@@ -16,9 +16,9 @@ public class Packet {
 	private final Map<String, CommandParameter> params;
 	
 	/**
-	 * Initialize a new Packet object with the given command name.
+	 * Initialize a new Packet object with the given packet name.
 	 * 
-	 * @param commandName The name of the command.
+	 * @param commandName The name of the packet.
 	 */
 	public Packet(String commandName) {
 		this.commandName = commandName;
@@ -26,29 +26,29 @@ public class Packet {
 	}
 	
 	/**
-	 * Get the name of the command.
+	 * Get the name of the packet.
 	 * 
-	 * @return The name of the command.
+	 * @return The name of the packet.
 	 */
-	public String getCommandName() {
+	public String getPacketName() {
 		return commandName;
 	}
 	
 	/**
-	 * Gets a set of all the parameters contained within this command.
+	 * Gets a set of all the parameters contained within this packet.
 	 * 
-	 * @return The name of each parameter sent with this command.
+	 * @return The name of each parameter sent with this packet.
 	 */
 	public Set<String> getParameterNames() {
 		return params.keySet();
 	}
 	
 	/**
-	 * Determines if the command contains a parameter with the given name.
+	 * Determines if the packet contains a parameter with the given name.
 	 * 
 	 * @param parameterName The name of the parameter for whom to check the
 	 * existence.
-	 * @return {@code true} if the given parameter exists in this command.
+	 * @return {@code true} if the given parameter exists in this packet.
 	 */
 	public boolean hasParameter(String parameterName) {
 		return params.containsKey(parameterName);
@@ -61,7 +61,7 @@ public class Packet {
 	 * type of.
 	 * @return The type of the parameter.
 	 * @throws IllegalArgumentException When the parameter with the given name
-	 * doesn't exist within this command.
+	 * doesn't exist within this packet.
 	 */
 	public CommandParameterType getParameterType(String parameterName) {
 		if(!hasParameter(parameterName)) {
@@ -69,7 +69,7 @@ public class Packet {
 		} else {
 			throw new IllegalArgumentException(
 					"Parameter named " + parameterName + " does not " +
-					"exist in this command.");
+					"exist in this packet.");
 		}
 	}
 	
@@ -90,13 +90,13 @@ public class Packet {
 				return param.getValue();
 			} else {
 				throw new IllegalArgumentException(
-						"Attempted to read parameter \"" + paramName + "\" of command \"" +
-						this.getCommandName() + "\" as " +
+						"Attempted to read parameter \"" + paramName + "\" of packet \"" +
+						this.getPacketName() + "\" as " +
 						"type " + type.name() + ", but it's actually of type " + param.getType().name() + ".");
 			}
 		} else {
 			throw new IllegalArgumentException(
-					"Attempted to read parameter \"" + paramName + "\" of command \"" + this.getCommandName() + "\", " +
+					"Attempted to read parameter \"" + paramName + "\" of packet \"" + this.getPacketName() + "\", " +
 					"but it does not exist.");
 		}
 	}
@@ -191,7 +191,7 @@ public class Packet {
 			params.put(paramName, new CommandParameter(type, value));
 		} else {
 			throw new IllegalArgumentException(
-					"This command already has a parameter named " +
+					"This packet already has a parameter named " +
 					paramName + ".");
 		}
 	}
@@ -201,7 +201,7 @@ public class Packet {
 	 * 
 	 * @param paramName The name of the parameter.
 	 * @param value The value of the parameter.
-	 * @return This command, for chaining {@code set*} commands.
+	 * @return This packet, for chaining {@code set*} commands.
 	 * @throws IllegalArgumentException When the parameter already exists.
 	 */
 	public Packet setString(String paramName, String value) {
@@ -214,7 +214,7 @@ public class Packet {
 	 * 
 	 * @param paramName The name of the parameter.
 	 * @param value The value of the parameter.
-	 * @return This command, for chaining {@code set*} commands.
+	 * @return This packet, for chaining {@code set*} commands.
 	 * @throws IllegalArgumentException When the parameter already exists.
 	 */
 	public Packet setInteger(String paramName, int value) {
@@ -227,7 +227,7 @@ public class Packet {
 	 * 
 	 * @param paramName The name of the parameter.
 	 * @param value The value of the parameter.
-	 * @return This command, for chaining {@code set*} commands.
+	 * @return This packet, for chaining {@code set*} commands.
 	 * @throws IllegalArgumentException When the parameter already exists.
 	 */
 	public Packet setLong(String paramName, long value) {
@@ -240,7 +240,7 @@ public class Packet {
 	 * 
 	 * @param paramName The name of the parameter.
 	 * @param value The value of the parameter.
-	 * @return This command, for chaining {@code set*} commands.
+	 * @return This packet, for chaining {@code set*} commands.
 	 * @throws IllegalArgumentException When the parameter already exists.
 	 */
 	public Packet setFloat(String paramName, float value) {
@@ -253,7 +253,7 @@ public class Packet {
 	 * 
 	 * @param paramName The name of the parameter.
 	 * @param value The value of the parameter.
-	 * @return This command, for chaining {@code set*} commands.
+	 * @return This packet, for chaining {@code set*} commands.
 	 * @throws IllegalArgumentException When the parameter already exists.
 	 */
 	public Packet setDouble(String paramName, double value) {
@@ -266,7 +266,7 @@ public class Packet {
 	 * 
 	 * @param paramName The name of the parameter.
 	 * @param value The value of the parameter.
-	 * @return This command, for chaining {@code set*} commands.
+	 * @return This packet, for chaining {@code set*} commands.
 	 * @throws IllegalArgumentException When the parameter already exists.
 	 */
 	public Packet setBoolean(String paramName, boolean value) {
@@ -277,7 +277,7 @@ public class Packet {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append(getCommandName());
+		builder.append(getPacketName());
 		builder.append("`|");
 		
 		boolean firstParam = true;
@@ -295,16 +295,16 @@ public class Packet {
 	}
 	
 	/**
-	 * Parses a command from a String. {@code string} can be a value returned
+	 * Parses a packet from a String. {@code string} can be a value returned
 	 * by {@link Packet#toString()}.
 	 * 
-	 * @param string The string representing the command.
-	 * @return The command that is represented by {@code string}.
+	 * @param string The string representing the packet.
+	 * @return The packet that is represented by {@code string}.
 	 */
 	public static Packet fromString(String string) {
 		int paramsBeginIndex = string.indexOf("`|");
 		String commandName = string.substring(0, paramsBeginIndex);
-		Packet command = new Packet(commandName);
+		Packet packet = new Packet(commandName);
 		String commandParamsString = string.substring(paramsBeginIndex + 2);
 		
 		String[] commandParams = StringUtil.split(commandParamsString, "`,", true);
@@ -320,14 +320,14 @@ public class Packet {
 			String paramName = commandParam.substring(0, paramBeginIndex);
 			String paramData = commandParam.substring(paramBeginIndex + 2);
 			CommandParameter parameter = CommandParameter.fromString(paramData);
-			command.params.put(paramName, parameter);
+			packet.params.put(paramName, parameter);
 		}
 		
-		return command;
+		return packet;
 	}
 	
 	/**
-	 * Represents the parameter of a command.
+	 * Represents the parameter of a packet.
 	 * 
 	 * @author Tom Galvin
 	 */
@@ -336,10 +336,10 @@ public class Packet {
 		private final String value;
 		
 		/**
-		 * Create a new command parameter.
+		 * Create a new packet parameter.
 		 * 
-		 * @param type The type of the command.
-		 * @param value The value of the command.
+		 * @param type The type of the packet.
+		 * @param value The value of the packet.
 		 */
 		public CommandParameter(CommandParameterType type, String value) {
 			if(value == null && !type.isNullable()) {
@@ -352,20 +352,20 @@ public class Packet {
 		}
 		
 		/**
-		 * Get the value of the command.
+		 * Get the value of the packet.
 		 * 
-		 * @return The value of the command.
+		 * @return The value of the packet.
 		 */
 		public String getValue() {
 			return this.value;
 		}
 		
 		/**
-		 * Gets the type of the command, represented using the {@link
+		 * Gets the type of the packet, represented using the {@link
 		 * CommandParameterType} enumeration which represents all of the
 		 * allowable types in a {@link Packet} object.
 		 * 
-		 * @return The type of the command.
+		 * @return The type of the packet.
 		 */
 		public CommandParameterType getType() {
 			return this.type;
@@ -384,9 +384,9 @@ public class Packet {
 		 * the data within the parameter. {@code string} can be a value
 		 * returned by {@link CommandParameter#toString()}.
 		 * 
-		 * @param string The string representing the data of this command
+		 * @param string The string representing the data of this packet
 		 * parameter.
-		 * @return The command parameter represented by {@code string}.
+		 * @return The packet parameter represented by {@code string}.
 		 */
 		public static CommandParameter fromString(String string) {
 			if(string.endsWith("`!")) {
@@ -406,7 +406,7 @@ public class Packet {
 	}
 	
 	/**
-	 * Represents the allowable types of command parameters.
+	 * Represents the allowable types of packet parameters.
 	 * 
 	 * @author Tom Galvin
 	 */
@@ -475,8 +475,8 @@ public class Packet {
 		 * Creates an instance of {@link CommandParameterType} from the String
 		 * representing it.
 		 * 
-		 * @param string The string representing the type of the command.
-		 * @return The type of the command.
+		 * @param string The string representing the type of the argument.
+		 * @return The type of the argument.
 		 */
 		public static CommandParameterType fromString(String string) {
 			/*
