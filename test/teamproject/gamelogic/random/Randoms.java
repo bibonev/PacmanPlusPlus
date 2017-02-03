@@ -14,7 +14,7 @@ import teamproject.gamelogic.domain.World;
 
 public class Randoms {
 
-	private static Random random;
+	private static Random random = new Random();
 	private static char[] CHARS = "1234567890qwertyuiopasdfghjklmnbvcxz".toCharArray();
 
 	public static int randomInteger(final int upperBound) {
