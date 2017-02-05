@@ -13,7 +13,7 @@ import teamproject.graphics.constants.Images;
  * Created by boyanbonev on 05/02/2017.
  */
 public class Cell {
-    protected Position position;
+    public Position position;
 
     private BoardState state;
     private Node node;
@@ -28,7 +28,6 @@ public class Cell {
             this.node = new Circle(position.x+position.width/2,position.y+position.height/2,position.width/8);
             ((Circle)node).setFill(Colors.CellFoodColor);
         } else if (this.state == BoardState.OBSTACLE){
-
             Images.Border =  new ImageView("border.jpg");
 
             Images.Border.setFitWidth(position.width);
