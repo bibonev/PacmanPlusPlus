@@ -25,6 +25,8 @@ public class Position {
         ScreenSize.Width = visualBounds.getWidth();
         ScreenSize.Height = visualBounds.getHeight();
 
+        // Test screen size
+        // TODO: Remove the test screen size, or add it as a default one
         ScreenSize.Width = 600;
         ScreenSize.Height = 350;
     }
@@ -38,6 +40,5 @@ public class Position {
 
         this.width = ScreenSize.Width/CellSize.Rows;
         this.height = ScreenSize.Height/CellSize.Rows;
-
     }
 }
