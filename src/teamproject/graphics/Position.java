@@ -19,7 +19,10 @@ public class Position {
     int row;
     int column;
 
-    public static void initScreenDimentions(){
+    /**
+     * Initialize initial screen dimension
+     */
+    public static void initScreenDimensions(){
         Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
 
         ScreenSize.Width = visualBounds.getWidth();
@@ -31,6 +34,11 @@ public class Position {
         ScreenSize.Height = 350;
     }
 
+    /**
+     * Initialize position by providing row and column
+     * @param i - row
+     * @param j - column
+     */
     public Position(int i, int j){
         this.row = i;
         this.column = j;

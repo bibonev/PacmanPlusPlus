@@ -1,7 +1,6 @@
 package teamproject.graphics;
 
 import javafx.scene.Node;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
@@ -11,7 +10,7 @@ import teamproject.graphics.constants.Colors;
 import teamproject.graphics.constants.Images;
 
 /**
- * Created by boyanbonev on 05/02/2017.
+ * Created by Boyan Bonev on 05/02/2017.
  */
 public class Cell {
     public Position position;
@@ -19,11 +18,20 @@ public class Cell {
     private BoardState state;
     private Node node;
 
+    /**
+     * Initialization of the Cell by providing its position and its state
+     * @param position
+     * @param state
+     */
     public Cell(Position position, BoardState state){
         this.position = position;
         this.state = state;
     }
 
+    /**
+     * Get the node for the particular cell depending on its state
+     * @return Node
+     */
     public Node getNode(){
         if (this.state == BoardState.FOOD){
             this.node = new Circle(position.x+position.width/2,position.y+position.height/2,position.width/8);
@@ -47,10 +55,18 @@ public class Cell {
         return node;
     }
 
+    /**
+     * Get the state of the cell
+     * @return BoardState
+     */
     public BoardState getType() {
         return this.state;
     }
 
+    /**
+     * Set different state
+     * @param state
+     */
     public void setType(BoardState state){
         this.state = state;
     }
