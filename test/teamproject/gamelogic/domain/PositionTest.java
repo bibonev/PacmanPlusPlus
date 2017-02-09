@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import teamproject.gamelogic.domain.stubs.PositionStub;
 import teamproject.gamelogic.random.Randoms;
 
 public class PositionTest {
@@ -16,7 +17,7 @@ public class PositionTest {
 		final int y = Randoms.randomInteger();
 
 		// When
-		final Position position = new Position(x, y);
+		final Position position = new PositionStub(x, y);
 
 		// Then
 		assertThat(position.getX(), Is.is(x));

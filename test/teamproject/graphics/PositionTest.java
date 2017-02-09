@@ -1,7 +1,5 @@
 package teamproject.graphics;
 
-import teamproject.graphics.constants.ScreenSize;
-
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -12,7 +10,7 @@ public class PositionTest {
 
     @Test(expected = ExceptionInInitializerError.class)
     public void testInitialInitialization(){
-        Position.initScreenDimentions();
+        Position.initScreenDimensions();
     }
 
     @Test

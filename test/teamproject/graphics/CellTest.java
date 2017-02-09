@@ -5,8 +5,8 @@ import javafx.scene.shape.Rectangle;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import teamproject.graphics.constants.BoardState;
-import teamproject.graphics.constants.Colors;
+import teamproject.constants.Colors;
+import teamproject.constants.CellState;
 
 /**
  * Created by boyanbonev on 05/02/2017.
@@ -16,7 +16,7 @@ public class CellTest {
     @Test
     public void testConstructor(){
         Position testPosition = new Position(5, 5);
-        BoardState testBoardState = BoardState.EMPTY;
+        CellState testBoardState = CellState.EMPTY;
         Cell test = new Cell(testPosition, testBoardState);
 
         assertEquals(test.position, testPosition);
@@ -25,16 +25,16 @@ public class CellTest {
     @Test
     public void testBoardState(){
         Position testPosition = new Position(5, 5);
-        BoardState testBoardState = BoardState.EMPTY;
+        CellState testBoardState = CellState.EMPTY;
         Cell test = new Cell(testPosition, testBoardState);
 
-        assertEquals(test.getType(), BoardState.EMPTY);
+        assertEquals(test.getState(), CellState.EMPTY);
     }
 
     @Test
     public void testRectangleNode(){
         Position testPosition = new Position(5, 5);
-        BoardState testBoardState = BoardState.EMPTY;
+        CellState testBoardState = CellState.EMPTY;
         Cell test = new Cell(testPosition, testBoardState);
 
         assertEquals(test.getNode().toString().contains("Rectangle"), true);
@@ -51,7 +51,7 @@ public class CellTest {
     @Test
     public void testCircleNode(){
         Position testPosition = new Position(5, 5);
-        BoardState testBoardState = BoardState.FOOD;
+        CellState testBoardState = CellState.FOOD;
         Cell test = new Cell(testPosition, testBoardState);
 
         assertEquals(test.getNode().toString().contains("Circle"), true);

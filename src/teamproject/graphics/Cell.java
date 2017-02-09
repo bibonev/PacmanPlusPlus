@@ -5,9 +5,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
-import teamproject.graphics.constants.BoardState;
-import teamproject.graphics.constants.Colors;
-import teamproject.graphics.constants.Images;
+import teamproject.constants.Colors;
+import teamproject.constants.Images;
+import teamproject.constants.CellState;
 
 /**
  * Created by Boyan Bonev on 05/02/2017.
@@ -15,7 +15,7 @@ import teamproject.graphics.constants.Images;
 public class Cell {
     public Position position;
 
-    private BoardState state;
+    private CellState state;
     private Node node;
 
     /**
@@ -23,7 +23,7 @@ public class Cell {
      * @param position
      * @param state
      */
-    public Cell(Position position, BoardState state){
+    public Cell(Position position, CellState state){
         this.position = position;
         this.state = state;
     }
@@ -33,10 +33,10 @@ public class Cell {
      * @return Node
      */
     public Node getNode(){
-        if (this.state == BoardState.FOOD){
+        if (this.state == CellState.FOOD){
             this.node = new Circle(position.x+position.width/2,position.y+position.height/2,position.width/8);
             ((Circle)node).setFill(Colors.CellFoodColor);
-        } else if (this.state == BoardState.OBSTACLE){
+        } else if (this.state == CellState.OBSTACLE){
             Images.Border =  new ImageView("border.jpg");
 
             Images.Border.setFitWidth(position.width);
@@ -47,7 +47,7 @@ public class Cell {
 
             this.node= Images.Border;
         }
-        else if (this.state == BoardState.EMPTY){
+        else if (this.state == CellState.EMPTY){
             this.node = new Rectangle(position.x,position.y,position.width,position.height);
             ((Rectangle)node).setFill(Colors.CellEmptyColor);
         }
@@ -59,7 +59,7 @@ public class Cell {
      * Get the state of the cell
      * @return BoardState
      */
-    public BoardState getType() {
+    public CellState getState() {
         return this.state;
     }
 
@@ -67,7 +67,7 @@ public class Cell {
      * Set different state
      * @param state
      */
-    public void setType(BoardState state){
+    public void setState(CellState state){
         this.state = state;
     }
 }
