@@ -15,6 +15,7 @@ import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.World;
+import teamproject.gamelogic.domain.stubs.MapStub;
 
 public class Randoms {
 
@@ -74,7 +75,7 @@ public class Randoms {
 	}
 
 	public static Map randomMap() {
-		return new Map(randomCells(randomInteger()));
+		return new MapStub(randomCells(randomInteger()));
 	}
 
 	public static GameSettings randomGameSettings() {
