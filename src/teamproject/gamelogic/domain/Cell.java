@@ -3,7 +3,7 @@ package teamproject.gamelogic.domain;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
 
-public class Cell {
+public abstract class Cell {
 
 	private CellType type;
 	private CellState state;

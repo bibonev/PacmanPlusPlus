@@ -15,7 +15,9 @@ import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.World;
+import teamproject.gamelogic.domain.stubs.CellStub;
 import teamproject.gamelogic.domain.stubs.MapStub;
+import teamproject.gamelogic.domain.stubs.PositionStub;
 
 public class Randoms {
 
@@ -95,15 +97,19 @@ public class Randoms {
 	}
 
 	public static Position randomPosition() {
-		return new Position(randomInteger(), randomInteger());
+		return new PositionStub(randomInteger(), randomInteger());
 	}
 
 	public static Position randomPositionInRange(final int range) {
-		return new Position(randomInteger(range), randomInteger(range));
+		return new PositionStub(randomInteger(range), randomInteger(range));
 	}
 
 	public static Cell randomCell() {
-		return new Cell(randomCellType(), randomCellState(), randomPosition());
+		return new CellStub(randomCellType(), randomCellState(), randomPosition());
+	}
+
+	public static Cell randomCell(final Position position) {
+		return new CellStub(randomCellType(), randomCellState(), position);
 	}
 
 	public static Cell[][] randomCells(final int numberOfCells) {
@@ -111,15 +117,11 @@ public class Randoms {
 
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells.length; j++) {
-				cells[i][j] = randomCell(new Position(i, j));
+				cells[i][j] = randomCell(new PositionStub(i, j));
 			}
 		}
 
 		return cells;
-	}
-
-	public static Cell randomCell(final Position position) {
-		return new Cell(randomCellType(), randomCellState(), position);
 	}
 
 }
