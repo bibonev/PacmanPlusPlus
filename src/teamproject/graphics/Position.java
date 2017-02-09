@@ -3,8 +3,8 @@ package teamproject.graphics;
 import javafx.geometry.Rectangle2D;
 import javafx.stage.Screen;
 
-import teamproject.graphics.constants.CellSize;
-import teamproject.graphics.constants.ScreenSize;
+import teamproject.constants.CellSize;
+import teamproject.constants.ScreenSize;
 
 /**
  * Created by boyanbonev on 03/02/2017.
