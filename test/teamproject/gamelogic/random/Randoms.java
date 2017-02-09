@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Random;
 
 import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.CellState;
-import teamproject.gamelogic.domain.CellType;
+import teamproject.constants.CellState;
+import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Item;

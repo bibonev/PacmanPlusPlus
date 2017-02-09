@@ -6,6 +6,8 @@ import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import teamproject.gamelogic.random.Randoms;
+import teamproject.constants.CellState;
+import teamproject.constants.CellType;
 
 public class CellTest {
 

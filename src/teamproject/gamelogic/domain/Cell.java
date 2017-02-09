@@ -1,5 +1,8 @@
 package teamproject.gamelogic.domain;
 
+import teamproject.constants.CellState;
+import teamproject.constants.CellType;
+
 public class Cell {
 
 	private CellType type;
