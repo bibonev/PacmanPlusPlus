@@ -94,7 +94,7 @@ class ClientSender extends Thread{
 			
 //			try {
 //				out.writeInt(message.length);
-//				out.write(message);
+//				out.wrsite(message);
 //			} catch (IOException e) {
 //				// TODO Auto-generated catch block
 //				e.printStackTrace();
