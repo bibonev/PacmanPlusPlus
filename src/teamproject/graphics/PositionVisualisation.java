@@ -5,11 +5,12 @@ import javafx.stage.Screen;
 
 import teamproject.constants.CellSize;
 import teamproject.constants.ScreenSize;
+import teamproject.gamelogic.domain.Position;
 
 /**
  * Created by boyanbonev on 03/02/2017.
  */
-public class Position {
+public class PositionVisualisation extends Position {
     double x;
     double y;
 
@@ -35,11 +36,12 @@ public class Position {
     }
 
     /**
-     * Initialize position by providing row and column
+     * Initialize positionVisualisation by providing row and column
      * @param i - row
      * @param j - column
      */
-    public Position(int i, int j){
+    public PositionVisualisation(int i, int j){
+        super(i, j);
         this.row = i;
         this.column = j;
 

@@ -8,7 +8,7 @@ import org.junit.Test;
 import teamproject.gamelogic.domain.stubs.PositionStub;
 import teamproject.gamelogic.random.Randoms;
 
-public class PositionTest {
+public class PositionVisualisationTest {
 
 	@Test
 	public void shouldConstruct() {

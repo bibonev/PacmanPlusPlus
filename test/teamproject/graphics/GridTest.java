@@ -3,6 +3,7 @@ package teamproject.graphics;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import teamproject.constants.CellState;
+import teamproject.constants.CellType;
 
 
 /**
@@ -13,14 +14,14 @@ public class GridTest {
     @Test
     public void testGettingAddingCell(){
         Grid test = new Grid();
-        Cell testCell = new Cell(new Position(0,0), CellState.EMPTY);
-        test.addCell(testCell);
+        CellVisualisation testCell = new CellVisualisation(CellType.NORMAL, CellState.EMPTY, new PositionVisualisation(0,0));
+        test.addVisualCell(testCell);
 
-        assertEquals(Grid.getCell(0,0).position.x,0,0.0001);
-        assertEquals(Grid.getCell(0,0).position.y,0,0.0001);
-        assertEquals(Grid.getCell(0,0).position.height,0,0.0001);
-        assertEquals(Grid.getCell(0,0).position.width,0,0.0001);
-        assertEquals(Grid.getCell(0,0).position.row,0);
-        assertEquals(Grid.getCell(0,0).position.column, 0);
+        assertEquals(test.getCell(0,0).positionVisualisation.x,0,0.0001);
+        assertEquals(test.getCell(0,0).positionVisualisation.y,0,0.0001);
+        assertEquals(test.getCell(0,0).positionVisualisation.height,0,0.0001);
+        assertEquals(test.getCell(0,0).positionVisualisation.width,0,0.0001);
+        assertEquals(test.getCell(0,0).positionVisualisation.row,0);
+        assertEquals(test.getCell(0,0).positionVisualisation.column, 0);
     }
 }

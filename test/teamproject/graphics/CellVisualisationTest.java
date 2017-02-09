@@ -5,37 +5,41 @@ import javafx.scene.shape.Rectangle;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import teamproject.constants.CellType;
 import teamproject.constants.Colors;
 import teamproject.constants.CellState;
 
 /**
  * Created by boyanbonev on 05/02/2017.
  */
-public class CellTest {
+public class CellVisualisationTest {
 
     @Test
     public void testConstructor(){
-        Position testPosition = new Position(5, 5);
+        PositionVisualisation testPositionVisualisation = new PositionVisualisation(5, 5);
         CellState testBoardState = CellState.EMPTY;
-        Cell test = new Cell(testPosition, testBoardState);
+        CellType testTye = CellType.NORMAL;
+        CellVisualisation test = new CellVisualisation(testTye, testBoardState, testPositionVisualisation);
 
-        assertEquals(test.position, testPosition);
+        assertEquals(test.positionVisualisation, testPositionVisualisation);
     }
 
     @Test
     public void testBoardState(){
-        Position testPosition = new Position(5, 5);
+        PositionVisualisation testPositionVisualisation = new PositionVisualisation(5, 5);
         CellState testBoardState = CellState.EMPTY;
-        Cell test = new Cell(testPosition, testBoardState);
+        CellType testTye = CellType.NORMAL;
+        CellVisualisation test = new CellVisualisation(testTye, testBoardState, testPositionVisualisation);
 
         assertEquals(test.getState(), CellState.EMPTY);
     }
 
     @Test
     public void testRectangleNode(){
-        Position testPosition = new Position(5, 5);
+        PositionVisualisation testPositionVisualisation = new PositionVisualisation(5, 5);
         CellState testBoardState = CellState.EMPTY;
-        Cell test = new Cell(testPosition, testBoardState);
+        CellType testTye = CellType.NORMAL;
+        CellVisualisation test = new CellVisualisation(testTye, testBoardState, testPositionVisualisation);
 
         assertEquals(test.getNode().toString().contains("Rectangle"), true);
 
@@ -50,9 +54,10 @@ public class CellTest {
 
     @Test
     public void testCircleNode(){
-        Position testPosition = new Position(5, 5);
+        PositionVisualisation testPositionVisualisation = new PositionVisualisation(5, 5);
         CellState testBoardState = CellState.FOOD;
-        Cell test = new Cell(testPosition, testBoardState);
+        CellType testTye = CellType.NORMAL;
+        CellVisualisation test = new CellVisualisation(testTye, testBoardState, testPositionVisualisation);
 
         assertEquals(test.getNode().toString().contains("Circle"), true);
 

@@ -10,7 +10,7 @@ import teamproject.gamelogic.random.Randoms;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
 
-public class CellTest {
+public class CellVisualisationTest {
 
 	@Test
 	public void shouldConstruct() {
