@@ -1,4 +1,4 @@
-package teamproject.graphics.constants;
+package teamproject.constants;
 
 /**
  * Created by boyanbonev on 03/02/2017.
