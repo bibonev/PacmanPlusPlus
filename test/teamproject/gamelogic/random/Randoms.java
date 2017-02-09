@@ -14,6 +14,7 @@ import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
 
 public class Randoms {
@@ -30,6 +31,10 @@ public class Randoms {
 
 	public static int randomInteger() {
 		return randomInteger(100);
+	}
+
+	public static long randomLong() {
+		return random.nextLong();
 	}
 
 	public static <T extends Enum<?>> T randomEnum(final Class<T> enumClass) {
@@ -62,7 +67,7 @@ public class Randoms {
 	}
 
 	public static Player randomPlayer() {
-		return new Player(randomString());
+		return new Player(randomLong(), randomString());
 	}
 
 	public static Ghost randomGhost() {
@@ -119,6 +124,16 @@ public class Randoms {
 
 	public static Cell randomCell(final Position position) {
 		return new Cell(randomCellType(), randomCellState(), position);
+	}
+
+	public static Scoreboard randomScoreboard() {
+		final Scoreboard scoreboard = new Scoreboard();
+
+		for (int i = 0; i < randomInteger(); i++) {
+			scoreboard.setScoreForPlayerId(randomLong(), randomInteger());
+		}
+
+		return scoreboard;
 	}
 
 }
