@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
-import teamproject.gamelogic.domain.Cell;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
+import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Item;
@@ -16,6 +17,7 @@ import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
+import teamproject.gamelogic.domain.stubs.BehaviourStub;
 import teamproject.gamelogic.domain.stubs.CellStub;
 import teamproject.gamelogic.domain.stubs.MapStub;
 import teamproject.gamelogic.domain.stubs.PositionStub;
@@ -74,7 +76,7 @@ public class Randoms {
 	}
 
 	public static Ghost randomGhost() {
-		return new Ghost();
+		return new Ghost(randomBehaviour(), randomString());
 	}
 
 	public static RuleEnforcer randomRuleEnforcer() {
@@ -129,10 +131,6 @@ public class Randoms {
 		return cells;
 	}
 
-	public static Cell randomCell(final Position position) {
-		return new Cell(randomCellType(), randomCellState(), position);
-	}
-
 	public static Scoreboard randomScoreboard() {
 		final Scoreboard scoreboard = new Scoreboard();
 
@@ -141,6 +139,10 @@ public class Randoms {
 		}
 
 		return scoreboard;
+	}
+
+	public static Behaviour randomBehaviour() {
+		return new BehaviourStub(randomEnum(Behaviour.Type.class));
 	}
 
 }
