@@ -1,6 +1,6 @@
 package teamproject.gamelogic.domain;
 
-public class Position {
+public abstract class Position {
 
 	private int x;
 	private int y;

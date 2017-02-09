@@ -1,6 +1,9 @@
 package teamproject.gamelogic.domain;
 
-public class Cell {
+import teamproject.constants.CellState;
+import teamproject.constants.CellType;
+
+public abstract class Cell {
 
 	private CellType type;
 	private CellState state;

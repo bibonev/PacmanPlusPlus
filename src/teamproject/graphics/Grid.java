@@ -1,6 +1,6 @@
 package teamproject.graphics;
 
-import teamproject.graphics.constants.CellSize;
+import teamproject.constants.CellSize;
 
 /**
  * Created by Boyan Bonev on 05/02/2017.

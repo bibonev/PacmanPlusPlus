@@ -5,7 +5,10 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import teamproject.gamelogic.domain.stubs.CellStub;
 import teamproject.gamelogic.random.Randoms;
+import teamproject.constants.CellState;
+import teamproject.constants.CellType;
 
 public class CellTest {
 
@@ -17,7 +20,7 @@ public class CellTest {
 		final Position position = Randoms.randomPosition();
 
 		// When
-		final Cell cell = new Cell(type, state, position);
+		final Cell cell = new CellStub(type, state, position);
 
 		// Then
 		assertThat(cell.getType(), Is.is(type));
