@@ -1,4 +1,4 @@
-package teamproject.gamelogic.domain;
+package teamproject.constants;
 
 public enum CellType {
 	NORMAL, WALL
