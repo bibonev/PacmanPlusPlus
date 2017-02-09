@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
+import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.CellState;
 import teamproject.gamelogic.domain.CellType;
@@ -71,7 +72,7 @@ public class Randoms {
 	}
 
 	public static Ghost randomGhost() {
-		return new Ghost();
+		return new Ghost(randomBehaviour(), randomString());
 	}
 
 	public static RuleEnforcer randomRuleEnforcer() {
@@ -134,6 +135,10 @@ public class Randoms {
 		}
 
 		return scoreboard;
+	}
+
+	private static Behaviour randomBehaviour() {
+		return new BehaviourStub(randomEnum(Behaviour.Type.class));
 	}
 
 }
