@@ -60,20 +60,4 @@ public class CellVisualisation extends Cell{
 
         return node;
     }
-
-    /**
-     * Get the state of the cell
-     * @return BoardState
-     */
-    public CellState getState() {
-        return this.state;
-    }
-
-    /**
-     * Set different state
-     * @param state
-     */
-    public void setState(CellState state){
-        this.state = state;
-    }
 }
