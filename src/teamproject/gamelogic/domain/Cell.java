@@ -1,6 +1,6 @@
 package teamproject.gamelogic.domain;
 
-public class Cell {
+public abstract class Cell {
 
 	private CellType type;
 	private CellState state;

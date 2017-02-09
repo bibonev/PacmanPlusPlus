@@ -15,6 +15,7 @@ import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.World;
+import teamproject.gamelogic.domain.stubs.CellStub;
 import teamproject.gamelogic.domain.stubs.MapStub;
 
 public class Randoms {
@@ -103,7 +104,11 @@ public class Randoms {
 	}
 
 	public static Cell randomCell() {
-		return new Cell(randomCellType(), randomCellState(), randomPosition());
+		return new CellStub(randomCellType(), randomCellState(), randomPosition());
+	}
+
+	public static Cell randomCell(final Position position) {
+		return new CellStub(randomCellType(), randomCellState(), position);
 	}
 
 	public static Cell[][] randomCells(final int numberOfCells) {
@@ -116,10 +121,6 @@ public class Randoms {
 		}
 
 		return cells;
-	}
-
-	public static Cell randomCell(final Position position) {
-		return new Cell(randomCellType(), randomCellState(), position);
 	}
 
 }
