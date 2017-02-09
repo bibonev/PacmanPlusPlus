@@ -15,13 +15,13 @@ import javafx.scene.shape.Rectangle;
  * @author Rose Kirtley
  *
  */
-public class GameScreen extends AbstractScreen {
+public class GameScreen extends Screen {
 	
 	private Button pause;
 	private Rectangle gameGraphics;
 	private StackPane mainPane;
 	private FlowPane gamePane;
-	private AbstractScreen pauseScreen;
+	private Screen pauseScreen;
 
 	public GameScreen(GameUI game){
 		super(game);

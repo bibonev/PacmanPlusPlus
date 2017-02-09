@@ -12,7 +12,7 @@ import javafx.scene.control.TextField;
  * @author Rose Kirtley
  *
  */
-public class LogInScreen extends AbstractScreen {
+public class LogInScreen extends Screen {
 	
 	private Button login;
 	private Label label;

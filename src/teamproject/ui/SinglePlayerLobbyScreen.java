@@ -9,7 +9,7 @@ import javafx.scene.control.Label;
  * @author Rose Kirtley
  *
  */
-public class SinglePlayerLobbyScreen extends AbstractScreen {
+public class SinglePlayerLobbyScreen extends Screen {
 	
 	private Button play;
 	private Label label;

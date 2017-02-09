@@ -12,7 +12,7 @@ import javafx.scene.paint.Color;
  * @author Rose Kirtley
  *
  */
-public class PauseScreen extends AbstractScreen {
+public class PauseScreen extends Screen {
 	
 	Button cont;
 	Button quit;
@@ -30,9 +30,9 @@ public class PauseScreen extends AbstractScreen {
         setUpButton(quit);
         quit.setOnAction(e-> switchToMain());
         label = new Label("Game Paused");
-        label.setStyle("-fx-font-size: 30px; -fx-font-weight: bold;");
+        label.setStyle(pauseLabelStyle);;
         label.setTextFill(Color.WHITE);
-		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.5); -fx-background-radius: 10;");
+		pane.setStyle(pausePaneStyle);
         
         pane.setAlignment(Pos.CENTER);
 	    pane.getChildren().addAll(label, cont, quit);

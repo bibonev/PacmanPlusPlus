@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -52,7 +53,7 @@ public class GameUI extends Application {
         centerPane = new StackPane();
         pane.setCenter(centerPane);
         Scene scene = new Scene(pane, 500, 500);
-        scene.setOnKeyPressed(e-> sendMoveEvent(e.getCode().toString()));
+        scene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
         
         setUpSettingsButton();
 		
@@ -80,10 +81,10 @@ public class GameUI extends Application {
 			      Bindings
 			        .when(settings.hoverProperty())
 			          .then(
-			            new SimpleStringProperty(AbstractScreen.hoverbuttonStyle)
+			            new SimpleStringProperty(Screen.hoverbuttonStyle)
 			          )
 			          .otherwise(
-			            new SimpleStringProperty(AbstractScreen.buttonStyle)
+			            new SimpleStringProperty(Screen.buttonStyle)
 			          )
 			    );
 		banner = new BorderPane();
@@ -172,33 +173,33 @@ public class GameUI extends Application {
 		multiPlayerLobbyScreen.addNames();
 	}
 	
-	private void sendMoveEvent(String move){
+	private void sendMoveEvent(KeyCode move){
 		if(isPlaying){
-			if(move=="UP"){
+			if(move == KeyCode.UP){
 				System.out.println("move up");
 				//send up move event
 			}
-			if(move=="DOWN"){
+			if(move == KeyCode.DOWN){
 				//send down move event
 				System.out.println("move down");
 			}
-			if(move=="LEFT"){
+			if(move == KeyCode.LEFT){
 				//send left move event
 				System.out.println("move left");
 			}
-			if(move=="RIGHT"){
+			if(move == KeyCode.RIGHT){
 				//send right move event
 				System.out.println("move right");
 			}
-			if(move=="S"){
+			if(move == KeyCode.S){
 				//send change selection event
 				System.out.println("swap selection");
 			}
-			if(move=="ENTER"){
+			if(move == KeyCode.ENTER){
 				//send use power up event
 				System.out.println("use power up");
 			}
-			if(move=="D"){
+			if(move == KeyCode.D){
 				//send drop power up event
 				System.out.println("drop power up");
 			}

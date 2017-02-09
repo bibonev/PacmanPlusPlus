@@ -12,7 +12,7 @@ import teamproject.gamelogic.domain.Player;
  * @author Rose Kirtley
  *
  */
-public class PlayersList extends AbstractScreen {
+public class PlayersList extends Screen {
 
 	public PlayersList(GameUI game) {
 		super(game);

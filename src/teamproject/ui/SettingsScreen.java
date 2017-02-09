@@ -10,7 +10,7 @@ import javafx.scene.control.Label;
  * @author Rose Kirtley
  *
  */
-public class SettingsScreen extends AbstractScreen {
+public class SettingsScreen extends Screen {
 
 	private Button returnButton; 
 	private Label label;

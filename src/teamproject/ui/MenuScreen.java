@@ -10,7 +10,7 @@ import javafx.scene.control.Tooltip;
  * @author Rose Kirtley
  *
  */
-public class MenuScreen extends AbstractScreen {
+public class MenuScreen extends Screen {
 	
 	private Button login;
 	private Button singlePlayer;

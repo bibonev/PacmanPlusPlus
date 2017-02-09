@@ -10,7 +10,7 @@ import javafx.scene.layout.Pane;
  * @author Rose Kirtley
  *
  */
-public class MultiPlayerLobbyScreen extends AbstractScreen {
+public class MultiPlayerLobbyScreen extends Screen {
 	
 	private Button play;
 	private Button leaveGame;

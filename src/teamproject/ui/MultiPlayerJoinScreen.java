@@ -12,7 +12,7 @@ import javafx.scene.control.TextField;
  * @author Rose Kirtley
  *
  */
-public class MultiPlayerJoinScreen extends AbstractScreen {
+public class MultiPlayerJoinScreen extends Screen {
 	
 	private Button join;
 	private Button back;

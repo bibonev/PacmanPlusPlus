@@ -10,7 +10,7 @@ import javafx.scene.control.Tooltip;
  * @author Rose Kirtley
  *
  */
-public class MultiPlayerOptionScreen extends AbstractScreen {
+public class MultiPlayerOptionScreen extends Screen {
 	
 	private Button joinGame;
 	private Button startGame;
