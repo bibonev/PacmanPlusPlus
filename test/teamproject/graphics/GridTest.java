@@ -2,7 +2,8 @@ package teamproject.graphics;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import teamproject.graphics.constants.BoardState;
+import teamproject.constants.CellState;
+
 
 /**
  * Created by boyanbonev on 06/02/2017.
@@ -12,7 +13,7 @@ public class GridTest {
     @Test
     public void testGettingAddingCell(){
         Grid test = new Grid();
-        Cell testCell = new Cell(new Position(0,0), BoardState.EMPTY);
+        Cell testCell = new Cell(new Position(0,0), CellState.EMPTY);
         test.addCell(testCell);
 
         assertEquals(Grid.getCell(0,0).position.x,0,0.0001);

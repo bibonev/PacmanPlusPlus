@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import teamproject.gamelogic.domain.stubs.CellStub;
 import teamproject.gamelogic.random.Randoms;
+import teamproject.constants.CellState;
+import teamproject.constants.CellType;
 
 public class CellTest {
 

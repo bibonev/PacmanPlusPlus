@@ -1,4 +1,4 @@
-package teamproject.graphics.constants;
+package teamproject.constants;
 
 import javafx.scene.paint.Color;
 
