@@ -8,7 +8,7 @@ import org.junit.Test;
 import teamproject.gamelogic.domain.stubs.PositionStub;
 import teamproject.gamelogic.random.Randoms;
 
-public class PositionTest {
+public class PositionVisualisationTest {
 
 	@Test
 	public void shouldConstruct() {
@@ -20,8 +20,8 @@ public class PositionTest {
 		final Position position = new PositionStub(x, y);
 
 		// Then
-		assertThat(position.getX(), Is.is(x));
-		assertThat(position.getY(), Is.is(y));
+		assertThat(position.getRow(), Is.is(x));
+		assertThat(position.getColumn(), Is.is(y));
 	}
 
 }
