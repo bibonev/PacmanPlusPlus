@@ -6,13 +6,13 @@ import teamproject.gamelogic.domain.Map;
 /**
  * Created by Boyan Bonev on 05/02/2017.
  */
-public class Grid extends Map {
+public class GridVisualisation extends Map {
     private static CellVisualisation[] [] grid;
 
     /**
      * Initialize the grid
      */
-    public Grid(){
+    public GridVisualisation(){
         super();
         grid = new CellVisualisation[CellSize.Rows] [CellSize.Columns];
     }
@@ -22,7 +22,7 @@ public class Grid extends Map {
      * @param cell
      */
     public static void addVisualCell(CellVisualisation cell){
-        grid[cell.positionVisualisation.row][cell.positionVisualisation.column] = cell;
+        grid[cell.positionVisualisation.getRow()][cell.positionVisualisation.getColumn()] = cell;
     }
 
     /**

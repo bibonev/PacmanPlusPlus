@@ -40,21 +40,21 @@ public class CellVisualisation extends Cell{
      */
     public Node getNode(){
         if (this.state == CellState.FOOD){
-            this.node = new Circle(positionVisualisation.x+ positionVisualisation.width/2, positionVisualisation.y+ positionVisualisation.height/2, positionVisualisation.width/8);
+            this.node = new Circle(positionVisualisation.getPixelX() + positionVisualisation.getWidth()/2, positionVisualisation.getPixelY() + positionVisualisation.getHeight()/2, positionVisualisation.getWidth()/8);
             ((Circle)node).setFill(Colors.CellFoodColor);
         } else if (this.state == CellState.OBSTACLE){
             Images.Border =  new ImageView("border.jpg");
 
-            Images.Border.setFitWidth(positionVisualisation.width);
-            Images.Border.setFitHeight(positionVisualisation.height);
+            Images.Border.setFitWidth(positionVisualisation.getWidth());
+            Images.Border.setFitHeight(positionVisualisation.getHeight());
 
-            Images.Border.setX(positionVisualisation.x+ positionVisualisation.width/2 - positionVisualisation.width/2);
-            Images.Border.setY(positionVisualisation.y+ positionVisualisation.height/2 - positionVisualisation.height/2);
+            Images.Border.setX(positionVisualisation.getPixelX() + positionVisualisation.getWidth()/2 - positionVisualisation.getWidth()/2);
+            Images.Border.setY(positionVisualisation.getPixelY() + positionVisualisation.getHeight()/2 - positionVisualisation.getHeight()/2);
 
             this.node= Images.Border;
         }
         else if (this.state == CellState.EMPTY){
-            this.node = new Rectangle(positionVisualisation.x, positionVisualisation.y, positionVisualisation.width, positionVisualisation.height);
+            this.node = new Rectangle(positionVisualisation.getPixelX(), positionVisualisation.getPixelY(), positionVisualisation.getWidth(), positionVisualisation.getHeight());
             ((Rectangle)node).setFill(Colors.CellEmptyColor);
         }
 

@@ -11,14 +11,26 @@ import teamproject.gamelogic.domain.Position;
  * Created by boyanbonev on 03/02/2017.
  */
 public class PositionVisualisation extends Position {
-    double x;
-    double y;
+    private double pixelX;
+    private double pixelY;
 
-    double width;
-    double height;
+    private double width;
+    private double height;
 
-    int row;
-    int column;
+    /**
+     * Initialize positionVisualisation by providing row and column
+     * @param i - row
+     * @param j - column
+     */
+    public PositionVisualisation(int i, int j){
+        super(i, j);
+
+        this.pixelX = (ScreenSize.Width/ CellSize.Columns)*j;
+        this.pixelY = (ScreenSize.Height/CellSize.Rows)*i;
+
+        this.width = ScreenSize.Width/CellSize.Rows;
+        this.height = ScreenSize.Height/CellSize.Rows;
+    }
 
     /**
      * Initialize initial screen dimension
@@ -35,20 +47,19 @@ public class PositionVisualisation extends Position {
         ScreenSize.Height = 350;
     }
 
-    /**
-     * Initialize positionVisualisation by providing row and column
-     * @param i - row
-     * @param j - column
-     */
-    public PositionVisualisation(int i, int j){
-        super(i, j);
-        this.row = i;
-        this.column = j;
+    public double getPixelX() {
+        return pixelX;
+    }
 
-        this.x = (ScreenSize.Width/ CellSize.Columns)*j;
-        this.y = (ScreenSize.Height/CellSize.Rows)*i;
+    public double getPixelY() {
+        return pixelY;
+    }
 
-        this.width = ScreenSize.Width/CellSize.Rows;
-        this.height = ScreenSize.Height/CellSize.Rows;
+    public double getWidth() {
+        return width;
+    }
+
+    public double getHeight() {
+        return height;
     }
 }

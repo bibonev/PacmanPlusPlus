@@ -20,8 +20,8 @@ public class PositionVisualisationTest {
 		final Position position = new PositionStub(x, y);
 
 		// Then
-		assertThat(position.getX(), Is.is(x));
-		assertThat(position.getY(), Is.is(y));
+		assertThat(position.getRow(), Is.is(x));
+		assertThat(position.getColumn(), Is.is(y));
 	}
 
 }
