@@ -1,23 +1,23 @@
 package teamproject.gamelogic.domain.stubs;
 
-import teamproject.gamelogic.domain.Cell;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
+import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.Position;
 
 public class CellStub extends Cell {
 
-	public CellStub(CellType type, CellState state, Position position) {
+	public CellStub(final CellType type, final CellState state, final Position position) {
 		super(type, state, position);
 		// TODO Auto-generated constructor stub
 	}
 
-	public CellStub(CellType type, Position position) {
+	public CellStub(final CellType type, final Position position) {
 		super(type, position);
 		// TODO Auto-generated constructor stub
 	}
 
-	public CellStub(Position position) {
+	public CellStub(final Position position) {
 		super(position);
 		// TODO Auto-generated constructor stub
 	}

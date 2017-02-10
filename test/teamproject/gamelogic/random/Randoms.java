@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
-import teamproject.gamelogic.domain.Cell;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
+import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Item;
@@ -14,7 +15,9 @@ import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
+import teamproject.gamelogic.domain.stubs.BehaviourStub;
 import teamproject.gamelogic.domain.stubs.CellStub;
 import teamproject.gamelogic.domain.stubs.MapStub;
 import teamproject.gamelogic.domain.stubs.PositionStub;
@@ -33,6 +36,10 @@ public class Randoms {
 
 	public static int randomInteger() {
 		return randomInteger(100);
+	}
+
+	public static long randomLong() {
+		return random.nextLong();
 	}
 
 	public static <T extends Enum<?>> T randomEnum(final Class<T> enumClass) {
@@ -65,11 +72,11 @@ public class Randoms {
 	}
 
 	public static Player randomPlayer() {
-		return new Player(randomString());
+		return new Player(randomLong(), randomString());
 	}
 
 	public static Ghost randomGhost() {
-		return new Ghost();
+		return new Ghost(randomBehaviour(), randomString());
 	}
 
 	public static RuleEnforcer randomRuleEnforcer() {
@@ -122,6 +129,20 @@ public class Randoms {
 		}
 
 		return cells;
+	}
+
+	public static Scoreboard randomScoreboard() {
+		final Scoreboard scoreboard = new Scoreboard();
+
+		for (int i = 0; i < randomInteger(); i++) {
+			scoreboard.setScoreForPlayerId(randomLong(), randomInteger());
+		}
+
+		return scoreboard;
+	}
+
+	public static Behaviour randomBehaviour() {
+		return new BehaviourStub(randomEnum(Behaviour.Type.class));
 	}
 
 }
