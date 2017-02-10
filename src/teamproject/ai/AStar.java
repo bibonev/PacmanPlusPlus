@@ -1,0 +1,262 @@
+/*
+ * Algorithm property of Jatin Thakur
+ */
+
+package teamproject.ai;
+
+import java.util.PriorityQueue;
+import java.util.ArrayList;
+
+import teamproject.gamelogic.domain.Cell;
+import teamproject.gamelogic.domain.Map;
+import teamproject.constants.CellType;
+import teamproject.gamelogic.domain.Position;
+
+/**
+ * The Class AStar. Contains the algorithm as well as the basic outline of the
+ * game map
+ * 
+ * @author Lyubomir Pashev
+ */
+public class AStar {
+
+	/** The diagonal cost. */
+	private final int DIAGONAL_COST = 14;
+
+	/** The vertical/horizontal cost. */
+	private final int V_H_COST = 10;
+
+	/** The grid. */
+	private AStarCell[][] grid;
+
+	/** The priority queue. */
+	PriorityQueue<AStarCell> open;
+
+	/** The closed cells. */
+	private boolean closed[][];
+	private int mapSize;
+
+	/** The start coords. */
+	private int startI, startJ;
+
+	/** The end coords. */
+	private int endI, endJ;
+
+	/**
+	 * Instantiates a new A*. Gets the game map and based on that it creates its
+	 * own grid filled with AStarCells that have costs and parent cells
+	 * 
+	 * @param map
+	 *            the map
+	 */
+	public AStar(Map map) {
+
+		mapSize = map.getMapSize();
+		Cell[][] cells = map.getCells();
+		ArrayList<Position> blocked = new ArrayList<Position>();
+		grid = new AStarCell[mapSize][mapSize];
+		closed = new boolean[mapSize][mapSize];
+
+		// create the A* grid
+		for (int i = 0; i < mapSize; ++i) {
+			for (int j = 0; j < mapSize; ++j) {
+				grid[i][j] = new AStarCell(i, j);
+				if (cells[i][j].getType() == CellType.WALL) {
+					blocked.add(new AIPosition(i, j));
+				}
+			}
+		}
+
+		// set permanently blocked cells(walls)
+		// walls are just null cells in the grid
+		for (int i = 0; i < blocked.size(); ++i) {
+			setBlocked(blocked.get(i).getRow(), blocked.get(i).getColumn());
+		}
+
+	}
+
+	/**
+	 * The Class AStarCell.
+	 */
+	class AStarCell {
+
+		/** The heuristic cost. */
+		int heuristicCost = 0; // Heuristic cost
+
+		/** The final cost. */
+		int finalCost = 0; // G+H
+
+		/** The j. */
+		int i, j;
+
+		/** The parent. */
+		AStarCell parent;
+
+		/**
+		 * Instantiates a new a star cell.
+		 *
+		 * @param cell
+		 *            the cell
+		 */
+		AStarCell(int i, int j) {
+			this.i = i;
+			this.j = j;
+		}
+
+		/**
+		 * Gets the position.
+		 *
+		 * @return the position
+		 */
+		public Position getPos() {
+			return new AIPosition(i, j);
+		}
+
+		@Override
+		public String toString() {
+			return "[" + this.i + ", " + this.j + "]";
+		}
+	}
+
+	/**
+	 * Sets a blocked cell.
+	 *
+	 * @param i
+	 *            the X coord
+	 * @param j
+	 *            the Y coord
+	 */
+	private void setBlocked(int i, int j) {
+		grid[i][j] = null;
+	}
+
+	/**
+	 * Sets the start cell.
+	 *
+	 * @param start
+	 *            the new start cell
+	 */
+	private void setStartCell(Position start) {
+		startI = start.getRow();
+		startJ = start.getColumn();
+	}
+
+	/**
+	 * Sets the end cell.
+	 *
+	 * @param target
+	 *            the new end cell
+	 */
+	private void setEndCell(Position target) {
+		endI = target.getRow();
+		endJ = target.getColumn();
+	}
+
+	/**
+	 * Check and update cost.
+	 *
+	 * @param current
+	 *            the current cell
+	 * @param t
+	 *            the next cell
+	 * @param cost
+	 *            the cost
+	 */
+	void checkAndUpdateCost(AStarCell current, AStarCell t, int cost) {
+		if (t == null || closed[t.i][t.j])
+			return;
+		int t_final_cost = t.heuristicCost + cost;
+
+		boolean inOpen = open.contains(t);
+		if (!inOpen || t_final_cost < t.finalCost) {
+			t.finalCost = t_final_cost;
+			t.parent = current;
+			if (!inOpen)
+				open.add(t);
+		}
+	}
+
+	/**
+	 * A* algorithm. Initializes costs for every cell, the start cell and the
+	 * goal cell Updates costs at each step until the goal cell is reached
+	 * Computes a path from start to goal
+	 * 
+	 * @param start
+	 *            the start cell
+	 * @param target
+	 *            the target cell
+	 * @return the back traced path
+	 */
+	public ArrayList<Position> AStarAlg(Position start, Position target) {
+
+		open = new PriorityQueue<>((Object o1, Object o2) -> {
+			AStarCell c1 = (AStarCell) o1;
+			AStarCell c2 = (AStarCell) o2;
+
+			return c1.finalCost < c2.finalCost ? -1 : c1.finalCost > c2.finalCost ? 1 : 0;
+		});
+
+		// set up the costs
+		for (int i = 0; i < mapSize; ++i) {
+			for (int j = 0; j < mapSize; ++j) {
+				if (grid[i][j] != null) {
+					grid[i][j].heuristicCost = Math.abs(i - endI) + Math.abs(j - endJ);
+				}
+			}
+		}
+		// Set start position
+		setStartCell(start);
+
+		// Set End Location
+		setEndCell(target);
+
+		// start has 0 cost
+		grid[start.getRow()][start.getColumn()].finalCost = 0;
+
+		// add the start location to open list.
+		open.add(grid[startI][startJ]);
+
+		AStarCell current = null;
+
+		// the algorithm
+		while (!current.equals(grid[endI][endJ])) {
+			current = open.poll();
+			if (current == null)
+				break;
+			closed[current.i][current.j] = true;
+
+			AStarCell t;
+			if (current.i - 1 >= 0) {
+				t = grid[current.i - 1][current.j];
+				checkAndUpdateCost(current, t, current.finalCost + V_H_COST);
+
+			}
+
+			if (current.j - 1 >= 0) {
+				t = grid[current.i][current.j - 1];
+				checkAndUpdateCost(current, t, current.finalCost + V_H_COST);
+			}
+
+			if (current.j + 1 < grid[0].length) {
+				t = grid[current.i][current.j + 1];
+				checkAndUpdateCost(current, t, current.finalCost + V_H_COST);
+			}
+
+			if (current.i + 1 < grid.length) {
+				t = grid[current.i + 1][current.j];
+				checkAndUpdateCost(current, t, current.finalCost + V_H_COST);
+
+			}
+		}
+		open = null;
+		// trace back the path
+		// path is reversed; goes from END to START
+		ArrayList<Position> path = new ArrayList<Position>();
+		AStarCell finalcell = grid[endI][endJ];
+		while (finalcell.parent != null) {
+			path.add(finalcell.parent.getPos());
+			finalcell = finalcell.parent;
+		}
+		return path;
+	}
+}
