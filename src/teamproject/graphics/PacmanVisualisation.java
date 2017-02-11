@@ -11,13 +11,13 @@ import javafx.scene.Node;
 /**
  * Created by boyanbonev on 11/02/2017.
  */
-public class PacmanVisulisation extends Pacman {
+public class PacmanVisualisation extends Pacman {
 
     private PositionVisualisation position;
     private GridVisualisation grid;
     private Node node;
 
-    public PacmanVisulisation(Behaviour behaviour, String name, GridVisualisation grid) {
+    public PacmanVisualisation(Behaviour behaviour, String name, GridVisualisation grid) {
         super(behaviour, name);
 
         this.position = new PositionVisualisation(1,1);

@@ -16,7 +16,7 @@ import java.util.Random;
 public class GhostVisualisation extends Ghost {
 
     private PositionVisualisation position;
-    private PacmanVisulisation pacman;
+    private PacmanVisualisation pacman;
     private GridVisualisation grid;
     private Node node;
 
@@ -24,7 +24,7 @@ public class GhostVisualisation extends Ghost {
             Behaviour behaviour,
             String name,
             GridVisualisation grid,
-            PacmanVisulisation pacman) {
+            PacmanVisualisation pacman) {
         super(behaviour, name);
 
         this.position = new PositionVisualisation(CellSize.Rows/2,CellSize.Columns/2);
