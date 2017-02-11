@@ -34,8 +34,8 @@ public abstract class Map {
 	}
 
 	public void addCell(final Cell cell) {
-		final int x = cell.getPosition().getX();
-		final int y = cell.getPosition().getY();
+		final int x = cell.getPosition().getRow();
+		final int y = cell.getPosition().getColumn();
 		cells[x][y] = cell;
 	}
 

@@ -41,7 +41,7 @@ public class MapTest {
 		map.addCell(cell);
 
 		// Then
-		assertThat(map.getCell(position.getX(), position.getY()), Is.is(cell));
+		assertThat(map.getCell(position.getRow(), position.getColumn()), Is.is(cell));
 	}
 
 }

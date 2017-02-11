@@ -1,8 +1,8 @@
 package teamproject.gamelogic.domain.stubs;
 
 import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.CellState;
-import teamproject.gamelogic.domain.CellType;
+import teamproject.constants.CellState;
+import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.Position;
 
 public class CellStub extends Cell {
