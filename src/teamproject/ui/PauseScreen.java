@@ -24,15 +24,15 @@ public class PauseScreen extends Screen {
 		this.gameScreen = gameScreen;
 		
         cont = new Button("Continue");
-        setUpButton(cont);
+        cont.getStyleClass().add("buttonStyle");
         cont.setOnAction(e-> gameScreen.play());
         quit = new Button("Quit game");
-        setUpButton(quit);
+        quit.getStyleClass().add("buttonStyle");
         quit.setOnAction(e-> switchToMain());
         label = new Label("Game Paused");
-        label.setStyle(pauseLabelStyle);;
+    	label.getStyleClass().add("pauseLabelStyle");
         label.setTextFill(Color.WHITE);
-		pane.setStyle(pausePaneStyle);
+        pane.getStyleClass().add("pausePaneStyle");
         
         pane.setAlignment(Pos.CENTER);
 	    pane.getChildren().addAll(label, cont, quit);

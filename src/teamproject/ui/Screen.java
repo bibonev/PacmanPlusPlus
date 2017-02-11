@@ -15,7 +15,7 @@ import javafx.scene.layout.Pane;
  * @author Rose Kirtley
  *
  */
-public abstract class Screen extends Styles{
+public abstract class Screen {
 	
 	public FlowPane pane;
 	public GameUI game;
@@ -30,22 +30,22 @@ public abstract class Screen extends Styles{
         pane.setVgap(4);
         pane.setHgap(4);
         pane.setOrientation(Orientation.VERTICAL);
-        pane.setStyle(paneStyle);
+        pane.getStyleClass().add("paneStyle");
         pane.setAlignment(Pos.TOP_CENTER);
 	}
 	
-	public void setUpButton(Node node) {
-		    node.styleProperty().bind(
-		      Bindings
-		        .when(node.hoverProperty())
-		          .then(
-		            new SimpleStringProperty(hoverbuttonStyle)
-		          )
-		          .otherwise(
-		            new SimpleStringProperty(buttonStyle)
-		          )
-		    );
-		  }
+//	public void setUpButton(Node node) {
+//		    node.styleProperty().bind(
+//		      Bindings
+//		        .when(node.hoverProperty())
+//		          .then(
+//		            new SimpleStringProperty(hoverbuttonStyle)
+//		          )
+//		          .otherwise(
+//		            new SimpleStringProperty(buttonStyle)
+//		          )
+//		    );
+//		  }
 	
 	public Pane getPane(){
 		return pane;

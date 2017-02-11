@@ -23,24 +23,25 @@ public class LogInScreen extends Screen {
 		super(game);
 		
         title = new Label("Welcome to PacMan");
-        title.setStyle(titleStyle);
+        title.getStyleClass().add("titleStyle");
         
         label = new Label("Enter Username:");
-        label.setStyle(labelStyle);
+        label.getStyleClass().add("labelStyle");
         
         text = new TextField ();
-        text.setStyle(labelStyle);
+        text.getStyleClass().add("labelStyle");
         
         login = new Button("Log in");
-        setUpButton(login);
+        login.getStyleClass().add("buttonStyle");
         login.setOnAction(e-> switchScreen(text.getText()));
         
 	    pane.getChildren().addAll(title, label, text, login);
 	}
 	
-	private void switchScreen(String name){
-		if(!name.isEmpty()){
-			//if(checkname(name)){
+	private void switchScreen(String username){
+		if(!username.isEmpty()){
+			//if(checkname(username)){
+			    name = username;
 				game.switchToMenu();
 //			}else{
 //				Alert alert = new Alert(AlertType.ERROR);

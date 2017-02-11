@@ -24,17 +24,17 @@ public class MultiPlayerJoinScreen extends Screen {
 		super(game);
 		
 		join = new Button("Join game");
-		setUpButton(join);
+		join.getStyleClass().add("buttonStyle");
 		join.setOnAction(e-> joinGame(ip.getText()));
 		
 		ip = new TextField();
-		ip.setStyle(labelStyle);
+        ip.getStyleClass().add("labelStyle");
 		
 		label = new Label("IP address: ");
-		label.setStyle(labelStyle);
+        label.getStyleClass().add("labelStyle");
 		
 		back = new Button("Back");
-		back.setStyle(buttonStyle);
+        back.getStyleClass().add("butonStyle");
 		back.setOnAction(e -> game.switchToMenu());
 		
 		pane.getChildren().addAll(label, ip, join, back);

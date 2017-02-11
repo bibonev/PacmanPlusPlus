@@ -19,12 +19,12 @@ public class MultiPlayerOptionScreen extends Screen {
 		super(game);
 		
         joinGame = new Button("Join game");
-        setUpButton(joinGame);
+        joinGame.getStyleClass().add("buttonStyle");
         joinGame.setTooltip(new Tooltip("Join a game"));
         joinGame.setOnAction(e-> game.switchToMultiPlayerJoin());
 		
         startGame = new Button("Start a new game");
-        setUpButton(startGame);
+        startGame.getStyleClass().add("buttonStyle");
         startGame.setTooltip(new Tooltip("Initiate a new game"));
         startGame.setOnAction(e-> startNewGame());
         

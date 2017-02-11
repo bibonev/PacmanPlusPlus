@@ -27,7 +27,7 @@ public class GameScreen extends Screen {
 		super(game);
 
         pause = new Button("pause");
-        setUpButton(pause);
+        pause.getStyleClass().add("buttonStyle");
         pause.setOnAction(e-> paused());
                 
         gamePane = new FlowPane();

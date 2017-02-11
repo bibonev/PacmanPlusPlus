@@ -48,12 +48,16 @@ public class GameUI extends Application {
 		primaryStage.setTitle("PacMac");
 		
 		pane = new BorderPane();
-        pane.setStyle("-fx-background-color: DAE6F3;");
+        //pane.setStyle("-fx-background-color: DAE6F3;");
         
         centerPane = new StackPane();
         pane.setCenter(centerPane);
         Scene scene = new Scene(pane, 500, 500);
         scene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
+        
+        String css = this.getClass().getResource("style.css").toExternalForm();
+        scene.getStylesheets().add(css);
+        pane.getStyleClass().add("paneStyle");
         
         setUpSettingsButton();
 		
@@ -77,16 +81,8 @@ public class GameUI extends Application {
 		
 		settings = new Button("Settings");
         settings.setOnAction(e-> switchToSettings());
-		settings.styleProperty().bind(
-			      Bindings
-			        .when(settings.hoverProperty())
-			          .then(
-			            new SimpleStringProperty(Screen.hoverbuttonStyle)
-			          )
-			          .otherwise(
-			            new SimpleStringProperty(Screen.buttonStyle)
-			          )
-			    );
+        settings.getStyleClass().add("buttonStyle");
+
 		banner = new BorderPane();
 		
 		banner.setRight(settings);

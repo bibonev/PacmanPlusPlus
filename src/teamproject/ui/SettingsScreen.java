@@ -21,19 +21,19 @@ public class SettingsScreen extends Screen {
 		super(game);
 		
         returnButton = new Button("Return");
-        setUpButton(returnButton);
+        returnButton.getStyleClass().add("buttonStyle");
    		returnButton.setOnAction(e-> game.returnBack());
    		
    		music = new CheckBox("Music");
-   		music.setStyle(labelStyle);
+   		music.getStyleClass().add("labelStyle");
    		music.setSelected(true);
    		
    		sounds = new CheckBox("Sound effects");
-   		sounds.setStyle(labelStyle);
+   		sounds.getStyleClass().add("labelStyle");
    		sounds.setSelected(true);
         
    		label = new Label("Settings");
-        label.setStyle(titleStyle);
+   		label.getStyleClass().add("titleStyle");
 		
 	    pane.getChildren().addAll(label, returnButton, music, sounds);
 	}	

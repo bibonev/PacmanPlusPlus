@@ -22,25 +22,25 @@ public class MenuScreen extends Screen {
 		super(game);
 		
         login = new Button("Log in again");
-        setUpButton(login);
+        login.getStyleClass().add("buttonStyle");
         login.setOnAction(e-> game.switchToLogIn());
         
         singlePlayer = new Button("Single player");
-        setUpButton(singlePlayer);
+        singlePlayer.getStyleClass().add("buttonStyle");
         singlePlayer.setTooltip(new Tooltip("Play in single player mode"));
         singlePlayer.setOnAction(e-> game.switchToSinglePlayerLobby());
         
         multiPlayer = new Button("Multiplayer");
-        setUpButton(multiPlayer);
+        multiPlayer.getStyleClass().add("buttonStyle");
         multiPlayer.setTooltip(new Tooltip("Play in multiplayer mode with others"));
         multiPlayer.setOnAction(e-> game.switchToMultiPlayerOption());
         
         close = new Button("Close");
-        setUpButton(close);
+        close.getStyleClass().add("buttonStyle");
         close.setOnAction(e-> game.close());
         
         title = new Label("Main Menu");
-        title.setStyle(titleStyle);
+        title.getStyleClass().add("titleStyle");
 		
         pane.getChildren().addAll(title, singlePlayer, multiPlayer, login, close);
 	}

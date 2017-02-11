@@ -18,11 +18,11 @@ public class SinglePlayerLobbyScreen extends Screen {
 		super(game);
 		
 		play = new Button("Play!");
-        setUpButton(play);
+        play.getStyleClass().add("buttonStyle");
         play.setOnAction(e-> game.switchToGame());
         
         label = new Label("Single Player");
-        label.setStyle(labelStyle);
+        label.getStyleClass().add("labelStyle");
 		
 	    pane.getChildren().addAll(label, play);
 	}

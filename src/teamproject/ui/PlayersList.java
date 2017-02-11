@@ -28,18 +28,18 @@ public class PlayersList extends Screen {
         }*/
         
         Label name = new Label("Name1");
-    	name.setStyle(labelStyle);
+    	name.getStyleClass().add("labelStyle");
     	pane.getChildren().add(name);
     	
     	Label name2 = new Label("Name2");
-    	name2.setStyle(labelStyle);
+    	name2.getStyleClass().add("labelStyle");
     	pane.getChildren().add(name2);
 
 	}
 	
 	public void addPlayer(Player name){
 		Label label = new Label(name.getName());
-		label.setStyle(labelStyle);
+    	label.getStyleClass().add("labelStyle");
 		pane.getChildren().add(label);
 	}
 

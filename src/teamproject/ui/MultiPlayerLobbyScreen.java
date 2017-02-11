@@ -21,15 +21,15 @@ public class MultiPlayerLobbyScreen extends Screen {
 		super(game);
 		
         play = new Button("Play!");
-        setUpButton(play);
+        play.getStyleClass().add("buttonStyle");
         play.setOnAction(e-> play());
         
         leaveGame = new Button("Leave game");
-        setUpButton(leaveGame);
+        leaveGame.getStyleClass().add("buttonStyle");
         leaveGame.setOnAction(e-> leaveGame());
                 
         label = new Label("Multiplayer");
-        label.setStyle(labelStyle);
+    	label.getStyleClass().add("labelStyle");
 		
 	    pane.getChildren().addAll(label, play, leaveGame);
 	}
