@@ -12,6 +12,7 @@ import javafx.scene.Node;
  * Created by boyanbonev on 11/02/2017.
  */
 public class PacmanVisulisation extends Pacman {
+
     private PositionVisualisation position;
     private GridVisualisation grid;
     private Node node;
@@ -106,5 +107,9 @@ public class PacmanVisulisation extends Pacman {
         node = Images.PacMan;
 
         return node;
+    }
+
+    public PositionVisualisation getPosition() {
+        return position;
     }
 }
