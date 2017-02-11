@@ -17,10 +17,7 @@ import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
-import teamproject.gamelogic.domain.stubs.BehaviourStub;
-import teamproject.gamelogic.domain.stubs.CellStub;
-import teamproject.gamelogic.domain.stubs.MapStub;
-import teamproject.gamelogic.domain.stubs.PositionStub;
+import teamproject.gamelogic.domain.stubs.*;
 
 public class Randoms {
 
@@ -76,7 +73,7 @@ public class Randoms {
 	}
 
 	public static Ghost randomGhost() {
-		return new Ghost(randomBehaviour(), randomString());
+		return new GhostStub(randomBehaviour(), randomString());
 	}
 
 	public static RuleEnforcer randomRuleEnforcer() {

@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import teamproject.gamelogic.domain.stubs.GhostStub;
 import teamproject.gamelogic.random.Randoms;
 
 public class GhostTest {
@@ -16,7 +17,7 @@ public class GhostTest {
 		final Behaviour behaviour = Randoms.randomBehaviour();
 
 		// When
-		final Ghost ghost = new Ghost(behaviour, name);
+		final Ghost ghost = new GhostStub(behaviour, name);
 
 		// Then
 		assertThat(ghost.getBehaviour(), Is.is(behaviour));
