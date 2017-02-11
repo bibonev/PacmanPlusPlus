@@ -7,19 +7,20 @@ import org.junit.Test;
 
 import teamproject.gamelogic.random.Randoms;
 
-public class PlayerTest {
+public class GhostTest {
 
 	@Test
 	public void shouldConstruct() {
 		// Given
-		final long id = Randoms.randomLong();
 		final String name = Randoms.randomString();
+		final Behaviour behaviour = Randoms.randomBehaviour();
 
 		// When
-		final Player player = new Player(id, name);
+		final Ghost ghost = new Ghost(behaviour, name);
+
 		// Then
-		assertThat(player.getId(), Is.is(id));
-		assertThat(player.getName(), Is.is(name));
+		assertThat(ghost.getBehaviour(), Is.is(behaviour));
+		assertThat(ghost.getName(), Is.is(name));
 	}
 
 }
