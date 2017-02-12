@@ -2,6 +2,7 @@ package teamproject.gamelogic.random;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Random;
 
 import teamproject.constants.CellState;
@@ -77,7 +78,7 @@ public class Randoms {
 	}
 
 	public static Player randomPlayer() {
-		return new Player(randomLong(), randomString());
+		return new Player(Optional.of(randomLong()), randomString());
 	}
 
 	public static Ghost randomGhost() {

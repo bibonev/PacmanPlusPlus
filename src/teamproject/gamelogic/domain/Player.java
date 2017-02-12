@@ -1,11 +1,13 @@
 package teamproject.gamelogic.domain;
 
+import java.util.Optional;
+
 public class Player {
 
-	private long id;
+	private Optional<Long> id;
 	private String name;
 
-	public Player(final long id, final String name) {
+	public Player(final Optional<Long> id, final String name) {
 		this.id = id;
 		this.name = name;
 	}
@@ -18,7 +20,7 @@ public class Player {
 		this.name = name;
 	}
 
-	public long getId() {
+	public Optional<Long> getId() {
 		return id;
 	}
 

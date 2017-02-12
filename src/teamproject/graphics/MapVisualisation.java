@@ -34,6 +34,10 @@ public class MapVisualisation {
 		this.grid = grid;
 	}
 
+	public GridVisualisation getGrid() {
+		return grid;
+	}
+
 	public Stage generateMap(final Stage stage) {
 		this.stage = stage;
 
