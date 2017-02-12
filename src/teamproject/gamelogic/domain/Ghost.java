@@ -3,9 +3,9 @@ package teamproject.gamelogic.domain;
 public abstract class Ghost {
 
 	private String name;
-	private Behavior behavior;
+	private Behaviour behavior;
 
-	public Ghost(final Behavior behavior, final String name) {
+	public Ghost(final Behaviour behavior, final String name) {
 		this.name = name;
 		this.behavior = behavior;
 	}
@@ -14,7 +14,7 @@ public abstract class Ghost {
 		return name;
 	}
 
-	public Behavior getBehavior() {
+	public Behaviour getBehaviour() {
 		return behavior;
 	}
 

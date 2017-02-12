@@ -1,24 +1,27 @@
 package teamproject.ai;
 
-import teamproject.gamelogic.domain.Player;
-import teamproject.gamelogic.domain.Map;
-import teamproject.gamelogic.domain.Behavior;
+import java.util.Optional;
 
+import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.Map;
+import teamproject.gamelogic.domain.Player;
 
 /**
  * The AI player. Each AI player has a unique behavior that tells it which items
  * to collect or when to attack other players
- * 
+ *
  * @author Lyubomir Pashev
  */
-public class AI extends Player {
+public class AIPlayer extends Player {
 
 	/** The behavior. */
-	private Behavior behavior;
+	private Behaviour behavior;
 
 	/**
 	 * Instantiates a new AI player.
 	 *
+	 * @param id
+	 *            player's id (present for real players, empty for AI)
 	 * @param name
 	 *            the name
 	 * @param behavior
@@ -26,7 +29,7 @@ public class AI extends Player {
 	 * @param map
 	 *            the map
 	 */
-	public AI(final long id, String name, Behavior behavior, Map map) {
+	public AIPlayer(final Optional<Long> id, final String name, final Behaviour behavior, final Map map) {
 		super(id, name);
 		this.behavior = behavior;
 	}

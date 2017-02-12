@@ -2,6 +2,7 @@ package teamproject.gamelogic.random;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Random;
 
 import teamproject.constants.CellState;
@@ -17,12 +18,20 @@ import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
-import teamproject.gamelogic.domain.stubs.*;
+import teamproject.gamelogic.domain.stubs.BehaviourStub;
+import teamproject.gamelogic.domain.stubs.CellStub;
+import teamproject.gamelogic.domain.stubs.GhostStub;
+import teamproject.gamelogic.domain.stubs.MapStub;
+import teamproject.gamelogic.domain.stubs.PositionStub;
 
 public class Randoms {
 
 	private static Random random = new Random();
 	private static char[] CHARS = "1234567890qwertyuiopasdfghjklmnbvcxz".toCharArray();
+
+	public static boolean randomBoolean() {
+		return random.nextBoolean();
+	}
 
 	public static int randomInteger(final int upperBound) {
 		if (upperBound < 0) {
@@ -69,7 +78,7 @@ public class Randoms {
 	}
 
 	public static Player randomPlayer() {
-		return new Player(randomLong(), randomString());
+		return new Player(Optional.of(randomLong()), randomString());
 	}
 
 	public static Ghost randomGhost() {
@@ -85,7 +94,7 @@ public class Randoms {
 	}
 
 	public static GameSettings randomGameSettings() {
-		return new GameSettings();
+		return new GameSettings(randomBoolean(), randomBoolean());
 	}
 
 	public static Item randomItem() {

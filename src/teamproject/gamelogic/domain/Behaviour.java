@@ -3,39 +3,38 @@ package teamproject.gamelogic.domain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.HashMap;
 
-import teamproject.gamelogic.domain.*;
 import teamproject.ai.AStar;
 import teamproject.ai.Target;
-import teamproject.constants.*;
-
+import teamproject.constants.CellState;
 
 /**
  * The default behavior, which picks the closes enemy or moves at random if
  * there are no enemies on the map. There will be several behaviors that extend
  * this class. Each behavior will be able to dynamically prioritize targets on
  * the map (items, players etc.) based on the nature of the behavior. It is
- * responsible for sending move events. Constantly gets an updated version of the
- * game map.
- * 
+ * responsible for sending move events. Constantly gets an updated version of
+ * the game map.
+ *
  * @author Lyubomir Pashev
  */
-public abstract class Behavior extends Thread {
+public abstract class Behaviour extends Thread {
 
 	/**
 	 * Different types of behaviors.
-	 * 
+	 *
 	 * @author User
 	 *
 	 */
 	public enum Type {
-		DEFAULT,
-		AGGRESSIVE,
-		DEFENSIVE,
-		GHOST
+		DEFAULT, AGGRESSIVE, DEFENSIVE, GHOST
+	}
+
+	public Behaviour(final Type type) {
+		this.type = type;
 	}
 
 	/** The type of the behavior. */
@@ -49,14 +48,15 @@ public abstract class Behavior extends Thread {
 
 	/** The run condition. */
 	private boolean run = true;
-	
-	/** The focus variable determines how long it takes before the AI
-	 * gets bored of chasing something or how many consecutive random moves
-	 * it makes before it decides to do something else.
-	 * Provides some efficiency, since the A* algorithm has to be run far less often.
+
+	/**
+	 * The focus variable determines how long it takes before the AI gets bored
+	 * of chasing something or how many consecutive random moves it makes before
+	 * it decides to do something else. Provides some efficiency, since the A*
+	 * algorithm has to be run far less often.
 	 */
 	private int focus;
-	
+
 	/** A random number generator. */
 	private Random rng = new Random();
 
@@ -65,8 +65,8 @@ public abstract class Behavior extends Thread {
 
 	/** The locked target of the ai. */
 	private Position lockedTarget;
-	
-	/** The target type. Determines what kind of enemy the ai is following*/
+
+	/** The target type. Determines what kind of enemy the ai is following */
 	private Target tarType;
 
 	/** The cells. */
@@ -74,7 +74,7 @@ public abstract class Behavior extends Thread {
 
 	/** The map size. */
 	private int mapSize;
-	
+
 	/** The inventory. */
 	private Inventory stash;
 
@@ -82,18 +82,22 @@ public abstract class Behavior extends Thread {
 	private ArrayList<Position> currentPath;
 
 	/** The priority targets. */
-	//to be used in more complex behaviors
+	// to be used in more complex behaviors
 	private PriorityQueue<Item> priorityTargets;
 
 	/**
 	 * Instantiates a new behavior.
 	 *
-	 * @param map the map
-	 * @param startPos the start position of the ai
-	 * @param speed the speed of the ai
-	 * @param stash the inventory
+	 * @param map
+	 *            the map
+	 * @param startPos
+	 *            the start position of the ai
+	 * @param speed
+	 *            the speed of the ai
+	 * @param stash
+	 *            the inventory
 	 */
-	public Behavior(Map map, Position startPos, int speed, Inventory stash) {
+	public Behaviour(final Map map, final Position startPos, final int speed, final Inventory stash) {
 		mapSize = map.getMapSize();
 		currentPos = startPos;
 		cells = map.getCells();
@@ -107,21 +111,21 @@ public abstract class Behavior extends Thread {
 	/**
 	 * Pick a target for the A* algorithm. Default implementation: picks the
 	 * nearest player and follows them if there are no players, moves at random
-	 * 
+	 *
 	 * @return the position
 	 */
 	public Position pickTarget() {
 
-		ArrayList<Position> enemies = scanEnemies();
+		final ArrayList<Position> enemies = scanEnemies();
 
 		if (enemies.size() == 0) {
 			return pickRandomTarget();
 		}
 
 		else {
-			int size = enemies.size();
-			int[] distances = new int[size];
-			HashMap<Integer, Position> targets = new HashMap<Integer, Position>();
+			final int size = enemies.size();
+			final int[] distances = new int[size];
+			final HashMap<Integer, Position> targets = new HashMap<Integer, Position>();
 
 			for (int i = 0; i < size; i++) {
 				distances[i] = manhattanDistance(currentPos, enemies.get(i));
@@ -138,12 +142,14 @@ public abstract class Behavior extends Thread {
 	/**
 	 * Manhattan distance.
 	 *
-	 * @param ai the ai position
-	 * @param target the target position
+	 * @param ai
+	 *            the ai position
+	 * @param target
+	 *            the target position
 	 * @return the heuristic distance
 	 */
-	private int manhattanDistance(Position ai, Position target) {
-		return (Math.abs(ai.getRow() - target.getRow()) + Math.abs(ai.getColumn() - target.getColumn()));
+	private int manhattanDistance(final Position ai, final Position target) {
+		return Math.abs(ai.getRow() - target.getRow()) + Math.abs(ai.getColumn() - target.getColumn());
 	}
 
 	/**
@@ -153,33 +159,25 @@ public abstract class Behavior extends Thread {
 	 */
 	private Position pickRandomTarget() {
 
-		int row = currentPos.getRow();
-		int column = currentPos.getColumn();
-		ArrayList<Cell> availableCells = new ArrayList<Cell>();
+		final int row = currentPos.getRow();
+		final int column = currentPos.getColumn();
+		final ArrayList<Cell> availableCells = new ArrayList<Cell>();
 
-		if (checkValidity(cells[row - 1][column]))
+		if (RuleEnforcer.checkCellValidity(cells[row - 1][column])) {
 			availableCells.add(cells[row - 1][column]);
-		if (checkValidity(cells[row + 1][column]))
+		}
+		if (RuleEnforcer.checkCellValidity(cells[row + 1][column])) {
 			availableCells.add(cells[row + 1][column]);
-		if (checkValidity(cells[row][column - 1]))
+		}
+		if (RuleEnforcer.checkCellValidity(cells[row][column - 1])) {
 			availableCells.add(cells[row][column - 1]);
-		if (checkValidity(cells[row][column + 1]))
+		}
+		if (RuleEnforcer.checkCellValidity(cells[row][column + 1])) {
 			availableCells.add(cells[row][column + 1]);
+		}
 
 		tarType = Target.RANDOM;
 		return availableCells.get(rng.nextInt(availableCells.size())).getPosition();
-	}
-
-	/**
-	 * Check cell validity.
-	 *
-	 * @param cell the cell
-	 * @return true, if successful
-	 */
-	private boolean checkValidity(Cell cell) {
-		return (cell.getPosition().getRow() >= 0 && cell.getPosition().getColumn() >= 0
-				&& cell.getState() != CellState.OBSTACLE && cell.getType() == CellType.NORMAL);
-
 	}
 
 	/**
@@ -188,7 +186,7 @@ public abstract class Behavior extends Thread {
 	 * @return the array list
 	 */
 	private ArrayList<Position> scanEnemies() {
-		ArrayList<Position> enemies = new ArrayList<Position>();
+		final ArrayList<Position> enemies = new ArrayList<Position>();
 		for (int i = 0; i < mapSize; i++) {
 			for (int j = 0; j < mapSize; j++) {
 				if (cells[i][j].getState() == CellState.ENEMY) {
@@ -202,30 +200,33 @@ public abstract class Behavior extends Thread {
 	/**
 	 * Checks if target is still present.
 	 *
-	 * @param target the target
+	 * @param target
+	 *            the target
 	 * @return true, if target is present
 	 */
-	private boolean isTargetThere(Position target) {
+	private boolean isTargetThere(final Position target) {
 		return cells[target.getRow()][target.getColumn()].getState() != CellState.EMPTY;
 	}
 
 	/**
 	 * Receives an updated map.
-	 * 
-	 * @param map the map
+	 *
+	 * @param map
+	 *            the map
 	 */
 	// will most likely be substituted with event-based implementation
-	public void updateMap(Map map) {
+	public void updateMap(final Map map) {
 		cells = map.getCells();
 	}
-	
+
 	/**
 	 * Receives an updated position.
-	 * 
-	 * @param pos the position
+	 *
+	 * @param pos
+	 *            the position
 	 */
 	// will most likely be substituted with event-based implementation
-	public void updatePosition(Position pos){
+	public void updatePosition(final Position pos) {
 		currentPos = pos;
 	}
 
@@ -237,9 +238,10 @@ public abstract class Behavior extends Thread {
 	public Position getPosition() {
 		return currentPos;
 	}
+
 	/**
 	 * Gets the type of the behavior.
-	 * 
+	 *
 	 * @return the type
 	 */
 	public Type getType() {
@@ -249,12 +251,13 @@ public abstract class Behavior extends Thread {
 	/**
 	 * Attempt to trace target in a 3x3 area.
 	 *
-	 * @param target the target position
+	 * @param target
+	 *            the target position
 	 * @return true, if successful
 	 */
-	private boolean traceTarget(Position target) {
-		int row = target.getRow();
-		int column = target.getColumn();
+	private boolean traceTarget(final Position target) {
+		final int row = target.getRow();
+		final int column = target.getColumn();
 
 		if (cells[row][column].getState() == CellState.ENEMY) {
 			return true;
@@ -282,11 +285,13 @@ public abstract class Behavior extends Thread {
 	/**
 	 * Generate path, reverse it and remove starting position.
 	 *
-	 * @param current the start position
-	 * @param target the goal
+	 * @param current
+	 *            the start position
+	 * @param target
+	 *            the goal
 	 * @return the array list
 	 */
-	private ArrayList<Position> genPath(Position current, Position target) {
+	private ArrayList<Position> genPath(final Position current, final Position target) {
 
 		currentPath = astar.AStarAlg(current, target);
 
@@ -301,6 +306,7 @@ public abstract class Behavior extends Thread {
 	/**
 	 * Run the behavior thread.
 	 */
+	@Override
 	public void run() {
 		while (run) {
 
@@ -316,19 +322,20 @@ public abstract class Behavior extends Thread {
 				while (i <= focus && run) {
 
 					// TODO: send move event
-					
+
 					// waits for the move to be executed
 					try {
 						sleep(speed);
-					} catch (InterruptedException e) {
+					} catch (final InterruptedException e) {
 						e.printStackTrace();
 					}
 
 					lockedTarget = pickRandomTarget();
 					i++;
 				}
-			}break;
-			
+			}
+				break;
+
 			// if AI has a stationary target (item,food etc)
 			// generates path and follows it until it reaches the target
 			// if path becomes obstructed or item disappears ai chooses new
@@ -338,14 +345,15 @@ public abstract class Behavior extends Thread {
 				genPath(currentPos, lockedTarget);
 
 				while (currentPath.size() > 0 && run && isTargetThere(lockedTarget)) {
-					if (checkValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+					if (RuleEnforcer
+							.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 						// TODO: send move event
 						currentPath.remove(0);
-						
+
 						// waits for the move to be executed
 						try {
 							sleep(speed);
-						} catch (InterruptedException e) {
+						} catch (final InterruptedException e) {
 							e.printStackTrace();
 						}
 					} else {
@@ -353,8 +361,9 @@ public abstract class Behavior extends Thread {
 						break;
 					}
 				}
-			}break;
-			
+			}
+				break;
+
 			// if ai chases an enemy player
 			// generates path to current enemy position
 			// does *focus number of moves while attempting to trace the
@@ -373,7 +382,8 @@ public abstract class Behavior extends Thread {
 					int i = 1;
 
 					while (i <= focus && run) {
-						if (checkValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+						if (RuleEnforcer.checkCellValidity(
+								cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 
 							targetLocked = traceTarget(lockedTarget);
 
@@ -384,7 +394,7 @@ public abstract class Behavior extends Thread {
 							// waits for the move to be executed
 							try {
 								sleep(speed);
-							} catch (InterruptedException e) {
+							} catch (final InterruptedException e) {
 								e.printStackTrace();
 							}
 						} else {
@@ -394,7 +404,8 @@ public abstract class Behavior extends Thread {
 						i++;
 					}
 				}
-			}break;
+			}
+				break;
 			}
 		}
 	}
