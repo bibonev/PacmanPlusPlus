@@ -110,8 +110,8 @@ public class PacmanVisualisation extends AIPlayer {
 		Images.PacMan.setFitWidth(min);
 		Images.PacMan.setFitHeight(min);
 
-		Images.PacMan.setX(position.getRow() + position.getWidth() / 2 - min / 2);
-		Images.PacMan.setY(position.getColumn() + position.getHeight() / 2 - min / 2);
+		Images.PacMan.setX(position.getPixelX() + position.getWidth() / 2 - min / 2);
+		Images.PacMan.setY(position.getPixelY() + position.getHeight() / 2 - min / 2);
 
 		node = Images.PacMan;
 

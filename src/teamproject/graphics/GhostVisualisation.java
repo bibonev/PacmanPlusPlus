@@ -134,8 +134,8 @@ public class GhostVisualisation extends Ghost {
         Images.Ghost.setFitWidth(min);
         Images.Ghost.setFitHeight(min);
 
-        Images.Ghost.setX(position.getRow()+position.getWidth()/2 - min/2);
-        Images.Ghost.setY(position.getColumn()+position.getHeight()/2 - min/2);
+        Images.Ghost.setX(position.getPixelX()+position.getWidth()/2 - min/2);
+        Images.Ghost.setY(position.getPixelY()+position.getHeight()/2 - min/2);
 
         node = Images.Ghost;
 

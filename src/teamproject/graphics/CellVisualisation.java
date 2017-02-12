@@ -60,4 +60,9 @@ public class CellVisualisation extends Cell{
 
         return node;
     }
+
+    @Override
+    public void setState(CellState state) {
+        this.state = state;
+    }
 }
