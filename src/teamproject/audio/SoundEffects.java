@@ -4,6 +4,7 @@ import java.io.File;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 /**
  * Class for playing sound effects
@@ -21,15 +22,15 @@ public class SoundEffects {
 	public SoundEffects(){
 		isOn = true;
 		
-		String explosionFile = "java-team-project/src/teamproject/audio/"; //TODO
+		String explosionFile = "src/teamproject/audio/explosion.mp3";
 		Media explosion = new Media(new File(explosionFile).toURI().toString());
 		explosionPlayer = new MediaPlayer(explosion);
 		
-		String shootFile = "java-team-project/src/teamproject/audio/"; //TODO
+		String shootFile = "src/teamproject/audio/gun.mp3";
 		Media shoot = new Media(new File(shootFile).toURI().toString());
 		shootPlayer = new MediaPlayer(shoot);
 		
-		String powerUpFile = "java-team-project/src/teamproject/audio/"; //TODO
+		String powerUpFile = "src/teamproject/audio/powerup.mp3";
 		Media powerUp = new Media(new File(powerUpFile).toURI().toString());
 		powerUpPlayer = new MediaPlayer(powerUp);
 	}
@@ -44,18 +45,21 @@ public class SoundEffects {
 	
 	public void playExplosion(){
 		if(isOn){
-		explosionPlayer.play();
+			explosionPlayer.seek(Duration.ZERO);
+			explosionPlayer.play();
 		}
 	}
 	
 	public void playShoot(){
 		if(isOn){
+			shootPlayer.seek(Duration.ZERO);
 			shootPlayer.play();
 		}
 	}
 
 	public void playPowerUp(){
 		if(isOn){
+			powerUpPlayer.seek(Duration.ZERO);
 			powerUpPlayer.play();
 		}
 	}

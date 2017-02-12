@@ -32,6 +32,7 @@ public class SettingsScreen extends Screen {
    		sounds = new CheckBox("Sound effects");
    		sounds.getStyleClass().add("labelStyle");
    		sounds.setSelected(true);
+   		sounds.selectedProperty().addListener(e -> game.muteSounds(sounds.isSelected()));
         
    		label = new Label("Settings");
    		label.getStyleClass().add("titleStyle");

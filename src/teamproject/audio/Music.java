@@ -19,7 +19,7 @@ public class Music {
 	
 	public Music(){
 		isOn = true;
-		String musicFile = "src/teamproject/audio/musicShort.mp3"; //TODO
+		String musicFile = "src/teamproject/audio/musicShort.mp3"; //could change to longer version
 		Media sound = new Media(new File(musicFile).toURI().toString());
 		mediaPlayer = new MediaPlayer(sound);
 		

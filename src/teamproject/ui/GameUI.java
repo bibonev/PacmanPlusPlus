@@ -12,6 +12,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import teamproject.audio.Music;
+import teamproject.audio.SoundEffects;
 import teamproject.gamelogic.domain.Game;
 
 /**
@@ -24,6 +25,7 @@ public class GameUI extends Application {
 	
 	private Game game;
 	private Music music;
+	private SoundEffects sounds;
 
 	private Stage thisStage;
 	private BorderPane pane;
@@ -70,6 +72,7 @@ public class GameUI extends Application {
 	
 	private void setup(){
 		music = new Music();
+		sounds = new SoundEffects();
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
 		gameScreen = new GameScreen(this, music);
@@ -176,6 +179,10 @@ public class GameUI extends Application {
 	
 	public void muteMusic(boolean bool){
 		music.setOn(bool);
+	}
+	
+	public void muteSounds(boolean bool){
+		sounds.setOn(bool);
 	}
 	
 	private void sendMoveEvent(KeyCode move){
