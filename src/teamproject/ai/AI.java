@@ -2,7 +2,7 @@ package teamproject.ai;
 
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Map;
-import teamproject.gamelogic.domain.Behavior;
+import teamproject.gamelogic.domain.Behaviour;
 
 
 /**
@@ -14,7 +14,7 @@ import teamproject.gamelogic.domain.Behavior;
 public class AI extends Player {
 
 	/** The behavior. */
-	private Behavior behavior;
+	private Behaviour behavior;
 
 	/**
 	 * Instantiates a new AI player.
@@ -26,7 +26,7 @@ public class AI extends Player {
 	 * @param map
 	 *            the map
 	 */
-	public AI(final long id, String name, Behavior behavior, Map map) {
+	public AI(final long id, String name, Behaviour behavior, Map map) {
 		super(id, name);
 		this.behavior = behavior;
 	}
