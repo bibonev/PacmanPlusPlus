@@ -16,26 +16,26 @@ public class Main extends Application {
         GridVisualisation grid = new GridVisualisation();
         MapVisualisation mapV = new MapVisualisation(grid);
 
-        //Initialose ScreenDimentions
+        //Initialisze Screen Dimentions
         PositionVisualisation.initScreenDimensions();
 
         //Generate Map
-        MapVisualisation.generateMap(stage).show();
+        mapV.generateMap(stage).show();
 
         //Add CLick Listener
-        MapVisualisation.addClickListener();
+        mapV.addClickListener();
 
         //Create Pacman
-        GamePlay.pacman = new PacmanVisualisation(sampleBehavior, "Player1", grid);
+        GamePlay.pacman = new PacmanVisualisation(sampleBehavior, "Player1", grid, mapV);
 
         //Create Ghost
-        GamePlay.ghost1 = new GhostVisualisation(sampleBehavior, "Ghost1", grid, GamePlay.pacman);
+        GamePlay.ghost1 = new GhostVisualisation(sampleBehavior, "Ghost1", grid, GamePlay.pacman, mapV);
 
         //Redraw Map
-        MapVisualisation.redrawMap();
+        mapV.redrawMap();
 
         //Start Timeline
-        MapVisualisation.startTimeline();
+        mapV.startTimeline();
 
         //Play background music
         //playMusic();

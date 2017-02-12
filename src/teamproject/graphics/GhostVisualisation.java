@@ -19,17 +19,20 @@ public class GhostVisualisation extends Ghost {
     private PacmanVisualisation pacman;
     private GridVisualisation grid;
     private Node node;
+    private MapVisualisation map;
 
     public GhostVisualisation(
             Behaviour behaviour,
             String name,
             GridVisualisation grid,
-            PacmanVisualisation pacman) {
+            PacmanVisualisation pacman,
+            MapVisualisation map) {
         super(behaviour, name);
 
-        this.position = new PositionVisualisation(CellSize.Rows/2,CellSize.Columns/2);
+        this.position = new PositionVisualisation(CellSize.Rows/2, CellSize.Columns/2);
         this.grid = grid;
         this.pacman = pacman;
+        this.map = map;
         Images.Ghost = new ImageView("ghost.png");
     }
 
@@ -77,9 +80,9 @@ public class GhostVisualisation extends Ghost {
         }
 
         if (position.getRow() == pacman.getPosition().getRow() && position.getColumn() == pacman.getPosition().getColumn()) {
-            //MapGenerator.gameEnded();
+            map.gameEnded();
         }else{
-            //MapGenerator.redrawMap();
+            map.redrawMap();
         }
     }
 
@@ -88,7 +91,7 @@ public class GhostVisualisation extends Ghost {
             return false;
 
         position = new PositionVisualisation(position.getRow() - 1, position.getColumn());
-        //MapGenerator.redrawMap();
+        map.redrawMap();
 
         return true;
     }
@@ -98,7 +101,7 @@ public class GhostVisualisation extends Ghost {
             return false;
 
         position = new PositionVisualisation(position.getRow() + 1, position.getColumn());
-        //MapGenerator.redrawMap();
+        map.redrawMap();
 
         return true;
     }
@@ -108,7 +111,7 @@ public class GhostVisualisation extends Ghost {
             return false;
 
         position = new PositionVisualisation(position.getRow(), position.getColumn() - 1);
-        //MapGenerator.redrawMap();
+        map.redrawMap();
 
         return true;
     }
@@ -118,7 +121,7 @@ public class GhostVisualisation extends Ghost {
             return false;
 
         position = new PositionVisualisation(position.getRow(), position.getColumn() + 1);
-        //MapGenerator.redrawMap();
+        map.redrawMap();
 
         return true;
     }
