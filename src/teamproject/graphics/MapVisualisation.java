@@ -19,33 +19,33 @@ import java.util.ArrayList;
  * Created by boyanbonev on 09/02/2017.
  */
 public class MapVisualisation {
-    protected static Pane root;
+    private Pane root;
+    private Timeline timeLine;
+    private Scene scene;
+    private Stage stage;
+    private GridVisualisation grid;
 
-    static Timeline timeLine;
-    static Scene scene;
-    static Stage stage;
-    static GridVisualisation grid;
+    private ArrayList<PositionVisualisation> obstacles = new ArrayList<>();
 
     public MapVisualisation(GridVisualisation grid){
         this.grid = grid;
     }
 
-    public static Stage generateMap(Stage stage) {
-        MapVisualisation.stage = stage;
+    public Stage generateMap(Stage stage) {
+        this.stage = stage;
 
         Images.Border = new ImageView("border.jpg");
-        grid = new GridVisualisation();
-        root = new Pane();
-        root.setStyle("-fx-background-color: black");
+        this.root = new Pane();
+        this.root.setStyle("-fx-background-color: black");
 
-        scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
+        this.scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
 
         //Create obstacles
         initObstacles();
         CellState state = CellState.EMPTY;
 
-        for (int i = 0; i < CellSize.Rows; i++) {
-            for (int j = 0; j < CellSize.Columns; j++) {
+        for (int i = 0; i < CellSize.Columns; i++) {
+            for (int j = 0; j < CellSize.Rows; j++) {
                 PositionVisualisation position = new PositionVisualisation(i, j);
 
                 //Check if not boundary
@@ -59,53 +59,47 @@ public class MapVisualisation {
                 }
 
                 CellVisualisation cell = new CellVisualisation(CellType.NORMAL, state, position);
-                grid.addCell(cell);
+                this.grid.addVisualCell(cell);
 
-                root.getChildren().add(cell.getNode());
+                this.root.getChildren().add(cell.getNode());
             }
 
         }
 
-        stage.setScene(scene);
-        return stage;
+        this.stage.setScene(scene);
+        return this.stage;
     }
 
-    public static void redrawMap() {
+    public void redrawMap() {
         PositionVisualisation.initScreenDimensions();
 
-        root.getChildren().clear();
-        System.out.println(grid.getCells().length);
+        this.root.getChildren().clear();
 
         for (int i = 0; i < CellSize.Rows; i++) {
             for (int j = 0; j < CellSize.Columns; j++) {
-                System.out.println("I, j : " + i + ", " + j);
                 root.getChildren().add(grid.getCell(i, j).getNode());
-                //System.out.println("I, j : " + i + ", " + j);
             }
         }
 
-        root.getChildren().add(GamePlay.pacman.getNode());
+        System.out.println("Pacman - " + GamePlay.pacman.getNode());
+        this.root.getChildren().add(GamePlay.pacman.getNode());
 
-        root.getChildren().add(GamePlay.ghost1.getNode());
+        System.out.println("Ghost - " + (ImageView)GamePlay.ghost1.getNode());
+        this.root.getChildren().add(GamePlay.ghost1.getNode());
 
-        root.requestFocus();
+        this.root.requestFocus();
     }
 
-    private static boolean isObstacle(PositionVisualisation position){
-
-        for (int i =0;i< obstacles.size();i++){
-            PositionVisualisation tmpPosition = obstacles.get(i);
+    private boolean isObstacle(PositionVisualisation position){
+        for (PositionVisualisation tmpPosition : obstacles) {
             if (position.getRow() == tmpPosition.getRow() && position.getColumn() == tmpPosition.getColumn())
                 return true;
         }
 
         return false;
-
     }
 
-    private static ArrayList<PositionVisualisation> obstacles = new ArrayList<>();
-
-    private static void initObstacles(){
+    private void initObstacles(){
 
         //Generate Left Obstacles
         obstacles.add(new PositionVisualisation(2, 2));
@@ -162,9 +156,8 @@ public class MapVisualisation {
         obstacles.add(new PositionVisualisation(4, 7));
     }
 
-    public static void addClickListener(){
-        MapVisualisation.root.setOnKeyPressed(event -> {
-
+    public void addClickListener(){
+        this.root.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.UP)
                 GamePlay.pacman.moveUp();
             else if (event.getCode() == KeyCode.DOWN)
@@ -173,14 +166,12 @@ public class MapVisualisation {
                 GamePlay.pacman.moveLeft();
             else if (event.getCode() == KeyCode.RIGHT)
                 GamePlay.pacman.moveRight();
-
         });
     }
 
 
-    public static void invalidateClickListener(){
-
-        MapVisualisation.root.setOnKeyPressed(event -> {
+    public void invalidateClickListener(){
+        this.root.setOnKeyPressed(event -> {
 
             if (event.getCode() == KeyCode.SPACE)
             {
@@ -188,42 +179,42 @@ public class MapVisualisation {
             }
 
         });
-
     }
 
-    public static void replay(){
+    public void replay(){
         Behaviour sampleBehavior = new BasicBehaviour(Behaviour.Type.BASIC);
 
         //Generate Map
-        MapVisualisation.generateMap(stage);
+        this.generateMap(stage);
 
         //Add CLick istener
-        MapVisualisation.addClickListener();
+        this.addClickListener();
 
         //Create Pacman
-        GamePlay.pacman = new PacmanVisualisation(sampleBehavior, "Player1", grid);
+        GamePlay.pacman = new PacmanVisualisation(sampleBehavior, "Player1", grid, this);
+        System.out.println(GamePlay.pacman.getPosition().getRow() + ", " + GamePlay.pacman.getPosition().getColumn());
 
         //Create Ghost
-        GamePlay.ghost1 = new GhostVisualisation(sampleBehavior, "Ghost1", grid, GamePlay.pacman);
+        GamePlay.ghost1 = new GhostVisualisation(sampleBehavior, "Ghost1", grid, GamePlay.pacman, this);
 
         //Redraw Map
-        MapVisualisation.redrawMap();
+        this.redrawMap();
 
         //Start Timeline
-        MapVisualisation.startTimeline();
+        this.startTimeline();
     }
 
-    public static void gameEnded(){
+    public void gameEnded(){
         invalidateClickListener();
-        timeLine.stop();
+        this.timeLine.stop();
     }
 
-    public static void startTimeline(){
-        timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
+    public void startTimeline(){
+        this.timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
             GamePlay.ghost1.moveGhost();
         }));
-        timeLine.setCycleCount(Timeline.INDEFINITE);
-        timeLine.play();
+        this.timeLine.setCycleCount(Timeline.INDEFINITE);
+        this.timeLine.play();
     }
 
 }

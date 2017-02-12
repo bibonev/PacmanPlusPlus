@@ -16,12 +16,14 @@ public class PacmanVisualisation extends Pacman {
     private PositionVisualisation position;
     private GridVisualisation grid;
     private Node node;
+    private MapVisualisation map;
 
-    public PacmanVisualisation(Behaviour behaviour, String name, GridVisualisation grid) {
+    public PacmanVisualisation(Behaviour behaviour, String name, GridVisualisation grid, MapVisualisation map) {
         super(behaviour, name);
 
         this.position = new PositionVisualisation(1,1);
         this.grid = grid;
+        this.map = map;
         Images.PacMan = new ImageView("pacman.png");
     }
 
@@ -37,7 +39,7 @@ public class PacmanVisualisation extends Pacman {
             grid.getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
         }
 
-        //MapGenerator.redrawMap();
+        map.redrawMap();
 
         return true;
     }
@@ -54,7 +56,7 @@ public class PacmanVisualisation extends Pacman {
             grid.getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
         }
 
-        //MapGenerator.redrawMap();
+        map.redrawMap();
 
         return true;
     }
@@ -71,7 +73,7 @@ public class PacmanVisualisation extends Pacman {
             grid.getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
         }
 
-        //MapGenerator.redrawMap();
+        map.redrawMap();
 
         return true;
     }
@@ -88,7 +90,7 @@ public class PacmanVisualisation extends Pacman {
             grid.getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
         }
 
-        //MapGenerator.redrawMap();
+        map.redrawMap();
 
         return true;
     }
