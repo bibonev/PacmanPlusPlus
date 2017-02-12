@@ -10,7 +10,6 @@ import java.util.Random;
 import teamproject.ai.AStar;
 import teamproject.ai.Target;
 import teamproject.constants.CellState;
-import teamproject.constants.CellType;
 
 /**
  * The default behavior, which picks the closes enemy or moves at random if
@@ -164,34 +163,21 @@ public abstract class Behaviour extends Thread {
 		final int column = currentPos.getColumn();
 		final ArrayList<Cell> availableCells = new ArrayList<Cell>();
 
-		if (checkValidity(cells[row - 1][column])) {
+		if (RuleEnforcer.checkCellValidity(cells[row - 1][column])) {
 			availableCells.add(cells[row - 1][column]);
 		}
-		if (checkValidity(cells[row + 1][column])) {
+		if (RuleEnforcer.checkCellValidity(cells[row + 1][column])) {
 			availableCells.add(cells[row + 1][column]);
 		}
-		if (checkValidity(cells[row][column - 1])) {
+		if (RuleEnforcer.checkCellValidity(cells[row][column - 1])) {
 			availableCells.add(cells[row][column - 1]);
 		}
-		if (checkValidity(cells[row][column + 1])) {
+		if (RuleEnforcer.checkCellValidity(cells[row][column + 1])) {
 			availableCells.add(cells[row][column + 1]);
 		}
 
 		tarType = Target.RANDOM;
 		return availableCells.get(rng.nextInt(availableCells.size())).getPosition();
-	}
-
-	/**
-	 * Check cell validity.
-	 *
-	 * @param cell
-	 *            the cell
-	 * @return true, if successful
-	 */
-	private boolean checkValidity(final Cell cell) {
-		return cell.getPosition().getRow() >= 0 && cell.getPosition().getColumn() >= 0
-				&& cell.getState() != CellState.OBSTACLE && cell.getType() == CellType.NORMAL;
-
 	}
 
 	/**
@@ -359,7 +345,8 @@ public abstract class Behaviour extends Thread {
 				genPath(currentPos, lockedTarget);
 
 				while (currentPath.size() > 0 && run && isTargetThere(lockedTarget)) {
-					if (checkValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+					if (RuleEnforcer
+							.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 						// TODO: send move event
 						currentPath.remove(0);
 
@@ -395,7 +382,8 @@ public abstract class Behaviour extends Thread {
 					int i = 1;
 
 					while (i <= focus && run) {
-						if (checkValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+						if (RuleEnforcer.checkCellValidity(
+								cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 
 							targetLocked = traceTarget(lockedTarget);
 
