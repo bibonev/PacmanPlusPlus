@@ -1,6 +1,6 @@
 package teamproject.gamelogic.domain;
 
-public class Ghost {
+public abstract class Ghost {
 
 	private String name;
 	private Behaviour behaviour;

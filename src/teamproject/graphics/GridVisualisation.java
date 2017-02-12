@@ -21,7 +21,7 @@ public class GridVisualisation extends Map {
      * Add cell on the grid
      * @param cell
      */
-    public static void addVisualCell(CellVisualisation cell){
+    public void addVisualCell(CellVisualisation cell){
         grid[cell.positionVisualisation.getRow()][cell.positionVisualisation.getColumn()] = cell;
     }
 
