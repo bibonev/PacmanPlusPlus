@@ -27,6 +27,7 @@ public class SettingsScreen extends Screen {
    		music = new CheckBox("Music");
    		music.getStyleClass().add("labelStyle");
    		music.setSelected(true);
+   		music.selectedProperty().addListener(e -> game.muteMusic(music.isSelected()));
    		
    		sounds = new CheckBox("Sound effects");
    		sounds.getStyleClass().add("labelStyle");

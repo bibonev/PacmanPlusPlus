@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import teamproject.audio.Music;
 
 /**
  * Screen for the actual game
@@ -22,10 +23,14 @@ public class GameScreen extends Screen {
 	private StackPane mainPane;
 	private FlowPane gamePane;
 	private Screen pauseScreen;
+	
+	private Music music;
 
-	public GameScreen(GameUI game){
+	public GameScreen(GameUI game, Music music){
 		super(game);
 
+		this.music = music;
+		
         pause = new Button("pause");
         pause.getStyleClass().add("buttonStyle");
         pause.setOnAction(e-> paused());
@@ -50,12 +55,16 @@ public class GameScreen extends Screen {
 	}
 	
 	private void paused(){
+		music.stopMusic();
+		game.settings.setDisable(false);
 		pause.setDisable(true);
 		mainPane.getChildren().add(pauseScreen.getPane());
 		game.setIsPlaying(false);
 	}
 	
 	public void play(){
+		music.playMusic();
+		game.settings.setDisable(true);
 		pause.setDisable(false);
 		mainPane.getChildren().removeAll(pauseScreen.getPane());
 		game.setIsPlaying(true);

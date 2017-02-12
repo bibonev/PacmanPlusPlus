@@ -11,6 +11,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import teamproject.audio.Music;
 import teamproject.gamelogic.domain.Game;
 
 /**
@@ -22,11 +23,12 @@ import teamproject.gamelogic.domain.Game;
 public class GameUI extends Application {
 	
 	private Game game;
+	private Music music;
 
 	private Stage thisStage;
 	private BorderPane pane;
 	private BorderPane banner;
-	private Button settings;
+	public Button settings;
 	private StackPane centerPane;
 	
 	private boolean isPlaying;
@@ -67,9 +69,10 @@ public class GameUI extends Application {
 	}
 	
 	private void setup(){
+		music = new Music();
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
-		gameScreen = new GameScreen(this);
+		gameScreen = new GameScreen(this, music);
 		settingsScreen = new SettingsScreen(this);
 		singlePlayerLobbyScreen = new SinglePlayerLobbyScreen(this);
 		multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(this);
@@ -112,6 +115,8 @@ public class GameUI extends Application {
 		setScreen(logInScreen.getPane());
 	}	
 	public void switchToGame(){
+		settings.setDisable(true);
+		music.playMusic();
 		isPlaying = true;
 		setScreen(gameScreen.getPane());
 	}
@@ -167,6 +172,10 @@ public class GameUI extends Application {
 	public void joinGame(String ip){
 		//start new game with ip
 		multiPlayerLobbyScreen.addNames();
+	}
+	
+	public void muteMusic(boolean bool){
+		music.setOn(bool);
 	}
 	
 	private void sendMoveEvent(KeyCode move){
