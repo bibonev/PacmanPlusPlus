@@ -17,12 +17,20 @@ import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
-import teamproject.gamelogic.domain.stubs.*;
+import teamproject.gamelogic.domain.stubs.BehaviourStub;
+import teamproject.gamelogic.domain.stubs.CellStub;
+import teamproject.gamelogic.domain.stubs.GhostStub;
+import teamproject.gamelogic.domain.stubs.MapStub;
+import teamproject.gamelogic.domain.stubs.PositionStub;
 
 public class Randoms {
 
 	private static Random random = new Random();
 	private static char[] CHARS = "1234567890qwertyuiopasdfghjklmnbvcxz".toCharArray();
+
+	public static boolean randomBoolean() {
+		return random.nextBoolean();
+	}
 
 	public static int randomInteger(final int upperBound) {
 		if (upperBound < 0) {
@@ -85,7 +93,7 @@ public class Randoms {
 	}
 
 	public static GameSettings randomGameSettings() {
-		return new GameSettings();
+		return new GameSettings(randomBoolean(), randomBoolean());
 	}
 
 	public static Item randomItem() {
