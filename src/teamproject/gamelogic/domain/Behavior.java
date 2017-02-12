@@ -1,4 +1,4 @@
-package teamproject.ai;
+package teamproject.gamelogic.domain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -8,6 +8,8 @@ import java.util.Random;
 import java.util.HashMap;
 
 import teamproject.gamelogic.domain.*;
+import teamproject.ai.AStar;
+import teamproject.ai.Target;
 import teamproject.constants.*;
 
 
@@ -22,6 +24,22 @@ import teamproject.constants.*;
  * @author Lyubomir Pashev
  */
 public abstract class Behavior extends Thread {
+
+	/**
+	 * Different types of behaviors.
+	 * 
+	 * @author User
+	 *
+	 */
+	public enum Type {
+		DEFAULT,
+		AGGRESSIVE,
+		DEFENSIVE,
+		GHOST
+	}
+
+	/** The type of the behavior. */
+	private Type type;
 
 	/** The astar. */
 	private AStar astar;
@@ -218,6 +236,14 @@ public abstract class Behavior extends Thread {
 	 */
 	public Position getPosition() {
 		return currentPos;
+	}
+	/**
+	 * Gets the type of the behavior.
+	 * 
+	 * @return the type
+	 */
+	public Type getType() {
+		return type;
 	}
 
 	/**

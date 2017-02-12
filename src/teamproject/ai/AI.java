@@ -1,8 +1,9 @@
 package teamproject.ai;
 
 import teamproject.gamelogic.domain.Player;
-import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Map;
+import teamproject.gamelogic.domain.Behavior;
+
 
 /**
  * The AI player. Each AI player has a unique behavior that tells it which items
