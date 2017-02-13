@@ -2,26 +2,26 @@ package teamproject.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
 
-import java.util.Optional;
-
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import teamproject.gamelogic.domain.stubs.GhostStub;
 import teamproject.gamelogic.random.Randoms;
 
-public class PlayerTest {
+public class GhostTest {
 
 	@Test
 	public void shouldConstruct() {
 		// Given
-		final Optional<Long> id = Optional.of(Randoms.randomLong());
 		final String name = Randoms.randomString();
+		final Behaviour behaviour = Randoms.randomBehaviour();
 
 		// When
-		final Player player = new Player(id, name);
+		final Ghost ghost = new GhostStub(behaviour, name);
+
 		// Then
-		assertThat(player.getId(), Is.is(id));
-		assertThat(player.getName(), Is.is(name));
+		assertThat(ghost.getBehaviour(), Is.is(behaviour));
+		assertThat(ghost.getName(), Is.is(name));
 	}
 
 }
