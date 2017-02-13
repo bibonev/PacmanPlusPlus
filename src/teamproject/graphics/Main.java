@@ -2,14 +2,19 @@ package teamproject.graphics;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Behaviour.Type;
 
 /**
- * Created by boyanbonev on 11/02/2017.
+ * Created by Boyan Bonev on 11/02/2017.
  */
 public class Main extends Application {
 
+	/**
+	 * Start the graphics
+	 * @param stage
+	 */
 	@Override
 	public void start(final Stage stage) {
 		final Behaviour sampleBehavior = new BasicBehaviour(Type.DEFAULT);
@@ -17,7 +22,7 @@ public class Main extends Application {
 		final GridVisualisation grid = new GridVisualisation();
 		final MapVisualisation mapV = new MapVisualisation(grid);
 
-		// Initialisze Screen Dimentions
+		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
 		// Generate Map
@@ -37,11 +42,12 @@ public class Main extends Application {
 
 		// Start Timeline
 		mapV.startTimeline();
-
-		// Play background music
-		// playMusic();
 	}
 
+	/**
+	 * Run the graphics
+	 * @param args
+	 */
 	public static void main(final String[] args) {
 		launch(args);
 	}
