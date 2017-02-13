@@ -1,17 +1,17 @@
 package teamproject.graphics;
 
 import javafx.scene.image.ImageView;
+import javafx.scene.Node;
+import java.util.Random;
+
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
 import teamproject.constants.Images;
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Ghost;
-import javafx.scene.Node;
-
-import java.util.Random;
 
 /**
- * Created by boyanbonev on 11/02/2017.
+ * Created by Boyan Bonev on 11/02/2017.
  */
 public class GhostVisualisation extends Ghost {
 
@@ -21,6 +21,14 @@ public class GhostVisualisation extends Ghost {
     private Node node;
     private MapVisualisation map;
 
+    /**
+     * Initialize new visualization for the ghost
+     * @param behaviour
+     * @param name
+     * @param grid
+     * @param pacman
+     * @param map
+     */
     public GhostVisualisation(
             Behaviour behaviour,
             String name,
@@ -36,6 +44,9 @@ public class GhostVisualisation extends Ghost {
         Images.Ghost = new ImageView("ghost.png");
     }
 
+    /**
+     * Move Ghost randomly
+     */
     public void moveGhost() {
         Random rand = new Random();
         int randomNum = rand.nextInt((3 - 0) + 1) + 0;
@@ -86,7 +97,7 @@ public class GhostVisualisation extends Ghost {
         }
     }
 
-    public boolean moveUp(){
+    private boolean moveUp(){
         if (grid.getCell(position.getRow() - 1, position.getColumn()).getState() == CellState.OBSTACLE)
             return false;
 
@@ -96,7 +107,7 @@ public class GhostVisualisation extends Ghost {
         return true;
     }
 
-    public boolean moveDown(){
+    private boolean moveDown(){
         if (grid.getCell(position.getRow() + 1, position.getColumn()).getState() == CellState.OBSTACLE)
             return false;
 
@@ -106,7 +117,7 @@ public class GhostVisualisation extends Ghost {
         return true;
     }
 
-    public boolean moveLeft(){
+    private boolean moveLeft(){
         if (grid.getCell(position.getRow(), position.getColumn() - 1).getState() == CellState.OBSTACLE)
             return false;
 
@@ -116,7 +127,7 @@ public class GhostVisualisation extends Ghost {
         return true;
     }
 
-    public boolean moveRight(){
+    private boolean moveRight(){
         if (grid.getCell(position.getRow(), position.getColumn() + 1).getState() == CellState.OBSTACLE)
             return false;
 
@@ -126,6 +137,10 @@ public class GhostVisualisation extends Ghost {
         return true;
     }
 
+    /**
+     * Get the node that represents the ghost
+     * @return Node
+     */
     public  Node getNode(){
         double min = position.getHeight();
         if (position.getWidth() < position.getHeight())
@@ -134,8 +149,8 @@ public class GhostVisualisation extends Ghost {
         Images.Ghost.setFitWidth(min);
         Images.Ghost.setFitHeight(min);
 
-        Images.Ghost.setX(position.getRow()+position.getWidth()/2 - min/2);
-        Images.Ghost.setY(position.getColumn()+position.getHeight()/2 - min/2);
+        Images.Ghost.setX(position.getPixelX()+position.getWidth()/2 - min/2);
+        Images.Ghost.setY(position.getPixelY()+position.getHeight()/2 - min/2);
 
         node = Images.Ghost;
 
