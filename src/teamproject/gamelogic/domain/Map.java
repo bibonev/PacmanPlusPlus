@@ -1,16 +1,16 @@
 package teamproject.gamelogic.domain;
 
+import java.util.ArrayList;
+
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
 import teamproject.graphics.CellVisualisation;
 import teamproject.graphics.PositionVisualisation;
 
-import java.util.ArrayList;
-
 public abstract class Map {
 
-	private static int defaultNumberOfCells = 15;
+	public static int defaultNumberOfCells = 15;
 	private Cell[][] cells;
 	private ArrayList<PositionVisualisation> obstacles;
 
@@ -48,94 +48,97 @@ public abstract class Map {
 		cells[x][y] = cell;
 	}
 
-	public void generateMap(){
-        initializeObstacles();
-        CellState state;
+	// TODO: Should a map be able generate itself? I don't think so...
+	public Map generateMap() {
+		initializeObstacles();
+		CellState state;
 
-        for (int i = 0; i < cells.length; i++) {
-            for (int j = 0; j < cells[i].length; j++) {
-                final PositionVisualisation position = new PositionVisualisation(i, j);
+		for (int i = 0; i < cells.length; i++) {
+			for (int j = 0; j < cells[i].length; j++) {
+				final PositionVisualisation position = new PositionVisualisation(i, j);
 
-                if (i == 1 && j == 1) {
-                    state = CellState.EMPTY;
-                } else if (isObstacle(position)) {
-                    state = CellState.OBSTACLE;
-                } else {
-                    state = CellState.FOOD;
-                }
+				if (i == 1 && j == 1) {
+					state = CellState.EMPTY;
+				} else if (isObstacle(position)) {
+					state = CellState.OBSTACLE;
+				} else {
+					state = CellState.FOOD;
+				}
 
-                final Cell cell = new CellVisualisation(CellType.NORMAL, state, position);
-                cells[position.getRow()][position.getColumn()] = cell;
-            }
-        }
-    }
+				final Cell cell = new CellVisualisation(CellType.NORMAL, state, position);
+				cells[position.getRow()][position.getColumn()] = cell;
+			}
+		}
 
-    private boolean isObstacle(final PositionVisualisation position) {
-        for (final PositionVisualisation tmpPosition : obstacles) {
-            if (position.getRow() == tmpPosition.getRow() && position.getColumn() == tmpPosition.getColumn()) {
-                return true;
-            }
-        }
+		return new GLMap(cells);
+	}
 
-        return false;
-    }
+	private boolean isObstacle(final PositionVisualisation position) {
+		for (final PositionVisualisation tmpPosition : obstacles) {
+			if (position.getRow() == tmpPosition.getRow() && position.getColumn() == tmpPosition.getColumn()) {
+				return true;
+			}
+		}
 
-    private void initializeObstacles() {
-        obstacles = new ArrayList<>();
+		return false;
+	}
 
-        // Generate Left Obstacles
-        obstacles.add(new PositionVisualisation(2, 2));
-        obstacles.add(new PositionVisualisation(1, 4));
-        obstacles.add(new PositionVisualisation(2, 4));
-        obstacles.add(new PositionVisualisation(3, 4));
-        obstacles.add(new PositionVisualisation(4, 4));
+	private void initializeObstacles() {
+		obstacles = new ArrayList<>();
 
-        obstacles.add(new PositionVisualisation(4, 2));
-        obstacles.add(new PositionVisualisation(5, 2));
-        obstacles.add(new PositionVisualisation(6, 2));
+		// Generate Left Obstacles
+		obstacles.add(new PositionVisualisation(2, 2));
+		obstacles.add(new PositionVisualisation(1, 4));
+		obstacles.add(new PositionVisualisation(2, 4));
+		obstacles.add(new PositionVisualisation(3, 4));
+		obstacles.add(new PositionVisualisation(4, 4));
 
-        obstacles.add(new PositionVisualisation(6, 3));
+		obstacles.add(new PositionVisualisation(4, 2));
+		obstacles.add(new PositionVisualisation(5, 2));
+		obstacles.add(new PositionVisualisation(6, 2));
 
-        obstacles.add(new PositionVisualisation(13, 4));
-        obstacles.add(new PositionVisualisation(12, 4));
-        obstacles.add(new PositionVisualisation(11, 4));
-        obstacles.add(new PositionVisualisation(10, 4));
+		obstacles.add(new PositionVisualisation(6, 3));
 
-        obstacles.add(new PositionVisualisation(12, 2));
-        obstacles.add(new PositionVisualisation(8, 2));
-        obstacles.add(new PositionVisualisation(9, 2));
-        obstacles.add(new PositionVisualisation(11, 2));
+		obstacles.add(new PositionVisualisation(13, 4));
+		obstacles.add(new PositionVisualisation(12, 4));
+		obstacles.add(new PositionVisualisation(11, 4));
+		obstacles.add(new PositionVisualisation(10, 4));
 
-        obstacles.add(new PositionVisualisation(3, 6));
+		obstacles.add(new PositionVisualisation(12, 2));
+		obstacles.add(new PositionVisualisation(8, 2));
+		obstacles.add(new PositionVisualisation(9, 2));
+		obstacles.add(new PositionVisualisation(11, 2));
 
-        // Generate Reflection
-        final int loopSize = obstacles.size();
-        for (int i = 0; i < loopSize; i++) {
+		obstacles.add(new PositionVisualisation(3, 6));
 
-            final PositionVisualisation tmpPosition = obstacles.get(i);
-            final PositionVisualisation newPosition = new PositionVisualisation(tmpPosition.getRow(),
-                    CellSize.Columns - 1 - tmpPosition.getColumn());
-            obstacles.add(newPosition);
+		// Generate Reflection
+		final int loopSize = obstacles.size();
+		for (int i = 0; i < loopSize; i++) {
 
-        }
+			final PositionVisualisation tmpPosition = obstacles.get(i);
+			final PositionVisualisation newPosition = new PositionVisualisation(tmpPosition.getRow(),
+					CellSize.Columns - 1 - tmpPosition.getColumn());
+			obstacles.add(newPosition);
 
-        // Generate Center Obstacles
-        obstacles.add(new PositionVisualisation(6, 6));
-        obstacles.add(new PositionVisualisation(7, 6));
-        obstacles.add(new PositionVisualisation(8, 6));
-        obstacles.add(new PositionVisualisation(8, 7));
-        obstacles.add(new PositionVisualisation(8, 8));
+		}
 
-        obstacles.add(new PositionVisualisation(7, 8));
-        obstacles.add(new PositionVisualisation(6, 8));
+		// Generate Center Obstacles
+		obstacles.add(new PositionVisualisation(6, 6));
+		obstacles.add(new PositionVisualisation(7, 6));
+		obstacles.add(new PositionVisualisation(8, 6));
+		obstacles.add(new PositionVisualisation(8, 7));
+		obstacles.add(new PositionVisualisation(8, 8));
 
-        obstacles.add(new PositionVisualisation(10, 7));
-        obstacles.add(new PositionVisualisation(11, 7));
-        obstacles.add(new PositionVisualisation(12, 7));
+		obstacles.add(new PositionVisualisation(7, 8));
+		obstacles.add(new PositionVisualisation(6, 8));
 
-        obstacles.add(new PositionVisualisation(2, 7));
-        obstacles.add(new PositionVisualisation(3, 7));
-        obstacles.add(new PositionVisualisation(4, 7));
-    }
+		obstacles.add(new PositionVisualisation(10, 7));
+		obstacles.add(new PositionVisualisation(11, 7));
+		obstacles.add(new PositionVisualisation(12, 7));
+
+		obstacles.add(new PositionVisualisation(2, 7));
+		obstacles.add(new PositionVisualisation(3, 7));
+		obstacles.add(new PositionVisualisation(4, 7));
+	}
 
 }
