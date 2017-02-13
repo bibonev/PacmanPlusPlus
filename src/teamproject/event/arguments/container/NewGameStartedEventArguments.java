@@ -1,11 +1,24 @@
 package teamproject.event.arguments.container;
 
+import javafx.stage.Stage;
+import teamproject.gamelogic.domain.Game;
+
 public class NewGameStartedEventArguments {
 
-	public NewGameStartedEventArguments() {
-		// TODO Figure out what needs to go in here
-		// This should hold everything Graphics needs to render a new game
-		// visualisation
+	private Stage stage;
+	private Game game;
+
+	public NewGameStartedEventArguments(final Game game, final Stage stage) {
+		this.game = game;
+		this.stage = stage;
+	}
+
+	public Game getGame() {
+		return game;
+	}
+
+	public Stage getStage() {
+		return stage;
 	}
 
 }

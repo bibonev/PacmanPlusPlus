@@ -15,7 +15,6 @@ import teamproject.gamelogic.domain.Item;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
-import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
 import teamproject.gamelogic.domain.stubs.BehaviourStub;
@@ -74,7 +73,7 @@ public class Randoms {
 		final Collection<Ghost> ghosts = new ArrayList<Ghost>();
 		ghosts.add(randomGhost());
 
-		return new World(players, randomRuleEnforcer(), ghosts, randomMap());
+		return new World(players, ghosts, randomMap());
 	}
 
 	public static Player randomPlayer() {
@@ -83,10 +82,6 @@ public class Randoms {
 
 	public static Ghost randomGhost() {
 		return new GhostStub(randomBehaviour(), randomString());
-	}
-
-	public static RuleEnforcer randomRuleEnforcer() {
-		return new RuleEnforcer();
 	}
 
 	public static Map randomMap() {
