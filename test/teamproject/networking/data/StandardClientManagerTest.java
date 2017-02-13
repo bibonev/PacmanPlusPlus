@@ -8,20 +8,20 @@ import org.junit.Test;
 
 import teamproject.event.Event;
 import teamproject.networking.NetworkSocket;
-import teamproject.networking.NetworkSocketListener;
-import teamproject.networking.StandardNetworkManager;
+import teamproject.networking.NetworkListener;
+import teamproject.networking.StandardClientManager;
 
-public class StandardNetworkManagerTest {
+public class StandardClientManagerTest {
 	@Test
 	public void testTriggersTriggered() {
 		ArrayList<Integer> received = new ArrayList<Integer>();
 		
-		StandardNetworkManager nm = new StandardNetworkManager(new NetworkSocket() {
+		StandardClientManager nm = new StandardClientManager(new NetworkSocket() {
 			@Override
 			public void send(byte[] data) {}
 			@Override
-			public Event<NetworkSocketListener, byte[]> getReceiveEvent() {
-				return new Event<NetworkSocketListener, byte[]>((l, b) -> l.receive(b));
+			public Event<NetworkListener, byte[]> getReceiveEvent() {
+				return new Event<NetworkListener, byte[]>((l, b) -> l.receive(b));
 			}
 		});
 		
@@ -48,12 +48,12 @@ public class StandardNetworkManagerTest {
 	
 	@Test(expected=RuntimeException.class)
 	public void testNonexistentTrigger() {
-		StandardNetworkManager nm = new StandardNetworkManager(new NetworkSocket() {
+		StandardClientManager nm = new StandardClientManager(new NetworkSocket() {
 			@Override
 			public void send(byte[] data) {}
 			@Override
-			public Event<NetworkSocketListener, byte[]> getReceiveEvent() {
-				return new Event<NetworkSocketListener, byte[]>((l, b) -> l.receive(b));
+			public Event<NetworkListener, byte[]> getReceiveEvent() {
+				return new Event<NetworkListener, byte[]>((l, b) -> l.receive(b));
 			}
 		});
 		Packet p1 = new Packet("data");
@@ -62,12 +62,12 @@ public class StandardNetworkManagerTest {
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testNoMultipleTriggers() {
-		StandardNetworkManager nm = new StandardNetworkManager(new NetworkSocket() {
+		StandardClientManager nm = new StandardClientManager(new NetworkSocket() {
 			@Override
 			public void send(byte[] data) {}
 			@Override
-			public Event<NetworkSocketListener, byte[]> getReceiveEvent() {
-				return new Event<NetworkSocketListener, byte[]>((l, b) -> l.receive(b));
+			public Event<NetworkListener, byte[]> getReceiveEvent() {
+				return new Event<NetworkListener, byte[]>((l, b) -> l.receive(b));
 			}
 		});
 
