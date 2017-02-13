@@ -4,13 +4,14 @@ import java.util.Optional;
 
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+
 import teamproject.ai.AIPlayer;
 import teamproject.constants.CellState;
 import teamproject.constants.Images;
 import teamproject.gamelogic.domain.Behaviour;
 
 /**
- * Created by boyanbonev on 11/02/2017.
+ * Created by Boyan Bonev on 11/02/2017.
  */
 public class PacmanVisualisation extends AIPlayer {
 
@@ -19,6 +20,13 @@ public class PacmanVisualisation extends AIPlayer {
 	private Node node;
 	private MapVisualisation map;
 
+	/**
+	 * Initialize new visualisation for the PacMan player
+	 * @param behaviour
+	 * @param name
+	 * @param grid
+	 * @param map
+	 */
 	public PacmanVisualisation(final Behaviour behaviour, final String name, final GridVisualisation grid,
 			final MapVisualisation map) {
 		super(Optional.empty(), name, behaviour, map.getGrid());
@@ -29,6 +37,10 @@ public class PacmanVisualisation extends AIPlayer {
 		Images.PacMan = new ImageView("pacman.png");
 	}
 
+	/**
+	 * Move the PacMan up
+	 * @return true/false depending on whether the move is legit or not
+	 */
 	public boolean moveUp() {
 
 		if (grid.getCell(position.getRow() - 1, position.getColumn()).getState() == CellState.OBSTACLE) {
@@ -47,6 +59,10 @@ public class PacmanVisualisation extends AIPlayer {
 		return true;
 	}
 
+	/**
+	 * Move the PacMan down
+	 * @return true/false depending on whether the move is legit or not
+	 */
 	public boolean moveDown() {
 
 		if (grid.getCell(position.getRow() + 1, position.getColumn()).getState() == CellState.OBSTACLE) {
@@ -65,6 +81,10 @@ public class PacmanVisualisation extends AIPlayer {
 		return true;
 	}
 
+	/**
+	 * Move the PacMan left
+	 * @return true/false depending on whether the move is legit or not
+	 */
 	public boolean moveLeft() {
 
 		if (grid.getCell(position.getRow(), position.getColumn() - 1).getState() == CellState.OBSTACLE) {
@@ -83,6 +103,10 @@ public class PacmanVisualisation extends AIPlayer {
 		return true;
 	}
 
+	/**
+	 * Move the PacMan right
+	 * @return true/false depending on whether the move is legit or not
+	 */
 	public boolean moveRight() {
 
 		if (grid.getCell(position.getRow(), position.getColumn() + 1).getState() == CellState.OBSTACLE) {
@@ -101,6 +125,10 @@ public class PacmanVisualisation extends AIPlayer {
 		return true;
 	}
 
+	/**
+	 * Get the node that represents the PacMan player
+	 * @return Node
+	 */
 	public Node getNode() {
 		double min = position.getHeight();
 		if (position.getWidth() < position.getHeight()) {
@@ -118,6 +146,10 @@ public class PacmanVisualisation extends AIPlayer {
 		return node;
 	}
 
+	/**
+	 * Get the position of the PacMan
+	 * @return PositionVisualisation
+	 */
 	public PositionVisualisation getPosition() {
 		return position;
 	}
