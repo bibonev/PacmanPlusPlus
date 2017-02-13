@@ -163,9 +163,10 @@ public class GameUI extends Application {
 	
 	public void startNewSinglePlayerGame(){
 		switchToGame();
+		
 		//start single player game
-		Event<NewGameRequestedEventListener, GameRequestedObject> event = new Event<>((listener, obj) -> listener.onNewGameRequested(obj));
-		event.fire(new GameRequestedObject(GameType.SinglePlayer, new GameSettings(), gameScreen.getName()));
+		Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> event = new Event<>((listener, arg) -> listener.onNewGameRequested(arg));
+		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings(), gameScreen.getName()));
 	}
 	
 	public void startNewMultiPlayerGame(){
