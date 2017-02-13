@@ -17,9 +17,9 @@ import teamproject.gamelogic.domain.RuleEnforcer;
 public class PacmanVisualisation extends AIPlayer {
 
 	private PositionVisualisation position;
-	private GridVisualisation grid;
+	private MapVisualisation grid;
 	private Node node;
-	private MapVisualisation map;
+	private Render map;
 
 	/**
 	 * Initialize new visualisation for the PacMan player
@@ -28,8 +28,8 @@ public class PacmanVisualisation extends AIPlayer {
 	 * @param grid
 	 * @param map
 	 */
-	public PacmanVisualisation(final Behaviour behaviour, final String name, final GridVisualisation grid,
-			final MapVisualisation map) {
+	public PacmanVisualisation(final Behaviour behaviour, final String name, final MapVisualisation grid,
+			final Render map) {
 		super(Optional.empty(), name, behaviour, map.getGrid());
 
 		this.position = new PositionVisualisation(1, 1);

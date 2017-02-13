@@ -13,8 +13,8 @@ public class NewGameListener implements NewGameStartedEventListener {
     public void onNewGameStarted(NewGameStartedEventArguments args) {
         final Behaviour sampleBehavior = new BasicBehaviour(Behaviour.Type.DEFAULT);
 
-        final GridVisualisation grid = new GridVisualisation();
-        final MapVisualisation mapV = new MapVisualisation(grid);
+        final MapVisualisation grid = new MapVisualisation();
+        final Render mapV = new Render(grid);
 
         // Initialize Screen dimensions
         PositionVisualisation.initScreenDimensions();

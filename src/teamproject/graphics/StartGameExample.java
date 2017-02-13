@@ -20,14 +20,14 @@ public class StartGameExample extends Application {
 	public void start(final Stage stage) {
 		final Behaviour sampleBehavior = new BasicBehaviour(Type.DEFAULT);
 
-		final GridVisualisation grid = new GridVisualisation();
-		final MapVisualisation mapV = new MapVisualisation(grid);
+		final MapVisualisation grid = new MapVisualisation();
+		final Render mapV = new Render(grid);
 
         stage.setResizable(false);
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
-		Map newMap = new GridVisualisation();
+		Map newMap = new MapVisualisation();
 		newMap.generateMap();
 
 		// Generate Map
