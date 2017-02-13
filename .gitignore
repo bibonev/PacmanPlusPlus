@@ -12,5 +12,7 @@
 hs_err_pid*
 /bin/
 
+\.idea/
 .project
 .classpath
+lib/

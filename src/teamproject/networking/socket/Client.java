@@ -5,8 +5,14 @@ package teamproject.networking.socket;
 
 import teamproject.event.Event;
 import teamproject.networking.NetworkSocket;
-import teamproject.networking.NetworkSocketListener;
+import teamproject.networking.NetworkListener;
+import teamproject.networking.event.ClientDisconnectedListener;
+import teamproject.networking.event.HandshakeListener;
+
 import java.net.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
 import java.io.*;
 
 /**
@@ -14,122 +20,208 @@ import java.io.*;
  *
  */
 
-public class Client implements NetworkSocket {
-	
+public class Client implements NetworkSocket, HandshakeListener, Runnable {
 	private Socket socket = null;
 	private DataInputStream in = null;
-    private DataOutputStream out = null;
-    private String hostname = null;
+	private DataOutputStream out = null;
+	private String hostname = null;
+	private ClientSender sender = null;
+	private ClientReceiver receiver = null;
+	private Event<NetworkListener, byte[]> receiveEvent;
+	private int clientID = -1;
+	private boolean serverSide;
+	private Event<ClientDisconnectedListener, Integer> disconnectedEvent;
 
-	public Client(String hostname){
+	public Client(String hostname) {
+		this();
 		this.hostname = hostname;
+		this.serverSide = false;
 	}
-	 
-    public void start(){
-	    try {
-			socket = new Socket(hostname, Port.number);
+
+	public Client(Socket socket, int clientID) {
+		this();
+		this.socket = socket;
+		this.clientID = clientID;
+		this.serverSide = true;
+	}
+
+	private Client() {
+		this.receiveEvent = new Event<>((l, b) -> l.receive(b));
+		this.disconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
+	}
+	
+	public void die() {
+		try {
+			sender.die();
+			receiver.die();
+			socket.close();
+		} catch (IOException e) {
+			throw new RuntimeException("Could not close client.", e);
+		}
+	}
+	
+	public void start() {
+		try {
+			if (socket == null) {
+				socket = new Socket(hostname, Port.number);
+			}
+
 			in = new DataInputStream(socket.getInputStream());
 			out = new DataOutputStream(socket.getOutputStream());
-			
+
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException("Unknown host.", e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException("Couldn't get input and output streams for client.", e);
 		}
-	    
-	    // objects ClientSender and ClientReceiver
-	    ClientSender sender = new ClientSender(out);
-	    ClientReceiver receiver = new ClientReceiver(in);
 
-	    // Run them in parallel:
-	    sender.start();
-	    receiver.start();
-	    
-	    // Wait for them to end and close sockets.
-	    try {
-	      sender.join();
-	      out.close();
-	      receiver.join();
-	      in.close();
-	      socket.close();
-	    }
-	    catch (IOException e) {
-	      System.err.println("Something wrong " + e.getMessage());
-	      System.exit(1); 
-	    }
-	    catch (InterruptedException e) {
-	      System.err.println("Unexpected interruption " + e.getMessage());
-	      System.exit(1); 
-	    }	    
-   }
+		// objects ClientSender and ClientReceiver
+		sender = new ClientSender(out);
+		receiver = new ClientReceiver(in, b -> receiveEvent.fire(b));
 
+		new Thread(this).start();
+	}
+
+	@Override
+	public void run() {
+		// Run them in parallel:
+		sender.start();
+		receiver.start();
+
+		// Wait for them to end and close sockets.
+		try {
+			receiver.join();
+			in.close();
+			sender.die();
+			out.close();
+			socket.close();
+		} catch (IOException e) {
+			System.err.println("Something wrong " + e.getMessage());
+			System.exit(1);
+		} catch (InterruptedException e) {
+			System.err.println("Unexpected interruption " + e.getMessage());
+			System.exit(1);
+		} finally {
+			disconnectedEvent.fire(clientID);
+			disconnectedEvent.clearListeners();
+			receiveEvent.clearListeners();
+		}
+	}
 
 	@Override
 	public void send(byte[] data) {
-		// TODO Auto-generated method stub
-		
+		sender.send(data);
+	}
+
+	public int getClientID() {
+		if (this.clientID == -1) {
+			throw new RuntimeException("Not yet received client ID from server.");
+		} else {
+			return this.clientID;
+		}
 	}
 
 	@Override
-	public Event<NetworkSocketListener, byte[]> getReceiveEvent() {
-		// TODO Auto-generated method stub
-		return null;
+	public Event<NetworkListener, byte[]> getReceiveEvent() {
+		return receiveEvent;
 	}
 	
+	public Event<ClientDisconnectedListener, Integer> getDisconnectedEvent() {
+		return disconnectedEvent;
+	}
+
+	@Override
+	public void onServerHandshake(int clientID) {
+		if (!serverSide) {
+			this.clientID = clientID;
+		} else {
+			throw new RuntimeException("Server should not receive handshake packet.");
+		}
+	}
+
 }
 
-class ClientSender extends Thread{
+class ClientSender extends Thread {
 	private boolean alive = true;
 	private DataOutputStream out = null;
-	
-	public ClientSender(DataOutputStream out){
+	private BlockingQueue<byte[]> packets;
+
+	public ClientSender(DataOutputStream out) {
 		this.out = out;
+		packets = new LinkedBlockingQueue<byte[]>();
 	}
-	
-	public void run(){
-		while(alive){
-			// send data
-			
-//			try {
-//				out.writeInt(message.length);
-//				out.wrsite(message);
-//			} catch (IOException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			} // write length of the message
-			
+
+	public void run() {
+		try {
+			while (alive) {
+				byte[] packet = packets.take();
+				if(packet.length > 0) {
+					out.writeInt(packet.length);
+					out.write(packet);
+				}
+			}
+		} catch(EOFException e) {
+			// connection dropped
+			return;
+		} catch (IOException e) {
+			if (alive) {
+				throw new RuntimeException("Could not send packet.", e);
+			} else {
+				// connection already dropped, just close thread
+			}
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Client thread interrupted.", e);
+		} finally {
+			alive = false;
+		}
+	}
+
+	public void die() {
+		alive = false;
+		packets.add(new byte[0]);
+	}
+
+	public void send(byte[] packet) {
+		if (alive) {
+			packets.add(packet);
 		}
 	}
 }
 
-class ClientReceiver extends Thread{
+class ClientReceiver extends Thread {
 	private boolean alive = true;
 	private DataInputStream in = null;
-	private int length;
-	private byte[] message;
-	
-	public ClientReceiver(DataInputStream in){
+	private Consumer<byte[]> onReceive;
+
+	public ClientReceiver(DataInputStream in, Consumer<byte[]> onReceive) {
 		this.in = in;
+		this.onReceive = onReceive;
 	}
-	
-	public void run(){
-		while(alive){
-			
+
+	public void run() {
+		while (alive) {
 			try {
-				length = in.readInt();
-				if(length>0) {
-				    message = new byte[length];
-				    in.readFully(message, 0, message.length);
+				int length = in.readInt();
+
+				if (length > 0) {
+					byte[] message = new byte[length];
+					in.read(message);
+					this.onReceive.accept(message);
 				}
+			} catch(EOFException e) {
+				System.out.println("disconnected!");
+				return;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			
-			
-			
+				if (alive) {
+					throw new RuntimeException(e);
+				} else {
+					// connection already ended, just close thread
+				}
+			}
 		}
+	}
+
+	public void die() {
+		alive = false;
 	}
 }
