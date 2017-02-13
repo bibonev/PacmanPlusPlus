@@ -13,8 +13,12 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import teamproject.audio.Music;
 import teamproject.audio.SoundEffects;
+import teamproject.constants.GameType;
 import teamproject.event.Event;
+import teamproject.event.arguments.container.NewGameRequestedEventArguments;
+import teamproject.event.listener.NewGameRequestedEventListener;
 import teamproject.gamelogic.domain.Game;
+import teamproject.gamelogic.domain.GameSettings;
 
 /**
  * UI to be run, contains all screens
@@ -166,7 +170,7 @@ public class GameUI extends Application {
 		
 		//start single player game
 		Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> event = new Event<>((listener, arg) -> listener.onNewGameRequested(arg));
-		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings(), gameScreen.getName()));
+		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings() , gameScreen.getName(), thisStage));
 	}
 	
 	public void startNewMultiPlayerGame(){
