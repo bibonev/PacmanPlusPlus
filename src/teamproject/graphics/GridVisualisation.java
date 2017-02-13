@@ -1,6 +1,7 @@
 package teamproject.graphics;
 
 import teamproject.constants.CellSize;
+import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.Map;
 
 /**
