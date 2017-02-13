@@ -21,14 +21,16 @@ public class WorldTest {
 		final Collection<Ghost> ghosts = new ArrayList<Ghost>();
 		ghosts.add(Randoms.randomGhost());
 
+		final RuleEnforcer ruleEnforcer = Randoms.randomRuleEnforcer();
 		final Map map = Randoms.randomMap();
 
 		// When
-		final World world = new World(players, ghosts, map);
+		final World world = new World(players, ruleEnforcer, ghosts, map);
 
 		// Then
 		assertThat(world.getPlayers(), Is.is(players));
 		assertThat(world.getGhosts(), Is.is(ghosts));
+		assertThat(world.getRuleEnforcer(), Is.is(ruleEnforcer));
 		assertThat(world.getMap(), Is.is(map));
 	}
 
