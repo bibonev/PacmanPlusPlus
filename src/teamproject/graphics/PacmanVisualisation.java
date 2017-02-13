@@ -31,7 +31,7 @@ public class PacmanVisualisation extends AIPlayer {
 			final MapVisualisation map) {
 		super(Optional.empty(), name, behaviour, map.getGrid());
 
-		position = new PositionVisualisation(1, 1);
+		this.position = new PositionVisualisation(1, 1);
 		this.grid = grid;
 		this.map = map;
 		Images.PacMan = new ImageView("pacman.png");
