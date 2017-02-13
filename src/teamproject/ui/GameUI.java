@@ -13,6 +13,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import teamproject.audio.Music;
 import teamproject.audio.SoundEffects;
+import teamproject.event.Event;
 import teamproject.gamelogic.domain.Game;
 
 /**
@@ -52,12 +53,10 @@ public class GameUI extends Application {
 		primaryStage.setTitle("PacMac");
 		
 		pane = new BorderPane();
-        //pane.setStyle("-fx-background-color: DAE6F3;");
         
         centerPane = new StackPane();
         pane.setCenter(centerPane);
         Scene scene = new Scene(pane, 500, 500);
-        scene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
         
         String css = this.getClass().getResource("style.css").toExternalForm();
         scene.getStylesheets().add(css);
@@ -162,8 +161,20 @@ public class GameUI extends Application {
 		return game;
 	}
 	
-	public void startNewGame(){
-		//start new game
+	public void startNewSinglePlayerGame(){
+		switchToGame();
+		//start single player game
+		Event<NewGameRequestedEventListener, GameRequestedObject> event = new Event<>((listener, obj) -> listener.onNewGameRequested(obj));
+		event.fire(new GameRequestedObject(GameType.SinglePlayer, new GameSettings(), gameScreen.getName()));
+	}
+	
+	public void startNewMultiPlayerGame(){
+		switchToGame();
+		//start multiplayer game
+	}
+	
+	public void createNewPendingMultiPlayerGame(){
+		//create new lobby for a multiplayer game
 		multiPlayerLobbyScreen.addNames();
 	}
 	
@@ -172,8 +183,8 @@ public class GameUI extends Application {
 		return true;
 	}
 	
-	public void joinGame(String ip){
-		//start new game with ip
+	public void joinGame(String gameIp){
+		//join game with ip
 		multiPlayerLobbyScreen.addNames();
 	}
 	
@@ -183,38 +194,5 @@ public class GameUI extends Application {
 	
 	public void muteSounds(boolean bool){
 		sounds.setOn(bool);
-	}
-	
-	private void sendMoveEvent(KeyCode move){
-		if(isPlaying){
-			if(move == KeyCode.UP){
-				System.out.println("move up");
-				//send up move event
-			}
-			if(move == KeyCode.DOWN){
-				//send down move event
-				System.out.println("move down");
-			}
-			if(move == KeyCode.LEFT){
-				//send left move event
-				System.out.println("move left");
-			}
-			if(move == KeyCode.RIGHT){
-				//send right move event
-				System.out.println("move right");
-			}
-			if(move == KeyCode.S){
-				//send change selection event
-				System.out.println("swap selection");
-			}
-			if(move == KeyCode.ENTER){
-				//send use power up event
-				System.out.println("use power up");
-			}
-			if(move == KeyCode.D){
-				//send drop power up event
-				System.out.println("drop power up");
-			}
-		}
 	}
 }
