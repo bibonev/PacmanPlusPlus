@@ -1,7 +1,6 @@
 package teamproject.graphics;
 
 import javafx.application.Application;
-import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
@@ -25,10 +24,10 @@ import teamproject.gamelogic.domain.Behaviour;
 public class PacmanVisualisationTest {
     private Behaviour testBehavior;
     private String testName;
-    private GridVisualisation testGrid;
+    private MapVisualisation testGrid;
 
     @Mock
-    private MapVisualisation testMapV;
+    private Render testMapV;
 
     private PacmanVisualisation test;
 
@@ -56,8 +55,8 @@ public class PacmanVisualisationTest {
         MockitoAnnotations.initMocks(this);
         this.testBehavior = new BasicBehaviour(Behaviour.Type.DEFAULT);
         this.testName = "Test Pacman";
-        this.testGrid = new GridVisualisation();
-        this.testMapV = mock(MapVisualisation.class);
+        this.testGrid = new MapVisualisation();
+        this.testMapV = mock(Render.class);
     }
 
     @Test
