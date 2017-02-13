@@ -10,7 +10,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
@@ -37,7 +36,9 @@ public class MapVisualisation {
 
     /**
 	 * Initialize new visualisation of the map
-	 * @param grid - grid representation for visualizing
+	 * 
+	 * @param grid
+	 *            - grid representation for visualizing
 	 */
 	public MapVisualisation(final GridVisualisation grid) {
 		this.grid = grid;
@@ -45,10 +46,11 @@ public class MapVisualisation {
 
 	/**
 	 * Generate the map
+	 * 
 	 * @param stage
 	 * @return the stage that contians the scene with the map
 	 */
-	public Stage generateMap(Stage stage) {
+	public Stage generateMap(final Stage stage) {
 		this.stage = stage;
 
 		Images.Border = new ImageView("border.jpg");
@@ -195,6 +197,7 @@ public class MapVisualisation {
 
 	/**
 	 * Get the grid
+	 * 
 	 * @return the passed grid
 	 */
 	public GridVisualisation getGrid() {
