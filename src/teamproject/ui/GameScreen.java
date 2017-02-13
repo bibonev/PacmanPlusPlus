@@ -9,6 +9,10 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import teamproject.audio.Music;
+import teamproject.constants.GameStateType;
+import teamproject.event.Event;
+import teamproject.event.arguments.container.GameStateChangedEventArguments;
+import teamproject.event.listener.GameStateChangedEventListener;
 
 /**
  * Screen for the actual game
@@ -60,6 +64,9 @@ public class GameScreen extends Screen {
 		pause.setDisable(true);
 		mainPane.getChildren().add(pauseScreen.getPane());
 		game.setIsPlaying(false);
+
+		Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
+		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.PAUSE));
 	}
 	
 	public void play(){
@@ -68,11 +75,17 @@ public class GameScreen extends Screen {
 		pause.setDisable(false);
 		mainPane.getChildren().removeAll(pauseScreen.getPane());
 		game.setIsPlaying(true);
+
+		Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
+		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.PLAY));
 	}
 	
 	public void quit(){
 		pause.setDisable(false);
 		mainPane.getChildren().removeAll(pauseScreen.getPane());
+
+		Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
+		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.QUIT));
 	}
 
 }
