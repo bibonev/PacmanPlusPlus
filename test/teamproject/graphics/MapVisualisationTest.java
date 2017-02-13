@@ -9,11 +9,11 @@ import teamproject.constants.CellType;
 /**
  * Created by boyanbonev on 06/02/2017.
  */
-public class GridVisualisationTest {
+public class MapVisualisationTest {
 
     @Test
     public void testGettingAddingCell(){
-        GridVisualisation test = new GridVisualisation();
+        MapVisualisation test = new MapVisualisation();
         CellVisualisation testCell = new CellVisualisation(CellType.NORMAL, CellState.EMPTY, new PositionVisualisation(0,0));
         test.addVisualCell(testCell);
 
