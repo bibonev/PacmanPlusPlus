@@ -1,5 +1,5 @@
 package teamproject.constants;
 
-public enum PauseGameType {
+public enum GameStateType {
 	PAUSE, PLAY, QUIT
 }

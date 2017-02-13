@@ -9,10 +9,10 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import teamproject.audio.Music;
-import teamproject.constants.PauseGameType;
+import teamproject.constants.GameStateType;
 import teamproject.event.Event;
-import teamproject.event.arguments.container.GamePausedEventArguments;
-import teamproject.event.listener.GamePausedEventListener;
+import teamproject.event.arguments.container.GameStateChangedEventArguments;
+import teamproject.event.listener.GameStateChangedEventListener;
 
 /**
  * Screen for the actual game
@@ -65,8 +65,8 @@ public class GameScreen extends Screen {
 		mainPane.getChildren().add(pauseScreen.getPane());
 		game.setIsPlaying(false);
 
-		Event<GamePausedEventListener, GamePausedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
-		event.fire(new GamePausedEventArguments(game.logInScreen.getName(), PauseGameType.PAUSE));
+		Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
+		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.PAUSE));
 	}
 	
 	public void play(){
@@ -76,16 +76,16 @@ public class GameScreen extends Screen {
 		mainPane.getChildren().removeAll(pauseScreen.getPane());
 		game.setIsPlaying(true);
 
-		Event<GamePausedEventListener, GamePausedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
-		event.fire(new GamePausedEventArguments(game.logInScreen.getName(), PauseGameType.PLAY));
+		Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
+		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.PLAY));
 	}
 	
 	public void quit(){
 		pause.setDisable(false);
 		mainPane.getChildren().removeAll(pauseScreen.getPane());
 
-		Event<GamePausedEventListener, GamePausedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
-		event.fire(new GamePausedEventArguments(game.logInScreen.getName(), PauseGameType.QUIT));
+		Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>((listener, args) -> listener.onGamePaused(args));
+		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.QUIT));
 	}
 
 }
