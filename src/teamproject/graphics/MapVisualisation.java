@@ -19,6 +19,8 @@ import teamproject.constants.ScreenSize;
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Behaviour.Type;
 
+import static java.lang.System.exit;
+
 /**
  * Created by Boyan Bonev on 09/02/2017.
  */
@@ -31,8 +33,9 @@ public class MapVisualisation {
 	private GridVisualisation grid;
 
 	private ArrayList<PositionVisualisation> obstacles = new ArrayList<>();
+    private boolean isPaused;
 
-	/**
+    /**
 	 * Initialize new visualisation of the map
 	 * @param grid - grid representation for visualizing
 	 */
@@ -118,8 +121,14 @@ public class MapVisualisation {
 			} else if (event.getCode() == KeyCode.LEFT) {
 				GamePlay.pacman.moveLeft();
 			} else if (event.getCode() == KeyCode.RIGHT) {
-				GamePlay.pacman.moveRight();
-			}
+                GamePlay.pacman.moveRight();
+            } else if (event.getCode() == KeyCode.R){
+                invalidateClickListener();
+                timeLine.pause();
+            } else if (event.getCode() == KeyCode.Q){
+			    timeLine.stop();
+			    exit(0);
+            }
 		});
 	}
 
@@ -128,11 +137,15 @@ public class MapVisualisation {
 	 */
 	public void invalidateClickListener() {
 		root.setOnKeyPressed(event -> {
-
 			if (event.getCode() == KeyCode.SPACE) {
-				replay();
-			}
-
+                replay();
+			} else if (event.getCode() == KeyCode.Q){
+                timeLine.stop();
+                exit(0);
+            } else if (event.getCode() == KeyCode.R) {
+			    addClickListener();
+                timeLine.play();
+            }
 		});
 	}
 

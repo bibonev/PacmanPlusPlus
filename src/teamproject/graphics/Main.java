@@ -22,6 +22,7 @@ public class Main extends Application {
 		final GridVisualisation grid = new GridVisualisation();
 		final MapVisualisation mapV = new MapVisualisation(grid);
 
+        stage.setResizable(false);
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
