@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Behaviour.Type;
+import teamproject.gamelogic.domain.Map;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.
@@ -26,8 +27,11 @@ public class StartGameExample extends Application {
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
+		Map newMap = new GridVisualisation();
+		newMap.generateMap();
+
 		// Generate Map
-		stage.setScene(mapV.generateMap());
+		stage.setScene(mapV.drawMap(newMap.getCells()));
 		stage.show();
 
 		// Add CLick Listener

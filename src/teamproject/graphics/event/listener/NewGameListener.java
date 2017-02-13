@@ -20,7 +20,7 @@ public class NewGameListener implements NewGameStartedEventListener {
         PositionVisualisation.initScreenDimensions();
 
         // Generate Map
-        //args.stage.setScene(mapV.generateMap());
+        //args.stage.setScene(mapV.drawMap());
         //args.stage.show();
 
         // Add CLick Listener
