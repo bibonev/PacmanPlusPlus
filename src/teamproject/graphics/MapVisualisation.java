@@ -28,7 +28,6 @@ public class MapVisualisation {
 	private Pane root;
 	private Timeline timeLine;
 	private Scene scene;
-	private Stage stage;
 	private GridVisualisation grid;
 
 	private ArrayList<PositionVisualisation> obstacles = new ArrayList<>();
@@ -46,13 +45,10 @@ public class MapVisualisation {
 
 	/**
 	 * Generate the map
-	 * 
-	 * @param stage
+	 *
 	 * @return the stage that contians the scene with the map
 	 */
-	public Stage generateMap(final Stage stage) {
-		this.stage = stage;
-
+	public Scene generateMap() {
 		Images.Border = new ImageView("border.jpg");
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
@@ -86,8 +82,7 @@ public class MapVisualisation {
 
 		}
 
-		this.stage.setScene(scene);
-		return this.stage;
+		return scene;
 	}
 
 	/**
@@ -158,7 +153,7 @@ public class MapVisualisation {
 		final Behaviour sampleBehavior = new BasicBehaviour(Type.DEFAULT);
 
 		// Generate Map
-		generateMap(stage);
+		generateMap();
 
 		// Add CLick istener
 		addClickListener();

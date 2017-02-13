@@ -9,7 +9,7 @@ import teamproject.gamelogic.domain.Behaviour.Type;
 /**
  * Created by Boyan Bonev on 11/02/2017.
  */
-public class Main extends Application {
+public class StartGameExample extends Application {
 
 	/**
 	 * Start the graphics
@@ -27,7 +27,8 @@ public class Main extends Application {
 		PositionVisualisation.initScreenDimensions();
 
 		// Generate Map
-		mapV.generateMap(stage).show();
+		stage.setScene(mapV.generateMap());
+		stage.show();
 
 		// Add CLick Listener
 		mapV.addClickListener();
