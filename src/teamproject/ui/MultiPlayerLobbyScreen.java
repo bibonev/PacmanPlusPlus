@@ -3,6 +3,7 @@ package teamproject.ui;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
+import teamproject.event.Event;
 
 /**
  * Screen for the lobby of a multiplayer game
@@ -35,13 +36,12 @@ public class MultiPlayerLobbyScreen extends Screen {
 	}
 	
 	private void play(){
-		//fire event to start playing a game
 		pane.getChildren().remove(names);
-		game.switchToGame();
+		game.startNewMultiPlayerGame();
 	}
 	
 	private void leaveGame(){
-		//fire event for leaving a game
+		//fire event for leaving a multiplayer game
 		pane.getChildren().remove(names);
 		game.switchToMenu();
 	}

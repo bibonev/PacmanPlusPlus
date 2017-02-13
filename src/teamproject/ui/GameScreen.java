@@ -60,6 +60,8 @@ public class GameScreen extends Screen {
 		pause.setDisable(true);
 		mainPane.getChildren().add(pauseScreen.getPane());
 		game.setIsPlaying(false);
+
+		//TODO pause game itself
 	}
 	
 	public void play(){
@@ -68,11 +70,13 @@ public class GameScreen extends Screen {
 		pause.setDisable(false);
 		mainPane.getChildren().removeAll(pauseScreen.getPane());
 		game.setIsPlaying(true);
+		//TODO play game itself
 	}
 	
 	public void quit(){
 		pause.setDisable(false);
 		mainPane.getChildren().removeAll(pauseScreen.getPane());
+		//TODO quit game itself
 	}
 
 }
