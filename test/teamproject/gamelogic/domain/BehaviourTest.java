@@ -15,8 +15,9 @@ public class BehaviourTest {
 		// Given
 		final Behaviour.Type type = Randoms.randomEnum(Behaviour.Type.class);
 
+		final Map map = Randoms.randomMap();
 		// When
-		final Behaviour behaviour = new BehaviourStub(type);
+		final Behaviour behaviour = Randoms.randomBehaviour();
 
 		// Then
 		assertThat(behaviour.getType(), Is.is(type));
