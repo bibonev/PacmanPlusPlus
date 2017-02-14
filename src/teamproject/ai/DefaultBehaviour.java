@@ -6,7 +6,7 @@ import teamproject.gamelogic.domain.*;
  * The Class DefaultBehavior.
  *@author Lyubomir Pashev
  */
-public class DefaultBehavior extends Behavior {
+public class DefaultBehaviour extends Behaviour {
 
 	/**
 	 * Instantiates a new default behavior.
@@ -16,7 +16,7 @@ public class DefaultBehavior extends Behavior {
 	 * @param speed the speed
 	 * @param stash the inventory
 	 */
-	public DefaultBehavior(Map map, Position currentPos, int speed, Inventory stash) {
+	public DefaultBehaviour(Map map, Position currentPos, int speed, Inventory stash) {
 		super(map, currentPos, speed, stash);
 	}
 }

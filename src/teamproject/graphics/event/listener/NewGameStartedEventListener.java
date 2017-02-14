@@ -25,8 +25,8 @@ public class NewGameStartedEventListener implements teamproject.event.listener.N
 		PositionVisualisation.initScreenDimensions();
 
 		// Generate Map
-		// args.stage.setScene(mapV.drawMap());
-		// args.stage.show();
+		args.getStage().setScene(mapV.drawMap(args.getGame().getWorld().getMap().getCells()));
+		args.getStage().show();
 
 		// Add CLick Listener
 		mapV.addClickListener();
