@@ -39,11 +39,14 @@ public class NewGameRequestedEventListener implements teamproject.event.listener
 		final Game game = new Game(Repository.nextGameId(), world, args.getSettings());
 		Repository.addGame(game);
 
+		System.out.println("Game starts on GL side");
+
 		// Fire NewGameStartedEvent
 		final NewGameStartedEventArguments gameStartedEventArgs = new NewGameStartedEventArguments(game,
 				args.getStage());
 		final Event<NewGameStartedEventListener, NewGameStartedEventArguments> newGameStartedEvent = new Event<>(
 				(listener, s) -> listener.onNewGameStarted(s));
+		newGameStartedEvent.addListener(new teamproject.graphics.event.listener.NewGameStartedEventListener());
 		newGameStartedEvent.fire(gameStartedEventArgs);
 	}
 
