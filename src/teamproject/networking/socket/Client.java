@@ -16,10 +16,9 @@ import java.util.function.Consumer;
 import java.io.*;
 
 /**
- * @author Simeon Kostadinov
- *
  * Represents connection between client and server. Handles sending and receiving 
  * data to and from the server and calling the particular events
+ * @author Simeon Kostadinov
  */
 
 public class Client implements NetworkSocket, HandshakeListener, Runnable {
