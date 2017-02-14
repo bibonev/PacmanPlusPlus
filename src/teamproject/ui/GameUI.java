@@ -1,12 +1,9 @@
 package teamproject.ui;
 
 import javafx.application.Application;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -22,12 +19,12 @@ import teamproject.gamelogic.domain.GameSettings;
 
 /**
  * UI to be run, contains all screens
- * 
+ *
  * @author Rose Kirtley
  *
  */
 public class GameUI extends Application {
-	
+
 	private Game game;
 	private Music music;
 	private SoundEffects sounds;
@@ -37,9 +34,9 @@ public class GameUI extends Application {
 	private BorderPane banner;
 	public Button settings;
 	private StackPane centerPane;
-	
+
 	private boolean isPlaying;
-	
+
 	public LogInScreen logInScreen;
 	private MenuScreen menuScreen;
 	private GameScreen gameScreen;
@@ -50,30 +47,30 @@ public class GameUI extends Application {
 	private MultiPlayerJoinScreen multiPlayerJoinScreen;
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(final Stage primaryStage) throws Exception {
 		setup();
-		
+
 		thisStage = primaryStage;
 		primaryStage.setTitle("PacMac");
-		
+
 		pane = new BorderPane();
-        
-        centerPane = new StackPane();
-        pane.setCenter(centerPane);
-        Scene scene = new Scene(pane, 500, 500);
-        
-        String css = this.getClass().getResource("style.css").toExternalForm();
-        scene.getStylesheets().add(css);
-        pane.getStyleClass().add("paneStyle");
-        
-        setUpSettingsButton();
-		
-        primaryStage.setScene(scene);
+
+		centerPane = new StackPane();
+		pane.setCenter(centerPane);
+		final Scene scene = new Scene(pane, 500, 500);
+
+		final String css = this.getClass().getResource("style.css").toExternalForm();
+		scene.getStylesheets().add(css);
+		pane.getStyleClass().add("paneStyle");
+
+		setUpSettingsButton();
+
+		primaryStage.setScene(scene);
 		switchToLogIn();
 		primaryStage.show();
 	}
-	
-	private void setup(){
+
+	private void setup() {
 		music = new Music();
 		sounds = new SoundEffects();
 		logInScreen = new LogInScreen(this);
@@ -85,119 +82,123 @@ public class GameUI extends Application {
 		multiPlayerOptionScreen = new MultiPlayerOptionScreen(this);
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
 	}
-	
-	private void setUpSettingsButton(){
-		
+
+	private void setUpSettingsButton() {
+
 		settings = new Button("Settings");
-        settings.setOnAction(e-> switchToSettings());
-        settings.getStyleClass().add("buttonStyle");
+		settings.setOnAction(e -> switchToSettings());
+		settings.getStyleClass().add("buttonStyle");
 
 		banner = new BorderPane();
-		
+
 		banner.setRight(settings);
-		
+
 		pane.setTop(banner);
 	}
-	
-	public static void main(String[] args){
-		launch(args);	
+
+	public static void main(final String[] args) {
+		launch(args);
 	}
-	
-	private void setScreen(Pane screen){
+
+	private void setScreen(final Pane screen) {
 		centerPane.getChildren().remove(0, centerPane.getChildren().size());
 		centerPane.getChildren().add(screen);
 	}
-	
-	
-	public void switchToMenu(){
+
+	public void switchToMenu() {
 		setScreen(menuScreen.getPane());
-		Label label = new Label("PacMan " + logInScreen.getName());
-        banner.setLeft(label);
+		final Label label = new Label("PacMan " + logInScreen.getName());
+		banner.setLeft(label);
 	}
-	
-	public void switchToLogIn(){	
-		Label label = new Label("PacMan");
+
+	public void switchToLogIn() {
+		final Label label = new Label("PacMan");
 		banner.setLeft(label);
 		setScreen(logInScreen.getPane());
-	}	
-	public void switchToGame(){
+	}
+
+	public void switchToGame() {
 		settings.setDisable(true);
 		music.playMusic();
 		isPlaying = true;
 		setScreen(gameScreen.getPane());
 	}
-	
-	public void switchToSettings(){		
+
+	public void switchToSettings() {
 		settings.setDisable(true);
 		centerPane.getChildren().add(settingsScreen.getPane());
-	}	
-	
-	public void returnBack(){
+	}
+
+	public void returnBack() {
 		settings.setDisable(false);
 		centerPane.getChildren().remove(settingsScreen.getPane());
 	}
-	
-	public void switchToSinglePlayerLobby(){
+
+	public void switchToSinglePlayerLobby() {
 		setScreen(singlePlayerLobbyScreen.getPane());
 	}
-	
-	public void switchToMultiPlayerLobby(){		
+
+	public void switchToMultiPlayerLobby() {
 		setScreen(multiPlayerLobbyScreen.getPane());
 
-	}	
-	public void switchToMultiPlayerOption(){
+	}
+
+	public void switchToMultiPlayerOption() {
 		setScreen(multiPlayerOptionScreen.getPane());
 	}
-	
-	public void switchToMultiPlayerJoin(){
+
+	public void switchToMultiPlayerJoin() {
 		setScreen(multiPlayerJoinScreen.getPane());
 	}
-	
-	public void close(){
+
+	public void close() {
 		thisStage.close();
 	}
-	
-	public void setIsPlaying(boolean bool){
+
+	public void setIsPlaying(final boolean bool) {
 		isPlaying = bool;
 	}
-	
-	public Game getGame(){
+
+	public Game getGame() {
 		return game;
 	}
-	
-	public void startNewSinglePlayerGame(){
+
+	public void startNewSinglePlayerGame() {
 		switchToGame();
-		
-		//start single player game
-		Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> event = new Event<>((listener, arg) -> listener.onNewGameRequested(arg));
-		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings() , gameScreen.getName(), thisStage));
+
+		// start single player game
+		final Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> event = new Event<>(
+				(listener, arg) -> listener.onNewGameRequested(arg));
+		event.addListener(new teamproject.gamelogic.event.listener.NewGameRequestedEventListener());
+		// TODO replace hard-coded user name
+		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings(), "test", thisStage));
 	}
-	
-	public void startNewMultiPlayerGame(){
+
+	public void startNewMultiPlayerGame() {
 		switchToGame();
-		//start multiplayer game
+		// start multiplayer game
 	}
-	
-	public void createNewPendingMultiPlayerGame(){
-		//create new lobby for a multiplayer game
+
+	public void createNewPendingMultiPlayerGame() {
+		// create new lobby for a multiplayer game
 		multiPlayerLobbyScreen.addNames();
 	}
-	
-	public boolean checkGame(String ip){
-		//check game
+
+	public boolean checkGame(final String ip) {
+		// check game
 		return true;
 	}
-	
-	public void joinGame(String gameIp){
-		//join game with ip
+
+	public void joinGame(final String gameIp) {
+		// join game with ip
 		multiPlayerLobbyScreen.addNames();
 	}
-	
-	public void muteMusic(boolean bool){
+
+	public void muteMusic(final boolean bool) {
 		music.setOn(bool);
 	}
-	
-	public void muteSounds(boolean bool){
+
+	public void muteSounds(final boolean bool) {
 		sounds.setOn(bool);
 	}
 }
