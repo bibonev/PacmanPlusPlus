@@ -157,7 +157,7 @@ public abstract class Behaviour extends Thread {
 	 *
 	 * @return the position
 	 */
-	private Position pickRandomTarget() {
+	protected Position pickRandomTarget() {
 
 		final int row = currentPos.getRow();
 		final int column = currentPos.getColumn();
@@ -303,6 +303,12 @@ public abstract class Behaviour extends Thread {
 		return currentPath;
 	}
 
+	/**
+	 * Terminate the behaviour.
+	 */
+	public void kill(){
+		run = false;
+	}
 	/**
 	 * Run the behavior thread.
 	 */

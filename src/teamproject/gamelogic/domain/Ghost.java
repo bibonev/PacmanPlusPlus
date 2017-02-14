@@ -17,5 +17,12 @@ public abstract class Ghost {
 	public Behaviour getBehaviour() {
 		return behavior;
 	}
-
+	
+	public void start() {
+		behavior.start();
+	}
+	
+	public void kill(){
+		behavior.kill();
+	}
 }
