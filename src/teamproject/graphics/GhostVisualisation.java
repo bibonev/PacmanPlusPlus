@@ -20,7 +20,6 @@ public class GhostVisualisation extends Ghost {
     private MapVisualisation grid;
     private Node node;
     private Render map;
-
     /**
      * Initialize new visualization for the ghost
      * @param behaviour

@@ -57,6 +57,13 @@ public class Event<TListener, TEventArgs> {
 	}
 	
 	/**
+	 * Removes all listeners from this event.
+	 */
+	public void clearListeners() {
+		listeners.clear();
+	}
+	
+	/**
 	 * Determines whether the given listener object is listening to this event.
 	 * 
 	 * @param listener The listener to check,
