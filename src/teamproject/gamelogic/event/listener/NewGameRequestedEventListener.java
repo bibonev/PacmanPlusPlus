@@ -6,10 +6,12 @@ import java.util.HashMap;
 
 import teamproject.ai.AIGhost;
 import teamproject.ai.DefaultBehaviour;
+import teamproject.ai.GhostBehaviour;
 import teamproject.event.Event;
 import teamproject.event.arguments.container.NewGameRequestedEventArguments;
 import teamproject.event.arguments.container.NewGameStartedEventArguments;
 import teamproject.event.listener.NewGameStartedEventListener;
+import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.GLMap;
 import teamproject.gamelogic.domain.GLPosition;
 import teamproject.gamelogic.domain.Game;
@@ -39,7 +41,7 @@ public class NewGameRequestedEventListener implements teamproject.event.listener
 		// Collect ghosts
 		// Just one for now
 		final Ghost ghost = new AIGhost(
-				new DefaultBehaviour(map, new GLPosition(0, 0), 1000, new Inventory(new HashMap<Item, Integer>())),
+				new GhostBehaviour(map, new GLPosition(0, 0), 1000, new Inventory(new HashMap<Item, Integer>()),Behaviour.Type.GHOST),
 				"Ghost");
 		final Collection<Ghost> ghosts = new ArrayList<Ghost>();
 		ghosts.add(ghost);
