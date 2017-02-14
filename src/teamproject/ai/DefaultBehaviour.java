@@ -16,7 +16,7 @@ public class DefaultBehaviour extends Behaviour {
 	 * @param speed the speed
 	 * @param stash the inventory
 	 */
-	public DefaultBehaviour(Map map, Position currentPos, int speed, Inventory stash) {
-		super(map, currentPos, speed, stash);
+	public DefaultBehaviour(Map map, Position currentPos, int speed, Inventory stash, Type type) {
+		super(map, currentPos, speed, stash, type);
 	}
 }
