@@ -34,7 +34,7 @@ public class MultiPlayerOptionScreen extends Screen {
 	private void startNewGame(){
 		//fire event to start new game
 		//give game game.logInScreen.getName(); for the user name
-		game.startNewGame();
+		game.createNewPendingMultiPlayerGame();
 		game.switchToMultiPlayerLobby();
 	}
 }

@@ -16,8 +16,9 @@ import java.util.function.Consumer;
 import java.io.*;
 
 /**
+ * Represents connection between client and server. Handles sending and receiving 
+ * data to and from the server and calling the particular events
  * @author Simeon Kostadinov
- *
  */
 
 public class Client implements NetworkSocket, HandshakeListener, Runnable {
@@ -33,12 +34,18 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 	private Event<ClientDisconnectedListener, Integer> disconnectedEvent;
 	private boolean alive = false;
 
+	/**
+	 * Initialise Client object using a hostname
+	 */
 	public Client(String hostname) {
 		this();
 		this.hostname = hostname;
 		this.serverSide = false;
 	}
 
+	/**
+	 * Initialise Client object using the created socket and clientID
+	 */
 	public Client(Socket socket, int clientID) {
 		this();
 		this.socket = socket;
@@ -51,6 +58,9 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 		this.disconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
 	}
 	
+	/**
+	 * Method for killing a particular client and closing the socket
+	 */
 	@Override
 	public void die() {
 		if(alive) {
@@ -70,6 +80,9 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 		return alive;
 	}
 	
+	/**
+	 * Starting the thread and establishing the InputStream and OutputStream connections
+	 */
 	public void start() {
 		try {
 			if (socket == null) {
@@ -92,6 +105,9 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 		new Thread(this).start();
 	}
 
+	/**
+	 * Start both sender and receiver and fire disconnect event when they are closing
+	 */
 	@Override
 	public void run() {
 		// Run them in parallel:
@@ -156,6 +172,9 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 
 }
 
+/**
+ * ClientSender thread is used to send a packet byte array to the server
+ */
 class ClientSender extends Thread {
 	private boolean alive = true;
 	private DataOutputStream out = null;
@@ -205,6 +224,9 @@ class ClientSender extends Thread {
 	}
 }
 
+/**
+ * ClientReceiver thread is used to recieve the packet byte array from the server
+ */
 class ClientReceiver extends Thread {
 	private boolean alive = true;
 	private DataInputStream in = null;

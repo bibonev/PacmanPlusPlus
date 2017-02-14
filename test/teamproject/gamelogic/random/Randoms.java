@@ -94,7 +94,7 @@ public class Randoms {
 	}
 
 	public static GameSettings randomGameSettings() {
-		return new GameSettings(randomBoolean(), randomBoolean());
+		return new GameSettings();
 	}
 
 	public static Item randomItem() {

@@ -9,6 +9,7 @@ import teamproject.ai.AIPlayer;
 import teamproject.constants.CellState;
 import teamproject.constants.Images;
 import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.RuleEnforcer;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.
@@ -16,9 +17,9 @@ import teamproject.gamelogic.domain.Behaviour;
 public class PacmanVisualisation extends AIPlayer {
 
 	private PositionVisualisation position;
-	private GridVisualisation grid;
+	private MapVisualisation grid;
 	private Node node;
-	private MapVisualisation map;
+	private Render map;
 
 	/**
 	 * Initialize new visualisation for the PacMan player
@@ -27,8 +28,8 @@ public class PacmanVisualisation extends AIPlayer {
 	 * @param grid
 	 * @param map
 	 */
-	public PacmanVisualisation(final Behaviour behaviour, final String name, final GridVisualisation grid,
-			final MapVisualisation map) {
+	public PacmanVisualisation(final Behaviour behaviour, final String name, final MapVisualisation grid,
+			final Render map) {
 		super(Optional.empty(), name, behaviour, map.getGrid());
 
 		this.position = new PositionVisualisation(1, 1);
@@ -42,10 +43,9 @@ public class PacmanVisualisation extends AIPlayer {
 	 * @return true/false depending on whether the move is legit or not
 	 */
 	public boolean moveUp() {
+        if (RuleEnforcer.isOutOfBounds(position.getRow() - 1, position.getColumn())) return false;
 
-		if (grid.getCell(position.getRow() - 1, position.getColumn()).getState() == CellState.OBSTACLE) {
-			return false;
-		}
+		if (grid.getCell(position.getRow() - 1, position.getColumn()).getState() == CellState.OBSTACLE) return false;
 
 		Images.PacMan.setRotate(90 + 180);
 
@@ -65,9 +65,9 @@ public class PacmanVisualisation extends AIPlayer {
 	 */
 	public boolean moveDown() {
 
-		if (grid.getCell(position.getRow() + 1, position.getColumn()).getState() == CellState.OBSTACLE) {
-			return false;
-		}
+        if (RuleEnforcer.isOutOfBounds(position.getRow() + 1, position.getColumn())) return false;
+
+		if (grid.getCell(position.getRow() + 1, position.getColumn()).getState() == CellState.OBSTACLE) return false;
 
 		Images.PacMan.setRotate(90);
 
@@ -86,10 +86,9 @@ public class PacmanVisualisation extends AIPlayer {
 	 * @return true/false depending on whether the move is legit or not
 	 */
 	public boolean moveLeft() {
+        if (RuleEnforcer.isOutOfBounds(position.getRow(), position.getColumn()-1)) return false;
 
-		if (grid.getCell(position.getRow(), position.getColumn() - 1).getState() == CellState.OBSTACLE) {
-			return false;
-		}
+		if (grid.getCell(position.getRow(), position.getColumn() - 1).getState() == CellState.OBSTACLE) return false;
 
 		Images.PacMan.setRotate(-180);
 
@@ -103,15 +102,16 @@ public class PacmanVisualisation extends AIPlayer {
 		return true;
 	}
 
+
 	/**
 	 * Move the PacMan right
 	 * @return true/false depending on whether the move is legit or not
 	 */
 	public boolean moveRight() {
 
-		if (grid.getCell(position.getRow(), position.getColumn() + 1).getState() == CellState.OBSTACLE) {
-			return false;
-		}
+        if (RuleEnforcer.isOutOfBounds(position.getRow(), position.getColumn()+1)) return false;
+
+		if (grid.getCell(position.getRow(), position.getColumn() + 1).getState() == CellState.OBSTACLE) return false;
 
 		Images.PacMan.setRotate(0);
 

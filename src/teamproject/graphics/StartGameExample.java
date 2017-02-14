@@ -5,11 +5,12 @@ import javafx.stage.Stage;
 
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Behaviour.Type;
+import teamproject.gamelogic.domain.Map;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.
  */
-public class Main extends Application {
+public class StartGameExample extends Application {
 
 	/**
 	 * Start the graphics
@@ -19,14 +20,19 @@ public class Main extends Application {
 	public void start(final Stage stage) {
 		final Behaviour sampleBehavior = new BasicBehaviour(Type.DEFAULT);
 
-		final GridVisualisation grid = new GridVisualisation();
-		final MapVisualisation mapV = new MapVisualisation(grid);
+		final MapVisualisation grid = new MapVisualisation();
+		final Render mapV = new Render(grid);
 
+        stage.setResizable(false);
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
+		Map newMap = new MapVisualisation();
+		newMap.generateMap();
+
 		// Generate Map
-		mapV.generateMap(stage).show();
+		stage.setScene(mapV.drawMap(newMap.getCells()));
+		stage.show();
 
 		// Add CLick Listener
 		mapV.addClickListener();

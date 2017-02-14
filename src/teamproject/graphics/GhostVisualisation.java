@@ -17,10 +17,9 @@ public class GhostVisualisation extends Ghost {
 
     private PositionVisualisation position;
     private PacmanVisualisation pacman;
-    private GridVisualisation grid;
+    private MapVisualisation grid;
     private Node node;
-    private MapVisualisation map;
-
+    private Render map;
     /**
      * Initialize new visualization for the ghost
      * @param behaviour
@@ -32,9 +31,9 @@ public class GhostVisualisation extends Ghost {
     public GhostVisualisation(
             Behaviour behaviour,
             String name,
-            GridVisualisation grid,
+            MapVisualisation grid,
             PacmanVisualisation pacman,
-            MapVisualisation map) {
+            Render map) {
         super(behaviour, name);
 
         this.position = new PositionVisualisation(CellSize.Rows/2, CellSize.Columns/2);

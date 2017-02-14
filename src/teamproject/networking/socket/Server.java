@@ -17,8 +17,9 @@ import teamproject.networking.event.ClientConnectedListener;
 import teamproject.networking.event.ClientDisconnectedListener;
 
 /**
+ * Represents running a server connecting and adding each client 
+ * and sets up the listners for each event
  * @author Simeon Kostadinov
- *
  */
 
 public class Server implements NetworkServer, ClientDisconnectedListener, Runnable {
@@ -30,6 +31,9 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	private Event<ClientConnectedListener, Integer> clientConnectedEvent;
 	private Event<ClientDisconnectedListener, Integer> clientDisconnectedEvent;
 
+	/**
+	 * Initialise Server object and attaching listeners to the events for connect and disconnect
+	 */
 	public Server() {
 		this.serverPort = Port.number;
 		this.clients = new HashMap<Integer, Client>();
@@ -42,6 +46,9 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		new Thread(this).start();
 	}
 
+	/**
+	 * Start the thread by oppening a socket and starting each client
+	 */
 	@Override
 	public void run() {
 		this.serverSocket = openServerSocket();
@@ -60,6 +67,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 				if(alive) {
 					throw new RuntimeException("Error accepting client.", e);
 				} else {
+					return;
 					// server stopped, just exit
 				}
 			} finally {
@@ -121,6 +129,9 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		}
 	}
 
+	/**
+	 * Listener implementation for disconnecting a client
+	 */
 	@Override
 	public void onClientDisconnected(int clientID) {
 		clientDisconnectedEvent.fire(clientID);

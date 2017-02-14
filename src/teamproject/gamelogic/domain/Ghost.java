@@ -18,4 +18,12 @@ public abstract class Ghost {
 		return behavior;
 	}
 
+	public void start() {
+		behavior.start();
+	}
+
+	public void kill() {
+		behavior.kill();
+	}
+
 }
