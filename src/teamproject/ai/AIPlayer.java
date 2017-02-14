@@ -40,5 +40,12 @@ public class AIPlayer extends Player {
 	public void start() {
 		behavior.start();
 	}
+	
+	/**
+	 * Terminate the behavior
+	 */
+	public void kill(){
+		behavior.kill();
+	}
 
 }

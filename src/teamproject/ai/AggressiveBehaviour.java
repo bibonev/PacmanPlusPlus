@@ -4,9 +4,9 @@ import teamproject.gamelogic.domain.*;
 import teamproject.constants.*;
 
 //TODO: to be implemented
-public class PassiveBehavior extends Behavior {
+public class AggressiveBehaviour extends Behaviour {
 
-	public PassiveBehavior(Map map, Position currentPos, int speed, Inventory stash) {
+	public AggressiveBehaviour(Map map, Position currentPos, int speed, Inventory stash) {
 		super(map, currentPos, speed, stash);
 	}
 
@@ -14,4 +14,5 @@ public class PassiveBehavior extends Behavior {
 	public Position pickTarget() {
 		return null;
 	}
+
 }
