@@ -1,12 +1,12 @@
 package teamproject.gamelogic.domain.stubs;
 
-import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.*;
+
 
 public class BehaviourStub extends Behaviour {
 
-	public BehaviourStub(Type type) {
-		super(type);
-		// TODO Auto-generated constructor stub
+	public BehaviourStub(Map map, Position pos, int speed, Inventory stash,Type type) {
+		super(map,pos,speed,stash,type);
 	}
 
 }

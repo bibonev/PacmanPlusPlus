@@ -2,15 +2,19 @@ package teamproject.gamelogic.random;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.Random;
 
+import teamproject.ai.DefaultBehaviour;
+import teamproject.ai.GhostBehaviour;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Ghost;
+import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Player;
@@ -82,7 +86,7 @@ public class Randoms {
 	}
 
 	public static Ghost randomGhost() {
-		return new GhostStub(randomBehaviour(), randomString());
+		return new GhostStub(new GhostBehaviour(randomMap(),randomPosition(),1000,new Inventory(new HashMap<Item, Integer>()),Behaviour.Type.GHOST), randomString());
 	}
 
 	public static RuleEnforcer randomRuleEnforcer() {
@@ -146,9 +150,7 @@ public class Randoms {
 
 		return scoreboard;
 	}
-
 	public static Behaviour randomBehaviour() {
-		return new BehaviourStub(randomEnum(Behaviour.Type.class));
+		return new DefaultBehaviour(randomMap(),randomPosition(),1000,new Inventory(new HashMap<Item, Integer>()),Behaviour.Type.DEFAULT);
 	}
-
 }
