@@ -20,9 +20,8 @@ public class GhostBehaviour extends Behaviour {
 	 * @param speed the speed
 	 * @param stash the inventory
 	 */
-	public GhostBehaviour(Map map, Position startPos, int speed, Inventory stash) {
-		super(map, startPos, speed, stash);
-		// TODO Auto-generated constructor stub
+	public GhostBehaviour(Map map, Position startPos, int speed, Inventory stash, Type type) {
+		super(map, startPos, speed, stash, type);
 	}
 	
 	/** 

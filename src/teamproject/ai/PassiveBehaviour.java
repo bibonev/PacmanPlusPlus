@@ -6,8 +6,8 @@ import teamproject.constants.*;
 //TODO: to be implemented
 public class PassiveBehaviour extends Behaviour {
 
-	public PassiveBehaviour(Map map, Position currentPos, int speed, Inventory stash) {
-		super(map, currentPos, speed, stash);
+	public PassiveBehaviour(Map map, Position currentPos, int speed, Inventory stash, Type type) {
+		super(map, currentPos, speed, stash, type);
 	}
 
 	@Override
