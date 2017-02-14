@@ -1,6 +1,10 @@
 package teamproject.graphics;
 
 import javafx.application.Application;
+<<<<<<< Updated upstream
+=======
+import javafx.scene.Node;
+>>>>>>> Stashed changes
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
@@ -24,10 +28,17 @@ import teamproject.gamelogic.domain.Behaviour;
 public class PacmanVisualisationTest {
     private Behaviour testBehavior;
     private String testName;
+<<<<<<< Updated upstream
     private MapVisualisation testGrid;
 
     @Mock
     private Render testMapV;
+=======
+    private GridVisualisation testGrid;
+
+    @Mock
+    private MapVisualisation testMapV;
+>>>>>>> Stashed changes
 
     private PacmanVisualisation test;
 
@@ -55,8 +66,13 @@ public class PacmanVisualisationTest {
         MockitoAnnotations.initMocks(this);
         this.testBehavior = new BasicBehaviour(Behaviour.Type.DEFAULT);
         this.testName = "Test Pacman";
+<<<<<<< Updated upstream
         this.testGrid = new MapVisualisation();
         this.testMapV = mock(Render.class);
+=======
+        this.testGrid = new GridVisualisation();
+        this.testMapV = mock(MapVisualisation.class);
+>>>>>>> Stashed changes
     }
 
     @Test

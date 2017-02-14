@@ -8,12 +8,13 @@ import teamproject.networking.data.Packet;
  * 
  * @author Tom Galvin
  */
-public interface NetworkTrigger {
+public interface ServerTrigger {
 	/**
 	 * Call the relevant events, passing event arguments to the events
 	 * which are described by the data in packet {@code p};
 	 * 
+	 * @param sender The client who sent the packet.
 	 * @param p The packet received.
 	 */
-	public void trigger(Packet p);
+	public void trigger(int sender, Packet p);
 }

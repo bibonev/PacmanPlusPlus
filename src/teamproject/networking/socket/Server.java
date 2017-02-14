@@ -2,143 +2,116 @@ package teamproject.networking.socket;
 
 import java.io.*;
 import java.net.*;
-import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import teamproject.event.Event;
+import teamproject.networking.NetworkServer;
+import teamproject.networking.NetworkSocket;
+import teamproject.networking.event.ClientConnectedListener;
+import teamproject.networking.event.ClientDisconnectedListener;
 
 /**
+ * Represents running a server connecting and adding each client 
+ * and sets up the listners for each event
  * @author Simeon Kostadinov
- *
  */
 
-public class Server extends Thread{
-	
+public class Server extends Thread implements NetworkServer, ClientDisconnectedListener, Runnable{
 	private ServerSocket serverSocket = null;
-	private int serverPort = 8000;
 	private boolean alive = true;
-	private DataInputStream in = null;
-    private DataOutputStream out = null;
+	private int serverPort;
+	private int currentClientNumber = 0;
+	private Map<Integer, Client> clients;
+	private Event<ClientConnectedListener, Integer> clientConnectedEvent;
+	private Event<ClientDisconnectedListener, Integer> clientDisconnectedEvent;
 
-    
-	
-	public Server(){
-		// empty constructor
+	/**
+	 * Initialise Server object and attaching listeners to the events for connect and disconnect
+	 */
+	public Server() {
 		this.serverPort = Port.number;
+		this.clients = new HashMap<Integer, Client>();
+
+		clientConnectedEvent = new Event<>((l, i) -> l.onClientConnected(i));
+		clientDisconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
 	}
 	
-	public void run(){
-		
-		openServerSocket();
-		
-		BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>();
+	public void start() {
+		new Thread(this).start();
+	}
 
-	    while(alive){	
-			
+	/**
+	 * Start the thread by oppening a socket and starting each client
+	 */
+	@Override
+	public void run() {
+		this.serverSocket = openServerSocket();
+
+		while (alive) {
 			Socket clientSocket = null;
-            try {
-                clientSocket = this.serverSocket.accept();
-            } catch (IOException e) {
-                if(alive) {
-                    System.out.println("Server Stopped.") ;
-                    return;
-                }
-                throw new RuntimeException(
-                    "Error accepting client connection", e);
-            }
-            
-            try {
-				in = new DataInputStream(clientSocket.getInputStream());
-				out = new DataOutputStream(clientSocket.getOutputStream());
+			try {
+				clientSocket = this.serverSocket.accept();
+				int clientID = currentClientNumber++;
+				Client client = new Client(clientSocket, clientID);
+				client.start();
+				clients.put(clientID, client);
+				clientConnectedEvent.fire(clientID);
+				client.getDisconnectedEvent().addListener(this);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}	    
-            
-         // objects ClientSender and ClientReceiver
-    	    ServerSender sender = new ServerSender(out, queue);
-    	    ServerReceiver receiver = new ServerReceiver(in, queue);
-
-    	    // Run them in parallel:
-    	    sender.start();
-    	    receiver.start();
-        }
-        System.out.println("Server Stopped.") ;
-	    		    	
-	    }
-	
-		private void openServerSocket() {
-	        try {
-	            this.serverSocket = new ServerSocket(this.serverPort);
-	        } catch (IOException e) {
-	            throw new RuntimeException("Cannot open port " + this.serverPort + ":", e);
-	        }
-	    }
-	}
-
-class ServerSender extends Thread{
-	private boolean alive = true;
-	private DataOutputStream out = null;
-	private BlockingQueue<byte[]> queue;
-	
-	public ServerSender(DataOutputStream out, BlockingQueue<byte[]> queue){
-		this.out = out;
-		this.queue = queue;
-	}
-	
-	public void run(){
-		while(alive){
-			// send data
-			
-			byte[] message = null;
-			
-			try {
-				message = queue.take();
-			} catch (InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			try {
-				out.writeInt(message.length);
-				out.write(message);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} // write length of the message
-			
-		}
-	}
-}
-
-class ServerReceiver extends Thread{
-	private boolean alive = true;
-	private DataInputStream in = null;
-	private int length;
-	private byte[] message;
-	private BlockingQueue<byte[]> queue;
-	
-	public ServerReceiver(DataInputStream in, BlockingQueue<byte[]> queue){
-		this.in = in;
-		this.queue = queue;
-	}
-	
-	public void run(){
-		while(alive){
-			
-			try {
-				length = in.readInt();
-				if(length>0) {
-				    message = new byte[length];
-				    in.readFully(message, 0, message.length);
+				if(alive) {
+					throw new RuntimeException("Error accepting client.", e);
+				} else {
+					return;
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
-			
-			queue.offer(message);			
-			
+			}
+
 		}
 	}
-}
+	
+	public Event<ClientConnectedListener, Integer> getClientConnectedEvent() {
+		return clientConnectedEvent;
+	}
 
+	@Override
+	public Event<ClientDisconnectedListener, Integer> getClientDisconnectedEvent() {
+		return clientDisconnectedEvent;
+	}
+	
+	public void die() {
+		alive = false;
+	}
+
+	private ServerSocket openServerSocket() {
+		try {
+			return new ServerSocket(this.serverPort);
+		} catch (IOException e) {
+			throw new RuntimeException("Cannot open port " + this.serverPort + ":", e);
+		}
+	}
+
+	@Override
+	public Set<Integer> getConnectedClients() {
+		return clients.keySet();
+	}
+
+	@Override
+	public NetworkSocket getClient(int clientID) {
+		if(clients.containsKey(clientID)) {
+			return clients.get(clientID);
+		} else {
+			throw new IllegalArgumentException("No client with ID " + clientID);
+		}
+	}
+
+	/**
+	 * Listener implementation for disconnecting a client
+	 */
+	@Override
+	public void onClientDisconnected(int clientID) {
+		clientDisconnectedEvent.fire(clientID);
+		clients.get(clientID).getDisconnectedEvent().removeListeners(this);
+		clients.remove(clientID);
+	}
+}
