@@ -13,7 +13,6 @@ import teamproject.networking.event.ClientConnectedListener;
 import teamproject.networking.event.ClientDisconnectedListener;
 
 /**
-<<<<<<< HEAD
  * Represents running a server connecting and adding each client 
  * and sets up the listners for each event
  * @author Simeon Kostadinov

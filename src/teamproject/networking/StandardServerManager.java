@@ -72,19 +72,11 @@ public class StandardServerManager
 		String stringToSend = packet.toString();
 		byte[] dataToSend = stringToSend.getBytes(StandardCharsets.UTF_8);
 		if(recipientID == -1) {
-<<<<<<< HEAD
 			for(int id : server.getConnectedClients()) {
 				server.getClient(id).send(dataToSend);
 			}
 		} else {
 			server.getClient(recipientID).send(dataToSend);
-=======
-			server.getClient(recipientID).send(dataToSend);
-		} else {
-			for(int id : server.getConnectedClients()) {
-				server.getClient(id).send(dataToSend);
-			}
->>>>>>> 0dce7173da1c11929c5ec5f6e3102e764a072efa
 		}
 	}
 
