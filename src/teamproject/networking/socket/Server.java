@@ -2,7 +2,11 @@ package teamproject.networking.socket;
 
 import java.io.*;
 import java.net.*;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,7 +21,7 @@ import teamproject.networking.event.ClientDisconnectedListener;
  *
  */
 
-public class Server extends Thread implements NetworkServer, ClientDisconnectedListener, Runnable{
+public class Server implements NetworkServer, ClientDisconnectedListener, Runnable {
 	private ServerSocket serverSocket = null;
 	private boolean alive = true;
 	private int serverPort;
@@ -58,9 +62,15 @@ public class Server extends Thread implements NetworkServer, ClientDisconnectedL
 				} else {
 					// server stopped, just exit
 				}
+			} finally {
+				die();
 			}
-
 		}
+	}
+	
+	@Override
+	public boolean isAlive() {
+		return alive;
 	}
 	
 	public Event<ClientConnectedListener, Integer> getClientConnectedEvent() {
@@ -73,7 +83,16 @@ public class Server extends Thread implements NetworkServer, ClientDisconnectedL
 	}
 	
 	public void die() {
-		alive = false;
+		if(alive) {
+			alive = false;
+			if(!serverSocket.isClosed()) {
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
+					throw new RuntimeException("Couldn't kill server.", e);
+				}
+			}
+		}
 	}
 
 	private ServerSocket openServerSocket() {
@@ -86,7 +105,11 @@ public class Server extends Thread implements NetworkServer, ClientDisconnectedL
 
 	@Override
 	public Set<Integer> getConnectedClients() {
-		return clients.keySet();
+		if(alive) {
+			return clients.keySet();
+		} else {
+			return new HashSet<Integer>(0);
+		}
 	}
 
 	@Override

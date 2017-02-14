@@ -6,9 +6,6 @@ import java.util.ArrayList;
 
 import org.junit.Test;
 
-import teamproject.event.Event;
-import teamproject.networking.NetworkSocket;
-import teamproject.networking.NetworkListener;
 import teamproject.networking.StandardClientManager;
 
 public class StandardClientManagerTest {
@@ -16,14 +13,7 @@ public class StandardClientManagerTest {
 	public void testTriggersTriggered() {
 		ArrayList<Integer> received = new ArrayList<Integer>();
 		
-		StandardClientManager nm = new StandardClientManager(new NetworkSocket() {
-			@Override
-			public void send(byte[] data) {}
-			@Override
-			public Event<NetworkListener, byte[]> getReceiveEvent() {
-				return new Event<NetworkListener, byte[]>((l, b) -> l.receive(b));
-			}
-		});
+		StandardClientManager nm = new StandardClientManager(new MockSocket(0));
 		
 		nm.addTrigger(t -> {
 			received.add(t.getInteger("value"));
@@ -48,28 +38,14 @@ public class StandardClientManagerTest {
 	
 	@Test(expected=RuntimeException.class)
 	public void testNonexistentTrigger() {
-		StandardClientManager nm = new StandardClientManager(new NetworkSocket() {
-			@Override
-			public void send(byte[] data) {}
-			@Override
-			public Event<NetworkListener, byte[]> getReceiveEvent() {
-				return new Event<NetworkListener, byte[]>((l, b) -> l.receive(b));
-			}
-		});
+		StandardClientManager nm = new StandardClientManager(new MockSocket(0));
 		Packet p1 = new Packet("data");
 		nm.receive(p1.toString().getBytes(StandardCharsets.UTF_8));
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
 	public void testNoMultipleTriggers() {
-		StandardClientManager nm = new StandardClientManager(new NetworkSocket() {
-			@Override
-			public void send(byte[] data) {}
-			@Override
-			public Event<NetworkListener, byte[]> getReceiveEvent() {
-				return new Event<NetworkListener, byte[]>((l, b) -> l.receive(b));
-			}
-		});
+		StandardClientManager nm = new StandardClientManager(new MockSocket(0));
 
 		
 		nm.addTrigger(t -> {
