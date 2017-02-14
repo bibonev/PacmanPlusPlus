@@ -2,14 +2,20 @@ package teamproject.gamelogic.event.listener;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
+import teamproject.ai.AIGhost;
+import teamproject.ai.DefaultBehaviour;
 import teamproject.event.Event;
 import teamproject.event.arguments.container.NewGameRequestedEventArguments;
 import teamproject.event.arguments.container.NewGameStartedEventArguments;
 import teamproject.event.listener.NewGameStartedEventListener;
 import teamproject.gamelogic.domain.GLMap;
+import teamproject.gamelogic.domain.GLPosition;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.Ghost;
+import teamproject.gamelogic.domain.Inventory;
+import teamproject.gamelogic.domain.Item;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.RuleEnforcer;
@@ -20,19 +26,23 @@ public class NewGameRequestedEventListener implements teamproject.event.listener
 
 	@Override
 	public void onNewGameRequested(final NewGameRequestedEventArguments args) {
+		// Generate a map
+		// Simplest one for now (random)
+		final Map map = new GLMap().generateMap();
+
 		// Collect players
 		// Just the one for now
 		final Player player = Repository.getHumanPlayer(args.getUserName());
 		final Collection<Player> players = new ArrayList<Player>();
 		players.add(player);
 
-		// Add some ghosts TODO: generate ghost properly
+		// Collect ghosts
 		// Just one for now
+		final Ghost ghost = new AIGhost(
+				new DefaultBehaviour(map, new GLPosition(0, 0), 1000, new Inventory(new HashMap<Item, Integer>())),
+				"Ghost");
 		final Collection<Ghost> ghosts = new ArrayList<Ghost>();
-
-		// Generate a map
-		// Simplest one for now (random)
-		final Map map = new GLMap();
+		ghosts.add(ghost);
 
 		// Create new game and store it
 		final World world = new World(players, new RuleEnforcer(), ghosts, map);
