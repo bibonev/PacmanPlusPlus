@@ -15,7 +15,6 @@ public class GhostTest {
 		// Given
 		final String name = Randoms.randomString();
 		final Behaviour behaviour = Randoms.randomBehaviour();
-
 		// When
 		final Ghost ghost = new GhostStub(behaviour, name);
 
