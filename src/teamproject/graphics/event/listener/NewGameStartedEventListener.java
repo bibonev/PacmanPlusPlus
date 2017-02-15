@@ -1,6 +1,8 @@
 package teamproject.graphics.event.listener;
 
+import teamproject.ai.AIGhost;
 import teamproject.event.arguments.container.NewGameStartedEventArguments;
+import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.GLGhost;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Player;
@@ -18,26 +20,26 @@ public class NewGameStartedEventListener implements teamproject.event.listener.N
 	@Override
 	public void onNewGameStarted(final NewGameStartedEventArguments args) {
 		Player player1 = (Player) args.getGame().getWorld().getPlayers().toArray()[0];
-		Ghost ghost = (GLGhost) args.getGame().getWorld().getPlayers().toArray()[1];
+		Ghost ghost = (AIGhost) args.getGame().getWorld().getGhosts().toArray()[0];
 
-		final MapVisualisation grid = new MapVisualisation();
-		final Render mapV = new Render(grid);
+		Cell[][] cells = args.getGame().getWorld().getMap().getCells();
+		final Render mapV = new Render();
 
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
-		// Generate Map
-		args.getStage().setScene(mapV.drawMap(args.getGame().getWorld().getMap().getCells()));
+		// Draw Map
+		args.getStage().setScene(mapV.drawMap(cells));
 		args.getStage().show();
 
 		// Add CLick Listener
 		mapV.addClickListener();
 
 		// Create Pacman
-		GamePlay.pacman = new PacmanVisualisation(player1, grid, mapV);
+		GamePlay.pacman = new PacmanVisualisation(player1, mapV);
 
 		// Create Ghost
-		GamePlay.ghost1 = new GhostVisualisation(ghost, grid, GamePlay.pacman, mapV);
+		GamePlay.ghost1 = new GhostVisualisation(ghost, GamePlay.pacman, mapV);
 
 		// Redraw Map
 		mapV.redrawMap();

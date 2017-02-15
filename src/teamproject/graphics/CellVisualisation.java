@@ -14,7 +14,7 @@ import teamproject.gamelogic.domain.Cell;
  * Created by Boyan Bonev on 05/02/2017.
  */
 public class CellVisualisation extends Cell {
-	public PositionVisualisation positionVisualisation;
+	PositionVisualisation positionVisualisation;
 
 	private CellType type;
 	private CellState state;
@@ -41,7 +41,7 @@ public class CellVisualisation extends Cell {
 	 * 
 	 * @return Node
 	 */
-	public Node getNode() {
+	Node getNode() {
 		if (state == CellState.FOOD) {
 			node = new Circle(positionVisualisation.getPixelX() + positionVisualisation.getWidth() / 2,
 					positionVisualisation.getPixelY() + positionVisualisation.getHeight() / 2,

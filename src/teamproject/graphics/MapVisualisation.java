@@ -12,7 +12,7 @@ public class MapVisualisation extends Map {
 	/**
 	 * Initialize the grid
 	 */
-	public MapVisualisation() {
+	MapVisualisation() {
 		super();
 		grid = new CellVisualisation[CellSize.Rows][CellSize.Columns];
 	}
@@ -22,7 +22,7 @@ public class MapVisualisation extends Map {
 	 *
 	 * @param cell
 	 */
-	public void addVisualCell(final CellVisualisation cell) {
+	void addVisualCell(final CellVisualisation cell) {
 		grid[cell.positionVisualisation.getRow()][cell.positionVisualisation.getColumn()] = cell;
 	}
 

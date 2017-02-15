@@ -27,8 +27,6 @@ import java.util.Optional;
 
 public class PacmanVisualisationTest {
     private Player testPlayer;
-    private String testName;
-    private MapVisualisation testGrid;
 
     @Mock
     private Render testMapV;
@@ -57,15 +55,13 @@ public class PacmanVisualisationTest {
     @Before
     public void setUp() throws NullPointerException {
         this.testPlayer = new Player(Optional.empty(), "TestPlayer");
-        this.testName = "Test Pacman";
-        this.testGrid = new MapVisualisation();
         this.testMapV = mock(Render.class);
     }
 
     @Test
     public void testInitialization(){
         try{
-            this.test = new PacmanVisualisation(testPlayer, testGrid, testMapV);
+            this.test = new PacmanVisualisation(testPlayer, testMapV);
         } catch (NullPointerException ex){
 
         }
@@ -75,7 +71,7 @@ public class PacmanVisualisationTest {
 
     @Test
     public void testPosition(){
-        this.test = new PacmanVisualisation(testPlayer, testGrid, testMapV);
+        this.test = new PacmanVisualisation(testPlayer, testMapV);
 
         assertEquals(1, this.test.getPosition().getRow());
         assertEquals(1, this.test.getPosition().getColumn());
@@ -88,16 +84,16 @@ public class PacmanVisualisationTest {
         for(int i = 0; i < 15; i++){
             for(int j = 0; j < 15; j++){
                 if(i == 0 && j == 0){
-                    testGrid.addVisualCell(new CellVisualisation(CellType.NORMAL, CellState.OBSTACLE,
+                    testMapV.getGrid().addVisualCell(new CellVisualisation(CellType.NORMAL, CellState.OBSTACLE,
                             new PositionVisualisation(i, j)));
                 } else{
-                    testGrid.addVisualCell(new CellVisualisation(CellType.NORMAL, CellState.FOOD,
+                    testMapV.getGrid().addVisualCell(new CellVisualisation(CellType.NORMAL, CellState.FOOD,
                             new PositionVisualisation(i, j)));
                 }
             }
         }
 
-        this.test = new PacmanVisualisation(testPlayer, testGrid, testMapV);
+        this.test = new PacmanVisualisation(testPlayer, testMapV);
 
         assertEquals(true, this.test.moveUp());
         assertEquals(false, this.test.moveLeft());
@@ -107,7 +103,7 @@ public class PacmanVisualisationTest {
 
     @Test
     public void testNode(){
-        this.test = new PacmanVisualisation(testPlayer, testGrid, testMapV);
+        this.test = new PacmanVisualisation(testPlayer, testMapV);
         ImageView node = ((javafx.scene.image.ImageView) this.test.getNode());
 
         assertEquals(53.0, node.getImage().getHeight(), 0.001);
