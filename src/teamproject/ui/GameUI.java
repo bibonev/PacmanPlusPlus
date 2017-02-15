@@ -180,7 +180,7 @@ public class GameUI extends Application {
 				(listener, arg) -> listener.onNewGameRequested(arg));
 		event.addListener(new teamproject.gamelogic.event.listener.NewGameRequestedEventListener());
 		// TODO replace hard-coded user name
-		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings(), "test", thisStage));
+		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings(), name, thisStage));
 	}
 
 	public void startNewMultiPlayerGame() {
