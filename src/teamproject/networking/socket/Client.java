@@ -32,6 +32,7 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 	private int clientID = -1;
 	private boolean serverSide;
 	private Event<ClientDisconnectedListener, Integer> disconnectedEvent;
+	private boolean alive = false;
 
 	/**
 	 * Initialise Client object using a hostname
@@ -60,14 +61,23 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 	/**
 	 * Method for killing a particular client and closing the socket
 	 */
+	@Override
 	public void die() {
-		try {
-			sender.die();
-			receiver.die();
-			socket.close();
-		} catch (IOException e) {
-			throw new RuntimeException("Could not close client.", e);
+		if(alive) {
+			try {
+				alive = false;
+				sender.die();
+				receiver.die();
+				socket.close();
+			} catch (IOException e) {
+				throw new RuntimeException("Could not close client.", e);
+			}
 		}
+	}
+	
+	@Override
+	public boolean isAlive() {
+		return alive;
 	}
 	
 	/**
@@ -103,37 +113,41 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 		// Run them in parallel:
 		sender.start();
 		receiver.start();
+		alive = true;
 
 		// Wait for them to end and close sockets.
 		try {
 			receiver.join();
-			in.close();
 			sender.die();
-			out.close();
-			socket.close();
-		} catch (IOException e) {
-			System.err.println("Something wrong " + e.getMessage());
-			System.exit(1);
+			die();
 		} catch (InterruptedException e) {
-			System.err.println("Unexpected interruption " + e.getMessage());
-			System.exit(1);
+			throw new RuntimeException(e);
 		} finally {
 			disconnectedEvent.fire(clientID);
 			disconnectedEvent.clearListeners();
 			receiveEvent.clearListeners();
+			alive = false;
 		}
 	}
 
 	@Override
 	public void send(byte[] data) {
-		sender.send(data);
+		if(alive) {
+			sender.send(data);
+		} else {
+			throw new IllegalStateException("Cannot send data to a closed socket.");
+		}
 	}
 
 	public int getClientID() {
-		if (this.clientID == -1) {
-			throw new RuntimeException("Not yet received client ID from server.");
+		if(alive) {
+			if (this.clientID == -1) {
+				throw new RuntimeException("Not yet received client ID from server.");
+			} else {
+				return this.clientID;
+			}
 		} else {
-			return this.clientID;
+			throw new IllegalStateException("Cannot get client ID of a closed socket.");
 		}
 	}
 
@@ -142,6 +156,7 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 		return receiveEvent;
 	}
 	
+	@Override
 	public Event<ClientDisconnectedListener, Integer> getDisconnectedEvent() {
 		return disconnectedEvent;
 	}
@@ -196,8 +211,10 @@ class ClientSender extends Thread {
 	}
 
 	public void die() {
-		alive = false;
-		packets.add(new byte[0]);
+		if(alive) {
+			alive = false;
+			packets.add(new byte[0]);
+		}
 	}
 
 	public void send(byte[] packet) {
@@ -231,7 +248,6 @@ class ClientReceiver extends Thread {
 					this.onReceive.accept(message);
 				}
 			} catch(EOFException e) {
-				System.out.println("disconnected!");
 				return;
 			} catch (IOException e) {
 				if (alive) {
@@ -244,6 +260,8 @@ class ClientReceiver extends Thread {
 	}
 
 	public void die() {
-		alive = false;
+		if(alive) {
+			alive = false;
+		}
 	}
 }

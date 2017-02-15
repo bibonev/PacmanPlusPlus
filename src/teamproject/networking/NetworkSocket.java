@@ -1,6 +1,7 @@
 package teamproject.networking;
 
 import teamproject.event.Event;
+import teamproject.networking.event.ClientDisconnectedListener;
 
 /**
  * Represents a basic socket which can send data to, or receive data from,
@@ -22,4 +23,25 @@ public interface NetworkSocket {
 	 * @return The data deception event.
 	 */
 	public Event<NetworkListener, byte[]> getReceiveEvent();
+	
+	/**
+	 * Gets the event which is fired when the connection maintained by this socket
+	 * is closed, either due to network connections, or either end of the connection
+	 * terminating the socket.
+	 * 
+	 * @return The disconnection event.
+	 */
+	public Event<ClientDisconnectedListener, Integer> getDisconnectedEvent();
+	
+	/**
+	 * Kills the network connection.
+	 */
+	public void die();
+	
+	/**
+	 * Determines if the socket is alive or not.
+	 * 
+	 * @return Returns whether this socket is alive or not.
+	 */
+	public boolean isAlive();
 }
