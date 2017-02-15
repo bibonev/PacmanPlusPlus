@@ -1,7 +1,7 @@
 package teamproject.networking;
 
 import teamproject.networking.data.Packet;
-import teamproject.networking.event.NetworkTrigger;
+import teamproject.networking.event.ClientTrigger;
 
 /**
  * Represents an object which dispatches events when data is received over
@@ -9,7 +9,7 @@ import teamproject.networking.event.NetworkTrigger;
  * 
  * @author Tom Galvin
  */
-public interface NetworkManager {
+public interface ClientManager {
 	/**
 	 * Adds a network trigger for the given packet type. When data is received from
 	 * the server, after it is converted to a readable packet, the appropriate
@@ -22,7 +22,7 @@ public interface NetworkManager {
 	 * One trigger may handle multiple packet types. However, each packet type may only
 	 * be handled by one trigger.
 	 */
-	public void addTrigger(NetworkTrigger trigger, String... packetNames);
+	public void addTrigger(ClientTrigger trigger, String... packetNames);
 	
 	/**
 	 * Dispatch a packet to the socket to be sent.

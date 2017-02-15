@@ -102,7 +102,8 @@ public class PacmanVisualisation extends AIPlayer {
 		return true;
 	}
 
-    /**
+
+	/**
 	 * Move the PacMan right
 	 * @return true/false depending on whether the move is legit or not
 	 */

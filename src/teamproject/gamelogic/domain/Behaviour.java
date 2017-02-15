@@ -24,17 +24,11 @@ import teamproject.constants.CellState;
 public abstract class Behaviour extends Thread {
 
 	/**
-	 * Different types of behaviors.
-	 *
-	 * @author User
+	 * Different types of behaviour.
 	 *
 	 */
 	public enum Type {
 		DEFAULT, AGGRESSIVE, DEFENSIVE, GHOST
-	}
-
-	public Behaviour(final Type type) {
-		this.type = type;
 	}
 
 	/** The type of the behavior. */
@@ -96,8 +90,10 @@ public abstract class Behaviour extends Thread {
 	 *            the speed of the ai
 	 * @param stash
 	 *            the inventory
+	 * @param type
+	 * 			  the type
 	 */
-	public Behaviour(final Map map, final Position startPos, final int speed, final Inventory stash) {
+	public Behaviour(final Map map, final Position startPos, final int speed, final Inventory stash, Type type) {
 		mapSize = map.getMapSize();
 		currentPos = startPos;
 		cells = map.getCells();
@@ -106,6 +102,7 @@ public abstract class Behaviour extends Thread {
 		focus = rng.nextInt(4) + 1;
 		this.stash = stash;
 		this.speed = speed;
+		this.type = type;
 	}
 
 	/**
@@ -157,7 +154,7 @@ public abstract class Behaviour extends Thread {
 	 *
 	 * @return the position
 	 */
-	private Position pickRandomTarget() {
+	protected Position pickRandomTarget() {
 
 		final int row = currentPos.getRow();
 		final int column = currentPos.getColumn();
@@ -231,15 +228,6 @@ public abstract class Behaviour extends Thread {
 	}
 
 	/**
-	 * Gets the position.
-	 *
-	 * @return the position
-	 */
-	public Position getPosition() {
-		return currentPos;
-	}
-
-	/**
 	 * Gets the type of the behavior.
 	 *
 	 * @return the type
@@ -301,6 +289,13 @@ public abstract class Behaviour extends Thread {
 		currentPath.remove(0);
 
 		return currentPath;
+	}
+
+	/**
+	 * Terminate the behaviour.
+	 */
+	public void kill() {
+		run = false;
 	}
 
 	/**
