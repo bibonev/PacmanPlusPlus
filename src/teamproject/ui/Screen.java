@@ -19,8 +19,6 @@ public abstract class Screen {
 	
 	public FlowPane pane;
 	public GameUI game;
-	
-	public String name;
 		
 	public Screen(GameUI game){
 		this.game = game;
@@ -34,24 +32,7 @@ public abstract class Screen {
         pane.setAlignment(Pos.TOP_CENTER);
 	}
 	
-//	public void setUpButton(Node node) {
-//		    node.styleProperty().bind(
-//		      Bindings
-//		        .when(node.hoverProperty())
-//		          .then(
-//		            new SimpleStringProperty(hoverbuttonStyle)
-//		          )
-//		          .otherwise(
-//		            new SimpleStringProperty(buttonStyle)
-//		          )
-//		    );
-//		  }
-	
 	public Pane getPane(){
 		return pane;
-	}
-	
-	public String getName(){
-		return name;
 	}
 }
