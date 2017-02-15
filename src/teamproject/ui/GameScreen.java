@@ -64,6 +64,7 @@ public class GameScreen extends Screen {
 		mainPane.getChildren().add(pauseScreen.getPane());
 		game.setIsPlaying(false);
 
+		// TODO: actually use this event
 		final Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>(
 				(listener, args) -> listener.onGameStateChanged(args));
 		event.fire(new GameStateChangedEventArguments(game.getName(), GameStateType.PAUSE));
