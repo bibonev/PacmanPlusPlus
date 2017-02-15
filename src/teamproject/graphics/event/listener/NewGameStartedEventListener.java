@@ -1,5 +1,6 @@
 package teamproject.graphics.event.listener;
 
+import teamproject.ai.AIGhost;
 import teamproject.event.arguments.container.NewGameStartedEventArguments;
 import teamproject.gamelogic.domain.GLGhost;
 import teamproject.gamelogic.domain.Ghost;
@@ -18,7 +19,7 @@ public class NewGameStartedEventListener implements teamproject.event.listener.N
 	@Override
 	public void onNewGameStarted(final NewGameStartedEventArguments args) {
 		Player player1 = (Player) args.getGame().getWorld().getPlayers().toArray()[0];
-		Ghost ghost = (GLGhost) args.getGame().getWorld().getPlayers().toArray()[1];
+		Ghost ghost = (AIGhost) args.getGame().getWorld().getGhosts().toArray()[0];
 
 		final MapVisualisation grid = new MapVisualisation();
 		final Render mapV = new Render(grid);
