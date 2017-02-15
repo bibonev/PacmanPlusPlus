@@ -1,28 +1,12 @@
 package teamproject.gamelogic.random;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
-import teamproject.gamelogic.domain.Behaviour;
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.GameSettings;
-import teamproject.gamelogic.domain.Ghost;
-import teamproject.gamelogic.domain.Item;
+import teamproject.gamelogic.domain.*;
 import teamproject.gamelogic.domain.Map;
-import teamproject.gamelogic.domain.Player;
-import teamproject.gamelogic.domain.Position;
-import teamproject.gamelogic.domain.RuleEnforcer;
-import teamproject.gamelogic.domain.Scoreboard;
-import teamproject.gamelogic.domain.World;
-import teamproject.gamelogic.domain.stubs.BehaviourStub;
-import teamproject.gamelogic.domain.stubs.CellStub;
-import teamproject.gamelogic.domain.stubs.GhostStub;
-import teamproject.gamelogic.domain.stubs.MapStub;
-import teamproject.gamelogic.domain.stubs.PositionStub;
+import teamproject.gamelogic.domain.stubs.*;
 
 public class Randoms {
 
@@ -148,7 +132,8 @@ public class Randoms {
 	}
 
 	public static Behaviour randomBehaviour() {
-		return new BehaviourStub(randomEnum(Behaviour.Type.class));
+		//Not sure if this should be like this.
+		return new BehaviourStub(randomMap(), randomPosition(), 2, new Inventory(new HashMap<>(2)), Behaviour.Type.DEFAULT);
 	}
 
 }

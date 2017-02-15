@@ -13,29 +13,27 @@ import teamproject.gamelogic.domain.Ghost;
 /**
  * Created by Boyan Bonev on 11/02/2017.
  */
-public class GhostVisualisation extends Ghost {
+public class GhostVisualisation {
 
     private PositionVisualisation position;
     private PacmanVisualisation pacman;
     private MapVisualisation grid;
     private Node node;
     private Render map;
+    private Ghost ghost;
     /**
      * Initialize new visualization for the ghost
-     * @param behaviour
-     * @param name
      * @param grid
      * @param pacman
      * @param map
      */
     public GhostVisualisation(
-            Behaviour behaviour,
-            String name,
+            Ghost ghost,
             MapVisualisation grid,
             PacmanVisualisation pacman,
             Render map) {
-        super(behaviour, name);
 
+        this.ghost = ghost;
         this.position = new PositionVisualisation(CellSize.Rows/2, CellSize.Columns/2);
         this.grid = grid;
         this.pacman = pacman;
