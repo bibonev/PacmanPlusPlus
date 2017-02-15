@@ -66,7 +66,7 @@ public class GameScreen extends Screen {
 
 		final Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>(
 				(listener, args) -> listener.onGameStateChanged(args));
-		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.PAUSE));
+		event.fire(new GameStateChangedEventArguments(game.getName(), GameStateType.PAUSE));
 	}
 
 	public void play() {
@@ -78,7 +78,7 @@ public class GameScreen extends Screen {
 
 		final Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>(
 				(listener, args) -> listener.onGameStateChanged(args));
-		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.PLAY));
+		event.fire(new GameStateChangedEventArguments(game.getName(), GameStateType.PLAY));
 	}
 
 	public void quit() {
@@ -87,7 +87,7 @@ public class GameScreen extends Screen {
 
 		final Event<GameStateChangedEventListener, GameStateChangedEventArguments> event = new Event<>(
 				(listener, args) -> listener.onGameStateChanged(args));
-		event.fire(new GameStateChangedEventArguments(game.logInScreen.getName(), GameStateType.QUIT));
+		event.fire(new GameStateChangedEventArguments(game.getName(), GameStateType.QUIT));
 	}
 
 }

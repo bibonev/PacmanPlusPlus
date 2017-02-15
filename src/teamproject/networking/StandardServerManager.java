@@ -7,7 +7,6 @@ import java.util.Map;
 import teamproject.networking.data.Packet;
 import teamproject.networking.event.ClientConnectedListener;
 import teamproject.networking.event.ClientDisconnectedListener;
-import teamproject.networking.event.ClientTrigger;
 import teamproject.networking.event.ServerTrigger;
 
 /**

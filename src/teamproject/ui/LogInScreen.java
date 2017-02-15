@@ -42,7 +42,7 @@ public class LogInScreen extends Screen {
 	private void switchScreen(final String username) {
 		if (!username.isEmpty()) {
 			// if(checkname(username)){
-			name = username;
+			game.setName(username);
 			final Event<UserLoggedInEventListener, UserLoggedInEventArguments> event = new Event<>(
 					(listener, arg) -> listener.onUserLoggedIn(arg));
 			event.addListener(new teamproject.gamelogic.event.listener.UserLoggedInEventListener());
