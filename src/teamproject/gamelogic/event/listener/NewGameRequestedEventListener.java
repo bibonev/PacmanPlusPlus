@@ -17,7 +17,7 @@ public class NewGameRequestedEventListener implements teamproject.event.listener
 		if (args.getType().equals(GameType.SINGLEPLAYER)) {
 			gameCommandService.startNewSingleplayerGame(args.getUserName(), args.getSettings(), args.getStage());
 		} else {
-			gameCommandService.requestNewMultiplayerGame(args.getUserName(), args.getSettings());
+			gameCommandService.requestNewMultiplayerGame(args.getUserName(), args.getSettings(), args.getStage());
 		}
 	}
 

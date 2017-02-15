@@ -74,10 +74,12 @@ public class GameCommandService {
 		// networking
 	}
 
-	public void requestNewMultiplayerGame(final String userName, final GameSettings settings) {
+	// TODO: Maybe we could do without passing the stage around? Not sure how to
+	// do this though...
+	public void requestNewMultiplayerGame(final String userName, final GameSettings settings, final Stage stage) {
 		// Fire NewMultiplayerGameRequestedEvent
 		final NewMultiplayerGameRequestedEventArguments multiplayerGameRequestedEventArgs = new NewMultiplayerGameRequestedEventArguments(
-				userName, settings);
+				userName, settings, stage);
 		final Event<NewMultiplayerGameRequestedEventListener, NewMultiplayerGameRequestedEventArguments> multiplayerGameRequestedEvent = new Event<>(
 				(listener, s) -> listener.onNewMultiplayerGameRequested(s));
 		// TODO: Networking to add their listener here
