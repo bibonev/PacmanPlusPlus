@@ -16,3 +16,6 @@ hs_err_pid*
 .project
 .classpath
 lib/
+
+# remove all .log files
+*.log
