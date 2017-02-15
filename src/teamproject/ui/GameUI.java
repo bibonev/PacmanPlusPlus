@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -59,6 +60,7 @@ public class GameUI extends Application {
 		centerPane = new StackPane();
 		pane.setCenter(centerPane);
 		final Scene scene = new Scene(pane, 500, 500);
+		scene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
 
 		final String css = this.getClass().getResource("style.css").toExternalForm();
 		scene.getStylesheets().add(css);
@@ -82,6 +84,18 @@ public class GameUI extends Application {
 		multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(this);
 		multiPlayerOptionScreen = new MultiPlayerOptionScreen(this);
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
+	}
+	
+	private void sendMoveEvent(KeyCode key){
+		if(key == KeyCode.R){
+			if(isPlaying){
+				music.stopMusic();
+				isPlaying = false;
+			}else{
+				music.playMusic();
+				isPlaying = true;
+			}
+		}
 	}
 
 	private void setUpSettingsButton() {
