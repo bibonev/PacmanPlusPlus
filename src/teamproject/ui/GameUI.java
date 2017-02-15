@@ -36,6 +36,7 @@ public class GameUI extends Application {
 	private StackPane centerPane;
 
 	private boolean isPlaying;
+	private String name;
 
 	public LogInScreen logInScreen;
 	private MenuScreen menuScreen;
@@ -107,7 +108,7 @@ public class GameUI extends Application {
 
 	public void switchToMenu() {
 		setScreen(menuScreen.getPane());
-		final Label label = new Label("PacMan " + logInScreen.getName());
+		final Label label = new Label("PacMan " + getName());
 		banner.setLeft(label);
 	}
 
@@ -161,6 +162,14 @@ public class GameUI extends Application {
 
 	public Game getGame() {
 		return game;
+	}
+	
+	public void setName(String name){
+		this.name = name;
+	}
+	
+	public String getName(){
+		return name;
 	}
 
 	public void startNewSinglePlayerGame() {
