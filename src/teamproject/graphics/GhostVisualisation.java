@@ -9,6 +9,7 @@ import teamproject.constants.CellState;
 import teamproject.constants.Images;
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Ghost;
+import teamproject.gamelogic.domain.RuleEnforcer;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.
@@ -17,25 +18,22 @@ public class GhostVisualisation {
 
     private PositionVisualisation position;
     private PacmanVisualisation pacman;
-    private MapVisualisation grid;
     private Node node;
     private Render map;
     private Ghost ghost;
     /**
      * Initialize new visualization for the ghost
-     * @param grid
+     * @param ghost
      * @param pacman
      * @param map
      */
     public GhostVisualisation(
             Ghost ghost,
-            MapVisualisation grid,
             PacmanVisualisation pacman,
             Render map) {
 
         this.ghost = ghost;
         this.position = new PositionVisualisation(CellSize.Rows/2, CellSize.Columns/2);
-        this.grid = grid;
         this.pacman = pacman;
         this.map = map;
         Images.Ghost = new ImageView("ghost.png");
@@ -44,7 +42,7 @@ public class GhostVisualisation {
     /**
      * Move Ghost randomly
      */
-    public void moveGhost() {
+    void moveGhost() {
         Random rand = new Random();
         int randomNum = rand.nextInt((3 - 0) + 1) + 0;
 
@@ -95,7 +93,9 @@ public class GhostVisualisation {
     }
 
     private boolean moveUp(){
-        if (grid.getCell(position.getRow() - 1, position.getColumn()).getState() == CellState.OBSTACLE)
+        if (RuleEnforcer.isOutOfBounds(position.getRow() - 1, position.getColumn())) return false;
+
+        if (map.getGrid().getCell(position.getRow() - 1, position.getColumn()).getState() == CellState.OBSTACLE)
             return false;
 
         position = new PositionVisualisation(position.getRow() - 1, position.getColumn());
@@ -105,7 +105,9 @@ public class GhostVisualisation {
     }
 
     private boolean moveDown(){
-        if (grid.getCell(position.getRow() + 1, position.getColumn()).getState() == CellState.OBSTACLE)
+        if (RuleEnforcer.isOutOfBounds(position.getRow() + 1, position.getColumn())) return false;
+
+        if (map.getGrid().getCell(position.getRow() + 1, position.getColumn()).getState() == CellState.OBSTACLE)
             return false;
 
         position = new PositionVisualisation(position.getRow() + 1, position.getColumn());
@@ -115,7 +117,9 @@ public class GhostVisualisation {
     }
 
     private boolean moveLeft(){
-        if (grid.getCell(position.getRow(), position.getColumn() - 1).getState() == CellState.OBSTACLE)
+        if (RuleEnforcer.isOutOfBounds(position.getRow(), position.getColumn() - 1)) return false;
+
+        if (map.getGrid().getCell(position.getRow(), position.getColumn() - 1).getState() == CellState.OBSTACLE)
             return false;
 
         position = new PositionVisualisation(position.getRow(), position.getColumn() - 1);
@@ -125,7 +129,9 @@ public class GhostVisualisation {
     }
 
     private boolean moveRight(){
-        if (grid.getCell(position.getRow(), position.getColumn() + 1).getState() == CellState.OBSTACLE)
+        if (RuleEnforcer.isOutOfBounds(position.getRow(), position.getColumn() + 1)) return false;
+
+        if (map.getGrid().getCell(position.getRow(), position.getColumn() + 1).getState() == CellState.OBSTACLE)
             return false;
 
         position = new PositionVisualisation(position.getRow(), position.getColumn() + 1);

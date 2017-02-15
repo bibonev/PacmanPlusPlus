@@ -18,22 +18,19 @@ import teamproject.gamelogic.domain.RuleEnforcer;
 public class PacmanVisualisation {
 
 	private PositionVisualisation position;
-	private MapVisualisation grid;
+
 	private Node node;
 	private Render map;
 	private Player player;
 
 	/**
 	 * Initialize new visualisation for the PacMan player
-	 * @param grid
+	 * @param player
 	 * @param map
 	 */
-	public PacmanVisualisation(final Player player, final MapVisualisation grid,
-			final Render map) {
-
+	public PacmanVisualisation(final Player player, final Render map) {
 		this.player = player;
 		this.position = new PositionVisualisation(1, 1);
-		this.grid = grid;
 		this.map = map;
 		Images.PacMan = new ImageView("pacman.png");
 	}
@@ -42,16 +39,16 @@ public class PacmanVisualisation {
 	 * Move the PacMan up
 	 * @return true/false depending on whether the move is legit or not
 	 */
-	public boolean moveUp() {
+	boolean moveUp() {
         if (RuleEnforcer.isOutOfBounds(position.getRow() - 1, position.getColumn())) return false;
 
-		if (grid.getCell(position.getRow() - 1, position.getColumn()).getState() == CellState.OBSTACLE) return false;
+		if (map.getGrid().getCell(position.getRow() - 1, position.getColumn()).getState() == CellState.OBSTACLE) return false;
 
 		Images.PacMan.setRotate(90 + 180);
 
 		position = new PositionVisualisation(position.getRow() - 1, position.getColumn());
-		if (grid.getCell(position.getRow(), position.getColumn()).getState() == CellState.FOOD) {
-			grid.getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
+		if (map.getGrid().getCell(position.getRow(), position.getColumn()).getState() == CellState.FOOD) {
+			map.getGrid().getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
 		}
 
 		map.redrawMap();
@@ -63,17 +60,17 @@ public class PacmanVisualisation {
 	 * Move the PacMan down
 	 * @return true/false depending on whether the move is legit or not
 	 */
-	public boolean moveDown() {
+	boolean moveDown() {
 
         if (RuleEnforcer.isOutOfBounds(position.getRow() + 1, position.getColumn())) return false;
 
-		if (grid.getCell(position.getRow() + 1, position.getColumn()).getState() == CellState.OBSTACLE) return false;
+		if (map.getGrid().getCell(position.getRow() + 1, position.getColumn()).getState() == CellState.OBSTACLE) return false;
 
 		Images.PacMan.setRotate(90);
 
 		position = new PositionVisualisation(position.getRow() + 1, position.getColumn());
-		if (grid.getCell(position.getRow(), position.getColumn()).getState() == CellState.FOOD) {
-			grid.getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
+		if (map.getGrid().getCell(position.getRow(), position.getColumn()).getState() == CellState.FOOD) {
+			map.getGrid().getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
 		}
 
 		map.redrawMap();
@@ -85,16 +82,16 @@ public class PacmanVisualisation {
 	 * Move the PacMan left
 	 * @return true/false depending on whether the move is legit or not
 	 */
-	public boolean moveLeft() {
+	boolean moveLeft() {
         if (RuleEnforcer.isOutOfBounds(position.getRow(), position.getColumn()-1)) return false;
 
-		if (grid.getCell(position.getRow(), position.getColumn() - 1).getState() == CellState.OBSTACLE) return false;
+		if (map.getGrid().getCell(position.getRow(), position.getColumn() - 1).getState() == CellState.OBSTACLE) return false;
 
 		Images.PacMan.setRotate(-180);
 
 		position = new PositionVisualisation(position.getRow(), position.getColumn() - 1);
-		if (grid.getCell(position.getRow(), position.getColumn()).getState() == CellState.FOOD) {
-			grid.getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
+		if (map.getGrid().getCell(position.getRow(), position.getColumn()).getState() == CellState.FOOD) {
+			map.getGrid().getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
 		}
 
 		map.redrawMap();
@@ -107,17 +104,17 @@ public class PacmanVisualisation {
 	 * Move the PacMan right
 	 * @return true/false depending on whether the move is legit or not
 	 */
-	public boolean moveRight() {
+	boolean moveRight() {
 
         if (RuleEnforcer.isOutOfBounds(position.getRow(), position.getColumn()+1)) return false;
 
-		if (grid.getCell(position.getRow(), position.getColumn() + 1).getState() == CellState.OBSTACLE) return false;
+		if (map.getGrid().getCell(position.getRow(), position.getColumn() + 1).getState() == CellState.OBSTACLE) return false;
 
 		Images.PacMan.setRotate(0);
 
 		position = new PositionVisualisation(position.getRow(), position.getColumn() + 1);
-		if (grid.getCell(position.getRow(), position.getColumn()).getState() == CellState.FOOD) {
-			grid.getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
+		if (map.getGrid().getCell(position.getRow(), position.getColumn()).getState() == CellState.FOOD) {
+			map.getGrid().getCell(position.getRow(), position.getColumn()).setState(CellState.EMPTY);
 		}
 
 		map.redrawMap();
@@ -129,7 +126,7 @@ public class PacmanVisualisation {
 	 * Get the node that represents the PacMan player
 	 * @return Node
 	 */
-	public Node getNode() {
+	Node getNode() {
 		double min = position.getHeight();
 		if (position.getWidth() < position.getHeight()) {
 			min = position.getWidth();

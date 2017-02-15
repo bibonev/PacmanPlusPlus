@@ -26,11 +26,12 @@ public class StartGameExample extends Application {
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
-		Map newMap = new MapVisualisation();
+        // Generate Map
+		final Map newMap = new MapVisualisation();
 		newMap.generateMap();
-		final Render mapV = new Render((MapVisualisation) newMap);
 
-		// Generate Map
+		//Draw Map
+		final Render mapV = new Render();
 		stage.setScene(mapV.drawMap(newMap.getCells()));
 		stage.show();
 
@@ -44,9 +45,9 @@ public class StartGameExample extends Application {
 		Player pl = new Player(Optional.empty(),"Player1");
 		Ghost gh = new GLGhost(bh, "Ghost1");
 		
-		GamePlay.pacman = new PacmanVisualisation(pl, (MapVisualisation) newMap, mapV);
+		GamePlay.pacman = new PacmanVisualisation(pl, mapV);
 
-		GamePlay.ghost1 = new GhostVisualisation(gh, (MapVisualisation) newMap, GamePlay.pacman, mapV);
+		GamePlay.ghost1 = new GhostVisualisation(gh, GamePlay.pacman, mapV);
 
 		// Redraw Map
 		mapV.redrawMap();

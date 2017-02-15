@@ -31,12 +31,9 @@ public class Render {
 
     /**
 	 * Initialize new visualisation of the map
-	 * 
-	 * @param grid
-	 *            - grid representation for visualizing
 	 */
-	public Render(final MapVisualisation grid) {
-		this.grid = grid;
+	public Render() {
+		this.grid = new MapVisualisation();
 	}
 
 	/**
@@ -128,7 +125,7 @@ public class Render {
 	/**
 	 * Restart the game
 	 */
-	public void replay() {
+	void replay() {
 		Map newMap = new MapVisualisation();
 		Inventory stash = new Inventory(new HashMap<>(2));
 		Behaviour bh = new DefaultBehaviour(grid, new PositionVisualisation(0,0), 2, stash, Type.GHOST);
@@ -143,10 +140,10 @@ public class Render {
 		addClickListener();
 
 		// Create Pacman
-		GamePlay.pacman = new PacmanVisualisation(pl, grid, this);
+		GamePlay.pacman = new PacmanVisualisation(pl, this);
 
 		// Create Ghost
-		GamePlay.ghost1 = new GhostVisualisation(gh, grid, GamePlay.pacman, this);
+		GamePlay.ghost1 = new GhostVisualisation(gh, GamePlay.pacman, this);
 
 		// Redraw Map
 		redrawMap();
@@ -158,7 +155,7 @@ public class Render {
 	/**
 	 * End the game
 	 */
-	public void gameEnded() {
+	void gameEnded() {
 		invalidateClickListener();
 		timeLine.stop();
 	}
@@ -179,7 +176,7 @@ public class Render {
 	 * 
 	 * @return the passed grid
 	 */
-	public MapVisualisation getGrid() {
+	MapVisualisation getGrid() {
 		return grid;
 	}
 }
