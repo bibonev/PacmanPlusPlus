@@ -35,7 +35,7 @@ public abstract class Map {
 	}
 
 	public int getMapSize() {
-		return cells.length * cells[0].length;
+		return cells.length;
 	}
 
 	public void setCells(final Cell[][] cells) {
