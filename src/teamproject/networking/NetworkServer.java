@@ -43,4 +43,16 @@ public interface NetworkServer {
 	 * @return The client disconnected event.
 	 */
 	public Event<ClientDisconnectedListener, Integer> getClientDisconnectedEvent();
+	
+	/**
+	 * Instructs the server to stop listening.
+	 */
+	public void die();
+	
+	/**
+	 * Determines whether the server is still listening or not.
+	 * 
+	 * @return Returns whether the server is still listening or not.
+	 */
+	public boolean isAlive();
 }

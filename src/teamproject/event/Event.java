@@ -48,7 +48,7 @@ public class Event<TListener, TEventArgs> {
 	 * @throws IllegalArgumentException Thrown when the given listener is not
 	 * listening to this event, and so it can't stop listening (be removed).
 	 */
-	public void removeListeners(TListener listener) {
+	public void removeListener(TListener listener) {
 		if(isListenedToBy(listener)) {
 			listeners.remove(listener);
 		} else {
