@@ -131,7 +131,7 @@ public class Render {
 	public void replay() {
 		Map newMap = new MapVisualisation();
 		Inventory stash = new Inventory(new HashMap<>(2));
-		Behaviour bh = new DefaultBehaviour(grid, new PositionVisualisation(0,0), 2, stash, Type.DEFAULT);
+		Behaviour bh = new DefaultBehaviour(grid, new PositionVisualisation(0,0), 2, stash, Type.GHOST);
 		newMap.generateMap();
 
 		Player pl = new Player(Optional.empty(),"Player1");

@@ -21,16 +21,14 @@ public class StartGameExample extends Application {
 	 */
 	@Override
 	public void start(final Stage stage) {
-
-		final MapVisualisation grid = new MapVisualisation();
-		final Render mapV = new Render(grid);
-
         stage.setResizable(false);
+
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
 		Map newMap = new MapVisualisation();
 		newMap.generateMap();
+		final Render mapV = new Render((MapVisualisation) newMap);
 
 		// Generate Map
 		stage.setScene(mapV.drawMap(newMap.getCells()));
@@ -39,17 +37,16 @@ public class StartGameExample extends Application {
 		// Add CLick Listener
 		mapV.addClickListener();
 
+		//Create players, ghosts and other items
 		Inventory stash = new Inventory(new HashMap<>(2));
-		Behaviour bh = new DefaultBehaviour(grid, new PositionVisualisation(0,0), 2, stash, Type.DEFAULT);
+		Behaviour bh = new DefaultBehaviour(newMap, new PositionVisualisation(0,0), 2, stash, Type.GHOST);
 
 		Player pl = new Player(Optional.empty(),"Player1");
 		Ghost gh = new GLGhost(bh, "Ghost1");
+		
+		GamePlay.pacman = new PacmanVisualisation(pl, (MapVisualisation) newMap, mapV);
 
-		// Create Pacman
-		GamePlay.pacman = new PacmanVisualisation(pl, grid, mapV);
-
-		// Create Ghost
-		GamePlay.ghost1 = new GhostVisualisation(gh, grid, GamePlay.pacman, mapV);
+		GamePlay.ghost1 = new GhostVisualisation(gh, (MapVisualisation) newMap, GamePlay.pacman, mapV);
 
 		// Redraw Map
 		mapV.redrawMap();

@@ -18,6 +18,9 @@ import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.stubs.*;
+import teamproject.gamelogic.domain.World;
+import teamproject.gamelogic.domain.Player;
+import teamproject.gamelogic.domain.*;
 
 public class Randoms {
 
