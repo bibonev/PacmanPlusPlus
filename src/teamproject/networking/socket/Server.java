@@ -132,7 +132,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	@Override
 	public void onClientDisconnected(int clientID) {
 		clientDisconnectedEvent.fire(clientID);
-		clients.get(clientID).getDisconnectedEvent().removeListeners(this);
+		clients.get(clientID).getDisconnectedEvent().removeListener(this);
 		clients.remove(clientID);
 	}
 }
