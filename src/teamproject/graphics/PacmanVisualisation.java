@@ -9,29 +9,29 @@ import teamproject.ai.AIPlayer;
 import teamproject.constants.CellState;
 import teamproject.constants.Images;
 import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.RuleEnforcer;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.
  */
-public class PacmanVisualisation extends AIPlayer {
+public class PacmanVisualisation {
 
 	private PositionVisualisation position;
 	private MapVisualisation grid;
 	private Node node;
 	private Render map;
+	private Player player;
 
 	/**
 	 * Initialize new visualisation for the PacMan player
-	 * @param behaviour
-	 * @param name
 	 * @param grid
 	 * @param map
 	 */
-	public PacmanVisualisation(final Behaviour behaviour, final String name, final MapVisualisation grid,
+	public PacmanVisualisation(final Player player, final MapVisualisation grid,
 			final Render map) {
-		super(Optional.empty(), name, behaviour, map.getGrid());
 
+		this.player = player;
 		this.position = new PositionVisualisation(1, 1);
 		this.grid = grid;
 		this.map = map;

@@ -3,9 +3,12 @@ package teamproject.graphics;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
-import teamproject.gamelogic.domain.Behaviour;
+import teamproject.ai.DefaultBehaviour;
+import teamproject.gamelogic.domain.*;
 import teamproject.gamelogic.domain.Behaviour.Type;
-import teamproject.gamelogic.domain.Map;
+
+import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.
@@ -18,17 +21,14 @@ public class StartGameExample extends Application {
 	 */
 	@Override
 	public void start(final Stage stage) {
-		final Behaviour sampleBehavior = new BasicBehaviour(Type.DEFAULT);
-
-		final MapVisualisation grid = new MapVisualisation();
-		final Render mapV = new Render(grid);
-
         stage.setResizable(false);
+
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
 
 		Map newMap = new MapVisualisation();
 		newMap.generateMap();
+		final Render mapV = new Render((MapVisualisation) newMap);
 
 		// Generate Map
 		stage.setScene(mapV.drawMap(newMap.getCells()));
@@ -37,11 +37,16 @@ public class StartGameExample extends Application {
 		// Add CLick Listener
 		mapV.addClickListener();
 
-		// Create Pacman
-		GamePlay.pacman = new PacmanVisualisation(sampleBehavior, "Player1", grid, mapV);
+		//Create players, ghosts and other items
+		Inventory stash = new Inventory(new HashMap<>(2));
+		Behaviour bh = new DefaultBehaviour(newMap, new PositionVisualisation(0,0), 2, stash, Type.GHOST);
 
-		// Create Ghost
-		GamePlay.ghost1 = new GhostVisualisation(sampleBehavior, "Ghost1", grid, GamePlay.pacman, mapV);
+		Player pl = new Player(Optional.empty(),"Player1");
+		Ghost gh = new GLGhost(bh, "Ghost1");
+		
+		GamePlay.pacman = new PacmanVisualisation(pl, (MapVisualisation) newMap, mapV);
+
+		GamePlay.ghost1 = new GhostVisualisation(gh, (MapVisualisation) newMap, GamePlay.pacman, mapV);
 
 		// Redraw Map
 		mapV.redrawMap();

@@ -7,13 +7,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
+import teamproject.ai.DefaultBehaviour;
 import teamproject.constants.CellSize;
 import teamproject.constants.Images;
 import teamproject.constants.ScreenSize;
-import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.*;
 import teamproject.gamelogic.domain.Behaviour.Type;
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.Map;
+
+import java.util.HashMap;
+import java.util.Optional;
 
 import static java.lang.System.exit;
 
@@ -127,11 +129,13 @@ public class Render {
 	 * Restart the game
 	 */
 	public void replay() {
-		final Behaviour sampleBehavior = new BasicBehaviour(Type.DEFAULT);
-
 		Map newMap = new MapVisualisation();
+		Inventory stash = new Inventory(new HashMap<>(2));
+		Behaviour bh = new DefaultBehaviour(grid, new PositionVisualisation(0,0), 2, stash, Type.GHOST);
 		newMap.generateMap();
 
+		Player pl = new Player(Optional.empty(),"Player1");
+		Ghost gh = new GLGhost(bh, "Ghost1");
 		// Generate Map
 		drawMap(newMap.getCells());
 
@@ -139,10 +143,10 @@ public class Render {
 		addClickListener();
 
 		// Create Pacman
-		GamePlay.pacman = new PacmanVisualisation(sampleBehavior, "Player1", grid, this);
+		GamePlay.pacman = new PacmanVisualisation(pl, grid, this);
 
 		// Create Ghost
-		GamePlay.ghost1 = new GhostVisualisation(sampleBehavior, "Ghost1", grid, GamePlay.pacman, this);
+		GamePlay.ghost1 = new GhostVisualisation(gh, grid, GamePlay.pacman, this);
 
 		// Redraw Map
 		redrawMap();
