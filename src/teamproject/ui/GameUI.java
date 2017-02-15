@@ -177,15 +177,16 @@ public class GameUI extends Application {
 	public Game getGame() {
 		return game;
 	}
-	
-	public void setName(String name){
+
+	public void setName(final String name) {
 		this.name = name;
 	}
-	
-	public String getName(){
+
+	public String getName() {
 		return name;
 	}
 
+	// TODO: refactor - these 2 methods are very very similar
 	public void startNewSinglePlayerGame() {
 		switchToGame();
 
@@ -193,13 +194,17 @@ public class GameUI extends Application {
 		final Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> event = new Event<>(
 				(listener, arg) -> listener.onNewGameRequested(arg));
 		event.addListener(new teamproject.gamelogic.event.listener.NewGameRequestedEventListener());
-		// TODO replace hard-coded user name
 		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings(), name, thisStage));
 	}
 
 	public void startNewMultiPlayerGame() {
 		switchToGame();
+
 		// start multiplayer game
+		final Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> event = new Event<>(
+				(listener, arg) -> listener.onNewGameRequested(arg));
+		event.addListener(new teamproject.gamelogic.event.listener.NewGameRequestedEventListener());
+		event.fire(new NewGameRequestedEventArguments(GameType.MULTIPLAYER, new GameSettings(), name, thisStage));
 	}
 
 	public void createNewPendingMultiPlayerGame() {
