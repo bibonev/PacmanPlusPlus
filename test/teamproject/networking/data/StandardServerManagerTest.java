@@ -23,15 +23,15 @@ public class StandardServerManagerTest {
 		HashMap<Integer, Integer> received = new HashMap<Integer, Integer>();
 
 		StandardServerManager nm = new StandardServerManager(new MockServer());
-
-		nm.addTrigger((i, t) -> {
+		
+		nm.setTrigger((i, t) -> {
 			received.put(i, t.getInteger("value"));
-		}, "data");
-
-		nm.addTrigger((i, t) -> {
+		});
+		
+		nm.setTrigger((i, t) -> {
 			received.put(i, t.getInteger("value") + 1);
-		}, "data-plus-1");
-
+		});
+		
 		Packet p1 = new Packet("data");
 		p1.setInteger("value", 3);
 		nm.receive(5, p1.toString().getBytes(StandardCharsets.UTF_8));
@@ -41,7 +41,7 @@ public class StandardServerManagerTest {
 		nm.receive(3, p2.toString().getBytes(StandardCharsets.UTF_8));
 
 		assertTrue(received.containsKey(5));
-		assertEquals(3, (int)received.get(5));
+		assertEquals(4, (int)received.get(5));
 		assertTrue(received.containsKey(3));
 		assertEquals(6, (int)received.get(3));
 	}
@@ -51,19 +51,5 @@ public class StandardServerManagerTest {
 		StandardServerManager nm = new StandardServerManager(new MockServer());
 		Packet p1 = new Packet("data");
 		nm.receive(3, p1.toString().getBytes(StandardCharsets.UTF_8));
-	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void testNoMultipleTriggers() {
-		StandardServerManager nm = new StandardServerManager(new MockServer());
-
-
-		nm.addTrigger((i, t) -> {
-			System.out.println("d");
-		}, "data");
-
-		nm.addTrigger((i, t) -> {
-			System.out.println("e");
-		}, "data");
 	}
 }
