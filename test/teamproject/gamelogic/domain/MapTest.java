@@ -14,13 +14,13 @@ public class MapTest {
 	@Test
 	public void shouldConstruct() {
 		// Given
-		final Cell[][] cells = Randoms.randomCells(Randoms.randomInteger());
+		final Cell[][] cells = Randoms.randomCells(10);
 
 		// When
 		final Map map = new MapStub(cells);
 
 		// Then
-		assertThat(map.getMapSize(), Is.is(cells.length * cells[0].length));
+		assertThat(map.getMapSize(), Is.is(cells.length));
 
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells.length; j++) {
