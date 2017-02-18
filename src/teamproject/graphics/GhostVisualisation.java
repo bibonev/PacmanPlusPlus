@@ -26,7 +26,6 @@ public class GhostVisualisation {
      * Initialize new visualization for the ghost
      * @param ghost
      * @param target
-     * @param map
      */
     public GhostVisualisation(
             Ghost ghost,

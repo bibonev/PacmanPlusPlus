@@ -26,7 +26,7 @@ public class CellVisualisation {
 	 * 
 	 * @return Node
 	 */
-	Node getNode() {
+	public Node getNode() {
 		PositionVisualisation positionVisualisation = new PositionVisualisation(cell.getPosition().getRow(), cell.getPosition().getColumn());
 		if (cell.getState() == CellState.FOOD) {
 			node = new Circle(positionVisualisation.getPixelX() + positionVisualisation.getWidth() / 2,
@@ -52,5 +52,9 @@ public class CellVisualisation {
 		}
 
 		return node;
+	}
+
+	public Cell getCell() {
+		return cell;
 	}
 }

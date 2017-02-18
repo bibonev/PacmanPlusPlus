@@ -70,7 +70,7 @@ public class Render {
 	}
 
 	/**
-	 * Redrwa the map
+	 * Redraw the map
 	 */
 	public void redrawMap() {
 		Cell[][] cells = this.world.getMap().getCells();

@@ -8,18 +8,13 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-import teamproject.ai.DefaultBehaviour;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.*;
-
-import java.util.HashMap;
-import java.util.Optional;
 
 /**
  * Created by boyanbonev on 13/02/2017.
@@ -29,7 +24,7 @@ public class PacmanVisualisationTest {
     private Player testPlayer;
 
     @Mock
-    private Render testMapV;
+    private Render render;
 
     private PacmanVisualisation test;
 
@@ -54,14 +49,14 @@ public class PacmanVisualisationTest {
 
     @Before
     public void setUp() throws NullPointerException {
-        this.testPlayer = new Player(Optional.empty(), "TestPlayer");
-        this.testMapV = mock(Render.class);
+        this.testPlayer = new LocalPlayer("TestPlayer");
+        this.render = mock(Render.class);
     }
 
     @Test
     public void testInitialization(){
         try{
-            this.test = new PacmanVisualisation(testPlayer, testMapV);
+            this.test = new PacmanVisualisation(testPlayer);
         } catch (NullPointerException ex){
 
         }
@@ -70,40 +65,8 @@ public class PacmanVisualisationTest {
     }
 
     @Test
-    public void testPosition(){
-        this.test = new PacmanVisualisation(testPlayer, testMapV);
-
-        assertEquals(1, this.test.getPosition().getRow());
-        assertEquals(1, this.test.getPosition().getColumn());
-    }
-
-    @Test
-    public void testMovement(){
-        doNothing().when(this.testMapV).redrawMap();
-
-        for(int i = 0; i < 15; i++){
-            for(int j = 0; j < 15; j++){
-                if(i == 0 && j == 0){
-                    testMapV.getGrid().addVisualCell(new CellVisualisation(CellType.NORMAL, CellState.OBSTACLE,
-                            new PositionVisualisation(i, j)));
-                } else{
-                    testMapV.getGrid().addVisualCell(new CellVisualisation(CellType.NORMAL, CellState.FOOD,
-                            new PositionVisualisation(i, j)));
-                }
-            }
-        }
-
-        this.test = new PacmanVisualisation(testPlayer, testMapV);
-
-        assertEquals(true, this.test.moveUp());
-        assertEquals(false, this.test.moveLeft());
-        assertEquals(true, this.test.moveRight());
-        assertEquals(true, this.test.moveDown());
-    }
-
-    @Test
     public void testNode(){
-        this.test = new PacmanVisualisation(testPlayer, testMapV);
+        this.test = new PacmanVisualisation(testPlayer);
         ImageView node = ((javafx.scene.image.ImageView) this.test.getNode());
 
         assertEquals(53.0, node.getImage().getHeight(), 0.001);
