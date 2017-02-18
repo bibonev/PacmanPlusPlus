@@ -20,7 +20,7 @@ public class MapTest {
 		final Map map = new MapStub(cells);
 
 		// Then
-		assertThat(map.getMapSize(), Is.is(cells.length * cells[0].length));
+		assertThat(map.getMapSize(), Is.is(cells.length));
 
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells.length; j++) {
