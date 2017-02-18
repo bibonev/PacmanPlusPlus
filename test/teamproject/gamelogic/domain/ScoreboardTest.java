@@ -24,9 +24,9 @@ public class ScoreboardTest {
 	public void shouldSetAndGetScoreForPlayerId() {
 		// Given
 		final Scoreboard scoreboard = new Scoreboard();
-		final long id1 = Randoms.randomLong();
+		final int id1 = Randoms.randomInteger();
 		final int score1 = Randoms.randomInteger();
-		final long id2 = Randoms.randomLong();
+		final int id2 = Randoms.randomInteger();
 		final int score2 = Randoms.randomInteger();
 
 		// When
