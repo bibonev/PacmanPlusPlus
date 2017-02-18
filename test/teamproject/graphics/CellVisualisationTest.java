@@ -2,6 +2,7 @@ package teamproject.graphics;
 
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -21,7 +22,7 @@ public class CellVisualisationTest {
     private Cell testCell;
     private CellVisualisation test;
 
-    @BeforeClass
+    @Before
     public void initializeFields(){
         testPositionVisualisation = new PositionVisualisation(5, 5);
         testState = CellState.EMPTY;
@@ -50,6 +51,7 @@ public class CellVisualisationTest {
 
     @Test
     public void testCircleNode(){
+        test = new CellVisualisation(new Cell(testType, CellState.FOOD, testPositionVisualisation));
         assertEquals(test.getNode().toString().contains("Circle"), true);
 
         Circle testCircle = (Circle) test.getNode();

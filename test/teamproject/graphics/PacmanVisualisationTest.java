@@ -50,6 +50,7 @@ public class PacmanVisualisationTest {
     @Before
     public void setUp() throws NullPointerException {
         this.testPlayer = new LocalPlayer("TestPlayer");
+        this.testPlayer.setPosition(new Position(1, 1));
         this.render = mock(Render.class);
     }
 
