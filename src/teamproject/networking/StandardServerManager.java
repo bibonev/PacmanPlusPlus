@@ -21,7 +21,7 @@ import teamproject.networking.event.ServerTrigger;
 public class StandardServerManager
 		implements ServerManager, ClientConnectedListener, ClientDisconnectedListener {
 	private NetworkServer server;
-	private Map<String, ServerTrigger> triggers;
+	private ServerTrigger trigger;
 	private Map<Integer, NetworkListener> clientListeners;
 	
 	/**
@@ -33,36 +33,28 @@ public class StandardServerManager
 		this.server = server;
 		this.server.getClientConnectedEvent().addListener(this);
 		this.server.getClientDisconnectedEvent().addListener(this);
-		triggers = new HashMap<String, ServerTrigger>();
+		this.trigger = null;
 		clientListeners = new HashMap<Integer, NetworkListener>();
 	}
 	
 	@Override
-	public void addTrigger(ServerTrigger trigger, String... packetNames) {
-		for(String packetName : packetNames) {
-			if(!triggers.containsKey(packetName)) {
-				triggers.put(packetName, trigger);
-			} else {
-				throw new IllegalArgumentException(
-						String.format(
-								"Cannot add more than one trigger for packet name \"%s\".",
-								packetName));
-			}
-		}
+	public void setTrigger(ServerTrigger trigger) {
+		this.trigger = trigger;
+	}
+	
+	@Override
+	public ServerTrigger getTrigger() {
+		return trigger;
 	}
 	
 	public void receive(int clientID, byte[] receivedData) {
 		String receivedString = new String(receivedData, StandardCharsets.UTF_8);
 		Packet receivedPacket = Packet.fromString(receivedString);
-		ServerTrigger trigger = triggers.get(receivedPacket.getPacketName());
 		
 		if(trigger != null) {
 			trigger.trigger(clientID, receivedPacket);
 		} else {
-			throw new RuntimeException(
-					String.format(
-							"Received packet type \"%s\" with no registered packet trigger.",
-							receivedPacket.getPacketName()));
+			throw new RuntimeException("No trigger currently set.");
 		}
 	}
 
@@ -70,12 +62,31 @@ public class StandardServerManager
 	public void dispatch(int recipientID, Packet packet) {
 		String stringToSend = packet.toString();
 		byte[] dataToSend = stringToSend.getBytes(StandardCharsets.UTF_8);
-		if(recipientID == -1) {
-			for(int id : server.getConnectedClients()) {
-				server.getClient(id).send(dataToSend);
+		
+		server.getClient(recipientID).send(dataToSend);
+	}
+
+	@Override
+	public void dispatchAll(Packet packet) {
+		String stringToSend = packet.toString();
+		byte[] dataToSend = stringToSend.getBytes(StandardCharsets.UTF_8);
+		
+		for(int id : server.getConnectedClients()) {
+			server.getClient(id).send(dataToSend);
+		}
+	}
+
+	@Override
+	public void dispatchAllExcept(Packet packet, int... clientIDs) {
+		String stringToSend = packet.toString();
+		byte[] dataToSend = stringToSend.getBytes(StandardCharsets.UTF_8);
+		
+		outer: for(int id : server.getConnectedClients()) {
+			for(int i = 0; i < clientIDs.length; i++) {
+				if(id == clientIDs[i]) continue outer;
 			}
-		} else {
-			server.getClient(recipientID).send(dataToSend);
+			
+			server.getClient(id).send(dataToSend);
 		}
 	}
 

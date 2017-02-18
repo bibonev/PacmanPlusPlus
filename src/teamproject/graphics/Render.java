@@ -9,13 +9,15 @@ import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import teamproject.ai.DefaultBehaviour;
 import teamproject.constants.CellSize;
+import teamproject.constants.CellState;
 import teamproject.constants.Images;
 import teamproject.constants.ScreenSize;
 import teamproject.gamelogic.domain.*;
-import teamproject.gamelogic.domain.Behaviour.Type;
+import teamproject.ui.GameUI;
 
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.Random;
 
 import static java.lang.System.exit;
 
@@ -23,17 +25,24 @@ import static java.lang.System.exit;
  * Created by Boyan Bonev on 09/02/2017.
  */
 public class Render {
-
 	private Pane root;
 	private Timeline timeLine;
 	private Scene scene;
-	private MapVisualisation grid;
+	private ControlledPlayer controlledPlayer;
+	private GameUI gameUI;
+	private World world;
+	private boolean serverMode;
 
-    /**
+	/**
 	 * Initialize new visualisation of the map
+	 * 
+	 * @param world
 	 */
-	public Render() {
-		this.grid = new MapVisualisation();
+	public Render(GameUI gameUI, ControlledPlayer player, World world, boolean serverMode) {
+		this.gameUI = gameUI;
+		this.controlledPlayer = player;
+		this.world = world;
+		this.serverMode = serverMode;
 	}
 
 	/**
@@ -41,7 +50,8 @@ public class Render {
 	 *
 	 * @return the stage that contians the scene with the map
 	 */
-	public Scene drawMap(Cell[][] cells) {
+	public Scene drawMap() {
+		Cell[][] cells = this.world.getMap().getCells();
 		Images.Border = new ImageView("border.jpg");
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
@@ -50,10 +60,8 @@ public class Render {
 
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells[i].length; j++) {
-			    PositionVisualisation positionVisualisation =
-                        new PositionVisualisation(cells[i][j].getPosition().getRow(), cells[i][j].getPosition().getColumn());
-			    CellVisualisation cv = new CellVisualisation(cells[i][j].getType(), cells[i][j].getState(), positionVisualisation);
-				grid.addVisualCell(cv);
+				Cell c = cells[i][j];
+				CellVisualisation cv = new CellVisualisation(cells[i][j]);
 				root.getChildren().add(cv.getNode());
 			}
 		}
@@ -65,21 +73,141 @@ public class Render {
 	 * Redrwa the map
 	 */
 	public void redrawMap() {
+		Cell[][] cells = this.world.getMap().getCells();
 		PositionVisualisation.initScreenDimensions();
 
 		root.getChildren().clear();
 
-		for (int i = 0; i < CellSize.Rows; i++) {
-			for (int j = 0; j < CellSize.Columns; j++) {
-				root.getChildren().add(grid.getCell(i, j).getNode());
+		for (int i = 0; i < cells.length; i++) {
+			for (int j = 0; j < cells[i].length; j++) {
+				Cell c = cells[i][j];
+				CellVisualisation cv = new CellVisualisation(cells[i][j]);
+				root.getChildren().add(cv.getNode());
 			}
 		}
 
-		root.getChildren().add(GamePlay.pacman.getNode());
-
-		root.getChildren().add(GamePlay.ghost1.getNode());
+		for(Player player : world.getPlayers()) {
+			root.getChildren().add(new PacmanVisualisation(player).getNode());
+		}
+		
+		for(Ghost ghost : world.getGhosts()) {
+			root.getChildren().add(new GhostVisualisation(ghost, controlledPlayer).getNode());
+		}
 
 		root.requestFocus();
+	}
+
+	/**
+	 * Move Ghost randomly
+	 */
+	void moveGhost(Ghost ghostToMove) {
+		Random rand = new Random();
+		int randomNum = rand.nextInt((3 - 0) + 1) + 0;
+
+		if (controlledPlayer.getPosition().getRow() > ghostToMove.getPosition().getRow()) {
+			if (controlledPlayer.getPosition().getColumn() > ghostToMove.getPosition().getColumn()) {
+				randomNum = rand.nextInt((1 - 0) + 1) + 0;
+
+				if (randomNum == 0)
+					moveDown(ghostToMove);
+				else
+					moveRight(ghostToMove);
+			}
+
+			if (controlledPlayer.getPosition().getColumn() <= ghostToMove.getPosition().getColumn()) {
+				randomNum = rand.nextInt((1 - 0) + 1) + 0;
+
+				if (randomNum == 0)
+					moveDown(ghostToMove);
+				else
+					moveLeft(ghostToMove);
+			}
+
+		} else if (controlledPlayer.getPosition().getRow() <= ghostToMove.getPosition().getRow()) {
+			if (controlledPlayer.getPosition().getColumn() >= ghostToMove.getPosition().getColumn()) {
+				randomNum = rand.nextInt((1 - 0) + 1) + 0;
+
+				if (randomNum == 0)
+					moveUp(ghostToMove);
+				else
+					moveRight(ghostToMove);
+			}
+
+			if (controlledPlayer.getPosition().getColumn() < ghostToMove.getPosition().getColumn()) {
+				randomNum = rand.nextInt((1 - 0) + 1) + 0;
+
+				if (randomNum == 0)
+					moveUp(ghostToMove);
+				else
+					moveLeft(ghostToMove);
+			}
+		}
+
+		if (ghostToMove.getPosition().equals(controlledPlayer.getPosition())) {
+			gameEnded();
+		} else {
+			redrawMap();
+		}
+	}
+
+	public boolean moveTo(final int row, final int column, double angle, Entity entity) {
+		if (RuleEnforcer.isOutOfBounds(row, column))
+			return false;
+
+		if (world.getMap().getCell(row, column).getState() == CellState.OBSTACLE)
+			return false;
+
+		entity.setPosition(new Position(row, column));
+		if(entity == controlledPlayer)
+			controlledPlayer.setAngle(angle);
+
+		if (world.getMap().getCell(row, column).getState() == CellState.FOOD) {
+			world.getMap().getCell(row, column).setState(CellState.EMPTY);
+		}
+
+		redrawMap();
+
+		return true;
+	}
+
+	/**
+	 * Move the PacMan up
+	 * 
+	 * @return true/false depending on whether the move is legit or not
+	 */
+	boolean moveUp(Entity toMove) {
+		return moveTo(toMove.getPosition().getRow() - 1, toMove.getPosition().getColumn(), 270,
+				toMove);
+	}
+
+	/**
+	 * Move the PacMan down
+	 * 
+	 * @return true/false depending on whether the move is legit or not
+	 */
+	boolean moveDown(Entity toMove) {
+		return moveTo(toMove.getPosition().getRow() + 1, toMove.getPosition().getColumn(), 90,
+				toMove);
+	}
+
+	/**
+	 * Move the PacMan left
+	 * 
+	 * @return true/false depending on whether the move is legit or not
+	 */
+	boolean moveLeft(Entity toMove) {
+		return moveTo(toMove.getPosition().getRow(), toMove.getPosition().getColumn() - 1, -180,
+				toMove);
+	}
+
+	/**
+	 * Move the PacMan right
+	 * 
+	 * @return true/false depending on whether the move is legit or not
+	 */
+	boolean moveRight(Entity toMove) {
+		return moveTo(toMove.getPosition().getRow(), toMove.getPosition().getColumn() + 1, 0,
+				toMove);
 	}
 
 	/**
@@ -88,76 +216,24 @@ public class Render {
 	public void addClickListener() {
 		root.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.UP) {
-				GamePlay.pacman.moveUp();
+				moveUp(controlledPlayer);
 			} else if (event.getCode() == KeyCode.DOWN) {
-				GamePlay.pacman.moveDown();
+				moveDown(controlledPlayer);
 			} else if (event.getCode() == KeyCode.LEFT) {
-				GamePlay.pacman.moveLeft();
+				moveLeft(controlledPlayer);
 			} else if (event.getCode() == KeyCode.RIGHT) {
-                GamePlay.pacman.moveRight();
-            } else if (event.getCode() == KeyCode.R){
-                invalidateClickListener();
-                timeLine.pause();
-            } else if (event.getCode() == KeyCode.Q){
-			    timeLine.stop();
-			    exit(0);
-            }
+				moveRight(controlledPlayer);
+			}
 		});
-	}
-
-	/**
-	 * Click listener for restarting the game
-	 */
-	public void invalidateClickListener() {
-		root.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.SPACE) {
-                replay();
-			} else if (event.getCode() == KeyCode.Q){
-                timeLine.stop();
-                exit(0);
-            } else if (event.getCode() == KeyCode.R) {
-			    addClickListener();
-                timeLine.play();
-            }
-		});
-	}
-
-	/**
-	 * Restart the game
-	 */
-	void replay() {
-		Map newMap = new MapVisualisation();
-		Inventory stash = new Inventory(new HashMap<>(2));
-		Behaviour bh = new DefaultBehaviour(grid, new PositionVisualisation(0,0), 2, stash, Type.GHOST);
-		newMap.generateMap();
-
-		Player pl = new Player(Optional.empty(),"Player1");
-		Ghost gh = new GLGhost(bh, "Ghost1");
-		// Generate Map
-		drawMap(newMap.getCells());
-
-		// Add CLick istener
-		addClickListener();
-
-		// Create Pacman
-		GamePlay.pacman = new PacmanVisualisation(pl, this);
-
-		// Create Ghost
-		GamePlay.ghost1 = new GhostVisualisation(gh, GamePlay.pacman, this);
-
-		// Redraw Map
-		redrawMap();
-
-		// Start Timeline
-		startTimeline();
 	}
 
 	/**
 	 * End the game
 	 */
 	void gameEnded() {
-		invalidateClickListener();
 		timeLine.stop();
+		gameUI.switchToMenu();
+		root.setOnKeyPressed(e -> {});
 	}
 
 	/**
@@ -165,18 +241,18 @@ public class Render {
 	 */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-			GamePlay.ghost1.moveGhost();
+			if(serverMode) {
+				for(Ghost ghost : world.getGhosts()) {
+					moveGhost(ghost);
+					
+					if(ghost.getPosition().equals(controlledPlayer.getPosition())) {
+						gameEnded();
+						break;
+					}
+				}
+			}
 		}));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
-	}
-
-	/**
-	 * Get the grid
-	 * 
-	 * @return the passed grid
-	 */
-	MapVisualisation getGrid() {
-		return grid;
 	}
 }

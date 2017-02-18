@@ -1,19 +1,14 @@
 package teamproject.gamelogic.domain;
 
 public class Game {
-
-	private long id;
 	private World world;
 	private GameSettings gameSettings;
+	private ControlledPlayer player;
 
-	public Game(final long id, final World world, final GameSettings gameSettings) {
-		this.id = id;
+	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player) {
 		this.world = world;
 		this.gameSettings = gameSettings;
-	}
-
-	public long getId() {
-		return id;
+		this.player = player;
 	}
 
 	public World getWorld() {
@@ -24,10 +19,6 @@ public class Game {
 		return gameSettings;
 	}
 
-	public void setId(final long id) {
-		this.id = id;
-	}
-
 	public void setWorld(final World world) {
 		this.world = world;
 	}
@@ -36,4 +27,7 @@ public class Game {
 		this.gameSettings = gameSettings;
 	}
 
+	public ControlledPlayer getPlayer() {
+		return player;
+	}
 }

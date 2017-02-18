@@ -62,7 +62,7 @@ public class AStar {
 			for (int j = 0; j < mapSize; ++j) {
 				grid[i][j] = new AStarCell(i, j);
 				if (cells[i][j].getType() == CellType.WALL) {
-					blocked.add(new AIPosition(i, j));
+					blocked.add(new Position(i, j));
 				}
 			}
 		}
@@ -109,7 +109,7 @@ public class AStar {
 		 * @return the position
 		 */
 		public Position getPos() {
-			return new AIPosition(i, j);
+			return new Position(i, j);
 		}
 
 		@Override

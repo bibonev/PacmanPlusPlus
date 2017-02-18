@@ -13,10 +13,18 @@ import teamproject.audio.Music;
 import teamproject.audio.SoundEffects;
 import teamproject.constants.GameType;
 import teamproject.event.Event;
-import teamproject.event.arguments.container.NewGameRequestedEventArguments;
+import teamproject.event.arguments.NewGameRequestedEventArguments;
+import teamproject.event.listener.GameClosingListener;
 import teamproject.event.listener.NewGameRequestedEventListener;
+import teamproject.gamelogic.core.GameCommandService;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
+import teamproject.graphics.GhostVisualisation;
+import teamproject.graphics.PacmanVisualisation;
+import teamproject.graphics.PositionVisualisation;
+import teamproject.graphics.Render;
+import teamproject.networking.integration.ClientInstance;
+import teamproject.networking.integration.ServerInstance;
 
 /**
  * UI to be run, contains all screens
@@ -44,9 +52,11 @@ public class GameUI extends Application {
 	private GameScreen gameScreen;
 	private SettingsScreen settingsScreen;
 	private SinglePlayerLobbyScreen singlePlayerLobbyScreen;
-	private MultiPlayerLobbyScreen multiPlayerLobbyScreen;
+	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
 	private MultiPlayerOptionScreen multiPlayerOptionScreen;
 	private MultiPlayerJoinScreen multiPlayerJoinScreen;
+	
+	private Event<GameClosingListener, Object> onGameClosing = new Event<>((l, a) -> l.onGameClosing());
 
 	@Override
 	public void start(final Stage primaryStage) throws Exception {
@@ -71,6 +81,15 @@ public class GameUI extends Application {
 		primaryStage.setScene(scene);
 		switchToLogIn();
 		primaryStage.show();
+	}
+	
+	@Override
+	public void stop() throws Exception {
+		this.onGameClosing.fire(null);
+	}
+	
+	public Event<GameClosingListener,Object> getOnGameClosingEvent() {
+		return this.onGameClosing;
 	}
 
 	private void setup() {
@@ -124,6 +143,8 @@ public class GameUI extends Application {
 		setScreen(menuScreen.getPane());
 		final Label label = new Label("PacMan " + getName());
 		banner.setLeft(label);
+		settings.setDisable(false);
+		isPlaying = false;
 	}
 
 	public void switchToLogIn() {
@@ -189,27 +210,67 @@ public class GameUI extends Application {
 	// TODO: refactor - these 2 methods are very very similar
 	public void startNewSinglePlayerGame() {
 		switchToGame();
+		Game game = GameCommandService.generateNewSinglePlayerGame(name, new GameSettings());
+		
+		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
 
-		// start single player game
-		final Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> event = new Event<>(
-				(listener, arg) -> listener.onNewGameRequested(arg));
-		event.addListener(new teamproject.gamelogic.event.listener.NewGameRequestedEventListener());
-		event.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings(), name, thisStage));
+		// Initialize Screen dimensions
+		PositionVisualisation.initScreenDimensions();
+
+		// Draw Map
+		thisStage.setScene(mapV.drawMap());
+		thisStage.show();
+
+		// Add CLick Listener
+		mapV.addClickListener();
+
+		// Redraw Map
+		mapV.redrawMap();
+
+		// Start Timeline
+		mapV.startTimeline();
 	}
 
 	public void startNewMultiPlayerGame() {
-		switchToGame();
+		switchToMultiPlayerLobby();
+		
+		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
+
+		// Initialize Screen dimensions
+		PositionVisualisation.initScreenDimensions();
+
+		// Draw Map
+		thisStage.setScene(mapV.drawMap());
+		thisStage.show();
+
+		// Add CLick Listener
+		mapV.addClickListener();
+
+		// Redraw Map
+		mapV.redrawMap();
+
+		// Start Timeline
+		mapV.startTimeline();
 
 		// start multiplayer game
-		final Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> event = new Event<>(
-				(listener, arg) -> listener.onNewGameRequested(arg));
-		event.addListener(new teamproject.gamelogic.event.listener.NewGameRequestedEventListener());
-		event.fire(new NewGameRequestedEventArguments(GameType.MULTIPLAYER, new GameSettings(), name, thisStage));
+		// gameCommandService.requestNewMultiplayerGame(args.getUserName(), args.getSettings(), args.getStage());
 	}
 
 	public void createNewPendingMultiPlayerGame() {
-		// create new lobby for a multiplayer game
+		Game game = GameCommandService.generateNewMultiplayerGame(name, new GameSettings());
 		multiPlayerLobbyScreen.addNames();
+		
+		ServerInstance server = new ServerInstance(this, game.getWorld());
+		ClientInstance client = new ClientInstance(this, game.getWorld(), name, "localhost");
+		
+		this.onGameClosing.addListener(() -> {
+			server.stop();
+			client.stop();
+		});
+		
+		server.run();
+		client.run();
+		// create new lobby for a multiplayer game
 	}
 
 	public boolean checkGame(final String ip) {
@@ -218,8 +279,11 @@ public class GameUI extends Application {
 	}
 
 	public void joinGame(final String gameIp) {
-		// join game with ip
+		Game game = GameCommandService.generateNewMultiplayerGame(name, new GameSettings());
 		multiPlayerLobbyScreen.addNames();
+		ClientInstance client = new ClientInstance(this, game.getWorld(), name, gameIp);
+		client.run();
+		// join game with ip
 	}
 
 	public void muteMusic(final boolean bool) {

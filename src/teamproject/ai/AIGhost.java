@@ -5,15 +5,23 @@ import teamproject.gamelogic.domain.*;
  * The AI Ghost.
  * @author Lyubomir Pashev
  */
-public class AIGhost extends Ghost {
+public class AIGhost extends LocalGhost {
+	private Behaviour behaviour;
 
 	/**
 	 * Instantiates a new ghost.
 	 *
-	 * @param behavior the behavior
-	 * @param name the name
+	 * @param id entity ID
 	 */
-	public AIGhost(Behaviour behavior, String name) {
-		super(behavior, name);
+	public AIGhost() {
+		super();
+	}
+
+	public Behaviour getBehaviour() {
+		return behaviour;
+	}
+	
+	public void setBehaviour(Behaviour behaviour) {
+		this.behaviour = behaviour;
 	}
 }

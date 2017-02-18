@@ -7,7 +7,6 @@ import teamproject.event.Event;
 import teamproject.networking.NetworkSocket;
 import teamproject.networking.NetworkListener;
 import teamproject.networking.event.ClientDisconnectedListener;
-import teamproject.networking.event.HandshakeListener;
 
 import java.net.*;
 import java.util.concurrent.BlockingQueue;
@@ -21,7 +20,7 @@ import java.io.*;
  * @author Simeon Kostadinov
  */
 
-public class Client implements NetworkSocket, HandshakeListener, Runnable {
+public class Client implements NetworkSocket, Runnable {
 	private Socket socket = null;
 	private DataInputStream in = null;
 	private DataOutputStream out = null;
@@ -102,6 +101,7 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 		sender = new ClientSender(out);
 		receiver = new ClientReceiver(in, b -> receiveEvent.fire(b));
 
+		alive = true;
 		new Thread(this).start();
 	}
 
@@ -113,7 +113,6 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 		// Run them in parallel:
 		sender.start();
 		receiver.start();
-		alive = true;
 
 		// Wait for them to end and close sockets.
 		try {
@@ -161,15 +160,13 @@ public class Client implements NetworkSocket, HandshakeListener, Runnable {
 		return disconnectedEvent;
 	}
 
-	@Override
-	public void onServerHandshake(int clientID) {
+	public void setClientID(int clientID) {
 		if (!serverSide) {
 			this.clientID = clientID;
 		} else {
-			throw new RuntimeException("Server should not receive handshake packet.");
+			throw new RuntimeException("Cannot set client ID of client on server once initialised.");
 		}
 	}
-
 }
 
 /**
@@ -195,6 +192,7 @@ class ClientSender extends Thread {
 				}
 			}
 		} catch(EOFException e) {
+			e.printStackTrace();
 			// connection dropped
 			return;
 		} catch (IOException e) {

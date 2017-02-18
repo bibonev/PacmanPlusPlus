@@ -1,6 +1,6 @@
 package teamproject.event.listener;
 
-import teamproject.event.arguments.container.NewMultiplayerGameRequestedEventArguments;
+import teamproject.event.arguments.NewMultiplayerGameRequestedEventArguments;
 
 public interface NewMultiplayerGameRequestedEventListener {
 	void onNewMultiplayerGameRequested(NewMultiplayerGameRequestedEventArguments args);

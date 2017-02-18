@@ -1,13 +1,22 @@
 package teamproject.ai;
 
 import teamproject.gamelogic.domain.*;
+import teamproject.gamelogic.domain.Behaviour.Type;
 import teamproject.constants.*;
 
 //TODO: to be implemented
 public class PassiveBehaviour extends Behaviour {
 
-	public PassiveBehaviour(Map map, Position currentPos, int speed, Inventory stash, Type type) {
-		super(map, currentPos, speed, stash, type);
+	/**
+	 * Instantiates a new default behavior.
+	 *
+	 * @param map the map
+	 * @param entity the controlled entity
+	 * @param speed the speed
+	 * @param stash the inventory
+	 */
+	public PassiveBehaviour(Map map, Entity entity, int speed, Inventory stash, Type type) {
+		super(map, entity, speed, stash, type);
 	}
 
 	@Override

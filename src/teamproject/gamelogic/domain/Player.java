@@ -1,27 +1,22 @@
 package teamproject.gamelogic.domain;
 
-import java.util.Optional;
-
-public class Player {
-
-	private Optional<Long> id;
+public abstract class Player extends Entity {
 	private String name;
+	private double angle;
 
-	public Player(final Optional<Long> id, final String name) {
-		this.id = id;
+	public Player(final String name) {
 		this.name = name;
 	}
 
 	public String getName() {
 		return name;
 	}
-
-	public void setName(final String name) {
-		this.name = name;
+	
+	public double getAngle() {
+		return angle;
 	}
-
-	public Optional<Long> getId() {
-		return id;
+	
+	public void setAngle(double angle) {
+		this.angle = angle;
 	}
-
 }

@@ -8,7 +8,7 @@ import teamproject.constants.CellType;
 import teamproject.graphics.CellVisualisation;
 import teamproject.graphics.PositionVisualisation;
 
-public abstract class Map {
+public class Map {
 
 	public static int defaultNumberOfCells = 15;
 	private Cell[][] cells;
@@ -65,12 +65,12 @@ public abstract class Map {
 					state = CellState.FOOD;
 				}
 
-				final Cell cell = new CellVisualisation(CellType.NORMAL, state, position);
+				final Cell cell = new Cell(CellType.NORMAL, state, position);
 				cells[position.getRow()][position.getColumn()] = cell;
 			}
 		}
 
-		return new GLMap(cells);
+		return new Map(cells);
 	}
 
 	private boolean isObstacle(final PositionVisualisation position) {

@@ -11,23 +11,40 @@ import teamproject.networking.event.ServerTrigger;
  */
 public interface ServerManager {
 	/**
-	 * Adds a network trigger for the given packet type. When data is received from
-	 * the server, after it is converted to a readable packet, the appropriate
-	 * network trigger is looked up. This handles the job of turning the packet
-	 * data into useful event data, and firing the relevant event to inform the
-	 * game logic that info has been received from the server.
+	 * Sets the trigger used when packets are received over the network.
 	 * 
-	 * @param trigger The trigger which is to handle packets received from the server.
-	 * @param packetNames The name(s) of the packet which {@code trigger} is to handle.
-	 * One trigger may handle multiple packet types. However, each packet type may only
-	 * be handled by one trigger.
+	 * @param trigger The trigger to use.
 	 */
-	public void addTrigger(ServerTrigger trigger, String... packetNames);
+	public void setTrigger(ServerTrigger trigger);
 	
 	/**
-	 * Dispatch a packet to the socket to be sent.
+	 * Gets the trigger used when packets are received over the network.
 	 * 
+	 * @return The currently used server trigger.
+	 */
+	public ServerTrigger getTrigger();
+	
+	/**
+	 * Dispatch a packet to a specific client's socket.
+	 * 
+	 * @param clientID the Id of the client to send to.
 	 * @param packet The packet to send.
 	 */
 	public void dispatch(int clientID, Packet packet);
+	
+	/**
+	 * Dispatch a packet to the socket of every connected client.
+	 * 
+	 * @param packet The packet to send.
+	 */
+	public void dispatchAll(Packet packet);
+	
+	/**
+	 * Dispatch a packet to the socket of every connected client, except
+	 * the one with the specified client IDs.
+	 * 
+	 * @param packet The packet to send.
+	 * @param clientID the IDs of the client to not send the packet to.
+	 */
+	public void dispatchAllExcept(Packet packet, int... clientID);
 }

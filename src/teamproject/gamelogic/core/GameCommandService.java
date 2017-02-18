@@ -8,23 +8,23 @@ import javafx.stage.Stage;
 import teamproject.ai.AIGhost;
 import teamproject.ai.GhostBehaviour;
 import teamproject.event.Event;
-import teamproject.event.arguments.container.NewGameStartedEventArguments;
-import teamproject.event.arguments.container.NewMultiplayerGameRequestedEventArguments;
+import teamproject.event.arguments.NewGameStartedEventArguments;
+import teamproject.event.arguments.NewMultiplayerGameRequestedEventArguments;
 import teamproject.event.listener.NewGameStartedEventListener;
 import teamproject.event.listener.NewMultiplayerGameRequestedEventListener;
 import teamproject.gamelogic.domain.Behaviour;
-import teamproject.gamelogic.domain.GLMap;
-import teamproject.gamelogic.domain.GLPosition;
+import teamproject.gamelogic.domain.ControlledPlayer;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
+import teamproject.gamelogic.domain.LocalPlayer;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Player;
+import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleEnforcer;
 import teamproject.gamelogic.domain.World;
-import teamproject.gamelogic.domain.repository.Repository;
 
 public class GameCommandService {
 
@@ -32,34 +32,57 @@ public class GameCommandService {
 	// than creating
 	// them everytime we call the methods
 
-	private Game generateNewGame(final String userName, final GameSettings settings) {
+	public static Game generateNewSinglePlayerGame(final String userName, final GameSettings settings) {
 		// Generate a map
 		// Simplest one for now
-		final Map map = new GLMap().generateMap();
-
-		// Collect players
-		// Just the one for now
-		final Player player = Repository.getHumanPlayer(userName);
-		final Collection<Player> players = new ArrayList<Player>();
-		players.add(player);
-
-		// Collect ghosts
-		// Just one for now
-		final Ghost ghost = new AIGhost(new GhostBehaviour(map, new GLPosition(0, 0), 1000,
-				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST), "Ghost");
-		final Collection<Ghost> ghosts = new ArrayList<Ghost>();
-		ghosts.add(ghost);
+		final Map map = new Map().generateMap();
 
 		// Create new game and store it
-		final World world = new World(players, new RuleEnforcer(), ghosts, map);
-		final Game game = new Game(Repository.nextGameId(), world, settings);
-		Repository.addGame(game);
+		final World world = new World(new RuleEnforcer(), map);
+		final ControlledPlayer player = new ControlledPlayer(0, userName);
+		player.setPosition(new Position(6, 0));
+		
+		final Game game = new Game(world, settings, player);
+
+		
+		// Collect players
+		// Just the one for now
+		
+		final AIGhost ghost = new AIGhost();
+		ghost.setPosition(new Position(1, 1));
+		Behaviour b = new GhostBehaviour(map, ghost, 1000,
+				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
+		ghost.setBehaviour(b);
+
+		world.addEntity(ghost);
+		world.addEntity(player);
+
+		return game;
+	}
+	
+	public static Game generateNewMultiplayerGame(final String userName, final GameSettings settings) {
+		// Generate a map
+		// Simplest one for now
+		final Map map = new Map().generateMap();
+
+		// Create new game and store it
+		final World world = new World(new RuleEnforcer(), map);
+		final ControlledPlayer player = new ControlledPlayer(0, userName);
+		player.setPosition(new Position(0, 0));
+		
+		final Game game = new Game(world, settings, player);
+
+		
+		// Collect players
+		// Just the one for now
+
+		world.addEntity(player);
 
 		return game;
 	}
 
 	public void startNewSingleplayerGame(final String userName, final GameSettings settings, final Stage stage) {
-		final Game game = generateNewGame(userName, settings);
+		final Game game = generateNewSinglePlayerGame(userName, settings);
 
 		// Fire NewGameStartedEvent
 		final NewGameStartedEventArguments gameStartedEventArgs = new NewGameStartedEventArguments(game, stage);

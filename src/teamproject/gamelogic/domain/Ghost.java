@@ -1,29 +1,7 @@
 package teamproject.gamelogic.domain;
 
-public abstract class Ghost {
-
-	private String name;
-	private Behaviour behavior;
-
-	public Ghost(final Behaviour behavior, final String name) {
-		this.name = name;
-		this.behavior = behavior;
+public abstract class Ghost extends Entity {
+	public Ghost() {
+		super();
 	}
-
-	public String getName() {
-		return name;
-	}
-
-	public Behaviour getBehaviour() {
-		return behavior;
-	}
-
-	public void start() {
-		behavior.start();
-	}
-
-	public void kill() {
-		behavior.kill();
-	}
-
 }

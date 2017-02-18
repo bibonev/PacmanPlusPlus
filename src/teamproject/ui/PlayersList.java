@@ -1,8 +1,10 @@
 package teamproject.ui;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import teamproject.gamelogic.domain.Player;
 
@@ -13,9 +15,12 @@ import teamproject.gamelogic.domain.Player;
  *
  */
 public class PlayersList extends Screen {
+	private HashMap<Integer, Label> playerLabels;
 
 	public PlayersList(GameUI game) {
 		super(game);
+		
+		playerLabels = new HashMap<>();
         
         /*Collection<Player> players = game.getGame().getWorld().getPlayers();
                 
@@ -26,21 +31,20 @@ public class PlayersList extends Screen {
         	name.setStyle(labelStyle);
         	pane.getChildren().add(name);
         }*/
-        
-        Label name = new Label("Name1");
-    	name.getStyleClass().add("labelStyle");
-    	pane.getChildren().add(name);
-    	
-    	Label name2 = new Label("Name2");
-    	name2.getStyleClass().add("labelStyle");
-    	pane.getChildren().add(name2);
-
 	}
 	
-	public void addPlayer(Player name){
-		Label label = new Label(name.getName());
-    	label.getStyleClass().add("labelStyle");
-		pane.getChildren().add(label);
+	public void addPlayer(Player player) {
+		Platform.runLater(() -> {
+			Label label = new Label(player.getName());
+	    	label.getStyleClass().add("labelStyle");
+			pane.getChildren().add(label);
+		});
 	}
 
+	public void removePlayer(int playerID) {
+		Platform.runLater(() -> {
+			Label label = playerLabels.remove(playerID);
+			pane.getChildren().remove(label);
+		});
+	}
 }

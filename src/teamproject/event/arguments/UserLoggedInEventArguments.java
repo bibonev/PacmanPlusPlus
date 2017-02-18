@@ -1,4 +1,4 @@
-package teamproject.event.arguments.container;
+package teamproject.event.arguments;
 
 public class UserLoggedInEventArguments {
 

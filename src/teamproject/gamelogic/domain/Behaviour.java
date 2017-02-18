@@ -38,7 +38,7 @@ public abstract class Behaviour extends Thread {
 	private AStar astar;
 
 	/** The current position of the ai. */
-	public Position currentPos;
+	public Entity entity;
 
 	/** The run condition. */
 	private boolean run = true;
@@ -84,8 +84,8 @@ public abstract class Behaviour extends Thread {
 	 *
 	 * @param map
 	 *            the map
-	 * @param startPos
-	 *            the start position of the ai
+	 * @param entity
+	 *            the entity which this behaviour is controlling
 	 * @param speed
 	 *            the speed of the ai
 	 * @param stash
@@ -93,9 +93,9 @@ public abstract class Behaviour extends Thread {
 	 * @param type
 	 * 			  the type
 	 */
-	public Behaviour(final Map map, final Position startPos, final int speed, final Inventory stash, Type type) {
+	public Behaviour(final Map map, final Entity entity, final int speed, final Inventory stash, Type type) {
 		mapSize = map.getMapSize();
-		currentPos = startPos;
+		this.entity = entity;
 		cells = map.getCells();
 		astar = new AStar(map);
 		rng = new Random();
@@ -125,7 +125,7 @@ public abstract class Behaviour extends Thread {
 			final HashMap<Integer, Position> targets = new HashMap<Integer, Position>();
 
 			for (int i = 0; i < size; i++) {
-				distances[i] = manhattanDistance(currentPos, enemies.get(i));
+				distances[i] = manhattanDistance(entity.getPosition(), enemies.get(i));
 				targets.put(new Integer(distances[i]), enemies.get(i));
 
 			}
@@ -156,8 +156,8 @@ public abstract class Behaviour extends Thread {
 	 */
 	protected Position pickRandomTarget() {
 
-		final int row = currentPos.getRow();
-		final int column = currentPos.getColumn();
+		final int row = entity.getPosition().getRow();
+		final int column = entity.getPosition().getColumn();
 		final ArrayList<Cell> availableCells = new ArrayList<Cell>();
 
 		if (RuleEnforcer.checkCellValidity(cells[row - 1][column])) {
@@ -224,7 +224,7 @@ public abstract class Behaviour extends Thread {
 	 */
 	// will most likely be substituted with event-based implementation
 	public void updatePosition(final Position pos) {
-		currentPos = pos;
+		entity.setPosition(pos);
 	}
 
 	/**
@@ -337,7 +337,7 @@ public abstract class Behaviour extends Thread {
 			// target
 			case STATIONARY: {
 
-				genPath(currentPos, lockedTarget);
+				genPath(entity.getPosition(), lockedTarget);
 
 				while (currentPath.size() > 0 && run && isTargetThere(lockedTarget)) {
 					if (RuleEnforcer
@@ -372,7 +372,7 @@ public abstract class Behaviour extends Thread {
 
 				while (targetLocked && run) {
 
-					genPath(currentPos, lockedTarget);
+					genPath(entity.getPosition(), lockedTarget);
 
 					int i = 1;
 
