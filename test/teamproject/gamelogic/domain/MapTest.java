@@ -14,7 +14,7 @@ public class MapTest {
 	@Test
 	public void shouldConstruct() {
 		// Given
-		final Cell[][] cells = Randoms.randomCells(10);
+		final Cell[][] cells = Randoms.randomCells(Randoms.randomInteger());
 
 		// When
 		final Map map = new MapStub(cells);
