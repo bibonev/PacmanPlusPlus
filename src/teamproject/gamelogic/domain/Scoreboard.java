@@ -3,21 +3,21 @@ package teamproject.gamelogic.domain;
 import java.util.HashMap;
 
 public class Scoreboard {
-	private HashMap<Long, Integer> scores;
+	private HashMap<Integer, Integer> scores;
 
 	public Scoreboard() {
-		scores = new HashMap<Long, Integer>();
+		scores = new HashMap<Integer, Integer>();
 	}
 
-	public HashMap<Long, Integer> getScores() {
+	public HashMap<Integer, Integer> getScores() {
 		return scores;
 	}
 
-	public Integer getScoreForPlayerId(final long id) {
+	public int getScoreForPlayerId(final int id) {
 		return scores.get(id);
 	}
 
-	public void setScoreForPlayerId(final long id, final int score) {
+	public void setScoreForPlayerId(final int id, final int score) {
 		scores.put(id, score);
 	}
 

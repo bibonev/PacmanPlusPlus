@@ -7,16 +7,15 @@ import teamproject.gamelogic.domain.*;
  *@author Lyubomir Pashev
  */
 public class DefaultBehaviour extends Behaviour {
-
 	/**
 	 * Instantiates a new default behavior.
 	 *
 	 * @param map the map
-	 * @param currentPos the current position
+	 * @param entity the controlled entity
 	 * @param speed the speed
 	 * @param stash the inventory
 	 */
-	public DefaultBehaviour(Map map, Position currentPos, int speed, Inventory stash, Type type) {
-		super(map, currentPos, speed, stash, type);
+	public DefaultBehaviour(Map map, Entity entity, int speed, Inventory stash, Type type) {
+		super(map, entity, speed, stash, type);
 	}
 }

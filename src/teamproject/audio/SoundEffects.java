@@ -14,25 +14,8 @@ import javafx.util.Duration;
  */
 public class SoundEffects {
 	
-	private boolean isOn;
-	private MediaPlayer explosionPlayer;
-	private MediaPlayer shootPlayer;
-	private MediaPlayer powerUpPlayer;
 	
 	public SoundEffects(){
-		isOn = true;
-		
-		String explosionFile = "src/teamproject/audio/explosion.mp3";
-		Media explosion = new Media(new File(explosionFile).toURI().toString());
-		explosionPlayer = new MediaPlayer(explosion);
-		
-		String shootFile = "src/teamproject/audio/gun.mp3";
-		Media shoot = new Media(new File(shootFile).toURI().toString());
-		shootPlayer = new MediaPlayer(shoot);
-		
-		String powerUpFile = "src/teamproject/audio/powerup.mp3";
-		Media powerUp = new Media(new File(powerUpFile).toURI().toString());
-		powerUpPlayer = new MediaPlayer(powerUp);
 	}
 	
 	/**
@@ -40,28 +23,15 @@ public class SoundEffects {
 	 * @param bool
 	 */
 	public void setOn(boolean bool){
-		isOn = bool;
 	}
 	
 	public void playExplosion(){
-		if(isOn){
-			explosionPlayer.seek(Duration.ZERO);
-			explosionPlayer.play();
-		}
 	}
 	
 	public void playShoot(){
-		if(isOn){
-			shootPlayer.seek(Duration.ZERO);
-			shootPlayer.play();
-		}
 	}
 
 	public void playPowerUp(){
-		if(isOn){
-			powerUpPlayer.seek(Duration.ZERO);
-			powerUpPlayer.play();
-		}
 	}
 	
 }

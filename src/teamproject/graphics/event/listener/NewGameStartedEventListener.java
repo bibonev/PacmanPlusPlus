@@ -1,14 +1,11 @@
 package teamproject.graphics.event.listener;
 
 import teamproject.ai.AIGhost;
-import teamproject.event.arguments.container.NewGameStartedEventArguments;
+import teamproject.event.arguments.NewGameStartedEventArguments;
 import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.GLGhost;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Player;
-import teamproject.graphics.GamePlay;
 import teamproject.graphics.GhostVisualisation;
-import teamproject.graphics.MapVisualisation;
 import teamproject.graphics.PacmanVisualisation;
 import teamproject.graphics.PositionVisualisation;
 import teamproject.graphics.Render;
@@ -19,11 +16,7 @@ import teamproject.graphics.Render;
 public class NewGameStartedEventListener implements teamproject.event.listener.NewGameStartedEventListener {
 	@Override
 	public void onNewGameStarted(final NewGameStartedEventArguments args) {
-		Player player1 = (Player) args.getGame().getWorld().getPlayers().toArray()[0];
-		Ghost ghost = (AIGhost) args.getGame().getWorld().getGhosts().toArray()[0];
-
-		Cell[][] cells = args.getGame().getWorld().getMap().getCells();
-		final Render mapV = new Render();
+		/* final Render mapV = new Render();
 
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
@@ -45,6 +38,6 @@ public class NewGameStartedEventListener implements teamproject.event.listener.N
 		mapV.redrawMap();
 
 		// Start Timeline
-		mapV.startTimeline();
+		mapV.startTimeline(); */
 	}
 }

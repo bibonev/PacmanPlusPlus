@@ -1,4 +1,4 @@
-package teamproject.event.arguments.container;
+package teamproject.event.arguments;
 
 import javafx.stage.Stage;
 import teamproject.gamelogic.domain.Game;

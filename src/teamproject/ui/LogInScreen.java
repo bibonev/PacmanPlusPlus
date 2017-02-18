@@ -4,7 +4,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import teamproject.event.Event;
-import teamproject.event.arguments.container.UserLoggedInEventArguments;
+import teamproject.event.arguments.UserLoggedInEventArguments;
 import teamproject.event.listener.UserLoggedInEventListener;
 
 /**
@@ -43,10 +43,6 @@ public class LogInScreen extends Screen {
 		if (!username.isEmpty()) {
 			// if(checkname(username)){
 			game.setName(username);
-			final Event<UserLoggedInEventListener, UserLoggedInEventArguments> event = new Event<>(
-					(listener, arg) -> listener.onUserLoggedIn(arg));
-			event.addListener(new teamproject.gamelogic.event.listener.UserLoggedInEventListener());
-			event.fire(new UserLoggedInEventArguments(username));
 			game.switchToMenu();
 			// }else{
 			// Alert alert = new Alert(AlertType.ERROR);

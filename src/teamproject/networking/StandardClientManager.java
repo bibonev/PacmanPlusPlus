@@ -18,7 +18,7 @@ import teamproject.networking.event.ClientTrigger;
  */
 public class StandardClientManager implements ClientManager, NetworkListener {
 	private NetworkSocket socket;
-	private Map<String, ClientTrigger> triggers;
+	private ClientTrigger trigger;
 	
 	/**
 	 * Initialize a new {@code ClientNetworkManager} with the given underlying socket.
@@ -28,36 +28,28 @@ public class StandardClientManager implements ClientManager, NetworkListener {
 	public StandardClientManager(NetworkSocket socket) {
 		this.socket = socket;
 		this.socket.getReceiveEvent().addListener(this);
-		triggers = new HashMap<String, ClientTrigger>();
+		this.trigger = null;
 	}
 	
 	@Override
-	public void addTrigger(ClientTrigger trigger, String... packetNames) {
-		for(String packetName : packetNames) {
-			if(!triggers.containsKey(packetName)) {
-				triggers.put(packetName, trigger);
-			} else {
-				throw new IllegalArgumentException(
-						String.format(
-								"Cannot add more than one trigger for packet name \"%s\".",
-								packetName));
-			}
-		}
+	public void setTrigger(ClientTrigger trigger) {
+		this.trigger = trigger;
+	}
+	
+	@Override
+	public ClientTrigger getTrigger() {
+		return trigger;
 	}
 	
 	@Override
 	public void receive(byte[] receivedData) {
 		String receivedString = new String(receivedData, StandardCharsets.UTF_8);
 		Packet receivedPacket = Packet.fromString(receivedString);
-		ClientTrigger trigger = triggers.get(receivedPacket.getPacketName());
 		
 		if(trigger != null) {
 			trigger.trigger(receivedPacket);
 		} else {
-			throw new RuntimeException(
-					String.format(
-							"Received packet type \"%s\" with no registered packet trigger.",
-							receivedPacket.getPacketName()));
+			throw new RuntimeException("No trigger is currently set.");
 		}
 	}
 

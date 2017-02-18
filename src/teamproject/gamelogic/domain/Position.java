@@ -1,7 +1,6 @@
 package teamproject.gamelogic.domain;
 
-public abstract class Position {
-
+public class Position {
 	private int row;
 	private int column;
 
@@ -17,5 +16,15 @@ public abstract class Position {
 	public int getColumn() {
 		return column;
 	}
-
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj != null && obj instanceof Position) {
+			Position p = (Position)obj;
+			
+			return p.row == this.row && p.column == this.column;
+		} else {
+			return false;
+		}
+	}
 }

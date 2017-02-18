@@ -14,8 +14,9 @@ import teamproject.networking.event.ClientConnectedListener;
 import teamproject.networking.event.ClientDisconnectedListener;
 
 /**
- * Represents running a server connecting and adding each client 
- * and sets up the listners for each event
+ * Represents running a server connecting and adding each client and sets up the
+ * listners for each event
+ * 
  * @author Simeon Kostadinov
  */
 
@@ -29,7 +30,8 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	private Event<ClientDisconnectedListener, Integer> clientDisconnectedEvent;
 
 	/**
-	 * Initialise Server object and attaching listeners to the events for connect and disconnect
+	 * Initialise Server object and attaching listeners to the events for
+	 * connect and disconnect
 	 */
 	public Server() {
 		this.serverPort = Port.number;
@@ -38,7 +40,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		clientConnectedEvent = new Event<>((l, i) -> l.onClientConnected(i));
 		clientDisconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
 	}
-	
+
 	public void start() {
 		new Thread(this).start();
 	}
@@ -50,34 +52,38 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	public void run() {
 		this.serverSocket = openServerSocket();
 
-		while (alive) {
-			Socket clientSocket = null;
-			try {
-				clientSocket = this.serverSocket.accept();
-				int clientID = currentClientNumber++;
-				Client client = new Client(clientSocket, clientID);
-				client.start();
-				clients.put(clientID, client);
-				clientConnectedEvent.fire(clientID);
-				client.getDisconnectedEvent().addListener(this);
-			} catch (IOException e) {
-				if(alive) {
-					throw new RuntimeException("Error accepting client.", e);
-				} else {
-					return;
-					// server stopped, just exit
+		try {
+			while (alive) {
+				Socket clientSocket = null;
+				try {
+					System.out.println("waiting");
+					clientSocket = this.serverSocket.accept();
+					int clientID = currentClientNumber++;
+					Client client = new Client(clientSocket, clientID);
+					System.out.println("gotcha");
+					client.start();
+					clients.put(clientID, client);
+					clientConnectedEvent.fire(clientID);
+					client.getDisconnectedEvent().addListener(this);
+				} catch (IOException e) {
+					if (alive) {
+						throw new RuntimeException("Error accepting client.", e);
+					} else {
+						return;
+						// server stopped, just exit
+					}
 				}
-			} finally {
-				die();
 			}
+		} finally {
+			die();
 		}
 	}
-	
+
 	@Override
 	public boolean isAlive() {
 		return alive;
 	}
-	
+
 	public Event<ClientConnectedListener, Integer> getClientConnectedEvent() {
 		return clientConnectedEvent;
 	}
@@ -86,11 +92,11 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	public Event<ClientDisconnectedListener, Integer> getClientDisconnectedEvent() {
 		return clientDisconnectedEvent;
 	}
-	
+
 	public void die() {
-		if(alive) {
+		if (alive) {
 			alive = false;
-			if(!serverSocket.isClosed()) {
+			if (!serverSocket.isClosed()) {
 				try {
 					serverSocket.close();
 				} catch (IOException e) {
@@ -110,7 +116,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 
 	@Override
 	public Set<Integer> getConnectedClients() {
-		if(alive) {
+		if (alive) {
 			return clients.keySet();
 		} else {
 			return new HashSet<Integer>(0);
@@ -119,7 +125,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 
 	@Override
 	public NetworkSocket getClient(int clientID) {
-		if(clients.containsKey(clientID)) {
+		if (clients.containsKey(clientID)) {
 			return clients.get(clientID);
 		} else {
 			throw new IllegalArgumentException("No client with ID " + clientID);
