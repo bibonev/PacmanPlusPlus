@@ -1,26 +1,26 @@
 package teamproject.gamelogic.random;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
 import java.util.Random;
 
-import teamproject.ai.DefaultBehaviour;
-import teamproject.ai.GhostBehaviour;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
-import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Cell;
+import teamproject.gamelogic.domain.ControlledPlayer;
 import teamproject.gamelogic.domain.GameSettings;
-import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
+import teamproject.gamelogic.domain.LocalGhost;
+import teamproject.gamelogic.domain.LocalPlayer;
 import teamproject.gamelogic.domain.Map;
-import teamproject.gamelogic.domain.stubs.*;
+import teamproject.gamelogic.domain.Position;
+import teamproject.gamelogic.domain.RemoteGhost;
+import teamproject.gamelogic.domain.RemotePlayer;
+import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
-import teamproject.gamelogic.domain.Player;
-import teamproject.gamelogic.domain.*;
+import teamproject.gamelogic.domain.stubs.CellStub;
+import teamproject.gamelogic.domain.stubs.MapStub;
 
 public class Randoms {
 
@@ -66,21 +66,15 @@ public class Randoms {
 	}
 
 	public static World randomWorld() {
-		final Collection<Player> players = new ArrayList<Player>();
-		players.add(randomPlayer());
-
-		final Collection<Ghost> ghosts = new ArrayList<Ghost>();
-		ghosts.add(randomGhost());
-
-		return new World(players, randomRuleEnforcer(), ghosts, randomMap());
+		return new World(randomRuleEnforcer(), randomMap());
 	}
 
-	public static Player randomPlayer() {
-		return new Player(Optional.of(randomLong()), randomString());
+	public static RemoteGhost randomRemoteGhost() {
+		return new RemoteGhost(randomInteger());
 	}
 
-	public static Ghost randomGhost() {
-		return new GhostStub(new GhostBehaviour(randomMap(),randomPosition(),1000,new Inventory(new HashMap<Item, Integer>()),Behaviour.Type.GHOST), randomString());
+	public static LocalGhost randomLocalGhost() {
+		return new LocalGhost();
 	}
 
 	public static RuleEnforcer randomRuleEnforcer() {
@@ -99,6 +93,13 @@ public class Randoms {
 		return new Item(randomString(), randomString());
 	}
 
+	public static Inventory randomInventory() {
+		final java.util.Map<Item, Integer> items = new HashMap<Item, Integer>();
+		items.put(randomItem(), randomInteger());
+
+		return new Inventory(items);
+	}
+
 	public static CellType randomCellType() {
 		return randomEnum(CellType.class);
 	}
@@ -108,11 +109,11 @@ public class Randoms {
 	}
 
 	public static Position randomPosition() {
-		return new PositionStub(randomInteger(), randomInteger());
+		return new Position(randomInteger(), randomInteger());
 	}
 
 	public static Position randomPositionInRange(final int range) {
-		return new PositionStub(randomInteger(range), randomInteger(range));
+		return new Position(randomInteger(range), randomInteger(range));
 	}
 
 	public static Cell randomCell() {
@@ -128,7 +129,7 @@ public class Randoms {
 
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells.length; j++) {
-				cells[i][j] = randomCell(new PositionStub(i, j));
+				cells[i][j] = randomCell(new Position(i, j));
 			}
 		}
 
@@ -139,12 +140,22 @@ public class Randoms {
 		final Scoreboard scoreboard = new Scoreboard();
 
 		for (int i = 0; i < randomInteger(); i++) {
-			scoreboard.setScoreForPlayerId(randomLong(), randomInteger());
+			scoreboard.setScoreForPlayerId(randomInteger(), randomInteger());
 		}
 
 		return scoreboard;
 	}
-	public static Behaviour randomBehaviour() {
-		return new DefaultBehaviour(randomMap(),randomPosition(),1000,new Inventory(new HashMap<Item, Integer>()),Behaviour.Type.DEFAULT);
+
+	public static LocalPlayer randomLocalPlayer() {
+		return new LocalPlayer(Randoms.randomString());
 	}
+
+	public static RemotePlayer randomRemotePlayer() {
+		return new RemotePlayer(Randoms.randomInteger(), Randoms.randomString());
+	}
+
+	public static ControlledPlayer randomControlledPlayer() {
+		return new ControlledPlayer(Randoms.randomInteger(), Randoms.randomString());
+	}
+
 }

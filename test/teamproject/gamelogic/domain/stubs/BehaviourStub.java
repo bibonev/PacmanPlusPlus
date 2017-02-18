@@ -1,12 +1,14 @@
 package teamproject.gamelogic.domain.stubs;
 
-import teamproject.gamelogic.domain.*;
-
+import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.Entity;
+import teamproject.gamelogic.domain.Inventory;
+import teamproject.gamelogic.domain.Map;
 
 public class BehaviourStub extends Behaviour {
 
-	public BehaviourStub(Map map, Position pos, int speed, Inventory stash,Type type) {
-		super(map,pos,speed,stash,type);
+	public BehaviourStub(final Map map, final Entity entity, final int speed, final Inventory stash, final Type type) {
+		super(map, entity, speed, stash, type);
 	}
 
 }
