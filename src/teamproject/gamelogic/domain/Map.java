@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
-import teamproject.graphics.CellVisualisation;
 import teamproject.graphics.PositionVisualisation;
 
 public class Map {
