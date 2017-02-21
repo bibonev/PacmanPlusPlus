@@ -1,5 +1,9 @@
 package teamproject.ai;
 
+import teamproject.constants.EntityType;
+import teamproject.event.Event;
+import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.listener.EntityMovedListener;
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Inventory;
