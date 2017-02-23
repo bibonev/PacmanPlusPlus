@@ -7,6 +7,7 @@ import teamproject.constants.CellState;
 import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.ControlledPlayer;
+import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
@@ -156,6 +157,10 @@ public class Randoms {
 
 	public static ControlledPlayer randomControlledPlayer() {
 		return new ControlledPlayer(Randoms.randomInteger(), Randoms.randomString());
+	}
+
+	public static Game randomGame() {
+		return new Game(randomWorld(), randomGameSettings(), randomControlledPlayer());
 	}
 
 }
