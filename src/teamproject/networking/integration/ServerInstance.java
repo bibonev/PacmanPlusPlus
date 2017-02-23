@@ -1,5 +1,8 @@
 package teamproject.networking.integration;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.arguments.LocalGhostMovedEventArgs;
 import teamproject.event.arguments.LocalPlayerMovedEventArgs;
@@ -31,6 +34,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	private World world;
 	private GameUI gameUI;
 	private LocalEntityTracker tracker;
+	private Logger logger = Logger.getLogger("network-server");
 	
 	/**
 	 * Creates a new server instance which, when ran, will connect to the server
@@ -47,14 +51,13 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	public ServerInstance(GameUI gameUI, World world) {
 		this.world = world;
 		this.gameUI = gameUI;
+		logger.setLevel(Level.FINEST);
 	}
 	
 	@Override
 	public void run() {
 		// Create the server socket object
 		this.server = this.createServer();
-		
-		System.out.println("start server instance");
 		
 		// Create 
 		this.manager = new StandardServerManager(server);
@@ -175,7 +178,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 
 	@Override
 	public void trigger(int sender, Packet p) {
-		System.out.println("S-" + p.getPacketName());
+		logger.log(Level.INFO, "Packet received: {0}", p.getPacketName());
 		if(p.getPacketName().equals("client-handshake")) {
 			triggerHandshake(sender, p);
 		} else if(p.getPacketName().equals("player-moved")) {
@@ -241,7 +244,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 
 	@Override
 	public void onClientDisconnected(int clientID) {
-		System.out.println(clientID);
+		logger.log(Level.INFO, "Client {0} disconnected.", clientID);
 		world.removeEntity(clientID);
 	}
 	

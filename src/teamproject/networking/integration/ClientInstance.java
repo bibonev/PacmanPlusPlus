@@ -1,7 +1,9 @@
 package teamproject.networking.integration;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import teamproject.constants.CellState;
-import teamproject.event.Event;
 import teamproject.event.arguments.LocalPlayerMovedEventArgs;
 import teamproject.event.listener.LocalPlayerMovedListener;
 import teamproject.gamelogic.domain.Entity;
@@ -26,6 +28,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	private String username;
 	private GameUI gameUI;
 	private boolean alreadyDoneHandshake;
+	private Logger logger = Logger.getLogger("network-client");
 	
 	/**
 	 * Creates a new client instance which, when ran, will connect to the server
@@ -47,6 +50,8 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		this.serverAddress = serverAddress;
 		this.gameUI = gameUI;
 		this.alreadyDoneHandshake = false;
+		
+		logger.setLevel(Level.FINEST);
 	}
 	
 	@Override
@@ -150,7 +155,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	/* TRIGGERS to deal with incoming packets */
 	@Override
 	public void trigger(Packet p) {
-		System.out.println("--" + p.getPacketName());
+		logger.log(Level.INFO, "Packet received: {0}", p.getPacketName());
 		if(p.getPacketName().equals("server-handshake")) {
 			triggerHandshake(p);
 		} else if(p.getPacketName().equals("remote-player-moved")) {
