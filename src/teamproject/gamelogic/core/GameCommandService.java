@@ -7,6 +7,7 @@ import java.util.HashMap;
 import javafx.stage.Stage;
 import teamproject.ai.AIGhost;
 import teamproject.ai.GhostBehaviour;
+import teamproject.constants.EntityType;
 import teamproject.event.Event;
 import teamproject.event.arguments.NewGameStartedEventArguments;
 import teamproject.event.arguments.NewMultiplayerGameRequestedEventArguments;
@@ -50,11 +51,29 @@ public class GameCommandService {
 		
 		final AIGhost ghost = new AIGhost();
 		ghost.setPosition(new Position(1, 1));
+		ghost.setType(EntityType.GHOST);
 		Behaviour b = new GhostBehaviour(map, ghost, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost.setBehaviour(b);
-
+		
+		final AIGhost ghost1 = new AIGhost();
+		ghost1.setPosition(new Position(1, 13));
+		ghost1.setType(EntityType.GHOST);
+		Behaviour b1 = new GhostBehaviour(map, ghost1, 1000,
+				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
+		ghost1.setBehaviour(b1);
+		
+		final AIGhost ghost2 = new AIGhost();
+		ghost2.setPosition(new Position(13, 13));
+		ghost2.setType(EntityType.GHOST);
+		Behaviour b2 = new GhostBehaviour(map, ghost2, 1000,
+				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
+		ghost2.setBehaviour(b2);
+		
+		
 		world.addEntity(ghost);
+		world.addEntity(ghost1);
+		world.addEntity(ghost2);
 		world.addEntity(player);
 
 		return game;

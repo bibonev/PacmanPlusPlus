@@ -24,4 +24,9 @@ public class AIGhost extends LocalGhost {
 	public void setBehaviour(Behaviour behaviour) {
 		this.behaviour = behaviour;
 	}
+
+	public void run() {
+		behaviour.run();
+		
+	}
 }

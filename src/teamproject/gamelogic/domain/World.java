@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
+import teamproject.ai.AIGhost;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.listener.EntityAddedListener;
@@ -89,8 +90,8 @@ public class World {
 		return getEntities(Player.class);
 	}
 	
-	public Collection<Ghost> getGhosts() {
-		return getEntities(Ghost.class);
+	public Collection<AIGhost> getGhosts() {
+		return getEntities(AIGhost.class);
 	}
 
 	public void setRuleEnforcer(final RuleEnforcer ruleEnforcer) {

@@ -10,6 +10,12 @@ import java.util.Random;
 import teamproject.ai.AStar;
 import teamproject.ai.Target;
 import teamproject.constants.CellState;
+import teamproject.constants.EntityType;
+import teamproject.event.Event;
+import teamproject.event.arguments.EntityChangedEventArgs;
+import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.listener.EntityAddedListener;
+import teamproject.event.listener.EntityMovedListener;
 
 /**
  * The default behavior, which picks the closes enemy or moves at random if
@@ -21,7 +27,7 @@ import teamproject.constants.CellState;
  *
  * @author Lyubomir Pashev
  */
-public abstract class Behaviour extends Thread {
+public abstract class Behaviour {
 
 	/**
 	 * Different types of behaviour.
@@ -78,6 +84,10 @@ public abstract class Behaviour extends Thread {
 	/** The priority targets. */
 	// to be used in more complex behaviors
 	private PriorityQueue<Item> priorityTargets;
+	
+	private int counter;
+	
+	private Event<EntityMovedListener, EntityMovedEventArgs> onEntityMoved;
 
 	/**
 	 * Instantiates a new behavior.
@@ -103,8 +113,13 @@ public abstract class Behaviour extends Thread {
 		this.stash = stash;
 		this.speed = speed;
 		this.type = type;
+		this.onEntityMoved=entity.getOnMovedEvent();
+		counter=0;
 	}
 
+	public Event<EntityMovedListener, EntityMovedEventArgs> getOnMovedEvent() {
+		return onEntityMoved;
+	}
 	/**
 	 * Pick a target for the A* algorithm. Default implementation: picks the
 	 * nearest player and follows them if there are no players, moves at random
@@ -155,26 +170,32 @@ public abstract class Behaviour extends Thread {
 	 * @return the position
 	 */
 	protected Position pickRandomTarget() {
-
+		
 		final int row = entity.getPosition().getRow();
 		final int column = entity.getPosition().getColumn();
 		final ArrayList<Cell> availableCells = new ArrayList<Cell>();
 
-		if (RuleEnforcer.checkCellValidity(cells[row - 1][column])) {
-			availableCells.add(cells[row - 1][column]);
+		if (row>0) {
+			if (RuleEnforcer.checkCellValidity(cells[row - 1][column]))
+				availableCells.add(cells[row - 1][column]);
 		}
-		if (RuleEnforcer.checkCellValidity(cells[row + 1][column])) {
-			availableCells.add(cells[row + 1][column]);
+		if (row<mapSize-1) {
+			if (RuleEnforcer.checkCellValidity(cells[row + 1][column]))
+				availableCells.add(cells[row + 1][column]);
 		}
-		if (RuleEnforcer.checkCellValidity(cells[row][column - 1])) {
-			availableCells.add(cells[row][column - 1]);
+		if (column>0) {
+			if (RuleEnforcer.checkCellValidity(cells[row][column - 1]))
+				availableCells.add(cells[row][column - 1]);
 		}
-		if (RuleEnforcer.checkCellValidity(cells[row][column + 1])) {
-			availableCells.add(cells[row][column + 1]);
+		if (column<mapSize-1) {
+			if (RuleEnforcer.checkCellValidity(cells[row][column + 1])){
+					availableCells.add(cells[row][column + 1]);
+			}
 		}
-
 		tarType = Target.RANDOM;
-		return availableCells.get(rng.nextInt(availableCells.size())).getPosition();
+		int next = rng.nextInt(availableCells.size());
+		
+		return availableCells.get(next).getPosition();
 	}
 
 	/**
@@ -299,12 +320,10 @@ public abstract class Behaviour extends Thread {
 	}
 
 	/**
-	 * Run the behavior thread.
+	 * Run the behavior.
 	 */
-	@Override
 	public void run() {
-		while (run) {
-
+		
 			lockedTarget = pickTarget();
 
 			switch (tarType) {
@@ -313,20 +332,20 @@ public abstract class Behaviour extends Thread {
 			// of consecutive moves before it scans for new enemies
 			case RANDOM: {
 
-				int i = 1;
-				while (i <= focus && run) {
-
-					// TODO: send move event
-
-					// waits for the move to be executed
-					try {
-						sleep(speed);
-					} catch (final InterruptedException e) {
-						e.printStackTrace();
-					}
-
+				if(counter<focus){
+					
+					entity.setPosition(lockedTarget);
+					System.out.println(lockedTarget.getRow()+" "+ lockedTarget.getColumn());
+					onEntityMoved.fire(new EntityMovedEventArgs(lockedTarget.getRow(),lockedTarget.getColumn(),0,entity));
+				
 					lockedTarget = pickRandomTarget();
-					i++;
+					
+					counter++;
+				}
+				else{
+					counter=0;
+					run();
+					
 				}
 			}
 				break;
@@ -346,11 +365,6 @@ public abstract class Behaviour extends Thread {
 						currentPath.remove(0);
 
 						// waits for the move to be executed
-						try {
-							sleep(speed);
-						} catch (final InterruptedException e) {
-							e.printStackTrace();
-						}
 					} else {
 						currentPath.clear();
 						break;
@@ -386,12 +400,6 @@ public abstract class Behaviour extends Thread {
 
 							currentPath.remove(0);
 
-							// waits for the move to be executed
-							try {
-								sleep(speed);
-							} catch (final InterruptedException e) {
-								e.printStackTrace();
-							}
 						} else {
 							currentPath.clear();
 							break;
@@ -403,5 +411,4 @@ public abstract class Behaviour extends Thread {
 				break;
 			}
 		}
-	}
 }
