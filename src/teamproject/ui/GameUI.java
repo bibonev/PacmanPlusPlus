@@ -212,7 +212,7 @@ public class GameUI extends Application {
 		switchToGame();
 		Game game = GameCommandService.generateNewSinglePlayerGame(name, new GameSettings());
 		
-		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), false);
+		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
 
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
