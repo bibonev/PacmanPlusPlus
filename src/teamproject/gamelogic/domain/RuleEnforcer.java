@@ -27,7 +27,17 @@ public class RuleEnforcer {
 	 *
 	 * @return
 	 */
-	public static boolean isOutOfBounds(int row, int column) {
-		return (row > CellSize.Rows - 1 || column > CellSize.Columns - 1) || (row < 0 || column < 0);
+	public static boolean isOutOfBounds(final int row, final int column) {
+		return row > CellSize.Rows - 1 || column > CellSize.Columns - 1 || row < 0 || column < 0;
+	}
+
+	/**
+	 * Check whether game should end
+	 *
+	 * @param game
+	 * @return
+	 */
+	public static boolean gameShouldEnd(final Game game) {
+		return false;
 	}
 }
