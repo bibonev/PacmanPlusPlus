@@ -7,11 +7,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
+import teamproject.ai.AIGhost;
 import teamproject.ai.DefaultBehaviour;
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
 import teamproject.constants.Images;
 import teamproject.constants.ScreenSize;
+import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.listener.EntityMovedListener;
+import teamproject.event.listener.LocalEntityUpdatedListener;
 import teamproject.gamelogic.domain.*;
 import teamproject.ui.GameUI;
 
@@ -24,7 +28,7 @@ import static java.lang.System.exit;
 /**
  * Created by Boyan Bonev on 09/02/2017.
  */
-public class Render {
+public class Render implements LocalEntityUpdatedListener {
 	private Pane root;
 	private Timeline timeLine;
 	private Scene scene;
@@ -156,7 +160,6 @@ public class Render {
 
 		if (world.getMap().getCell(row, column).getState() == CellState.OBSTACLE)
 			return false;
-
 		entity.setPosition(new Position(row, column));
 		if(entity == controlledPlayer)
 			controlledPlayer.setAngle(angle);
@@ -240,19 +243,25 @@ public class Render {
 	 * Start the timeline
 	 */
 	public void startTimeline() {
-		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
+		for(AIGhost ghost : world.getGhosts()) {
+			ghost.getBehaviour().getOnMovedEvent().addListener(this);
+		}
+		timeLine = new Timeline(new KeyFrame(Duration.millis(1000), event -> {
 			if(serverMode) {
-				for(Ghost ghost : world.getGhosts()) {
-					moveGhost(ghost);
-					
-					if(ghost.getPosition().equals(controlledPlayer.getPosition())) {
-						gameEnded();
-						break;
-					}
+				for(AIGhost ghost : world.getGhosts()) {
+					ghost.run();
 				}
 			}
-		}));
+			}
+		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
+		
+	}
+
+	@Override
+	public void onEntityMoved(EntityMovedEventArgs args) {
+		moveTo(args.getRow(),args.getCol(),args.getAngle(),args.getEntity());
+		
 	}
 }

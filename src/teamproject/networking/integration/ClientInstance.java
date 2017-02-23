@@ -2,7 +2,8 @@ package teamproject.networking.integration;
 
 import teamproject.constants.CellState;
 import teamproject.event.Event;
-import teamproject.event.arguments.LocalPlayerMovedEventArgs;
+import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.listener.LocalEntityUpdatedListener;
 import teamproject.event.listener.LocalPlayerMovedListener;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Position;
@@ -18,7 +19,7 @@ import teamproject.networking.socket.Client;
 import teamproject.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger ,
-		ClientDisconnectedListener, LocalPlayerMovedListener {
+		ClientDisconnectedListener, LocalEntityUpdatedListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
@@ -139,11 +140,11 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 
 	/* HANDLERS to create/deal with outgoing packets */
 	@Override
-	public void onLocalPlayerMoved(LocalPlayerMovedEventArgs player) {
+	public void onEntityMoved(EntityMovedEventArgs args) {
 		Packet p = new Packet("player-moved");
-		p.setInteger("row", player.getRow());
-		p.setInteger("col", player.getCol());
-		p.setDouble("angle", player.getAngle());
+		p.setInteger("row", args.getRow());
+		p.setInteger("col", args.getCol());
+		p.setDouble("angle", args.getAngle());
 		manager.dispatch(p);
 	}
 
