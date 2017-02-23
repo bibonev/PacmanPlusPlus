@@ -155,7 +155,7 @@ public class Render implements LocalEntityUpdatedListener {
 	}
 
 	public boolean moveTo(final int row, final int column, double angle, Entity entity) {
-		if (RuleEnforcer.isOutOfBounds(row, column))
+		if (RuleChecker.isOutOfBounds(row, column))
 			return false;
 
 		if (world.getMap().getCell(row, column).getState() == CellState.OBSTACLE)

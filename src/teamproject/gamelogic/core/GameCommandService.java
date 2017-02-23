@@ -24,7 +24,7 @@ import teamproject.gamelogic.domain.LocalPlayer;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
-import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.RuleChecker;
 import teamproject.gamelogic.domain.World;
 
 public class GameCommandService {
@@ -39,7 +39,7 @@ public class GameCommandService {
 		final Map map = new Map().generateMap();
 
 		// Create new game and store it
-		final World world = new World(new RuleEnforcer(), map);
+		final World world = new World(new RuleChecker(), map);
 		final ControlledPlayer player = new ControlledPlayer(0, userName);
 		player.setPosition(new Position(6, 0));
 		
@@ -85,7 +85,7 @@ public class GameCommandService {
 		final Map map = new Map().generateMap();
 
 		// Create new game and store it
-		final World world = new World(new RuleEnforcer(), map);
+		final World world = new World(new RuleChecker(), map);
 		final ControlledPlayer player = new ControlledPlayer(0, userName);
 		player.setPosition(new Position(0, 0));
 		

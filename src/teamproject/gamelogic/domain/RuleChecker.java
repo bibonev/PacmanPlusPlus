@@ -3,9 +3,10 @@ package teamproject.gamelogic.domain;
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
+import teamproject.constants.GameOutcome;
 import teamproject.constants.GameType;
 
-public class RuleEnforcer {
+public class RuleChecker {
 
 	/**
 	 * Check cell validity.
@@ -40,17 +41,17 @@ public class RuleEnforcer {
 	 */
 	// TODO: possibly add the type as a game field instead of passing them
 	// separately
-	public static boolean gameShouldEnd(final Game game, final GameType type) {
+	public static GameOutcome gameShouldEnd(final Game game, final GameType type) {
 		return type.equals(GameType.SINGLEPLAYER) ? singleplayerGameShouldEnd(game) : multiplayerGameShouldEnd(game);
 	}
 
-	private static boolean multiplayerGameShouldEnd(final Game game) {
+	private static GameOutcome multiplayerGameShouldEnd(final Game game) {
 		// TODO More complicated so will be implemented once networking is
 		// integrated fully
-		return false;
+		return GameOutcome.STILL_PLAYING;
 	}
 
-	private static boolean singleplayerGameShouldEnd(final Game game) {
+	private static GameOutcome singleplayerGameShouldEnd(final Game game) {
 		final Cell[][] cells = game.getWorld().getMap().getCells();
 		boolean ghostAtePlayer = false;
 		boolean foodLeft = false;
@@ -62,6 +63,14 @@ public class RuleEnforcer {
 			}
 		}
 
-		return ghostAtePlayer || !foodLeft;
+		if (!foodLeft) {
+			return GameOutcome.LOCAL_PLAYER_WON;
+		}
+
+		if (ghostAtePlayer) {
+			return GameOutcome.LOCAL_PLAYER_LOST;
+		}
+
+		return GameOutcome.STILL_PLAYING;
 	}
 }

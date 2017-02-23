@@ -1,17 +1,20 @@
 package teamproject.gamelogic.domain;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import teamproject.constants.CellState;
 import teamproject.constants.CellType;
+import teamproject.constants.GameOutcome;
 import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.stubs.CellStub;
 import teamproject.gamelogic.random.Randoms;
 
-public class RuleEnforcerTest {
+public class RuleCheckerTest {
 
 	@Test
 	public void shouldCheckCellValidity_validCell() {
@@ -19,7 +22,7 @@ public class RuleEnforcerTest {
 		final Cell cell = new CellStub(CellType.NORMAL, CellState.EMPTY, new Position(1, 1));
 
 		// Then
-		assertTrue(RuleEnforcer.checkCellValidity(cell));
+		assertTrue(RuleChecker.checkCellValidity(cell));
 	}
 
 	@Test
@@ -28,7 +31,7 @@ public class RuleEnforcerTest {
 		final Cell cell = new CellStub(CellType.WALL, CellState.EMPTY, new Position(1, 1));
 
 		// Then
-		assertFalse(RuleEnforcer.checkCellValidity(cell));
+		assertFalse(RuleChecker.checkCellValidity(cell));
 	}
 
 	@Test
@@ -37,7 +40,7 @@ public class RuleEnforcerTest {
 		final Cell cell = new CellStub(CellType.NORMAL, CellState.OBSTACLE, new Position(1, 1));
 
 		// Then
-		assertFalse(RuleEnforcer.checkCellValidity(cell));
+		assertFalse(RuleChecker.checkCellValidity(cell));
 	}
 
 	@Test
@@ -46,7 +49,7 @@ public class RuleEnforcerTest {
 		final Cell cell = new CellStub(CellType.NORMAL, CellState.EMPTY, new Position(-2, 2));
 
 		// Then
-		assertFalse(RuleEnforcer.checkCellValidity(cell));
+		assertFalse(RuleChecker.checkCellValidity(cell));
 	}
 
 	@Test
@@ -55,21 +58,21 @@ public class RuleEnforcerTest {
 		final Cell cell = new CellStub(CellType.NORMAL, CellState.EMPTY, new Position(2, -2));
 
 		// Then
-		assertFalse(RuleEnforcer.checkCellValidity(cell));
+		assertFalse(RuleChecker.checkCellValidity(cell));
 	}
 
 	@Test
-	public void shouldEndSingplayerGame_PlayerEaten() {
+	public void shouldReportPlayerLost_PlayerEaten() {
 		// Given
 		final Game game = Randoms.randomGame();
 		game.getWorld().getMap().getCell(0, 0).setState(CellState.PLAYER_AND_ENEMY);
 
 		// Then
-		assertTrue(RuleEnforcer.gameShouldEnd(game, GameType.SINGLEPLAYER));
+		assertThat(RuleChecker.gameShouldEnd(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.LOCAL_PLAYER_LOST));
 	}
 
 	@Test
-	public void shouldEndSingleplayerGame_NoFoodLeft() {
+	public void shouldReportPlayerWon_NoFoodLeft() {
 		// Given
 		final Game game = Randoms.randomGame();
 		final Cell[][] cells = game.getWorld().getMap().getCells();
@@ -84,11 +87,11 @@ public class RuleEnforcerTest {
 		}
 
 		// Then
-		assertTrue(RuleEnforcer.gameShouldEnd(game, GameType.SINGLEPLAYER));
+		assertThat(RuleChecker.gameShouldEnd(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.LOCAL_PLAYER_WON));
 	}
 
 	@Test
-	public void shouldNotEndSingleplayerGame() {
+	public void shouldReportGameStillPlaying() {
 		// Given
 		final Game game = Randoms.randomGame();
 		final Cell[][] cells = game.getWorld().getMap().getCells();
@@ -106,7 +109,7 @@ public class RuleEnforcerTest {
 		}
 
 		// Then
-		assertFalse(RuleEnforcer.gameShouldEnd(game, GameType.SINGLEPLAYER));
+		assertThat(RuleChecker.gameShouldEnd(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.STILL_PLAYING));
 	}
 
 }

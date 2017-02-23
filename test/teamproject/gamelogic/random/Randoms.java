@@ -17,7 +17,7 @@ import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RemoteGhost;
 import teamproject.gamelogic.domain.RemotePlayer;
-import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.RuleChecker;
 import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
 import teamproject.gamelogic.domain.stubs.CellStub;
@@ -78,8 +78,8 @@ public class Randoms {
 		return new LocalGhost();
 	}
 
-	public static RuleEnforcer randomRuleEnforcer() {
-		return new RuleEnforcer();
+	public static RuleChecker randomRuleEnforcer() {
+		return new RuleChecker();
 	}
 
 	public static Map randomMap() {
