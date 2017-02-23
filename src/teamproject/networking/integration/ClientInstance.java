@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 import teamproject.constants.CellState;
 import teamproject.event.arguments.LocalPlayerMovedEventArgs;
 import teamproject.event.listener.LocalPlayerMovedListener;
+import teamproject.gamelogic.core.Lobby;
+import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RemoteGhost;
@@ -25,6 +27,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	private String serverAddress;
 	private ClientManager manager;
 	private World world;
+	private Lobby lobby;
 	private String username;
 	private GameUI gameUI;
 	private boolean alreadyDoneHandshake;
@@ -44,12 +47,13 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	 * 
 	 * @param serverAddress The IP address of the server to connect to.
 	 */
-	public ClientInstance(GameUI gameUI, World world, String username, String serverAddress) {
-		this.world = world;
+	public ClientInstance(GameUI gameUI, String username, String serverAddress) {
 		this.username = username;
 		this.serverAddress = serverAddress;
 		this.gameUI = gameUI;
 		this.alreadyDoneHandshake = false;
+		this.lobby = new Lobby();
+		this.world = null;
 		
 		logger.setLevel(Level.FINEST);
 	}
@@ -168,11 +172,34 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			triggerRemotePlayerJoined(p);
 		} else if(p.getPacketName().equals("remote-player-left")) {
 			triggerRemotePlayerLeft(p);
-		} else if(p.getPacketName().equals("remote-ghost-joined")) {
-			triggerRemoteGhostJoined(p);
 		} else if(p.getPacketName().equals("remote-ghost-left")) {
 			triggerRemoteGhostLeft(p);
+		} else if(p.getPacketName().equals("lobby-player-enter")) {
+			triggerLobbyPlayerEnter(p);
+		} else if(p.getPacketName().equals("lobby-player-leave")) {
+			triggerLobbyPlayerLeave(p);
+		} else if(p.getPacketName().equals("lobby-rule-display-changed")) {
+			triggerLobbyRuleDisplayChanged(p);
 		}
+	}
+
+	private void triggerLobbyPlayerLeave(Packet p) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void triggerLobbyRuleDisplayChanged(Packet p) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void triggerLobbyPlayerEnter(Packet p) {
+		int playerID = p.getInteger("player-id");
+		String playerName = p.getString("player-name");
+		
+		LobbyPlayerInfo lobbyPlayerInfo = new LobbyPlayerInfo(playerName); 
+		
+		lobby.addPlayer(playerID, lobbyPlayerInfo);
 	}
 
 	private void triggerRemoteGhostLeft(Packet p) {

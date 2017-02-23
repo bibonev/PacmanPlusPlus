@@ -9,6 +9,7 @@ import teamproject.event.arguments.LocalPlayerMovedEventArgs;
 import teamproject.event.listener.EntityAddedListener;
 import teamproject.event.listener.EntityRemovingListener;
 import teamproject.event.listener.LocalEntityUpdatedListener;
+import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.LocalEntityTracker;
@@ -35,6 +36,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	private GameUI gameUI;
 	private LocalEntityTracker tracker;
 	private Logger logger = Logger.getLogger("network-server");
+	private Lobby lobby;
 	
 	/**
 	 * Creates a new server instance which, when ran, will connect to the server
@@ -48,8 +50,9 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	 * object as a listener to any local events (eg. player moved) which must be
 	 * transmitted over the network.
 	 */
-	public ServerInstance(GameUI gameUI, World world) {
-		this.world = world;
+	public ServerInstance(GameUI gameUI, Lobby lobby) {
+		this.lobby = lobby;
+		this.world = null;
 		this.gameUI = gameUI;
 		logger.setLevel(Level.FINEST);
 	}
@@ -174,6 +177,10 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		} else {
 			manager.dispatchAllExcept(p, 0);
 		}
+	}
+	
+	private void sendLobbyUpdatePacket() {
+		Packet p = new Packet("lobby-updated");
 	}
 
 	@Override

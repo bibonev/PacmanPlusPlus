@@ -17,6 +17,7 @@ import teamproject.event.arguments.NewGameRequestedEventArguments;
 import teamproject.event.listener.GameClosingListener;
 import teamproject.event.listener.NewGameRequestedEventListener;
 import teamproject.gamelogic.core.GameCommandService;
+import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.graphics.GhostVisualisation;
@@ -33,7 +34,7 @@ import teamproject.networking.integration.ServerInstance;
  *
  */
 public class GameUI extends Application {
-
+	private Lobby lobby;
 	private Game game;
 	private Music music;
 	private SoundEffects sounds;
@@ -257,11 +258,11 @@ public class GameUI extends Application {
 	}
 
 	public void createNewPendingMultiPlayerGame() {
-		Game game = GameCommandService.generateNewMultiplayerGame(name, new GameSettings());
+		this.lobby = new Lobby();
 		multiPlayerLobbyScreen.addNames();
 		
-		ServerInstance server = new ServerInstance(this, game.getWorld());
-		ClientInstance client = new ClientInstance(this, game.getWorld(), name, "localhost");
+		ServerInstance server = new ServerInstance(this, lobby);
+		ClientInstance client = new ClientInstance(this, name, "localhost");
 		
 		this.onGameClosing.addListener(() -> {
 			server.stop();
@@ -281,7 +282,7 @@ public class GameUI extends Application {
 	public void joinGame(final String gameIp) {
 		Game game = GameCommandService.generateNewMultiplayerGame(name, new GameSettings());
 		multiPlayerLobbyScreen.addNames();
-		ClientInstance client = new ClientInstance(this, game.getWorld(), name, gameIp);
+		ClientInstance client = new ClientInstance(this, name, gameIp);
 		client.run();
 		// join game with ip
 	}
