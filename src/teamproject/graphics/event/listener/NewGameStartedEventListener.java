@@ -38,6 +38,6 @@ public class NewGameStartedEventListener implements teamproject.event.listener.N
 		mapV.redrawMap();
 
 		// Start Timeline
-		mapV.startTimeline(); */
+		mapV.startTimeline();*/
 	}
 }
