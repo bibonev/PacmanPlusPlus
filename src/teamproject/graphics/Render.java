@@ -7,23 +7,16 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
+
 import teamproject.ai.AIGhost;
-import teamproject.ai.DefaultBehaviour;
-import teamproject.constants.CellSize;
-import teamproject.constants.CellState;
 import teamproject.constants.Images;
 import teamproject.constants.ScreenSize;
 import teamproject.event.arguments.EntityMovedEventArgs;
-import teamproject.event.listener.EntityMovedListener;
 import teamproject.event.listener.LocalEntityUpdatedListener;
 import teamproject.gamelogic.domain.*;
 import teamproject.ui.GameUI;
 
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.Random;
-
-import static java.lang.System.exit;
+import java.util.*;
 
 /**
  * Created by Boyan Bonev on 09/02/2017.
@@ -31,22 +24,34 @@ import static java.lang.System.exit;
 public class Render implements LocalEntityUpdatedListener {
 	private Pane root;
 	private Timeline timeLine;
-	private Scene scene;
-	private ControlledPlayer controlledPlayer;
+    private ControlledPlayer controlledPlayer;
 	private GameUI gameUI;
 	private World world;
 	private boolean serverMode;
 
-	/**
-	 * Initialize new visualisation of the map
-	 * 
-	 * @param world
-	 */
+	private EntityMovement moveControlledPlayer;
+	private HashMap<Entity, EntityMovement> ghostMovements;
+
+    /**
+     * Initialize new visualisation of the map
+     *
+     * @param gameUI
+     * @param player
+     * @param world
+     * @param serverMode
+     */
 	public Render(GameUI gameUI, ControlledPlayer player, World world, boolean serverMode) {
 		this.gameUI = gameUI;
-		this.controlledPlayer = player;
 		this.world = world;
 		this.serverMode = serverMode;
+
+		this.controlledPlayer = player;
+		this.moveControlledPlayer = new EntityMovement(controlledPlayer, world);
+
+		this.ghostMovements = new HashMap<>();
+		for (AIGhost ghost : world.getGhosts()) {
+			this.ghostMovements.put(ghost, new EntityMovement(ghost, world));
+		}
 	}
 
 	/**
@@ -60,15 +65,9 @@ public class Render implements LocalEntityUpdatedListener {
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
 
-		scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
+        Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
 
-		for (int i = 0; i < cells.length; i++) {
-			for (int j = 0; j < cells[i].length; j++) {
-				Cell c = cells[i][j];
-				CellVisualisation cv = new CellVisualisation(cells[i][j]);
-				root.getChildren().add(cv.getNode());
-			}
-		}
+		addToRoot(root, cells);
 
 		return scene;
 	}
@@ -82,13 +81,7 @@ public class Render implements LocalEntityUpdatedListener {
 
 		root.getChildren().clear();
 
-		for (int i = 0; i < cells.length; i++) {
-			for (int j = 0; j < cells[i].length; j++) {
-				Cell c = cells[i][j];
-				CellVisualisation cv = new CellVisualisation(cells[i][j]);
-				root.getChildren().add(cv.getNode());
-			}
-		}
+		addToRoot(root, cells);
 
 		for(Player player : world.getPlayers()) {
 			root.getChildren().add(new PacmanVisualisation(player).getNode());
@@ -101,49 +94,12 @@ public class Render implements LocalEntityUpdatedListener {
 		root.requestFocus();
 	}
 
-	/**
-	 * Move Ghost randomly
-	 */
-	void moveGhost(Ghost ghostToMove) {
-		Random rand = new Random();
-		int randomNum = rand.nextInt((3 - 0) + 1) + 0;
-
-		if (controlledPlayer.getPosition().getRow() > ghostToMove.getPosition().getRow()) {
-			if (controlledPlayer.getPosition().getColumn() > ghostToMove.getPosition().getColumn()) {
-				randomNum = rand.nextInt((1 - 0) + 1) + 0;
-
-				if (randomNum == 0)
-					moveDown(ghostToMove);
-				else
-					moveRight(ghostToMove);
-			}
-
-			if (controlledPlayer.getPosition().getColumn() <= ghostToMove.getPosition().getColumn()) {
-				randomNum = rand.nextInt((1 - 0) + 1) + 0;
-
-				if (randomNum == 0)
-					moveDown(ghostToMove);
-				else
-					moveLeft(ghostToMove);
-			}
-
-		} else if (controlledPlayer.getPosition().getRow() <= ghostToMove.getPosition().getRow()) {
-			if (controlledPlayer.getPosition().getColumn() >= ghostToMove.getPosition().getColumn()) {
-				randomNum = rand.nextInt((1 - 0) + 1) + 0;
-
-				if (randomNum == 0)
-					moveUp(ghostToMove);
-				else
-					moveRight(ghostToMove);
-			}
-
-			if (controlledPlayer.getPosition().getColumn() < ghostToMove.getPosition().getColumn()) {
-				randomNum = rand.nextInt((1 - 0) + 1) + 0;
-
-				if (randomNum == 0)
-					moveUp(ghostToMove);
-				else
-					moveLeft(ghostToMove);
+	private void addToRoot(Pane root, Cell[][] cells) {
+		for (int i = 0; i < cells.length; i++) {
+			for (int j = 0; j < cells[i].length; j++) {
+				Cell c = cells[i][j];
+				CellVisualisation cv = new CellVisualisation(cells[i][j]);
+				root.getChildren().add(cv.getNode());
 			}
 		}
 
@@ -181,51 +137,25 @@ public class Render implements LocalEntityUpdatedListener {
 	boolean moveUp(Entity toMove) {
 		return moveTo(toMove.getPosition().getRow() - 1, toMove.getPosition().getColumn(), 270,
 				toMove);
-	}
 
-	/**
-	 * Move the PacMan down
-	 * 
-	 * @return true/false depending on whether the move is legit or not
-	 */
-	boolean moveDown(Entity toMove) {
-		return moveTo(toMove.getPosition().getRow() + 1, toMove.getPosition().getColumn(), 90,
-				toMove);
 	}
-
-	/**
-	 * Move the PacMan left
-	 * 
-	 * @return true/false depending on whether the move is legit or not
-	 */
-	boolean moveLeft(Entity toMove) {
-		return moveTo(toMove.getPosition().getRow(), toMove.getPosition().getColumn() - 1, -180,
-				toMove);
-	}
-
-	/**
-	 * Move the PacMan right
-	 * 
-	 * @return true/false depending on whether the move is legit or not
-	 */
-	boolean moveRight(Entity toMove) {
-		return moveTo(toMove.getPosition().getRow(), toMove.getPosition().getColumn() + 1, 0,
-				toMove);
-	}
-
 	/**
 	 * Click listener for moving the ghost
 	 */
 	public void addClickListener() {
 		root.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.UP) {
-				moveUp(controlledPlayer);
+				moveControlledPlayer.moveUp();
+				redrawMap();
 			} else if (event.getCode() == KeyCode.DOWN) {
-				moveDown(controlledPlayer);
+				moveControlledPlayer.moveDown();
+				redrawMap();
 			} else if (event.getCode() == KeyCode.LEFT) {
-				moveLeft(controlledPlayer);
+				moveControlledPlayer.moveLeft();
+				redrawMap();
 			} else if (event.getCode() == KeyCode.RIGHT) {
-				moveRight(controlledPlayer);
+				moveControlledPlayer.moveRight();
+				redrawMap();
 			}
 		});
 	}
@@ -246,22 +176,22 @@ public class Render implements LocalEntityUpdatedListener {
 		for(AIGhost ghost : world.getGhosts()) {
 			ghost.getBehaviour().getOnMovedEvent().addListener(this);
 		}
-		timeLine = new Timeline(new KeyFrame(Duration.millis(1000), event -> {
-			if(serverMode) {
-				for(AIGhost ghost : world.getGhosts()) {
-					ghost.run();
+
+		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
+				if(serverMode) {
+					for(AIGhost ghost : world.getGhosts()) {
+						ghost.run();
+					}
 				}
-			}
 			}
 		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
-		
 	}
 
 	@Override
 	public void onEntityMoved(EntityMovedEventArgs args) {
-		moveTo(args.getRow(),args.getCol(),args.getAngle(),args.getEntity());
-		
+		this.ghostMovements.get(args.getEntity()).moveTo(args.getRow(), args.getCol(), args.getAngle());
+		redrawMap();
 	}
 }
