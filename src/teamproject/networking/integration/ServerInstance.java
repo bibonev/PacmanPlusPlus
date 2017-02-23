@@ -6,12 +6,17 @@ import java.util.logging.Logger;
 import teamproject.constants.EntityType;
 import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.arguments.EntityMovedEventArgs;
-
+import teamproject.event.arguments.LobbyChangedEventArgs;
 import teamproject.event.listener.EntityAddedListener;
 import teamproject.event.listener.EntityRemovingListener;
+import teamproject.event.listener.GameStartedListener;
+import teamproject.event.listener.HostStartingMultiplayerGameListener;
+import teamproject.event.listener.LobbyStateChangedListener;
 import teamproject.event.listener.LocalEntityUpdatedListener;
 import teamproject.gamelogic.core.Lobby;
+import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
+import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.LocalEntityTracker;
 import teamproject.gamelogic.domain.Player;
@@ -30,10 +35,11 @@ import teamproject.ui.GameUI;
 public class ServerInstance implements Runnable, ServerTrigger,
 		ClientConnectedListener, LocalEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener,
-		ClientDisconnectedListener {
+		ClientDisconnectedListener, LobbyStateChangedListener,
+		HostStartingMultiplayerGameListener, GameStartedListener {
 	private Server server;
 	private ServerManager manager;
-	private World world;
+	private Game game;
 	private GameUI gameUI;
 	private LocalEntityTracker tracker;
 	private Logger logger = Logger.getLogger("network-server");
@@ -53,7 +59,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	 */
 	public ServerInstance(GameUI gameUI, Lobby lobby) {
 		this.lobby = lobby;
-		this.world = null;
+		this.game = null;
 		this.gameUI = gameUI;
 		logger.setLevel(Level.FINEST);
 	}
@@ -114,12 +120,16 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		 * the server.
 		 */
 		tracker = new LocalEntityTracker(this);
+		server.getClientConnectedEvent().addListener(this);
+		server.getClientDisconnectedEvent().addListener(this);
+		lobby.getLobbyStateChangedEvent().addListener(this);
+	}
+	
+	private void addWorldGameHooks(World world) {
 		world.getOnEntityAddedEvent().addListener(this);
 		world.getOnEntityAddedEvent().addListener(tracker);
 		world.getOnEntityRemovingEvent().addListener(this);
 		world.getOnEntityRemovingEvent().addListener(tracker);
-		server.getClientConnectedEvent().addListener(this);
-		server.getClientDisconnectedEvent().addListener(this);
 	}
 	
 	/**
@@ -137,6 +147,10 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		 * this.gameWorld.getPlayerMovedEvent().removeListener(this.dispatcher);
 		 */
 		
+		if(game != null) removeWorldGameHooks(game.getWorld());
+	}
+	
+	private void removeWorldGameHooks(World world) {
 		world.getOnEntityAddedEvent().removeListener(this);
 		world.getOnEntityAddedEvent().removeListener(tracker);
 		world.getOnEntityRemovingEvent().removeListener(this);
@@ -149,6 +163,37 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		p.setInteger("client-id", clientID);
 		
 		manager.dispatch(clientID, p);
+	}
+	
+	private void sendInitialLobbyState(int clientID) {
+		for(int i : lobby.getPlayerIDs()) {
+			manager.dispatch(clientID, createPlayerJoinedLobbyPacket(lobby.getPlayer(i)));
+		}
+		manager.dispatch(clientID, createRulesChangedPacket(lobby.getSettingsString()));
+	}
+	
+	private Packet createRulesChangedPacket(String[] rules) {
+		Packet p = new Packet("lobby-rule-display-changed");
+		
+		p.setInteger("rule-strings.length", rules.length);
+		for(int i = 0; i < rules.length; i++) {
+			p.setString("rule-strings[" + i + "]", rules[i]);
+		}
+		
+		return p;
+	}
+	
+	private Packet createPlayerJoinedLobbyPacket(LobbyPlayerInfo player) {
+		Packet p = new Packet("lobby-player-enter");
+		p.setInteger("player-id", player.getID());
+		p.setString("player-name", player.getName());
+		return p;
+	}
+	
+	private Packet createPlayerLeftLobbyPacket(int playerID) {
+		Packet p = new Packet("lobby-player-left");
+		p.setInteger("player-id", playerID);
+		return p;
 	}
 	
 	@Override
@@ -179,10 +224,6 @@ public class ServerInstance implements Runnable, ServerTrigger,
 			manager.dispatchAllExcept(p, 0);
 		}
 	}
-	
-	private void sendLobbyUpdatePacket() {
-		Packet p = new Packet("lobby-updated");
-	}
 
 	@Override
 	public void trigger(int sender, Packet p) {
@@ -198,7 +239,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		int row = p.getInteger("row"), col = p.getInteger("col");
 		double angle = p.getDouble("angle");
 		
-		Entity e = world.getEntity(sender);
+		Entity e = game.getWorld().getEntity(sender);
 		
 		if(e != null && e instanceof Player) {
 			Player player = (Player)e;
@@ -211,8 +252,9 @@ public class ServerInstance implements Runnable, ServerTrigger,
 
 	private void triggerHandshake(int sender, Packet p) {
 		String username = p.getString("username");
-		RemotePlayer player = new RemotePlayer(sender, username);
-		world.addEntity(player);
+
+		lobby.addPlayer(sender, new LobbyPlayerInfo(sender, username));
+		sendInitialLobbyState(sender);
 	}
 
 	@Override
@@ -223,7 +265,6 @@ public class ServerInstance implements Runnable, ServerTrigger,
 			Packet p = new Packet("remote-player-joined");
 			p.setInteger("player-id", e.getID());
 			p.setString("name", ((Player) e).getName());
-			gameUI.multiPlayerLobbyScreen.list.addPlayer((Player)e);
 			manager.dispatchAllExcept(p, e.getID(), 0);
 		}
 		if(e instanceof Ghost) {
@@ -253,7 +294,47 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	@Override
 	public void onClientDisconnected(int clientID) {
 		logger.log(Level.INFO, "Client {0} disconnected.", clientID);
-		world.removeEntity(clientID);
+		lobby.removePlayer(clientID);
+		if(game != null) game.getWorld().removeEntity(clientID);
+	}
+
+	@Override
+	public void onLobbyStateChanged(LobbyChangedEventArgs args) {
+		if(args instanceof LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) {
+			int id = ((LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) args).getPlayerID();
+			manager.dispatchAllExcept(createPlayerLeftLobbyPacket(
+					((LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) args).getPlayerID()),
+					id);
+		} else if(args instanceof LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) {
+			int id = ((LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) args).getPlayerID();
+			manager.dispatchAllExcept(createPlayerJoinedLobbyPacket(
+					((LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) args).getPlayerInfo()),
+					id);
+		} else if(args instanceof LobbyChangedEventArgs.LobbyRulesChangedEventArgs) {
+			manager.dispatchAll(createRulesChangedPacket(
+					((LobbyChangedEventArgs.LobbyRulesChangedEventArgs) args).getNewRules()));
+		}
+	}
+
+	@Override
+	public void onHostStartingGame() {
+		Packet p = new Packet("game-starting");
+		
+		// add game configuration stuff into this packet
+		
+		manager.dispatchAll(p);
+	}
+
+	@Override
+	public void onGameStarted(Game game) {
+		for(int i : lobby.getPlayerIDs()) {
+			if(i > 0) { // ie. remote
+				LobbyPlayerInfo info = lobby.getPlayer(i);
+				RemotePlayer player = new RemotePlayer(info.getID(), info.getName());
+				player.setPosition(new Position(0, 0));
+				game.getWorld().addEntity(player);
+			}
+		}
 	}
 
 	

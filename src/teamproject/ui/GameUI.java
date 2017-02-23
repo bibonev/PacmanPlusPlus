@@ -1,6 +1,7 @@
 package teamproject.ui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -13,11 +14,15 @@ import teamproject.audio.Music;
 import teamproject.audio.SoundEffects;
 import teamproject.constants.GameType;
 import teamproject.event.Event;
+import teamproject.event.arguments.LobbyChangedEventArgs;
 import teamproject.event.arguments.NewGameRequestedEventArguments;
 import teamproject.event.listener.GameClosingListener;
+import teamproject.event.listener.GameStartedListener;
+import teamproject.event.listener.LobbyStateChangedListener;
 import teamproject.event.listener.NewGameRequestedEventListener;
 import teamproject.gamelogic.core.GameCommandService;
 import teamproject.gamelogic.core.Lobby;
+import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.graphics.GhostVisualisation;
@@ -33,7 +38,7 @@ import teamproject.networking.integration.ServerInstance;
  * @author Rose Kirtley
  *
  */
-public class GameUI extends Application {
+public class GameUI extends Application implements LobbyStateChangedListener, GameStartedListener {
 	private Lobby lobby;
 	private Game game;
 	private Music music;
@@ -58,9 +63,12 @@ public class GameUI extends Application {
 	private MultiPlayerJoinScreen multiPlayerJoinScreen;
 	
 	private Event<GameClosingListener, Object> onGameClosing = new Event<>((l, a) -> l.onGameClosing());
+	private GameCommandService gameCommandService;
 
 	@Override
 	public void start(final Stage primaryStage) throws Exception {
+		gameCommandService = new GameCommandService();
+		gameCommandService.getGameStartedEvent().addListener(this);
 		setup();
 
 		thisStage = primaryStage;
@@ -101,6 +109,7 @@ public class GameUI extends Application {
 		gameScreen = new GameScreen(this, music);
 		settingsScreen = new SettingsScreen(this);
 		singlePlayerLobbyScreen = new SinglePlayerLobbyScreen(this);
+		singlePlayerLobbyScreen.getOnStartingSingleplayerGame().addListener(gameCommandService);
 		multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(this);
 		multiPlayerOptionScreen = new MultiPlayerOptionScreen(this);
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
@@ -208,59 +217,11 @@ public class GameUI extends Application {
 		return name;
 	}
 
-	// TODO: refactor - these 2 methods are very very similar
-	public void startNewSinglePlayerGame() {
-		switchToGame();
-		Game game = GameCommandService.generateNewSinglePlayerGame(name, new GameSettings());
-		
-		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
-
-		// Initialize Screen dimensions
-		PositionVisualisation.initScreenDimensions();
-
-		// Draw Map
-		thisStage.setScene(mapV.drawMap());
-		thisStage.show();
-
-		// Add CLick Listener
-		mapV.addClickListener();
-
-		// Redraw Map
-		mapV.redrawMap();
-		
-		// Start Timeline
-		mapV.startTimeline();
-	}
-
-	public void startNewMultiPlayerGame() {
-		switchToMultiPlayerLobby();
-		
-		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
-
-		// Initialize Screen dimensions
-		PositionVisualisation.initScreenDimensions();
-
-		// Draw Map
-		thisStage.setScene(mapV.drawMap());
-		thisStage.show();
-
-		// Add CLick Listener
-		mapV.addClickListener();
-
-		// Redraw Map
-		mapV.redrawMap();
-
-		// Start Timeline
-		mapV.startTimeline();
-
-		// start multiplayer game
-		// gameCommandService.requestNewMultiplayerGame(args.getUserName(), args.getSettings(), args.getStage());
-	}
-
+	// TODO move creation of client/server instances into GameCommandService at some point
 	public void createNewPendingMultiPlayerGame() {
-		this.lobby = new Lobby();
 		multiPlayerLobbyScreen.addNames();
 		
+		this.lobby = new Lobby();
 		ServerInstance server = new ServerInstance(this, lobby);
 		ClientInstance client = new ClientInstance(this, name, "localhost");
 		
@@ -268,6 +229,17 @@ public class GameUI extends Application {
 			server.stop();
 			client.stop();
 		});
+		
+		this.multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(
+				() -> {
+					client.stop();
+					server.stop();
+				});
+		this.multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
+		this.multiPlayerLobbyScreen.setStartGameEnabled(true);
+		this.gameCommandService.getGameStartedEvent().addListener(server);
+		
+		client.getRemoteGameStartingEvent().addListener(gameCommandService);
 		
 		server.run();
 		client.run();
@@ -279,10 +251,19 @@ public class GameUI extends Application {
 		return true;
 	}
 
+	// TODO move creation of client instance into GameCommandService at some point
 	public void joinGame(final String gameIp) {
-		Game game = GameCommandService.generateNewMultiplayerGame(name, new GameSettings());
-		multiPlayerLobbyScreen.addNames();
 		ClientInstance client = new ClientInstance(this, name, gameIp);
+		
+		this.onGameClosing.addListener(() -> {
+			client.stop();
+		});
+		
+		this.multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(
+				() -> client.stop());
+		this.multiPlayerLobbyScreen.setStartGameEnabled(false);
+		client.getRemoteGameStartingEvent().addListener(gameCommandService);
+		
 		client.run();
 		// join game with ip
 	}
@@ -293,5 +274,49 @@ public class GameUI extends Application {
 
 	public void muteSounds(final boolean bool) {
 		sounds.setOn(bool);
+	}
+
+	@Override
+	public void onLobbyStateChanged(LobbyChangedEventArgs args) {
+		if(args instanceof LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) {
+			multiPlayerLobbyScreen.list.removePlayer(
+					((LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) args).getPlayerID());
+		} else if(args instanceof LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) {
+			multiPlayerLobbyScreen.list.addPlayer(
+					((LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) args).getPlayerInfo());
+		} else {
+			// TODO: update rules display
+		}
+	}
+
+	public void setLobby(Lobby lobby) {
+		this.lobby = lobby;
+		lobby.getLobbyStateChangedEvent().addListener(this);
+	}
+
+	@Override
+	public void onGameStarted(Game game) {
+		Platform.runLater(() -> {
+			switchToGame();
+			
+			final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
+	
+			// Initialize Screen dimensions
+			PositionVisualisation.initScreenDimensions();
+	
+			// Draw Map
+			thisStage.setScene(mapV.drawMap());
+			thisStage.show();
+	
+			// Add CLick Listener
+			mapV.addClickListener();
+	
+			// Redraw Map
+			mapV.redrawMap();
+	
+			// Start Timeline
+			mapV.startTimeline();
+		});
+
 	}
 }

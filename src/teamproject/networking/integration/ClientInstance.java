@@ -6,11 +6,14 @@ import java.util.logging.Logger;
 import teamproject.constants.CellState;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
 import teamproject.event.listener.LocalEntityUpdatedListener;
 import teamproject.event.listener.LocalPlayerMovedListener;
+import teamproject.event.listener.RemoteGameStartingListener;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
+import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RemoteGhost;
 import teamproject.gamelogic.domain.RemotePlayer;
@@ -33,7 +36,8 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	private String username;
 	private GameUI gameUI;
 	private boolean alreadyDoneHandshake;
-	private Logger logger = Logger.getLogger("network-client");
+	private Logger logger = Logger.getLogger("network-clclassient");
+	private Event<RemoteGameStartingListener, MultiplayerGameStartingEventArgs> remoteGameStartingEvent;
 	
 	/**
 	 * Creates a new client instance which, when ran, will connect to the server
@@ -55,7 +59,9 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		this.gameUI = gameUI;
 		this.alreadyDoneHandshake = false;
 		this.lobby = new Lobby();
+		this.gameUI.setLobby(this.lobby);
 		this.world = null;
+		this.remoteGameStartingEvent = new Event<>((l, a) -> l.onRemoteGameStarting(a));
 		
 		logger.setLevel(Level.FINEST);
 	}
@@ -146,6 +152,12 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		 * 
 		 * this.gameWorld.getPlayerMovedEvent().removeListener(this);
 		 */
+		
+		
+	}
+	
+	public Event<RemoteGameStartingListener, MultiplayerGameStartingEventArgs> getRemoteGameStartingEvent() {
+		return remoteGameStartingEvent;
 	}
 
 	/* HANDLERS to create/deal with outgoing packets */
@@ -170,6 +182,8 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			triggerRemoteGhostMoved(p);
 		} else if(p.getPacketName().equals("game-tile-changed")) {
 			triggerGameTileChanged(p);
+		} else if(p.getPacketName().equals("remote-ghost-joined")) {
+			triggerRemoteGhostJoined(p);
 		} else if(p.getPacketName().equals("remote-player-joined")) {
 			triggerRemotePlayerJoined(p);
 		} else if(p.getPacketName().equals("remote-player-left")) {
@@ -178,28 +192,47 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			triggerRemoteGhostLeft(p);
 		} else if(p.getPacketName().equals("lobby-player-enter")) {
 			triggerLobbyPlayerEnter(p);
-		} else if(p.getPacketName().equals("lobby-player-leave")) {
+		} else if(p.getPacketName().equals("lobby-player-left")) {
 			triggerLobbyPlayerLeave(p);
 		} else if(p.getPacketName().equals("lobby-rule-display-changed")) {
 			triggerLobbyRuleDisplayChanged(p);
+		} else if(p.getPacketName().equals("game-starting")) {
+			triggerGameStarting(p);
 		}
 	}
 
-	private void triggerLobbyPlayerLeave(Packet p) {
-		// TODO Auto-generated method stub
+	private void triggerGameStarting(Packet p) {
+		GameSettings settings = new GameSettings();
+		// reconstruct game settings as needed
 		
+
+		MultiplayerGameStartingEventArgs args = new MultiplayerGameStartingEventArgs(settings, username);
+		
+		this.getRemoteGameStartingEvent().fire(args);
+	}
+
+	private void triggerLobbyPlayerLeave(Packet p) {
+		int playerID = p.getInteger("player-id");
+		
+		lobby.removePlayer(playerID);
 	}
 
 	private void triggerLobbyRuleDisplayChanged(Packet p) {
-		// TODO Auto-generated method stub
+		int size = p.getInteger("rule-strings.length");
+		String[] s = new String[size];
 		
+		for(int i = 0; i < size; i++) {
+			s[i] = p.getString("rule-strings[" + i + "]");
+		}
+		
+		lobby.setSettingsString(s);
 	}
 
 	private void triggerLobbyPlayerEnter(Packet p) {
 		int playerID = p.getInteger("player-id");
 		String playerName = p.getString("player-name");
 		
-		LobbyPlayerInfo lobbyPlayerInfo = new LobbyPlayerInfo(playerName); 
+		LobbyPlayerInfo lobbyPlayerInfo = new LobbyPlayerInfo(playerID, playerName); 
 		
 		lobby.addPlayer(playerID, lobbyPlayerInfo);
 	}
@@ -219,16 +252,15 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	private void triggerRemotePlayerJoined(Packet p) {
 		int playerID = p.getInteger("player-id");
 		String name = p.getString("name");
+
 		RemotePlayer player = new RemotePlayer(playerID, name);
+		player.setPosition(new Position(0, 0));
 		
-		gameUI.multiPlayerLobbyScreen.list.addPlayer(player);
-		world.addPlayer(player);
+		world.addEntity(player);
 	}
 
 	private void triggerRemotePlayerLeft(Packet p) {
 		int playerID = p.getInteger("player-id");
-		
-		gameUI.multiPlayerLobbyScreen.list.removePlayer(playerID);
 		world.removeEntity(playerID);
 	}
 
