@@ -1,12 +1,20 @@
 package teamproject.gamelogic.domain;
 
+import teamproject.constants.EntityType;
+import teamproject.event.Event;
+import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.listener.EntityMovedListener;
+
 public abstract class Entity {
+	
 	private Position position;
 	private int id = -1;
 	private World world;
+	private Event<EntityMovedListener, EntityMovedEventArgs> onMoved;
+	private EntityType type;
 	
 	public Entity() {
-		
+		onMoved = new Event<>((l, p) -> l.onEntityMoved(p));
 	}
 	
 	public Position getPosition() {
@@ -31,5 +39,14 @@ public abstract class Entity {
 	
 	protected void setWorld(World world) {
 		this.world = world;
+	}
+	public Event<EntityMovedListener, EntityMovedEventArgs> getOnMovedEvent() {
+		return onMoved;
+	}
+	public void setType(EntityType type){
+		this.type=type;
+	}
+	public EntityType getType(){
+		return type;
 	}
 }
