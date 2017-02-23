@@ -3,9 +3,10 @@ package teamproject.networking.integration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import teamproject.constants.EntityType;
 import teamproject.event.arguments.EntityChangedEventArgs;
-import teamproject.event.arguments.LocalGhostMovedEventArgs;
-import teamproject.event.arguments.LocalPlayerMovedEventArgs;
+import teamproject.event.arguments.EntityMovedEventArgs;
+
 import teamproject.event.listener.EntityAddedListener;
 import teamproject.event.listener.EntityRemovingListener;
 import teamproject.event.listener.LocalEntityUpdatedListener;
@@ -149,32 +150,32 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		
 		manager.dispatch(clientID, p);
 	}
-
+	
 	@Override
-	public void onLocalGhostMoved(LocalGhostMovedEventArgs ghost) {
-		Packet p = new Packet("remote-ghost-moved");
-		p.setInteger("row", ghost.getRow());
-		p.setInteger("col", ghost.getCol());
-		p.setInteger("ghost-id", ghost.getGhostID());
-		
-		manager.dispatchAllExcept(p, 0);
-	}
-
-	@Override
-	public void onLocalPlayerMoved(LocalPlayerMovedEventArgs player) {
-		Packet p = new Packet("remote-player-moved");
-		p.setInteger("row", player.getRow());
-		p.setInteger("col", player.getCol());
-		p.setDouble("angle", player.getAngle());
-		p.setInteger("player-id", player.getPlayerID());
-		
-		if(server.getConnectedClients().contains(player.getPlayerID())) {
-			// if the player ID is connected to the server, then
-			// this is an actual player
-			// otherwise it's an AI player
+	public void onEntityMoved(EntityMovedEventArgs args) {
+		if(args.getEntity().getType()==EntityType.PLAYER){
+			Packet p = new Packet("remote-player-moved");
+			p.setInteger("row", args.getRow());
+			p.setInteger("col", args.getCol());
+			p.setDouble("angle", args.getAngle());
+			p.setInteger("player-id", args.getEntity().getID());
 			
-			manager.dispatchAllExcept(p, player.getPlayerID(), 0);
-		} else {
+			if(server.getConnectedClients().contains(args.getEntity().getID())) {
+				// if the player ID is connected to the server, then
+				// this is an actual player
+				// otherwise it's an AI player
+				
+				manager.dispatchAllExcept(p, args.getEntity().getID(), 0);
+			} else {
+				manager.dispatchAllExcept(p, 0);
+			}
+		}
+		if(args.getEntity().getType()==EntityType.GHOST){
+			Packet p = new Packet("remote-ghost-moved");
+			p.setInteger("row", args.getRow());
+			p.setInteger("col", args.getCol());
+			p.setInteger("ghost-id", args.getEntity().getID());
+			
 			manager.dispatchAllExcept(p, 0);
 		}
 	}
@@ -254,6 +255,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		logger.log(Level.INFO, "Client {0} disconnected.", clientID);
 		world.removeEntity(clientID);
 	}
+
 	
 	/*
 	 * For posterity: a corresponding removeTriggers method is not necessary. Once

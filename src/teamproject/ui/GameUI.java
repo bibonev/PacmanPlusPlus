@@ -227,7 +227,7 @@ public class GameUI extends Application {
 
 		// Redraw Map
 		mapV.redrawMap();
-
+		
 		// Start Timeline
 		mapV.startTimeline();
 	}
