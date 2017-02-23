@@ -26,7 +26,6 @@ public class PacmanVisualisation {
 	 * Initialize new visualisation for the PacMan player
 	 * 
 	 * @param player
-	 * @param map
 	 */
 	public PacmanVisualisation(final Player player) {
 		this.player = player;

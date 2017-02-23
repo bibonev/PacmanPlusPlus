@@ -12,15 +12,15 @@ public class GameTest {
 	@Test
 	public void shouldConstruct() {
 		// Given
-		final long id = Randoms.randomLong();
 		final World world = Randoms.randomWorld();
 		final GameSettings gameSettings = Randoms.randomGameSettings();
+		final ControlledPlayer controlledPlayer = Randoms.randomControlledPlayer();
 
 		// When
-		final Game game = new Game(id, world, gameSettings);
+		final Game game = new Game(world, gameSettings, controlledPlayer);
 
 		// Then
-		assertThat(game.getId(), Is.is(id));
+		assertThat(game.getPlayer(), Is.is(controlledPlayer));
 		assertThat(game.getWorld(), Is.is(world));
 		assertThat(game.getGameSettings(), Is.is(gameSettings));
 	}

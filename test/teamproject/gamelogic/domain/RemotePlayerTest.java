@@ -5,22 +5,22 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-import teamproject.gamelogic.domain.stubs.GhostStub;
 import teamproject.gamelogic.random.Randoms;
 
-public class GhostTest {
+public class RemotePlayerTest {
 
 	@Test
 	public void shouldConstruct() {
 		// Given
+		final int id = Randoms.randomInteger();
 		final String name = Randoms.randomString();
-		final Behaviour behaviour = Randoms.randomBehaviour();
+
 		// When
-		final Ghost ghost = new GhostStub(behaviour, name);
+		final RemotePlayer player = new RemotePlayer(id, name);
 
 		// Then
-		assertThat(ghost.getBehaviour(), Is.is(behaviour));
-		assertThat(ghost.getName(), Is.is(name));
+		assertThat(player.getID(), Is.is(id));
+		assertThat(player.getName(), Is.is(name));
 	}
 
 }

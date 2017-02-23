@@ -2,45 +2,42 @@ package teamproject.graphics;
 
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 import teamproject.constants.CellType;
 import teamproject.constants.Colors;
 import teamproject.constants.CellState;
+import teamproject.gamelogic.domain.Cell;
 
 /**
  * Created by boyanbonev on 05/02/2017.
  */
 public class CellVisualisationTest {
+    private PositionVisualisation testPositionVisualisation;
+    private CellState testState;
+    private CellType testType;
+    private Cell testCell;
+    private CellVisualisation test;
 
-    @Test
-    public void testConstructor(){
-        PositionVisualisation testPositionVisualisation = new PositionVisualisation(5, 5);
-        CellState testBoardState = CellState.EMPTY;
-        CellType testTye = CellType.NORMAL;
-        CellVisualisation test = new CellVisualisation(testTye, testBoardState, testPositionVisualisation);
-
-        assertEquals(test.positionVisualisation, testPositionVisualisation);
+    @Before
+    public void initializeFields(){
+        testPositionVisualisation = new PositionVisualisation(5, 5);
+        testState = CellState.EMPTY;
+        testType = CellType.NORMAL;
+        testCell = new Cell(testType, testState, testPositionVisualisation);
+        test = new CellVisualisation(testCell);
     }
 
     @Test
-    public void testBoardState(){
-        PositionVisualisation testPositionVisualisation = new PositionVisualisation(5, 5);
-        CellState testBoardState = CellState.EMPTY;
-        CellType testTye = CellType.NORMAL;
-        CellVisualisation test = new CellVisualisation(testTye, testBoardState, testPositionVisualisation);
-
-        assertEquals(test.getState(), CellState.EMPTY);
+    public void testCell(){
+        assertEquals(test.getCell(), testCell);
     }
 
     @Test
     public void testRectangleNode(){
-        PositionVisualisation testPositionVisualisation = new PositionVisualisation(5, 5);
-        CellState testBoardState = CellState.EMPTY;
-        CellType testTye = CellType.NORMAL;
-        CellVisualisation test = new CellVisualisation(testTye, testBoardState, testPositionVisualisation);
-
         assertEquals(test.getNode().toString().contains("Rectangle"), true);
 
         Rectangle testRectangle = (Rectangle) test.getNode();
@@ -54,11 +51,7 @@ public class CellVisualisationTest {
 
     @Test
     public void testCircleNode(){
-        PositionVisualisation testPositionVisualisation = new PositionVisualisation(5, 5);
-        CellState testBoardState = CellState.FOOD;
-        CellType testTye = CellType.NORMAL;
-        CellVisualisation test = new CellVisualisation(testTye, testBoardState, testPositionVisualisation);
-
+        test = new CellVisualisation(new Cell(testType, CellState.FOOD, testPositionVisualisation));
         assertEquals(test.getNode().toString().contains("Circle"), true);
 
         Circle testCircle = (Circle) test.getNode();
