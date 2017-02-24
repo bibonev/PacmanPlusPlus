@@ -64,7 +64,7 @@ public abstract class Behaviour {
 	private int speed;
 
 	/** The locked target of the ai. */
-	private Position lockedTarget;
+	protected Position lockedTarget;
 
 	/** The target type. Determines what kind of enemy the ai is following */
 	private Target tarType;
@@ -74,6 +74,8 @@ public abstract class Behaviour {
 
 	/** The map size. */
 	private int mapSize;
+	
+	protected Position lastPos;
 
 	/** The inventory. */
 	private Inventory stash;
@@ -84,10 +86,10 @@ public abstract class Behaviour {
 	/** The priority targets. */
 	// to be used in more complex behaviors
 	private PriorityQueue<Item> priorityTargets;
-	
+
 	private int counter;
-	
-	private Event<EntityMovedListener, EntityMovedEventArgs> onEntityMoved;
+
+	protected Event<EntityMovedListener, EntityMovedEventArgs> onEntityMoved;
 
 	/**
 	 * Instantiates a new behavior.
@@ -101,7 +103,7 @@ public abstract class Behaviour {
 	 * @param stash
 	 *            the inventory
 	 * @param type
-	 * 			  the type
+	 *            the type
 	 */
 	public Behaviour(final Map map, final Entity entity, final int speed, final Inventory stash, Type type) {
 		mapSize = map.getMapSize();
@@ -113,13 +115,15 @@ public abstract class Behaviour {
 		this.stash = stash;
 		this.speed = speed;
 		this.type = type;
-		this.onEntityMoved=entity.getOnMovedEvent();
-		counter=0;
+		lastPos=entity.getPosition();
+		this.onEntityMoved = entity.getOnMovedEvent();
+		counter = 0;
 	}
 
 	public Event<EntityMovedListener, EntityMovedEventArgs> getOnMovedEvent() {
 		return onEntityMoved;
 	}
+
 	/**
 	 * Pick a target for the A* algorithm. Default implementation: picks the
 	 * nearest player and follows them if there are no players, moves at random
@@ -130,6 +134,7 @@ public abstract class Behaviour {
 
 		final ArrayList<Position> enemies = scanEnemies();
 
+		//System.out.println(enemies.size());
 		if (enemies.size() == 0) {
 			return pickRandomTarget();
 		}
@@ -170,11 +175,12 @@ public abstract class Behaviour {
 	 * @return the position
 	 */
 	protected Position pickRandomTarget() {
-		
+
 		final int row = entity.getPosition().getRow();
 		final int column = entity.getPosition().getColumn();
-		final ArrayList<Cell> availableCells = new ArrayList<Cell>();
+		final ArrayList<Position> availableCells = new ArrayList<Position>();
 
+<<<<<<< 17ba6411a36cd281883cf2b73a3dce353efbfa6b
 		if (row>0) {
 			if (RuleChecker.checkCellValidity(cells[row - 1][column]))
 				availableCells.add(cells[row - 1][column]);
@@ -191,11 +197,30 @@ public abstract class Behaviour {
 			if (RuleChecker.checkCellValidity(cells[row][column + 1])){
 					availableCells.add(cells[row][column + 1]);
 			}
+=======
+		if (row > 0 && RuleEnforcer.checkCellValidity(cells[row - 1][column]) && (cells[row - 1][column].getPosition().equals(lastPos)==false)) {
+			availableCells.add(new Position(row - 1, column));
+		}
+		if (row < mapSize - 1 && RuleEnforcer.checkCellValidity(cells[row + 1][column]) && (cells[row + 1][column].getPosition().equals(lastPos)==false)) {
+			availableCells.add(new Position(row + 1, column));
+		}
+		if (column > 0 && RuleEnforcer.checkCellValidity(cells[row][column - 1]) && (cells[row][column - 1].getPosition().equals(lastPos)==false)) {
+			availableCells.add(new Position(row, column - 1));
+		}
+		if (column < mapSize - 1 && RuleEnforcer.checkCellValidity(cells[row][column + 1]) && (cells[row][column + 1].getPosition().equals(lastPos)==false)) {
+			availableCells.add(new Position(row, column + 1));
+>>>>>>> Ghosts no longer move backwards unless that is the only move they can make
 		}
 		tarType = Target.RANDOM;
-		int next = rng.nextInt(availableCells.size());
+		int size = availableCells.size();
+		if(size == 0){
+			return lastPos;
+		}
+		else{
+			return availableCells.get(rng.nextInt(size));
+		}
 		
-		return availableCells.get(next).getPosition();
+		
 	}
 
 	/**
@@ -313,102 +338,109 @@ public abstract class Behaviour {
 	}
 
 	/**
-	 * Terminate the behaviour.
-	 */
-	public void kill() {
-		run = false;
-	}
-
-	/**
 	 * Run the behavior.
 	 */
 	public void run() {
-		
-			lockedTarget = pickTarget();
 
-			switch (tarType) {
+		lockedTarget = pickTarget();
 
-			// if AI is forced to make a random move, it makes *focus number
-			// of consecutive moves before it scans for new enemies
-			case RANDOM: {
+		switch (tarType) {
 
-				if(counter<focus){
-					
-					entity.setPosition(lockedTarget);
-					System.out.println(lockedTarget.getRow()+" "+ lockedTarget.getColumn());
-					onEntityMoved.fire(new EntityMovedEventArgs(lockedTarget.getRow(),lockedTarget.getColumn(),0,entity));
+		// if AI is forced to make a random move, it makes *focus number
+		// of consecutive moves before it scans for new enemies
+		case RANDOM: {
+
+			if (counter < focus) {
 				
-					lockedTarget = pickRandomTarget();
-					
-					counter++;
-				}
-				else{
-					counter=0;
-					run();
-					
-				}
+				lastPos=entity.getPosition();
+				entity.setPosition(lockedTarget);
+
+				onEntityMoved
+						.fire(new EntityMovedEventArgs(lockedTarget.getRow(), lockedTarget.getColumn(), 0, entity));
+
+				lockedTarget = pickRandomTarget();
+
+				counter++;
+			} else {
+				counter = 0;
+				run();
+
 			}
-				break;
+		}
+			break;
 
-			// if AI has a stationary target (item,food etc)
-			// generates path and follows it until it reaches the target
-			// if path becomes obstructed or item disappears ai chooses new
-			// target
-			case STATIONARY: {
+		// if AI has a stationary target (item,food etc)
+		// generates path and follows it until it reaches the target
+		// if path becomes obstructed or item disappears ai chooses new
+		// target
+		case STATIONARY: {
 
-				genPath(entity.getPosition(), lockedTarget);
+			genPath(entity.getPosition(), lockedTarget);
 
+<<<<<<< 17ba6411a36cd281883cf2b73a3dce353efbfa6b
 				while (currentPath.size() > 0 && run && isTargetThere(lockedTarget)) {
 					if (RuleChecker
 							.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 						// TODO: send move event
 						currentPath.remove(0);
+=======
+			while (currentPath.size() > 0 && isTargetThere(lockedTarget)) {
+				if (RuleEnforcer.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+					
+					onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+					
+					currentPath.remove(0);
+>>>>>>> Ghosts no longer move backwards unless that is the only move they can make
 
-						// waits for the move to be executed
+				} else {
+					currentPath.clear();
+					break;
+				}
+			}
+		}
+			break;
+
+		// if ai chases an enemy player
+		// generates path to current enemy position
+		// does *focus number of moves while attempting to trace the
+		// target as it moves
+		// after *focus number of moves it generates new path if target
+		// is still locked
+		// if target is lost the ai gives up and chooses a new target
+		case ENEMY: {
+
+			boolean targetLocked = true;
+
+			while (targetLocked) {
+
+				genPath(entity.getPosition(), lockedTarget);
+
+				int i = 1;
+
+<<<<<<< 17ba6411a36cd281883cf2b73a3dce353efbfa6b
+					while (i <= focus && run) {
+						if (RuleChecker.checkCellValidity(
+								cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+=======
+				while (i <= focus) {
+					if (RuleEnforcer.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+>>>>>>> Ghosts no longer move backwards unless that is the only move they can make
+
+						targetLocked = traceTarget(lockedTarget);
+
+						onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+
+						currentPath.remove(0);
+
 					} else {
 						currentPath.clear();
 						break;
 					}
+					i++;
 				}
-			}
-				break;
-
-			// if ai chases an enemy player
-			// generates path to current enemy position
-			// does *focus number of moves while attempting to trace the
-			// target as it moves
-			// after *focus number of moves it generates new path if target
-			// is still locked
-			// if target is lost the ai gives up and chooses a new target
-			case ENEMY: {
-
-				boolean targetLocked = true;
-
-				while (targetLocked && run) {
-
-					genPath(entity.getPosition(), lockedTarget);
-
-					int i = 1;
-
-					while (i <= focus && run) {
-						if (RuleChecker.checkCellValidity(
-								cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
-
-							targetLocked = traceTarget(lockedTarget);
-
-							// TODO: send move event
-
-							currentPath.remove(0);
-
-						} else {
-							currentPath.clear();
-							break;
-						}
-						i++;
-					}
-				}
-			}
-				break;
 			}
 		}
+			break;
+		}
+	}
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import javafx.stage.Stage;
 import teamproject.ai.AIGhost;
+import teamproject.ai.DefaultBehaviour;
 import teamproject.ai.GhostBehaviour;
 import teamproject.constants.EntityType;
 import teamproject.event.Event;
@@ -69,7 +70,6 @@ public class GameCommandService {
 		Behaviour b2 = new GhostBehaviour(map, ghost2, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost2.setBehaviour(b2);
-		
 		
 		world.addEntity(ghost);
 		world.addEntity(ghost1);

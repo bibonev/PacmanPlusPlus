@@ -37,5 +37,14 @@ public class GhostBehaviour extends Behaviour {
 	public Position pickTarget(){
 		return pickRandomTarget();
 	}
+	@Override
+	public void run(){
+		lockedTarget = pickTarget();
+		
+		lastPos=entity.getPosition();
+		entity.setPosition(lockedTarget);
+
+		onEntityMoved.fire(new EntityMovedEventArgs(lockedTarget.getRow(), lockedTarget.getColumn(), 0, entity));
+	}
 
 }
