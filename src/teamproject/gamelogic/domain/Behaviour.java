@@ -10,11 +10,8 @@ import java.util.Random;
 import teamproject.ai.AStar;
 import teamproject.ai.Target;
 import teamproject.constants.CellState;
-import teamproject.constants.EntityType;
 import teamproject.event.Event;
-import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.arguments.EntityMovedEventArgs;
-import teamproject.event.listener.EntityAddedListener;
 import teamproject.event.listener.EntityMovedListener;
 
 /**
@@ -46,9 +43,6 @@ public abstract class Behaviour {
 	/** The current position of the ai. */
 	public Entity entity;
 
-	/** The run condition. */
-	private boolean run = true;
-
 	/**
 	 * The focus variable determines how long it takes before the AI gets bored
 	 * of chasing something or how many consecutive random moves it makes before
@@ -59,9 +53,6 @@ public abstract class Behaviour {
 
 	/** A random number generator. */
 	private Random rng = new Random();
-
-	/** The speed. */
-	private int speed;
 
 	/** The locked target of the ai. */
 	protected Position lockedTarget;
@@ -113,11 +104,11 @@ public abstract class Behaviour {
 		rng = new Random();
 		focus = rng.nextInt(4) + 1;
 		this.stash = stash;
-		this.speed = speed;
 		this.type = type;
 		lastPos=entity.getPosition();
 		this.onEntityMoved = entity.getOnMovedEvent();
 		counter = 0;
+		currentPath = new ArrayList<Position>();
 	}
 
 	public Event<EntityMovedListener, EntityMovedEventArgs> getOnMovedEvent() {
@@ -356,22 +347,25 @@ public abstract class Behaviour {
 		// target
 		case STATIONARY: {
 
-			genPath(entity.getPosition(), lockedTarget);
+			if (currentPath.size() > 0 && isTargetThere(lockedTarget) && 
+					RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()]) ){
+				
+				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
+			
+				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+				
+				currentPath.remove(0);
 
-			while (currentPath.size() > 0 && isTargetThere(lockedTarget)) {
-				if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
-					
-					onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
-					
-					currentPath.remove(0);
-
-				} else {
-					currentPath.clear();
-					break;
-				}
+			} else {
+				genPath(entity.getPosition(), lockedTarget);
+				
+				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
+				
+				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+				
+				currentPath.remove(0);
 			}
 		}
-			break;
 
 		// if ai chases an enemy player
 		// generates path to current enemy position
@@ -382,29 +376,32 @@ public abstract class Behaviour {
 		// if target is lost the ai gives up and chooses a new target
 		case ENEMY: {
 
-			boolean targetLocked = true;
-
-			while (targetLocked) {
-
+			if (currentPath.size() > 0){
 				genPath(entity.getPosition(), lockedTarget);
-
-				int i = 1;
-
-				while (i <= focus) {
-					if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
-
-						targetLocked = traceTarget(lockedTarget);
-
-						onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
-
-						currentPath.remove(0);
-
-					} else {
-						currentPath.clear();
-						break;
-					}
+				int size = currentPath.size();
+				int i = 0;
+				while(i<=focus){
+					currentPath.remove(size - i);
 					i++;
 				}
+			}
+			
+			if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+				
+				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
+
+				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+
+				currentPath.remove(0);
+
+			} else {
+				genPath(entity.getPosition(), lockedTarget);
+				
+				entity.setPosition(lockedTarget);
+				
+				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+				
+				currentPath.remove(0);
 			}
 		}
 			break;
