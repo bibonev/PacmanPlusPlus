@@ -7,6 +7,12 @@ import teamproject.constants.CellState;
 import teamproject.constants.CellType;
 import teamproject.graphics.PositionVisualisation;
 
+/**
+ * Represent a Pacman game map
+ *
+ * @author aml
+ *
+ */
 public class Map {
 
 	public static int defaultNumberOfCells = 15;
@@ -25,28 +31,62 @@ public class Map {
 		this.cells = cells;
 	}
 
+	/**
+	 * Fetch the map's cells
+	 *
+	 * @return a matrix of cells
+	 */
 	public Cell[][] getCells() {
 		return cells;
 	}
 
+	/**
+	 * Fetch the cell at position (x, y)
+	 *
+	 * @param x
+	 * @param y
+	 * @return a cell
+	 */
 	public Cell getCell(final int x, final int y) {
 		return cells[x][y];
 	}
 
+	/**
+	 * Get the map size
+	 *
+	 * @return size as integer
+	 */
 	public int getMapSize() {
 		return cells.length;
 	}
 
+	/**
+	 * Update the map's cells
+	 *
+	 * @param cells
+	 *            the new matrix of cells
+	 */
 	public void setCells(final Cell[][] cells) {
 		this.cells = cells;
 	}
 
+	/**
+	 * Add a new cell on the map
+	 *
+	 * @param cell
+	 *            the cell object to be added
+	 */
 	public void addCell(final Cell cell) {
 		final int x = cell.getPosition().getRow();
 		final int y = cell.getPosition().getColumn();
 		cells[x][y] = cell;
 	}
 
+	/**
+	 * Generate a new map
+	 *
+	 * @return a map object
+	 */
 	// TODO: Should a map be able generate itself? I don't think so...
 	public Map generateMap() {
 		initializeObstacles();
@@ -72,6 +112,12 @@ public class Map {
 		return new Map(cells);
 	}
 
+	/**
+	 * Check whether a PositionVisualisation holds an obstacle
+	 *
+	 * @param position
+	 * @return boolean indicating whether or not it's an obstacle
+	 */
 	private boolean isObstacle(final PositionVisualisation position) {
 		for (final PositionVisualisation tmpPosition : obstacles) {
 			if (position.getRow() == tmpPosition.getRow() && position.getColumn() == tmpPosition.getColumn()) {
@@ -82,6 +128,9 @@ public class Map {
 		return false;
 	}
 
+	/**
+	 * Initialises obstacles
+	 */
 	private void initializeObstacles() {
 		obstacles = new ArrayList<>();
 
