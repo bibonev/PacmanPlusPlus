@@ -11,7 +11,7 @@ import teamproject.constants.ScreenSize;
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Player;
-import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.RuleChecker;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.

@@ -7,6 +7,7 @@ import teamproject.constants.CellState;
 import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.ControlledPlayer;
+import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
@@ -16,7 +17,7 @@ import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RemoteGhost;
 import teamproject.gamelogic.domain.RemotePlayer;
-import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.RuleChecker;
 import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
 import teamproject.gamelogic.domain.stubs.CellStub;
@@ -77,8 +78,8 @@ public class Randoms {
 		return new LocalGhost();
 	}
 
-	public static RuleEnforcer randomRuleEnforcer() {
-		return new RuleEnforcer();
+	public static RuleChecker randomRuleEnforcer() {
+		return new RuleChecker();
 	}
 
 	public static Map randomMap() {
@@ -156,6 +157,10 @@ public class Randoms {
 
 	public static ControlledPlayer randomControlledPlayer() {
 		return new ControlledPlayer(Randoms.randomInteger(), Randoms.randomString());
+	}
+
+	public static Game randomGame() {
+		return new Game(randomWorld(), randomGameSettings(), randomControlledPlayer());
 	}
 
 }

@@ -1,5 +1,7 @@
 package teamproject.graphics;
 
+import java.util.HashMap;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
@@ -7,16 +9,19 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
-
 import teamproject.ai.AIGhost;
 import teamproject.constants.Images;
 import teamproject.constants.ScreenSize;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.listener.LocalEntityUpdatedListener;
-import teamproject.gamelogic.domain.*;
+import teamproject.gamelogic.domain.Cell;
+import teamproject.gamelogic.domain.ControlledPlayer;
+import teamproject.gamelogic.domain.Entity;
+import teamproject.gamelogic.domain.EntityMovement;
+import teamproject.gamelogic.domain.Ghost;
+import teamproject.gamelogic.domain.Player;
+import teamproject.gamelogic.domain.World;
 import teamproject.ui.GameUI;
-
-import java.util.*;
 
 /**
  * Created by Boyan Bonev on 09/02/2017.
@@ -24,7 +29,7 @@ import java.util.*;
 public class Render implements LocalEntityUpdatedListener {
 	private Pane root;
 	private Timeline timeLine;
-    private ControlledPlayer controlledPlayer;
+	private ControlledPlayer controlledPlayer;
 	private GameUI gameUI;
 	private World world;
 	private boolean serverMode;
@@ -32,25 +37,25 @@ public class Render implements LocalEntityUpdatedListener {
 	private EntityMovement moveControlledPlayer;
 	private HashMap<Entity, EntityMovement> ghostMovements;
 
-    /**
-     * Initialize new visualisation of the map
-     *
-     * @param gameUI
-     * @param player
-     * @param world
-     * @param serverMode
-     */
-	public Render(GameUI gameUI, ControlledPlayer player, World world, boolean serverMode) {
+	/**
+	 * Initialize new visualisation of the map
+	 *
+	 * @param gameUI
+	 * @param player
+	 * @param world
+	 * @param serverMode
+	 */
+	public Render(final GameUI gameUI, final ControlledPlayer player, final World world, final boolean serverMode) {
 		this.gameUI = gameUI;
 		this.world = world;
 		this.serverMode = serverMode;
 
-		this.controlledPlayer = player;
-		this.moveControlledPlayer = new EntityMovement(controlledPlayer, world);
+		controlledPlayer = player;
+		moveControlledPlayer = new EntityMovement(controlledPlayer, world);
 
-		this.ghostMovements = new HashMap<>();
-		for (AIGhost ghost : world.getGhosts()) {
-			this.ghostMovements.put(ghost, new EntityMovement(ghost, world));
+		ghostMovements = new HashMap<>();
+		for (final AIGhost ghost : world.getGhosts()) {
+			ghostMovements.put(ghost, new EntityMovement(ghost, world));
 		}
 	}
 
@@ -60,12 +65,12 @@ public class Render implements LocalEntityUpdatedListener {
 	 * @return the stage that contians the scene with the map
 	 */
 	public Scene drawMap() {
-		Cell[][] cells = this.world.getMap().getCells();
+		final Cell[][] cells = world.getMap().getCells();
 		Images.Border = new ImageView("border.jpg");
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
 
-        Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
+		final Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
 
 		addToRoot(root, cells);
 
@@ -76,34 +81,35 @@ public class Render implements LocalEntityUpdatedListener {
 	 * Redraw the map
 	 */
 	public void redrawMap() {
-		Cell[][] cells = this.world.getMap().getCells();
+		final Cell[][] cells = world.getMap().getCells();
 		PositionVisualisation.initScreenDimensions();
 
 		root.getChildren().clear();
 
 		addToRoot(root, cells);
 
-		for(Player player : world.getPlayers()) {
+		for (final Player player : world.getPlayers()) {
 			root.getChildren().add(new PacmanVisualisation(player).getNode());
 		}
-		
-		for(Ghost ghost : world.getGhosts()) {
+
+		for (final Ghost ghost : world.getGhosts()) {
 			root.getChildren().add(new GhostVisualisation(ghost, controlledPlayer).getNode());
 		}
 
 		root.requestFocus();
 	}
 
-	private void addToRoot(Pane root, Cell[][] cells) {
-		for (int i = 0; i < cells.length; i++) {
-			for (int j = 0; j < cells[i].length; j++) {
-				Cell c = cells[i][j];
-				CellVisualisation cv = new CellVisualisation(cells[i][j]);
+	private void addToRoot(final Pane root, final Cell[][] cells) {
+		for (final Cell[] cell : cells) {
+			for (final Cell c : cell) {
+				final CellVisualisation cv = new CellVisualisation(c);
 				root.getChildren().add(cv.getNode());
 			}
 		}
 	}
+
 	/**
+	 *
 	 * Click listener for moving the ghost
 	 */
 	public void addClickListener() {
@@ -130,32 +136,32 @@ public class Render implements LocalEntityUpdatedListener {
 	void gameEnded() {
 		timeLine.stop();
 		gameUI.switchToMenu();
-		root.setOnKeyPressed(e -> {});
+		root.setOnKeyPressed(e -> {
+		});
 	}
 
 	/**
 	 * Start the timeline
 	 */
 	public void startTimeline() {
-		for(AIGhost ghost : world.getGhosts()) {
+		for (final AIGhost ghost : world.getGhosts()) {
 			ghost.getBehaviour().getOnMovedEvent().addListener(this);
 		}
 
 		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-				if(serverMode) {
-					for(AIGhost ghost : world.getGhosts()) {
-						ghost.run();
-					}
+			if (serverMode) {
+				for (final AIGhost ghost : world.getGhosts()) {
+					ghost.run();
 				}
 			}
-		));
+		}));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
 	}
 
 	@Override
-	public void onEntityMoved(EntityMovedEventArgs args) {
-		this.ghostMovements.get(args.getEntity()).moveTo(args.getRow(), args.getCol(), args.getAngle());
+	public void onEntityMoved(final EntityMovedEventArgs args) {
+		ghostMovements.get(args.getEntity()).moveTo(args.getRow(), args.getCol(), args.getAngle());
 		redrawMap();
 	}
 }
