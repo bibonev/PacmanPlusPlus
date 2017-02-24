@@ -101,15 +101,15 @@ public class Render implements LocalEntityUpdatedListener {
 
 	private void addToRoot(final Pane root, final Cell[][] cells) {
 		for (final Cell[] cell : cells) {
-			for (int j = 0; j < cell.length; j++) {
-				final Cell c = cell[j];
-				final CellVisualisation cv = new CellVisualisation(cell[j]);
+			for (final Cell c : cell) {
+				final CellVisualisation cv = new CellVisualisation(c);
 				root.getChildren().add(cv.getNode());
 			}
 		}
 	}
 
 	/**
+	 *
 	 * Click listener for moving the ghost
 	 */
 	public void addClickListener() {

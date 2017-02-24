@@ -68,7 +68,7 @@ public class RuleCheckerTest {
 		game.getWorld().getMap().getCell(0, 0).setState(CellState.PLAYER_AND_ENEMY);
 
 		// Then
-		assertThat(RuleChecker.gameShouldEnd(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.LOCAL_PLAYER_LOST));
+		assertThat(RuleChecker.getGameOutcome(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.LOCAL_PLAYER_LOST));
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class RuleCheckerTest {
 		}
 
 		// Then
-		assertThat(RuleChecker.gameShouldEnd(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.LOCAL_PLAYER_WON));
+		assertThat(RuleChecker.getGameOutcome(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.LOCAL_PLAYER_WON));
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class RuleCheckerTest {
 		}
 
 		// Then
-		assertThat(RuleChecker.gameShouldEnd(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.STILL_PLAYING));
+		assertThat(RuleChecker.getGameOutcome(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.STILL_PLAYING));
 	}
 
 }

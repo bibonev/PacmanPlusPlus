@@ -41,17 +41,17 @@ public class RuleChecker {
 	 */
 	// TODO: possibly add the type as a game field instead of passing them
 	// separately
-	public static GameOutcome gameShouldEnd(final Game game, final GameType type) {
-		return type.equals(GameType.SINGLEPLAYER) ? singleplayerGameShouldEnd(game) : multiplayerGameShouldEnd(game);
+	public static GameOutcome getGameOutcome(final Game game, final GameType type) {
+		return type.equals(GameType.SINGLEPLAYER) ? getSinglePlayerGameOutcome(game) : getMultiplayerGameOutcome(game);
 	}
 
-	private static GameOutcome multiplayerGameShouldEnd(final Game game) {
+	private static GameOutcome getMultiplayerGameOutcome(final Game game) {
 		// TODO More complicated so will be implemented once networking is
 		// integrated fully
 		return GameOutcome.STILL_PLAYING;
 	}
 
-	private static GameOutcome singleplayerGameShouldEnd(final Game game) {
+	private static GameOutcome getSinglePlayerGameOutcome(final Game game) {
 		final Cell[][] cells = game.getWorld().getMap().getCells();
 		boolean ghostAtePlayer = false;
 		boolean foodLeft = false;
