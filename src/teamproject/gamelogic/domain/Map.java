@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
-import teamproject.constants.CellType;
 import teamproject.graphics.PositionVisualisation;
 
 public class Map {
@@ -57,14 +56,14 @@ public class Map {
 				final PositionVisualisation position = new PositionVisualisation(i, j);
 
 				if (i == 1 && j == 1) {
-					state = CellState.EMPTY;
+					state = CellState.PLAYER;
 				} else if (isObstacle(position)) {
 					state = CellState.OBSTACLE;
 				} else {
 					state = CellState.FOOD;
 				}
 
-				final Cell cell = new Cell(CellType.NORMAL, state, position);
+				final Cell cell = new Cell(state, position);
 				cells[position.getRow()][position.getColumn()] = cell;
 			}
 		}

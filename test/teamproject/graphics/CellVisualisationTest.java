@@ -3,11 +3,9 @@ package teamproject.graphics;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import teamproject.constants.CellType;
 import teamproject.constants.Colors;
 import teamproject.constants.CellState;
 import teamproject.gamelogic.domain.Cell;
@@ -17,17 +15,13 @@ import teamproject.gamelogic.domain.Cell;
  */
 public class CellVisualisationTest {
     private PositionVisualisation testPositionVisualisation;
-    private CellState testState;
-    private CellType testType;
     private Cell testCell;
     private CellVisualisation test;
 
     @Before
     public void initializeFields(){
         testPositionVisualisation = new PositionVisualisation(5, 5);
-        testState = CellState.EMPTY;
-        testType = CellType.NORMAL;
-        testCell = new Cell(testType, testState, testPositionVisualisation);
+        testCell = new Cell(CellState.EMPTY, testPositionVisualisation);
         test = new CellVisualisation(testCell);
     }
 
@@ -51,7 +45,7 @@ public class CellVisualisationTest {
 
     @Test
     public void testCircleNode(){
-        test = new CellVisualisation(new Cell(testType, CellState.FOOD, testPositionVisualisation));
+        test = new CellVisualisation(new Cell(CellState.FOOD, testPositionVisualisation));
         assertEquals(test.getNode().toString().contains("Circle"), true);
 
         Circle testCircle = (Circle) test.getNode();

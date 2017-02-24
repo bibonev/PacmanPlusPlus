@@ -10,17 +10,13 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import teamproject.ai.AIGhost;
+import teamproject.constants.GameOutcome;
+import teamproject.constants.GameType;
 import teamproject.constants.Images;
 import teamproject.constants.ScreenSize;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.listener.LocalEntityUpdatedListener;
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.ControlledPlayer;
-import teamproject.gamelogic.domain.Entity;
-import teamproject.gamelogic.domain.EntityMovement;
-import teamproject.gamelogic.domain.Ghost;
-import teamproject.gamelogic.domain.Player;
-import teamproject.gamelogic.domain.World;
+import teamproject.gamelogic.domain.*;
 import teamproject.ui.GameUI;
 
 /**
@@ -33,6 +29,7 @@ public class Render implements LocalEntityUpdatedListener {
 	private GameUI gameUI;
 	private World world;
 	private boolean serverMode;
+	private Game game;
 
 	private EntityMovement moveControlledPlayer;
 	private HashMap<Entity, EntityMovement> ghostMovements;
@@ -41,16 +38,16 @@ public class Render implements LocalEntityUpdatedListener {
 	 * Initialize new visualisation of the map
 	 *
 	 * @param gameUI
-	 * @param player
-	 * @param world
+	 * @param game
 	 * @param serverMode
 	 */
-	public Render(final GameUI gameUI, final ControlledPlayer player, final World world, final boolean serverMode) {
+	public Render(final GameUI gameUI, final Game game, final boolean serverMode) {
 		this.gameUI = gameUI;
-		this.world = world;
+		this.world = game.getWorld();
 		this.serverMode = serverMode;
+		this.game = game;
 
-		controlledPlayer = player;
+		controlledPlayer = game.getPlayer();
 		moveControlledPlayer = new EntityMovement(controlledPlayer, world);
 
 		ghostMovements = new HashMap<>();
@@ -99,15 +96,6 @@ public class Render implements LocalEntityUpdatedListener {
 		root.requestFocus();
 	}
 
-	private void addToRoot(final Pane root, final Cell[][] cells) {
-		for (final Cell[] cell : cells) {
-			for (final Cell c : cell) {
-				final CellVisualisation cv = new CellVisualisation(c);
-				root.getChildren().add(cv.getNode());
-			}
-		}
-	}
-
 	/**
 	 *
 	 * Click listener for moving the ghost
@@ -131,16 +119,6 @@ public class Render implements LocalEntityUpdatedListener {
 	}
 
 	/**
-	 * End the game
-	 */
-	void gameEnded() {
-		timeLine.stop();
-		gameUI.switchToMenu();
-		root.setOnKeyPressed(e -> {
-		});
-	}
-
-	/**
 	 * Start the timeline
 	 */
 	public void startTimeline() {
@@ -150,10 +128,12 @@ public class Render implements LocalEntityUpdatedListener {
 
 		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
 			if (serverMode) {
-				for (final AIGhost ghost : world.getGhosts()) {
-					ghost.run();
-				}
+
 			}
+
+            for (final AIGhost ghost : world.getGhosts()) {
+                ghost.run();
+            }
 		}));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
@@ -163,5 +143,35 @@ public class Render implements LocalEntityUpdatedListener {
 	public void onEntityMoved(final EntityMovedEventArgs args) {
 		ghostMovements.get(args.getEntity()).moveTo(args.getRow(), args.getCol(), args.getAngle());
 		redrawMap();
+
+        if(RuleChecker.getGameOutcome(game, serverMode ? GameType.MULTIPLAYER : GameType.SINGLEPLAYER)
+                == GameOutcome.LOCAL_PLAYER_LOST){
+            gameEnded();
+        }
 	}
+
+    /**
+     * Add to parent root all nodes
+     * @param root
+     * @param cells
+     */
+    private void addToRoot(final Pane root, final Cell[][] cells) {
+        for (final Cell[] cell : cells) {
+            for (final Cell c : cell) {
+                final CellVisualisation cv = new CellVisualisation(c);
+                System.out.println("State: " + c.getState().toString());
+                root.getChildren().add(cv.getNode());
+            }
+        }
+    }
+
+    /**
+     * End the game
+     */
+    private void gameEnded() {
+        timeLine.stop();
+        gameUI.switchToMenu();
+        root.setOnKeyPressed(e -> {
+        });
+    }
 }

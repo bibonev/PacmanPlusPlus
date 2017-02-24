@@ -7,9 +7,9 @@ package teamproject.ai;
 import java.util.PriorityQueue;
 import java.util.ArrayList;
 
+import teamproject.constants.CellState;
 import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.Map;
-import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.Position;
 
 /**
@@ -61,7 +61,7 @@ public class AStar {
 		for (int i = 0; i < mapSize; ++i) {
 			for (int j = 0; j < mapSize; ++j) {
 				grid[i][j] = new AStarCell(i, j);
-				if (cells[i][j].getType() == CellType.WALL) {
+				if (cells[i][j].getState() == CellState.OBSTACLE) {
 					blocked.add(new Position(i, j));
 				}
 			}

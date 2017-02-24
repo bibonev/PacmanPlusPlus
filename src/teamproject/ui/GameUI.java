@@ -212,7 +212,7 @@ public class GameUI extends Application {
 		switchToGame();
 		Game game = GameCommandService.generateNewSinglePlayerGame(name, new GameSettings());
 		
-		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
+		final Render mapV = new Render(this, game, false);
 
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
@@ -234,7 +234,7 @@ public class GameUI extends Application {
 	public void startNewMultiPlayerGame() {
 		switchToMultiPlayerLobby();
 		
-		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
+		final Render mapV = new Render(this, game, true);
 
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
