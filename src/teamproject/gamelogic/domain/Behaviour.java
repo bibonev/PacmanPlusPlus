@@ -180,36 +180,17 @@ public abstract class Behaviour {
 		final int column = entity.getPosition().getColumn();
 		final ArrayList<Position> availableCells = new ArrayList<Position>();
 
-<<<<<<< 17ba6411a36cd281883cf2b73a3dce353efbfa6b
-		if (row>0) {
-			if (RuleChecker.checkCellValidity(cells[row - 1][column]))
-				availableCells.add(cells[row - 1][column]);
-		}
-		if (row<mapSize-1) {
-			if (RuleChecker.checkCellValidity(cells[row + 1][column]))
-				availableCells.add(cells[row + 1][column]);
-		}
-		if (column>0) {
-			if (RuleChecker.checkCellValidity(cells[row][column - 1]))
-				availableCells.add(cells[row][column - 1]);
-		}
-		if (column<mapSize-1) {
-			if (RuleChecker.checkCellValidity(cells[row][column + 1])){
-					availableCells.add(cells[row][column + 1]);
-			}
-=======
-		if (row > 0 && RuleEnforcer.checkCellValidity(cells[row - 1][column]) && (cells[row - 1][column].getPosition().equals(lastPos)==false)) {
+		if (row > 0 && RuleChecker.checkCellValidity(cells[row - 1][column]) && (cells[row - 1][column].getPosition().equals(lastPos)==false)) {
 			availableCells.add(new Position(row - 1, column));
 		}
-		if (row < mapSize - 1 && RuleEnforcer.checkCellValidity(cells[row + 1][column]) && (cells[row + 1][column].getPosition().equals(lastPos)==false)) {
+		if (row < mapSize - 1 && RuleChecker.checkCellValidity(cells[row + 1][column]) && (cells[row + 1][column].getPosition().equals(lastPos)==false)) {
 			availableCells.add(new Position(row + 1, column));
 		}
-		if (column > 0 && RuleEnforcer.checkCellValidity(cells[row][column - 1]) && (cells[row][column - 1].getPosition().equals(lastPos)==false)) {
+		if (column > 0 && RuleChecker.checkCellValidity(cells[row][column - 1]) && (cells[row][column - 1].getPosition().equals(lastPos)==false)) {
 			availableCells.add(new Position(row, column - 1));
 		}
-		if (column < mapSize - 1 && RuleEnforcer.checkCellValidity(cells[row][column + 1]) && (cells[row][column + 1].getPosition().equals(lastPos)==false)) {
+		if (column < mapSize - 1 && RuleChecker.checkCellValidity(cells[row][column + 1]) && (cells[row][column + 1].getPosition().equals(lastPos)==false)) {
 			availableCells.add(new Position(row, column + 1));
->>>>>>> Ghosts no longer move backwards unless that is the only move they can make
 		}
 		tarType = Target.RANDOM;
 		int size = availableCells.size();
@@ -377,20 +358,12 @@ public abstract class Behaviour {
 
 			genPath(entity.getPosition(), lockedTarget);
 
-<<<<<<< 17ba6411a36cd281883cf2b73a3dce353efbfa6b
-				while (currentPath.size() > 0 && run && isTargetThere(lockedTarget)) {
-					if (RuleChecker
-							.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
-						// TODO: send move event
-						currentPath.remove(0);
-=======
 			while (currentPath.size() > 0 && isTargetThere(lockedTarget)) {
-				if (RuleEnforcer.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+				if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 					
 					onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
 					
 					currentPath.remove(0);
->>>>>>> Ghosts no longer move backwards unless that is the only move they can make
 
 				} else {
 					currentPath.clear();
@@ -417,14 +390,8 @@ public abstract class Behaviour {
 
 				int i = 1;
 
-<<<<<<< 17ba6411a36cd281883cf2b73a3dce353efbfa6b
-					while (i <= focus && run) {
-						if (RuleChecker.checkCellValidity(
-								cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
-=======
 				while (i <= focus) {
-					if (RuleEnforcer.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
->>>>>>> Ghosts no longer move backwards unless that is the only move they can make
+					if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 
 						targetLocked = traceTarget(lockedTarget);
 
