@@ -11,14 +11,14 @@ import teamproject.event.listener.EntityAddedListener;
 import teamproject.event.listener.EntityRemovingListener;
 
 public class World {
-	private RuleEnforcer ruleEnforcer;
+	private RuleChecker ruleEnforcer;
 	private Map map;
 	private HashMap<Integer, Entity> entities;
 	private int latestEntityID = 1000;
 	private Event<EntityAddedListener, EntityChangedEventArgs> onEntityAdded;
 	private Event<EntityRemovingListener, EntityChangedEventArgs> onEntityRemoving;
 
-	public World(final RuleEnforcer ruleEnforcer, final Map map) {
+	public World(final RuleChecker ruleEnforcer, final Map map) {
 		this.entities = new HashMap<>();
 		this.ruleEnforcer = ruleEnforcer;
 		this.map = map;
@@ -35,7 +35,7 @@ public class World {
 		return onEntityRemoving;
 	}
 
-	public RuleEnforcer getRuleEnforcer() {
+	public RuleChecker getRuleEnforcer() {
 		return ruleEnforcer;
 	}
 
@@ -94,7 +94,7 @@ public class World {
 		return getEntities(AIGhost.class);
 	}
 
-	public void setRuleEnforcer(final RuleEnforcer ruleEnforcer) {
+	public void setRuleEnforcer(final RuleChecker ruleEnforcer) {
 		this.ruleEnforcer = ruleEnforcer;
 	}
 

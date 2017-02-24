@@ -176,19 +176,19 @@ public abstract class Behaviour {
 		final ArrayList<Cell> availableCells = new ArrayList<Cell>();
 
 		if (row>0) {
-			if (RuleEnforcer.checkCellValidity(cells[row - 1][column]))
+			if (RuleChecker.checkCellValidity(cells[row - 1][column]))
 				availableCells.add(cells[row - 1][column]);
 		}
 		if (row<mapSize-1) {
-			if (RuleEnforcer.checkCellValidity(cells[row + 1][column]))
+			if (RuleChecker.checkCellValidity(cells[row + 1][column]))
 				availableCells.add(cells[row + 1][column]);
 		}
 		if (column>0) {
-			if (RuleEnforcer.checkCellValidity(cells[row][column - 1]))
+			if (RuleChecker.checkCellValidity(cells[row][column - 1]))
 				availableCells.add(cells[row][column - 1]);
 		}
 		if (column<mapSize-1) {
-			if (RuleEnforcer.checkCellValidity(cells[row][column + 1])){
+			if (RuleChecker.checkCellValidity(cells[row][column + 1])){
 					availableCells.add(cells[row][column + 1]);
 			}
 		}
@@ -359,7 +359,7 @@ public abstract class Behaviour {
 				genPath(entity.getPosition(), lockedTarget);
 
 				while (currentPath.size() > 0 && run && isTargetThere(lockedTarget)) {
-					if (RuleEnforcer
+					if (RuleChecker
 							.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 						// TODO: send move event
 						currentPath.remove(0);
@@ -391,7 +391,7 @@ public abstract class Behaviour {
 					int i = 1;
 
 					while (i <= focus && run) {
-						if (RuleEnforcer.checkCellValidity(
+						if (RuleChecker.checkCellValidity(
 								cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 
 							targetLocked = traceTarget(lockedTarget);
