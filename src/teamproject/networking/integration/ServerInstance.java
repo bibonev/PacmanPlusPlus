@@ -4,15 +4,19 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import teamproject.constants.EntityType;
+import teamproject.event.Event;
 import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
 import teamproject.event.arguments.LobbyChangedEventArgs;
+import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
 import teamproject.event.listener.EntityAddedListener;
 import teamproject.event.listener.EntityRemovingListener;
 import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.HostStartingMultiplayerGameListener;
 import teamproject.event.listener.LobbyStateChangedListener;
 import teamproject.event.listener.LocalEntityUpdatedListener;
+import teamproject.event.listener.MultiplayerGameStartingListener;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
@@ -44,6 +48,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	private LocalEntityTracker tracker;
 	private Logger logger = Logger.getLogger("network-server");
 	private Lobby lobby;
+	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	
 	/**
 	 * Creates a new server instance which, when ran, will connect to the server
@@ -62,6 +67,8 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		this.game = null;
 		this.gameUI = gameUI;
 		logger.setLevel(Level.FINEST);
+		this.multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
+		
 	}
 	
 	@Override
@@ -95,6 +102,10 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		Server server = new Server();
 		
 		return server;
+	}
+	
+	public Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> getMultiplayerGameStartingEvent() {
+		return multiplayerGameStartingEvent;
 	}
 	
 	/**
@@ -210,9 +221,9 @@ public class ServerInstance implements Runnable, ServerTrigger,
 				// this is an actual player
 				// otherwise it's an AI player
 				
-				manager.dispatchAllExcept(p, args.getEntity().getID(), 0);
+				manager.dispatchAllExcept(p, args.getEntity().getID());
 			} else {
-				manager.dispatchAllExcept(p, 0);
+				manager.dispatchAll(p);
 			}
 		}
 		if(args.getEntity().getType()==EntityType.GHOST){
@@ -221,7 +232,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 			p.setInteger("col", args.getCol());
 			p.setInteger("ghost-id", args.getEntity().getID());
 			
-			manager.dispatchAllExcept(p, 0);
+			manager.dispatchAll(p);
 		}
 	}
 
@@ -265,12 +276,12 @@ public class ServerInstance implements Runnable, ServerTrigger,
 			Packet p = new Packet("remote-player-joined");
 			p.setInteger("player-id", e.getID());
 			p.setString("name", ((Player) e).getName());
-			manager.dispatchAllExcept(p, e.getID(), 0);
+			manager.dispatchAllExcept(p, e.getID());
 		}
 		if(e instanceof Ghost) {
 			Packet p = new Packet("remote-ghost-joined");
 			p.setInteger("ghost-id", e.getID());
-			manager.dispatchAllExcept(p, 0);
+			manager.dispatchAll(p);
 		}
 	}
 
@@ -282,12 +293,12 @@ public class ServerInstance implements Runnable, ServerTrigger,
 			Packet p = new Packet("remote-player-left");
 			p.setInteger("player-id", e.getID());
 			gameUI.multiPlayerLobbyScreen.list.removePlayer(e.getID());
-			manager.dispatchAllExcept(p, e.getID(), 0);
+			manager.dispatchAllExcept(p, e.getID());
 		}
 		if(e instanceof Ghost) {
 			Packet p = new Packet("remote-ghost-left");
 			p.setInteger("ghost-id", e.getID());
-			manager.dispatchAllExcept(p, 0);
+			manager.dispatchAll(p);
 		}
 	}
 
@@ -317,18 +328,29 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	}
 
 	@Override
-	public void onHostStartingGame() {
+	public void onHostStartingGame(HostStartingMultiplayerGameEventArgs args) {
 		Packet p = new Packet("game-starting");
 		
 		// add game configuration stuff into this packet
 		
 		manager.dispatchAll(p);
+		
+		getMultiplayerGameStartingEvent().fire(
+				new MultiplayerGameStartingEventArgs(args.getSettings()));
 	}
 
 	@Override
 	public void onGameStarted(Game game) {
-		for(int i : lobby.getPlayerIDs()) {
-			if(i > 0) { // ie. remote
+		if(game.isServerGame()) {
+			if(this.game != null) {
+				// cleanup hooks to old game
+				
+				removeWorldGameHooks(this.game.getWorld());
+			}
+			this.game = game;
+			addWorldGameHooks(game.getWorld());
+			logger.log(Level.INFO, "Adding remote players");
+			for(int i : lobby.getPlayerIDs()) {
 				LobbyPlayerInfo info = lobby.getPlayer(i);
 				RemotePlayer player = new RemotePlayer(info.getID(), info.getName());
 				player.setPosition(new Position(0, 0));
@@ -337,7 +359,6 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		}
 	}
 
-	
 	/*
 	 * For posterity: a corresponding removeTriggers method is not necessary. Once
 	 * the Server object's connection dies, the server manager will no longer

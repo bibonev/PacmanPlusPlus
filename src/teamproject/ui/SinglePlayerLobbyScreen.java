@@ -3,8 +3,8 @@ package teamproject.ui;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import teamproject.event.Event;
-import teamproject.event.arguments.GameStartingEventArgs;
-import teamproject.event.listener.StartingSingleplayerGameListener;
+import teamproject.event.arguments.SingleplayerGameStartingEventArgs;
+import teamproject.event.listener.SingleplayerGameStartingListener;
 import teamproject.gamelogic.domain.GameSettings;
 
 /**
@@ -17,7 +17,7 @@ public class SinglePlayerLobbyScreen extends Screen {
 	
 	private Button play;
 	private Label label;
-	private Event<StartingSingleplayerGameListener, GameStartingEventArgs> onStartingSingleplayerGame;
+	private Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> onStartingSingleplayerGame;
 
 	public SinglePlayerLobbyScreen(GameUI game){
 		super(game);
@@ -25,14 +25,14 @@ public class SinglePlayerLobbyScreen extends Screen {
 		play = new Button("Play!");
         play.getStyleClass().add("buttonStyle");
         play.setOnAction(e-> getOnStartingSingleplayerGame().fire(
-        		new GameStartingEventArgs(getSinglePlayerSettings(), game.getName())));
+        		new SingleplayerGameStartingEventArgs(getSinglePlayerSettings(), game.getName())));
         
         label = new Label("Single Player");
         label.getStyleClass().add("labelStyle");
 		
 	    pane.getChildren().addAll(label, play);
 	    
-	    onStartingSingleplayerGame = new Event<>((l, s) -> l.onStartingGame(s));
+	    onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
 	}
 	
 	public GameSettings getSinglePlayerSettings() {
@@ -46,7 +46,7 @@ public class SinglePlayerLobbyScreen extends Screen {
 		return new GameSettings();
 	}
 	
-	public Event<StartingSingleplayerGameListener, GameStartingEventArgs> getOnStartingSingleplayerGame() {
+	public Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> getOnStartingSingleplayerGame() {
 		return onStartingSingleplayerGame;
 	}
 }

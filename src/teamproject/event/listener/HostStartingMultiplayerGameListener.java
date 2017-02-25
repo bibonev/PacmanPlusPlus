@@ -1,7 +1,7 @@
 package teamproject.event.listener;
 
-import teamproject.networking.integration.ServerInstance;
+import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
 
 public interface HostStartingMultiplayerGameListener {
-	public void onHostStartingGame();
+	public void onHostStartingGame(HostStartingMultiplayerGameEventArgs args);
 }

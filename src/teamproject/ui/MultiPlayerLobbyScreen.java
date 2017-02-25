@@ -4,8 +4,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import teamproject.event.Event;
+import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
 import teamproject.event.listener.HostStartingMultiplayerGameListener;
 import teamproject.event.listener.UserLeavingLobbyListener;
+import teamproject.gamelogic.domain.GameSettings;
 
 /**
  * Screen for the lobby of a multiplayer game
@@ -41,9 +43,22 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 	    userLeavingLobbyEvent = new Event<>((l, a) -> l.onUserLeavingLobby());
 	    userLeavingLobbyEvent.addListener(this);
 	    
-	    hostStartingGameListener = new Event<>((l, a) -> l.onHostStartingGame());
+	    hostStartingGameListener = new Event<>((l, a) -> l.onHostStartingGame(
+	    		new HostStartingMultiplayerGameEventArgs(getMultiplayerSettings())));
 	    
 	    addNames();
+	}
+
+	
+	public GameSettings getMultiplayerSettings() {
+		// TODO Rose: when we get round to adding game settings that we need
+		// to change, add a screen to let you edit game settings for multi
+		// player games from this lobby screen - then make this method look
+		// at the choices the player has made and return a GameSettings
+		// object from it
+		
+		// temporary implementation
+		return new GameSettings();
 	}
 	
 	private void play(){

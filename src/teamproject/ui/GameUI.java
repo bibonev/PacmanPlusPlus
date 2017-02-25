@@ -12,21 +12,14 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import teamproject.audio.Music;
 import teamproject.audio.SoundEffects;
-import teamproject.constants.GameType;
 import teamproject.event.Event;
 import teamproject.event.arguments.LobbyChangedEventArgs;
-import teamproject.event.arguments.NewGameRequestedEventArguments;
 import teamproject.event.listener.GameClosingListener;
 import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.LobbyStateChangedListener;
-import teamproject.event.listener.NewGameRequestedEventListener;
 import teamproject.gamelogic.core.GameCommandService;
 import teamproject.gamelogic.core.Lobby;
-import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Game;
-import teamproject.gamelogic.domain.GameSettings;
-import teamproject.graphics.GhostVisualisation;
-import teamproject.graphics.PacmanVisualisation;
 import teamproject.graphics.PositionVisualisation;
 import teamproject.graphics.Render;
 import teamproject.networking.integration.ClientInstance;
@@ -237,9 +230,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				});
 		this.multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
 		this.multiPlayerLobbyScreen.setStartGameEnabled(true);
+		this.gameCommandService.getGameStartedEvent().addListener(client);
 		this.gameCommandService.getGameStartedEvent().addListener(server);
 		
-		client.getRemoteGameStartingEvent().addListener(gameCommandService);
+		server.getMultiplayerGameStartingEvent().addListener(gameCommandService);
+		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
 		
 		server.run();
 		client.run();
@@ -262,7 +257,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		this.multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(
 				() -> client.stop());
 		this.multiPlayerLobbyScreen.setStartGameEnabled(false);
-		client.getRemoteGameStartingEvent().addListener(gameCommandService);
+		this.gameCommandService.getGameStartedEvent().addListener(client);
+		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
 		
 		client.run();
 		// join game with ip
@@ -296,27 +292,28 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	@Override
 	public void onGameStarted(Game game) {
-		Platform.runLater(() -> {
-			switchToGame();
-			
-			final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
-	
-			// Initialize Screen dimensions
-			PositionVisualisation.initScreenDimensions();
-	
-			// Draw Map
-			thisStage.setScene(mapV.drawMap());
-			thisStage.show();
-	
-			// Add CLick Listener
-			mapV.addClickListener();
-	
-			// Redraw Map
-			mapV.redrawMap();
-	
-			// Start Timeline
-			mapV.startTimeline();
-		});
-
+		if(!game.isServerGame()) {
+			Platform.runLater(() -> {
+				switchToGame();
+				
+				final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
+		
+				// Initialize Screen dimensions
+				PositionVisualisation.initScreenDimensions();
+		
+				// Draw Map
+				thisStage.setScene(mapV.drawMap());
+				thisStage.show();
+		
+				// Add CLick Listener
+				mapV.addClickListener();
+		
+				// Redraw Map
+				mapV.redrawMap();
+		
+				// Start Timeline
+				mapV.startTimeline();
+			});
+		}
 	}
 }

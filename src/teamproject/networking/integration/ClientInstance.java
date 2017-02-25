@@ -7,12 +7,13 @@ import teamproject.constants.CellState;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
+import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.LocalEntityUpdatedListener;
-import teamproject.event.listener.LocalPlayerMovedListener;
-import teamproject.event.listener.RemoteGameStartingListener;
+import teamproject.event.listener.MultiplayerGameStartingListener;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
+import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RemoteGhost;
@@ -27,17 +28,17 @@ import teamproject.networking.socket.Client;
 import teamproject.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger ,
-		ClientDisconnectedListener, LocalEntityUpdatedListener {
+		ClientDisconnectedListener, LocalEntityUpdatedListener, GameStartedListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
-	private World world;
+	private Game game;
 	private Lobby lobby;
 	private String username;
 	private GameUI gameUI;
 	private boolean alreadyDoneHandshake;
-	private Logger logger = Logger.getLogger("network-clclassient");
-	private Event<RemoteGameStartingListener, MultiplayerGameStartingEventArgs> remoteGameStartingEvent;
+	private Logger logger = Logger.getLogger("network-client");
+	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	
 	/**
 	 * Creates a new client instance which, when ran, will connect to the server
@@ -60,8 +61,8 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		this.alreadyDoneHandshake = false;
 		this.lobby = new Lobby();
 		this.gameUI.setLobby(this.lobby);
-		this.world = null;
-		this.remoteGameStartingEvent = new Event<>((l, a) -> l.onRemoteGameStarting(a));
+		this.game = null;
+		this.multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 		
 		logger.setLevel(Level.FINEST);
 	}
@@ -138,6 +139,10 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		 */
 	}
 	
+	private void addWorldGameHooks(Game game) {
+		game.getPlayer().getOnMovedEvent().addListener(this);
+	}
+	
 	/**
 	 * In order to prevent resource leaks and to stop the event listener lists growing
 	 * increasingly large as the player joins successive online games, any of the game
@@ -153,11 +158,15 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		 * this.gameWorld.getPlayerMovedEvent().removeListener(this);
 		 */
 		
-		
+		if(game != null) removeWorldGameHooks(game);
 	}
 	
-	public Event<RemoteGameStartingListener, MultiplayerGameStartingEventArgs> getRemoteGameStartingEvent() {
-		return remoteGameStartingEvent;
+	private void removeWorldGameHooks(Game game) {
+		game.getPlayer().getOnMovedEvent().removeListener(this);
+	}
+	
+	public Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> getMultiplayerGameStartingEvent() {
+		return multiplayerGameStartingEvent;
 	}
 
 	/* HANDLERS to create/deal with outgoing packets */
@@ -206,9 +215,9 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		// reconstruct game settings as needed
 		
 
-		MultiplayerGameStartingEventArgs args = new MultiplayerGameStartingEventArgs(settings, username);
+		MultiplayerGameStartingEventArgs args = new MultiplayerGameStartingEventArgs(settings, client.getClientID(), username);
 		
-		this.getRemoteGameStartingEvent().fire(args);
+		this.getMultiplayerGameStartingEvent().fire(args);
 	}
 
 	private void triggerLobbyPlayerLeave(Packet p) {
@@ -240,13 +249,13 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	private void triggerRemoteGhostLeft(Packet p) {
 		int ghostID = p.getInteger("ghost-id");
 		
-		world.removeEntity(ghostID);
+		game.getWorld().removeEntity(ghostID);
 	}
 
 	private void triggerRemoteGhostJoined(Packet p) {
 		int ghostID = p.getInteger("ghost-id");
 		
-		world.addEntity(new RemoteGhost(ghostID));
+		game.getWorld().addEntity(new RemoteGhost(ghostID));
 	}
 
 	private void triggerRemotePlayerJoined(Packet p) {
@@ -256,12 +265,12 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		RemotePlayer player = new RemotePlayer(playerID, name);
 		player.setPosition(new Position(0, 0));
 		
-		world.addEntity(player);
+		game.getWorld().addEntity(player);
 	}
 
 	private void triggerRemotePlayerLeft(Packet p) {
 		int playerID = p.getInteger("player-id");
-		world.removeEntity(playerID);
+		game.getWorld().removeEntity(playerID);
 	}
 
 	private void triggerRemotePlayerMoved(Packet p) {
@@ -269,7 +278,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		double angle = p.getDouble("angle");
 		int playerID = p.getInteger("player-id");
 		
-		Entity e = world.getEntity(playerID);
+		Entity e = game.getWorld().getEntity(playerID);
 		
 		if(e instanceof RemotePlayer) {
 			RemotePlayer ghost = (RemotePlayer)e;
@@ -284,14 +293,14 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		int x = p.getInteger("x"), y = p.getInteger("y");
 		CellState cellState = CellState.valueOf(p.getString("cell-state"));
 		
-		world.getMap().getCell(x, y).setState(cellState);
+		game.getWorld().getMap().getCell(x, y).setState(cellState);
 	}
 
 	private void triggerRemoteGhostMoved(Packet p) {
 		int row = p.getInteger("row"), col = p.getInteger("col");
 		int ghostID = p.getInteger("ghost-id");
 		
-		Entity e = world.getEntity(ghostID);
+		Entity e = game.getWorld().getEntity(ghostID);
 		
 		if(e instanceof RemoteGhost) {
 			RemoteGhost ghost = (RemoteGhost)e;
@@ -312,6 +321,17 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			manager.dispatch(p2);
 		} else {
 			throw new RuntimeException("Already received handshake packet from server.");
+		}
+	}
+
+	@Override
+	public void onGameStarted(Game game) {
+		if(!game.isServerGame()) {
+			if(this.game != null) {
+				removeWorldGameHooks(game);
+			}
+			this.game = game;
+			addWorldGameHooks(game);
 		}
 	}
 }

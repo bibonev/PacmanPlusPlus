@@ -2,7 +2,7 @@ package teamproject.event.arguments;
 
 import teamproject.gamelogic.domain.GameSettings;
 
-public class GameStartingEventArgs {
+public class SingleplayerGameStartingEventArgs {
 	private GameSettings settings;
 	private String username;
 	
@@ -14,7 +14,7 @@ public class GameStartingEventArgs {
 		return username;
 	}
 	
-	public GameStartingEventArgs(GameSettings settings, String username) {
+	public SingleplayerGameStartingEventArgs(GameSettings settings, String username) {
 		this.settings = settings;
 		this.username = username;
 	}
