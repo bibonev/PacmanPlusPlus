@@ -90,8 +90,8 @@ public class World {
 		return getEntities(Player.class);
 	}
 	
-	public Collection<AIGhost> getGhosts() {
-		return getEntities(AIGhost.class);
+	public Collection<Ghost> getGhosts() {
+		return getEntities(Ghost.class);
 	}
 
 	public void setRuleEnforcer(final RuleEnforcer ruleEnforcer) {

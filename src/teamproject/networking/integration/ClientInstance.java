@@ -8,7 +8,7 @@ import teamproject.event.Event;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
 import teamproject.event.listener.GameStartedListener;
-import teamproject.event.listener.LocalEntityUpdatedListener;
+import teamproject.event.listener.RemoteEntityUpdatedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
@@ -28,7 +28,7 @@ import teamproject.networking.socket.Client;
 import teamproject.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger ,
-		ClientDisconnectedListener, LocalEntityUpdatedListener, GameStartedListener {
+		ClientDisconnectedListener, RemoteEntityUpdatedListener, GameStartedListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
@@ -176,6 +176,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		p.setInteger("row", args.getRow());
 		p.setInteger("col", args.getCol());
 		p.setDouble("angle", args.getAngle());
+		logger.log(Level.INFO, "sending player moved packet");
 		manager.dispatch(p);
 	}
 
@@ -255,7 +256,9 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	private void triggerRemoteGhostJoined(Packet p) {
 		int ghostID = p.getInteger("ghost-id");
 		
-		game.getWorld().addEntity(new RemoteGhost(ghostID));
+		RemoteGhost ghost = new RemoteGhost(ghostID);
+		ghost.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
+		game.getWorld().addEntity(ghost);
 	}
 
 	private void triggerRemotePlayerJoined(Packet p) {
@@ -263,7 +266,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		String name = p.getString("name");
 
 		RemotePlayer player = new RemotePlayer(playerID, name);
-		player.setPosition(new Position(0, 0));
+		player.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
 		
 		game.getWorld().addEntity(player);
 	}
@@ -279,6 +282,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		int playerID = p.getInteger("player-id");
 		
 		Entity e = game.getWorld().getEntity(playerID);
+		logger.log(Level.INFO, "remoteplayer");
 		
 		if(e instanceof RemotePlayer) {
 			RemotePlayer ghost = (RemotePlayer)e;

@@ -15,16 +15,16 @@ import teamproject.event.listener.EntityRemovingListener;
 import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.HostStartingMultiplayerGameListener;
 import teamproject.event.listener.LobbyStateChangedListener;
-import teamproject.event.listener.LocalEntityUpdatedListener;
+import teamproject.event.listener.RemoteEntityUpdatedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.Ghost;
-import teamproject.gamelogic.domain.LocalEntityTracker;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
+import teamproject.gamelogic.domain.RemoteEntityTracker;
 import teamproject.gamelogic.domain.RemotePlayer;
 import teamproject.gamelogic.domain.World;
 import teamproject.networking.ServerManager;
@@ -37,7 +37,7 @@ import teamproject.networking.socket.Server;
 import teamproject.ui.GameUI;
 
 public class ServerInstance implements Runnable, ServerTrigger,
-		ClientConnectedListener, LocalEntityUpdatedListener,
+		ClientConnectedListener, RemoteEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener,
 		ClientDisconnectedListener, LobbyStateChangedListener,
 		HostStartingMultiplayerGameListener, GameStartedListener {
@@ -45,7 +45,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	private ServerManager manager;
 	private Game game;
 	private GameUI gameUI;
-	private LocalEntityTracker tracker;
+	private RemoteEntityTracker tracker;
 	private Logger logger = Logger.getLogger("network-server");
 	private Lobby lobby;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
@@ -130,7 +130,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		 * to the server manager, which turns the packet into bytes and sends it to
 		 * the server.
 		 */
-		tracker = new LocalEntityTracker(this);
+		tracker = new RemoteEntityTracker(this);
 		server.getClientConnectedEvent().addListener(this);
 		server.getClientDisconnectedEvent().addListener(this);
 		lobby.getLobbyStateChangedEvent().addListener(this);
@@ -276,11 +276,15 @@ public class ServerInstance implements Runnable, ServerTrigger,
 			Packet p = new Packet("remote-player-joined");
 			p.setInteger("player-id", e.getID());
 			p.setString("name", ((Player) e).getName());
+			p.setInteger("row", e.getPosition().getRow());
+			p.setInteger("col", e.getPosition().getColumn());
 			manager.dispatchAllExcept(p, e.getID());
 		}
 		if(e instanceof Ghost) {
 			Packet p = new Packet("remote-ghost-joined");
 			p.setInteger("ghost-id", e.getID());
+			p.setInteger("row", e.getPosition().getRow());
+			p.setInteger("col", e.getPosition().getColumn());
 			manager.dispatchAll(p);
 		}
 	}

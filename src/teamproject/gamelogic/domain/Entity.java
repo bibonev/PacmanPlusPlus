@@ -27,6 +27,8 @@ public abstract class Entity {
 	
 	public void setPosition(Position position) {
 		this.position = position;
+		getOnMovedEvent().fire(
+				new EntityMovedEventArgs(position.getRow(), position.getColumn(), 0, this));
 	}
 	
 	public int getID() {

@@ -27,4 +27,9 @@ public class Position {
 			return false;
 		}
 	}
+	
+	@Override
+	public String toString() {
+		return String.format("(%d, %d)", getRow(), getColumn());
+	}
 }

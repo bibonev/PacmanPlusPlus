@@ -15,7 +15,7 @@ import teamproject.constants.Images;
 import teamproject.constants.ScreenSize;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.listener.EntityMovedListener;
-import teamproject.event.listener.LocalEntityUpdatedListener;
+import teamproject.event.listener.RemoteEntityUpdatedListener;
 import teamproject.gamelogic.domain.*;
 import teamproject.ui.GameUI;
 
@@ -28,7 +28,7 @@ import static java.lang.System.exit;
 /**
  * Created by Boyan Bonev on 09/02/2017.
  */
-public class Render implements LocalEntityUpdatedListener {
+public class Render implements RemoteEntityUpdatedListener {
 	private Pane root;
 	private Timeline timeLine;
 	private Scene scene;
@@ -243,15 +243,16 @@ public class Render implements LocalEntityUpdatedListener {
 	 * Start the timeline
 	 */
 	public void startTimeline() {
-		for(AIGhost ghost : world.getGhosts()) {
-			ghost.getBehaviour().getOnMovedEvent().addListener(this);
+		for(Ghost ghost : world.getGhosts()) {
+			ghost.getOnMovedEvent().addListener(this);
 		}
 		timeLine = new Timeline(new KeyFrame(Duration.millis(1000), event -> {
 			if(serverMode) {
-				for(AIGhost ghost : world.getGhosts()) {
+				for(AIGhost ghost : world.getEntities(AIGhost.class)) {
 					ghost.run();
 				}
 			}
+			redrawMap();
 			}
 		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
