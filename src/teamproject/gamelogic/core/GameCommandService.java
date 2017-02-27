@@ -58,8 +58,8 @@ public class GameCommandService {
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost2.setBehaviour(b2);
 
-		//world.addEntity(ghost);
-		//world.addEntity(ghost1);
+		world.addEntity(ghost);
+		world.addEntity(ghost1);
 		world.addEntity(ghost2);
 		world.addEntity(player);
 

@@ -27,7 +27,7 @@ public class CellVisualisation {
 	 */
 	public Node getNode() {
 		PositionVisualisation positionVisualisation = new PositionVisualisation(cell.getPosition().getRow(), cell.getPosition().getColumn());
-		if (cell.getState() == CellState.FOOD) {
+		if (cell.getState() == CellState.FOOD || cell.getState() == CellState.ENEMY_AND_FOOD) {
 			node = new Circle(positionVisualisation.getPixelX() + positionVisualisation.getWidth() / 2,
 					positionVisualisation.getPixelY() + positionVisualisation.getHeight() / 2,
 					positionVisualisation.getWidth() / 8);

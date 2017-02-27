@@ -321,7 +321,6 @@ public abstract class Behaviour {
 		// if AI is forced to make a random move, it makes *focus number
 		// of consecutive moves before it scans for new enemies
 		case RANDOM: {
-
 			if (counter < focus) {
 				
 				lastPos=entity.getPosition();
@@ -336,7 +335,6 @@ public abstract class Behaviour {
 			} else {
 				counter = 0;
 				run();
-
 			}
 		}
 			break;

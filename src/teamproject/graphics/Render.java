@@ -49,7 +49,11 @@ public class Render implements LocalEntityUpdatedListener {
 
 		ghostMovements = new HashMap<>();
 		for (final AIGhost ghost : world.getGhosts()) {
-			ghostMovements.put(ghost, new EntityMovement(ghost, world));
+            final AIGhost gh = new AIGhost();
+            gh.setPosition(ghost.getPosition());
+            gh.setType(EntityType.GHOST);
+            gh.setBehaviour(ghost.getBehaviour());
+			ghostMovements.put(ghost, new EntityMovement(gh, world));
 		}
 	}
 
@@ -58,7 +62,7 @@ public class Render implements LocalEntityUpdatedListener {
 	 *
 	 * @return the stage that contians the scene with the map
 	 */
-	public Scene drawMap() {
+	public Scene drawWorld() {
 		final Cell[][] cells = world.getMap().getCells();
 		Images.Border = new ImageView("border.jpg");
 		root = new Pane();
@@ -74,7 +78,7 @@ public class Render implements LocalEntityUpdatedListener {
 	/**
 	 * Redraw the map
 	 */
-	public void redrawMap() {
+	public void redrawWorld() {
 		final Cell[][] cells = world.getMap().getCells();
 		PositionVisualisation.initScreenDimensions();
 
@@ -86,8 +90,8 @@ public class Render implements LocalEntityUpdatedListener {
 			root.getChildren().add(new PacmanVisualisation(player).getNode());
 		}
 
-		for (final Ghost ghost : world.getGhosts()) {
-			root.getChildren().add(new GhostVisualisation(ghost, controlledPlayer).getNode());
+		for (final EntityMovement eMovement : ghostMovements.values()) {
+			root.getChildren().add(new GhostVisualisation(eMovement.getEntity().getPosition()).getNode());
 		}
 
 		root.requestFocus();
@@ -95,22 +99,22 @@ public class Render implements LocalEntityUpdatedListener {
 
 	/**
 	 *
-	 * Click listener for moving the ghost
+	 * Click listener for moving the player
 	 */
 	public void addClickListener() {
 		root.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.UP) {
 				moveControlledPlayer.moveUp();
-				redrawMap();
+				redrawWorld();
 			} else if (event.getCode() == KeyCode.DOWN) {
 				moveControlledPlayer.moveDown();
-				redrawMap();
+				redrawWorld();
 			} else if (event.getCode() == KeyCode.LEFT) {
 				moveControlledPlayer.moveLeft();
-				redrawMap();
+				redrawWorld();
 			} else if (event.getCode() == KeyCode.RIGHT) {
 				moveControlledPlayer.moveRight();
-				redrawMap();
+				redrawWorld();
 			}
 		});
 	}
@@ -139,7 +143,7 @@ public class Render implements LocalEntityUpdatedListener {
 	@Override
 	public void onEntityMoved(final EntityMovedEventArgs args) {
 		ghostMovements.get(args.getEntity()).moveTo(args.getRow(), args.getCol(), args.getAngle());
-		redrawMap();
+		redrawWorld();
 
         if(RuleChecker.getGameOutcome(game, serverMode ? GameType.MULTIPLAYER : GameType.SINGLEPLAYER)
                 == GameOutcome.LOCAL_PLAYER_LOST){

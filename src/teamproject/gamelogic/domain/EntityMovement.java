@@ -6,7 +6,11 @@ import teamproject.constants.CellState;
  * Created by Boyan Bonev on 23/02/2017.
  */
 public class EntityMovement {
-	private Entity entity;
+    public Entity getEntity() {
+        return entity;
+    }
+
+    private Entity entity;
 	private World world;
 
 	/**
@@ -36,27 +40,39 @@ public class EntityMovement {
 		if (world.getMap().getCell(row, column).getState() == CellState.OBSTACLE) {
 			return false;
 		}
-		entity.setPosition(new Position(row, column));
-		if (entity instanceof ControlledPlayer) {
-			((ControlledPlayer) entity).setAngle(angle);
-		}
-
-		if (world.getMap().getCell(row, column).getState() == CellState.FOOD) {
-			world.getMap().getCell(row, column).setState(CellState.EMPTY);
-		}
 
 		if(entity instanceof Player){
-			if (world.getMap().getCell(row, column).getState() == CellState.ENEMY) {
+			((Player) entity).setAngle(angle);
+            world.getMap().getCell(entity.getPosition().getRow(), entity.getPosition().getColumn()).setState(CellState.EMPTY);
+            entity.setPosition(new Position(row, column));
+
+			if (world.getMap().getCell(row, column).getState() == CellState.FOOD ||
+                    world.getMap().getCell(row, column).getState() == CellState.EMPTY) {
+				world.getMap().getCell(row, column).setState(CellState.PLAYER);
+			}
+
+			if (world.getMap().getCell(row, column).getState() == CellState.ENEMY ||
+                    world.getMap().getCell(row, column).getState() == CellState.ENEMY_AND_FOOD) {
 				world.getMap().getCell(row, column).setState(CellState.PLAYER_AND_ENEMY);
 			}
-		} else if (entity instanceof ControlledPlayer) {
-			if (world.getMap().getCell(row, column).getState() == CellState.ENEMY) {
-				world.getMap().getCell(row, column).setState(CellState.PLAYER_AND_ENEMY);
-			}
+
 		} else {
+		    if(world.getMap().getCell(entity.getPosition().getRow(), entity.getPosition().getColumn()).getState() == CellState.ENEMY){
+                world.getMap().getCell(entity.getPosition().getRow(), entity.getPosition().getColumn()).setState(CellState.EMPTY);
+            } else if(world.getMap().getCell(entity.getPosition().getRow(), entity.getPosition().getColumn()).getState() == CellState.ENEMY_AND_FOOD){
+                world.getMap().getCell(entity.getPosition().getRow(), entity.getPosition().getColumn()).setState(CellState.FOOD);
+            }
+
+            //world.getMap().getCell(entity.getPosition().getRow(), entity.getPosition().getColumn()).setState(CellState.FOOD);
+            entity.setPosition(new Position(row, column));
+
 			if (world.getMap().getCell(row, column).getState() == CellState.PLAYER) {
 				world.getMap().getCell(row, column).setState(CellState.PLAYER_AND_ENEMY);
-			}
+			} else if (world.getMap().getCell(row, column).getState() == CellState.EMPTY) {
+                world.getMap().getCell(row, column).setState(CellState.ENEMY);
+            } else if (world.getMap().getCell(row, column).getState() == CellState.FOOD) {
+                world.getMap().getCell(row, column).setState(CellState.ENEMY_AND_FOOD);
+            }
 		}
 
 		return true;
