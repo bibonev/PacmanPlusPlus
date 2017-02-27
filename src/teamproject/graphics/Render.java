@@ -10,10 +10,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import teamproject.ai.AIGhost;
-import teamproject.constants.GameOutcome;
-import teamproject.constants.GameType;
-import teamproject.constants.Images;
-import teamproject.constants.ScreenSize;
+import teamproject.constants.*;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.listener.LocalEntityUpdatedListener;
 import teamproject.gamelogic.domain.*;
@@ -147,7 +144,10 @@ public class Render implements LocalEntityUpdatedListener {
         if(RuleChecker.getGameOutcome(game, serverMode ? GameType.MULTIPLAYER : GameType.SINGLEPLAYER)
                 == GameOutcome.LOCAL_PLAYER_LOST){
             gameEnded();
-        }
+        } else if(RuleChecker.getGameOutcome(game, serverMode ? GameType.MULTIPLAYER : GameType.SINGLEPLAYER)
+				== GameOutcome.LOCAL_PLAYER_WON){
+			gameEnded();
+		}
 	}
 
     /**
@@ -158,9 +158,12 @@ public class Render implements LocalEntityUpdatedListener {
     private void addToRoot(final Pane root, final Cell[][] cells) {
         for (final Cell[] cell : cells) {
             for (final Cell c : cell) {
-                final CellVisualisation cv = new CellVisualisation(c);
-                System.out.println("State: " + c.getState().toString());
-                root.getChildren().add(cv.getNode());
+            	if (c.getState() != CellState.PLAYER &&
+						c.getState() != CellState.ENEMY &&
+						c.getState() != CellState.PLAYER_AND_ENEMY) {
+					final CellVisualisation cv = new CellVisualisation(c);
+					root.getChildren().add(cv.getNode());
+				}
             }
         }
     }

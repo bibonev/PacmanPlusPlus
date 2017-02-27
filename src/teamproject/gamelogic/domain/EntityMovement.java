@@ -45,6 +45,20 @@ public class EntityMovement {
 			world.getMap().getCell(row, column).setState(CellState.EMPTY);
 		}
 
+		if(entity instanceof Player){
+			if (world.getMap().getCell(row, column).getState() == CellState.ENEMY) {
+				world.getMap().getCell(row, column).setState(CellState.PLAYER_AND_ENEMY);
+			}
+		} else if (entity instanceof ControlledPlayer) {
+			if (world.getMap().getCell(row, column).getState() == CellState.ENEMY) {
+				world.getMap().getCell(row, column).setState(CellState.PLAYER_AND_ENEMY);
+			}
+		} else {
+			if (world.getMap().getCell(row, column).getState() == CellState.PLAYER) {
+				world.getMap().getCell(row, column).setState(CellState.PLAYER_AND_ENEMY);
+			}
+		}
+
 		return true;
 	}
 
