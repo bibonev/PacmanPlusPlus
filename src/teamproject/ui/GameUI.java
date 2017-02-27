@@ -11,16 +11,11 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import teamproject.audio.Music;
 import teamproject.audio.SoundEffects;
-import teamproject.constants.GameType;
 import teamproject.event.Event;
-import teamproject.event.arguments.NewGameRequestedEventArguments;
 import teamproject.event.listener.GameClosingListener;
-import teamproject.event.listener.NewGameRequestedEventListener;
 import teamproject.gamelogic.core.GameCommandService;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
-import teamproject.graphics.GhostVisualisation;
-import teamproject.graphics.PacmanVisualisation;
 import teamproject.graphics.PositionVisualisation;
 import teamproject.graphics.Render;
 import teamproject.networking.integration.ClientInstance;
@@ -140,6 +135,7 @@ public class GameUI extends Application {
 	}
 
 	public void switchToMenu() {
+		System.out.println("Here");
 		setScreen(menuScreen.getPane());
 		final Label label = new Label("PacMan " + getName());
 		banner.setLeft(label);
@@ -218,14 +214,14 @@ public class GameUI extends Application {
 		PositionVisualisation.initScreenDimensions();
 
 		// Draw Map
-		thisStage.setScene(mapV.drawMap());
+		thisStage.setScene(mapV.drawWorld());
 		thisStage.show();
 
 		// Add CLick Listener
 		mapV.addClickListener();
 
 		// Redraw Map
-		mapV.redrawMap();
+		mapV.redrawWorld();
 		
 		// Start Timeline
 		mapV.startTimeline();
@@ -240,14 +236,14 @@ public class GameUI extends Application {
 		PositionVisualisation.initScreenDimensions();
 
 		// Draw Map
-		thisStage.setScene(mapV.drawMap());
+		thisStage.setScene(mapV.drawWorld());
 		thisStage.show();
 
 		// Add CLick Listener
 		mapV.addClickListener();
 
 		// Redraw Map
-		mapV.redrawMap();
+		mapV.redrawWorld();
 
 		// Start Timeline
 		mapV.startTimeline();
