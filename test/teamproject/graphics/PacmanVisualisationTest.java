@@ -3,18 +3,17 @@ package teamproject.graphics;
 import javafx.application.Application;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mock;
+import teamproject.gamelogic.domain.LocalPlayer;
+import teamproject.gamelogic.domain.Player;
+import teamproject.gamelogic.domain.Position;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
-
-import teamproject.constants.CellState;
-import teamproject.constants.CellType;
-import teamproject.gamelogic.domain.*;
 
 /**
  * Created by boyanbonev on 13/02/2017.

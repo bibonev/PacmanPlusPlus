@@ -19,6 +19,7 @@ import teamproject.event.listener.NewGameRequestedEventListener;
 import teamproject.gamelogic.core.GameCommandService;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
+import teamproject.gamelogic.event.listener.NewGameRequestedListener;
 import teamproject.graphics.GhostVisualisation;
 import teamproject.graphics.PacmanVisualisation;
 import teamproject.graphics.PositionVisualisation;
@@ -210,50 +211,21 @@ public class GameUI extends Application {
 	// TODO: refactor - these 2 methods are very very similar
 	public void startNewSinglePlayerGame() {
 		switchToGame();
-		Game game = GameCommandService.generateNewSinglePlayerGame(name, new GameSettings());
-		
-		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
 
-		// Initialize Screen dimensions
-		PositionVisualisation.initScreenDimensions();
+		final Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> onNewGameRequested = new Event<>( (l, s) -> l.onNewGameRequested(s));
 
-		// Draw Map
-		thisStage.setScene(mapV.drawMap());
-		thisStage.show();
-
-		// Add CLick Listener
-		mapV.addClickListener();
-
-		// Redraw Map
-		mapV.redrawMap();
-		
-		// Start Timeline
-		mapV.startTimeline();
+		onNewGameRequested.addListener(new NewGameRequestedListener());
+		onNewGameRequested.fire(new NewGameRequestedEventArguments(GameType.SINGLEPLAYER, new GameSettings(), name, thisStage));
 	}
 
 	public void startNewMultiPlayerGame() {
 		switchToMultiPlayerLobby();
-		
-		final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
 
-		// Initialize Screen dimensions
-		PositionVisualisation.initScreenDimensions();
+		final Event<NewGameRequestedEventListener, NewGameRequestedEventArguments> onNewGameRequested = new Event<>( (l, s) -> l.onNewGameRequested(s));
 
-		// Draw Map
-		thisStage.setScene(mapV.drawMap());
-		thisStage.show();
+		onNewGameRequested.addListener(new NewGameRequestedListener());
+		onNewGameRequested.fire(new NewGameRequestedEventArguments(GameType.MULTIPLAYER, new GameSettings(), name, thisStage));
 
-		// Add CLick Listener
-		mapV.addClickListener();
-
-		// Redraw Map
-		mapV.redrawMap();
-
-		// Start Timeline
-		mapV.startTimeline();
-
-		// start multiplayer game
-		// gameCommandService.requestNewMultiplayerGame(args.getUserName(), args.getSettings(), args.getStage());
 	}
 
 	public void createNewPendingMultiPlayerGame() {

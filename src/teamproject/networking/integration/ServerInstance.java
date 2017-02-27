@@ -40,7 +40,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	 * Any objects which will be involved with networking (eg. the map, the game,
 	 * etc.) should be passed in to this {@link ServerInstance} object via the
 	 * constructor. This, in turn, will pass those objects into the appropriate
-	 * triggers (so packets received from the network will update the local game
+	 * triggers (so packets received from the network will upda te the local game
 	 * state accordingly), and also register the created {@link ServerDispatcher}
 	 * object as a listener to any local events (eg. player moved) which must be
 	 * transmitted over the network.
