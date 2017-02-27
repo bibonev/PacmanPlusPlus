@@ -5,6 +5,12 @@ import teamproject.constants.CellState;
 import teamproject.constants.GameOutcome;
 import teamproject.constants.GameType;
 
+/**
+ * Check different rules, constraints and states
+ *
+ * @author aml
+ *
+ */
 public class RuleChecker {
 
 	/**
@@ -44,12 +50,24 @@ public class RuleChecker {
 		return type.equals(GameType.SINGLEPLAYER) ? getSinglePlayerGameOutcome(game) : getMultiplayerGameOutcome(game);
 	}
 
+	/**
+	 * Check whether a multiplayer game should end
+	 * 
+	 * @param game
+	 * @return a GameOutcome enum value
+	 */
 	private static GameOutcome getMultiplayerGameOutcome(final Game game) {
 		// TODO More complicated so will be implemented once networking is
 		// integrated fully
 		return GameOutcome.STILL_PLAYING;
 	}
 
+	/**
+	 * Check whether a singleplayer game should end
+	 * 
+	 * @param game
+	 * @return a GameOutcome enum value
+	 */
 	private static GameOutcome getSinglePlayerGameOutcome(final Game game) {
 		final Cell[][] cells = game.getWorld().getMap().getCells();
 		boolean ghostAtePlayer = false;
