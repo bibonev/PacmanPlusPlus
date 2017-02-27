@@ -2,7 +2,6 @@ package teamproject.gamelogic.domain;
 
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
-import teamproject.constants.CellType;
 import teamproject.constants.GameOutcome;
 import teamproject.constants.GameType;
 
@@ -23,7 +22,7 @@ public class RuleChecker {
 	 */
 	public static boolean checkCellValidity(final Cell cell) {
 		return cell.getPosition().getRow() >= 0 && cell.getPosition().getColumn() >= 0
-				&& cell.getState() != CellState.OBSTACLE && cell.getType() == CellType.NORMAL;
+				&& cell.getState() != CellState.OBSTACLE;
 
 	}
 

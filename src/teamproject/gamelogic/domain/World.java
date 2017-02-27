@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import teamproject.ai.AIGhost;
+import teamproject.constants.CellState;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.listener.EntityAddedListener;
@@ -93,6 +94,7 @@ public class World {
 	 */
 	public int addEntity(final Entity entity) {
 		int id;
+		addToMap(entity);
 		if (entity instanceof Player) {
 			id = addPlayer((Player) entity);
 		} else {
@@ -184,7 +186,7 @@ public class World {
 
 	/**
 	 * Remove an entity
-	 * 
+	 *
 	 * @param entityID
 	 *            the id of the entity to be removed
 	 */
@@ -195,5 +197,22 @@ public class World {
 		} else {
 			throw new IllegalArgumentException("No such entity with ID " + entityID);
 		}
+	}
+
+	private void addToMap(Entity entity){
+		final Cell[][] cells = map.getCells();
+
+		for (int i = 0; i < cells.length; i++){
+			for(int j = 0; j < cells[0].length; j++){
+				if(cells[i][j].getPosition().equals(entity.getPosition())){
+					cells[i][j] = new Cell(
+							entity instanceof Player ? CellState.PLAYER : CellState.ENEMY,
+							entity.getPosition()
+					);
+				}
+			}
+		}
+
+		map.setCells(cells);
 	}
 }

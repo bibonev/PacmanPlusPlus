@@ -8,7 +8,6 @@ import org.hamcrest.core.Is;
 import org.junit.Test;
 
 import teamproject.constants.CellState;
-import teamproject.constants.CellType;
 import teamproject.constants.GameOutcome;
 import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.stubs.CellStub;
@@ -19,7 +18,7 @@ public class RuleCheckerTest {
 	@Test
 	public void shouldCheckCellValidity_validCell() {
 		// Given
-		final Cell cell = new CellStub(CellType.NORMAL, CellState.EMPTY, new Position(1, 1));
+		final Cell cell = new CellStub(CellState.EMPTY, new Position(1, 1));
 
 		// Then
 		assertTrue(RuleChecker.checkCellValidity(cell));
@@ -28,7 +27,7 @@ public class RuleCheckerTest {
 	@Test
 	public void shouldCheckCellValidity_invalidCell_type() {
 		// Given
-		final Cell cell = new CellStub(CellType.WALL, CellState.EMPTY, new Position(1, 1));
+		final Cell cell = new CellStub(CellState.EMPTY, new Position(1, 1));
 
 		// Then
 		assertFalse(RuleChecker.checkCellValidity(cell));
@@ -37,7 +36,7 @@ public class RuleCheckerTest {
 	@Test
 	public void shouldCheckCellValidity_invalidCell_state() {
 		// Given
-		final Cell cell = new CellStub(CellType.NORMAL, CellState.OBSTACLE, new Position(1, 1));
+		final Cell cell = new CellStub(CellState.OBSTACLE, new Position(1, 1));
 
 		// Then
 		assertFalse(RuleChecker.checkCellValidity(cell));
@@ -46,7 +45,7 @@ public class RuleCheckerTest {
 	@Test
 	public void shouldCheckCellValidity_invalidCell_posRow() {
 		// Given
-		final Cell cell = new CellStub(CellType.NORMAL, CellState.EMPTY, new Position(-2, 2));
+		final Cell cell = new CellStub(CellState.EMPTY, new Position(-2, 2));
 
 		// Then
 		assertFalse(RuleChecker.checkCellValidity(cell));
@@ -55,7 +54,7 @@ public class RuleCheckerTest {
 	@Test
 	public void shouldCheckCellValidity_invalidCell_posColumn() {
 		// Given
-		final Cell cell = new CellStub(CellType.NORMAL, CellState.EMPTY, new Position(2, -2));
+		final Cell cell = new CellStub(CellState.EMPTY, new Position(2, -2));
 
 		// Then
 		assertFalse(RuleChecker.checkCellValidity(cell));
