@@ -29,7 +29,6 @@ public class Render implements LocalEntityUpdatedListener {
 	private Game game;
 
 	private EntityMovement moveControlledPlayer;
-	private HashMap<Entity, EntityMovement> ghostMovements;
 
 	/**
 	 * Initialize new visualisation of the map
@@ -45,16 +44,7 @@ public class Render implements LocalEntityUpdatedListener {
 		this.game = game;
 
 		controlledPlayer = game.getPlayer();
-		moveControlledPlayer = new EntityMovement(controlledPlayer, world);
-
-		ghostMovements = new HashMap<>();
-		for (final AIGhost ghost : world.getGhosts()) {
-            final AIGhost gh = new AIGhost();
-            gh.setPosition(ghost.getPosition());
-            gh.setType(EntityType.GHOST);
-            gh.setBehaviour(ghost.getBehaviour());
-			ghostMovements.put(ghost, new EntityMovement(gh, world));
-		}
+		moveControlledPlayer = new EntityMovement(controlledPlayer, world.getMap());
 	}
 
 	/**
@@ -90,8 +80,8 @@ public class Render implements LocalEntityUpdatedListener {
 			root.getChildren().add(new PacmanVisualisation(player).getNode());
 		}
 
-		for (final EntityMovement eMovement : ghostMovements.values()) {
-			root.getChildren().add(new GhostVisualisation(eMovement.getEntity().getPosition()).getNode());
+		for (final AIGhost ghost : world.getGhosts()) {
+			root.getChildren().add(new GhostVisualisation(ghost.getPosition()).getNode());
 		}
 
 		root.requestFocus();
@@ -142,7 +132,6 @@ public class Render implements LocalEntityUpdatedListener {
 
 	@Override
 	public void onEntityMoved(final EntityMovedEventArgs args) {
-		ghostMovements.get(args.getEntity()).moveTo(args.getRow(), args.getCol(), args.getAngle());
 		redrawWorld();
 
         if(RuleChecker.getGameOutcome(game, serverMode ? GameType.MULTIPLAYER : GameType.SINGLEPLAYER)

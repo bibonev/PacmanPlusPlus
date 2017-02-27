@@ -43,6 +43,9 @@ public abstract class Behaviour {
 	/** The current position of the ai. */
 	public Entity entity;
 
+	/** The movement of the entity. */
+	private EntityMovement entityMovement;
+
 	/**
 	 * The focus variable determines how long it takes before the AI gets bored
 	 * of chasing something or how many consecutive random moves it makes before
@@ -109,6 +112,8 @@ public abstract class Behaviour {
 		this.onEntityMoved = entity.getOnMovedEvent();
 		counter = 0;
 		currentPath = new ArrayList<Position>();
+
+		entityMovement = new EntityMovement(entity, map);
 	}
 
 	public Event<EntityMovedListener, EntityMovedEventArgs> getOnMovedEvent() {
@@ -324,7 +329,8 @@ public abstract class Behaviour {
 			if (counter < focus) {
 				
 				lastPos=entity.getPosition();
-				entity.setPosition(lockedTarget);
+
+				entityMovement.moveTo(lockedTarget.getRow(), lockedTarget.getColumn(), 0);
 
 				onEntityMoved
 						.fire(new EntityMovedEventArgs(lockedTarget.getRow(), lockedTarget.getColumn(), 0, entity));
@@ -347,8 +353,8 @@ public abstract class Behaviour {
 
 			if (currentPath.size() > 0 && isTargetThere(lockedTarget) && 
 					RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()]) ){
-				
-				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
+
+				entityMovement.moveTo(currentPath.get(0).getRow(),currentPath.get(0).getColumn(), 0);
 			
 				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
 				
@@ -356,8 +362,8 @@ public abstract class Behaviour {
 
 			} else {
 				genPath(entity.getPosition(), lockedTarget);
-				
-				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
+
+				entityMovement.moveTo(currentPath.get(0).getRow(),currentPath.get(0).getColumn(), 0);
 				
 				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
 				
@@ -385,8 +391,8 @@ public abstract class Behaviour {
 			}
 			
 			if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
-				
-				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
+
+				entityMovement.moveTo(currentPath.get(0).getRow(),currentPath.get(0).getColumn(), 0);
 
 				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
 
@@ -394,8 +400,8 @@ public abstract class Behaviour {
 
 			} else {
 				genPath(entity.getPosition(), lockedTarget);
-				
-				entity.setPosition(lockedTarget);
+
+				entityMovement.moveTo(currentPath.get(0).getRow(),currentPath.get(0).getColumn(), 0);
 				
 				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
 				
