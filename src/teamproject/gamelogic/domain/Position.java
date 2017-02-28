@@ -32,6 +32,28 @@ public class Position {
 	public int getColumn() {
 		return column;
 	}
+	
+	/**
+	 * Creates aa new Position object with this position and the
+	 * position {@code p} added together like vectors.
+	 * 
+	 * @param p
+	 * @return
+	 */
+	public Position add(Position p) {
+		return new Position(this.row + p.row, this.column + p.column);
+	}
+	
+	/**
+	 * Creates a new Position object with this position and the
+	 * position {@code (row, column)} added like vectors.
+	 * @param row
+	 * @param column
+	 * @return
+	 */
+	public Position add(int row, int column) {
+		return new Position(this.row + row, this.column + column);
+	}
 
 	@Override
 	public boolean equals(final Object obj) {

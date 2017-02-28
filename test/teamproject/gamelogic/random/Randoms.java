@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 import teamproject.constants.CellState;
-import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.ControlledPlayer;
 import teamproject.gamelogic.domain.Game;
@@ -101,10 +100,6 @@ public class Randoms {
 		return new Inventory(items);
 	}
 
-	public static CellType randomCellType() {
-		return randomEnum(CellType.class);
-	}
-
 	public static CellState randomCellState() {
 		return randomEnum(CellState.class);
 	}
@@ -118,11 +113,11 @@ public class Randoms {
 	}
 
 	public static Cell randomCell() {
-		return new CellStub(randomCellType(), randomCellState(), randomPosition());
+		return new CellStub(randomCellState(), randomPosition());
 	}
 
 	public static Cell randomCell(final Position position) {
-		return new CellStub(randomCellType(), randomCellState(), position);
+		return new CellStub(randomCellState(), position);
 	}
 
 	public static Cell[][] randomCells(final int numberOfCells) {

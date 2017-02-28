@@ -10,13 +10,13 @@ public class Game {
 	private World world;
 	private GameSettings gameSettings;
 	private ControlledPlayer player;
-	private boolean isServerGame;
+	private GameType type;
 
-	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player, final boolean isServerGame) {
+	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player, final GameType type) {
 		this.world = world;
 		this.gameSettings = gameSettings;
 		this.player = player;
-		this.isServerGame = isServerGame;
+		this.type = type;
 	}
 
 	/**
@@ -65,15 +65,13 @@ public class Game {
 	public ControlledPlayer getPlayer() {
 		return player;
 	}
-	
+
 	/**
-	 * Determines if this {@link Game} instance is one which runs on the serve.r
-	 * 
-	 * @return Returns {@code true} if this game is to be ran on the server. Otherwise,
-	 * returns {@code false} if this game instance is one which is rendered and ran on
-	 * the client.
+	 * Determines the type of the game - ie. singleplayer,
+	 * multiplayer serverside, or multiplayer clientside.
+	 * @return
 	 */
-	public boolean isServerGame() {
-		return isServerGame;
+	public GameType getGameType() {
+		return type;
 	}
 }

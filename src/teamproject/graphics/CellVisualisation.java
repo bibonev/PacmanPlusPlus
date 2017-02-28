@@ -5,7 +5,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import teamproject.constants.CellState;
-import teamproject.constants.CellType;
 import teamproject.constants.Colors;
 import teamproject.constants.Images;
 import teamproject.gamelogic.domain.Cell;

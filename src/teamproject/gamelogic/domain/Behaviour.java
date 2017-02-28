@@ -79,6 +79,7 @@ public abstract class Behaviour {
 	private PriorityQueue<Item> priorityTargets;
 
 	private int counter;
+	private World world;
 
 	protected Event<EntityMovedListener, EntityMovedEventArgs> onEntityMoved;
 
@@ -96,11 +97,12 @@ public abstract class Behaviour {
 	 * @param type
 	 *            the type
 	 */
-	public Behaviour(final Map map, final Entity entity, final int speed, final Inventory stash, Type type) {
-		mapSize = map.getMapSize();
+	public Behaviour(final World world, final Entity entity, final int speed, final Inventory stash, Type type) {
+		this.world = world;
+		mapSize = this.world.getMap().getMapSize();
 		this.entity = entity;
-		cells = map.getCells();
-		astar = new AStar(map);
+		cells = this.world.getMap().getCells();
+		astar = new AStar(world.getMap());
 		rng = new Random();
 		focus = rng.nextInt(4) + 1;
 		this.stash = stash;
@@ -202,12 +204,8 @@ public abstract class Behaviour {
 	 */
 	private ArrayList<Position> scanEnemies() {
 		final ArrayList<Position> enemies = new ArrayList<Position>();
-		for (int i = 0; i < mapSize; i++) {
-			for (int j = 0; j < mapSize; j++) {
-				if (cells[i][j].getState() == CellState.ENEMY) {
-					enemies.add(cells[i][j].getPosition());
-				}
-			}
+		for(Ghost g : world.getEntities(Ghost.class)) {
+			enemies.add(g.getPosition());
 		}
 		return enemies;
 	}
@@ -265,23 +263,23 @@ public abstract class Behaviour {
 		final int row = target.getRow();
 		final int column = target.getColumn();
 
-		if (cells[row][column].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target)) {
 			return true;
 		}
-		if (cells[row - 1][column].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target.add(-1, 0))) {
 			lockedTarget = cells[row - 1][column].getPosition();
 			return true;
 		}
-		if (cells[row + 1][column].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target.add(+1, 0))) {
 			lockedTarget = cells[row + 1][column].getPosition();
 			return true;
 		}
-		if (cells[row][column - 1].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target.add(0, -1))) {
 			lockedTarget = cells[row][column - 1].getPosition();
 			return true;
 		}
 
-		if (cells[row][column + 1].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target.add(0, +1))) {
 			lockedTarget = cells[row][column + 1].getPosition();
 			return true;
 		}
@@ -321,14 +319,11 @@ public abstract class Behaviour {
 		// if AI is forced to make a random move, it makes *focus number
 		// of consecutive moves before it scans for new enemies
 		case RANDOM: {
-
 			if (counter < focus) {
 				
 				lastPos=entity.getPosition();
-				entity.setPosition(lockedTarget);
 
-				onEntityMoved
-						.fire(new EntityMovedEventArgs(lockedTarget.getRow(), lockedTarget.getColumn(), 0, entity));
+				entity.setPosition(currentPath.get(0));
 
 				lockedTarget = pickRandomTarget();
 
@@ -336,7 +331,6 @@ public abstract class Behaviour {
 			} else {
 				counter = 0;
 				run();
-
 			}
 		}
 			break;
@@ -349,19 +343,15 @@ public abstract class Behaviour {
 
 			if (currentPath.size() > 0 && isTargetThere(lockedTarget) && 
 					RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()]) ){
-				
-				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
-			
-				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+
+				entity.setPosition(currentPath.get(0));
 				
 				currentPath.remove(0);
 
 			} else {
 				genPath(entity.getPosition(), lockedTarget);
-				
-				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
-				
-				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+
+				entity.setPosition(currentPath.get(0));
 				
 				currentPath.remove(0);
 			}
@@ -387,19 +377,15 @@ public abstract class Behaviour {
 			}
 			
 			if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
-				
-				entity.setPosition(new Position(currentPath.get(0).getRow(),currentPath.get(0).getColumn()));
 
-				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+				entity.setPosition(currentPath.get(0));
 
 				currentPath.remove(0);
 
 			} else {
 				genPath(entity.getPosition(), lockedTarget);
-				
-				entity.setPosition(lockedTarget);
-				
-				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+
+				entity.setPosition(currentPath.get(0));
 				
 				currentPath.remove(0);
 			}

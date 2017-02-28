@@ -12,8 +12,6 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-import teamproject.constants.CellState;
-import teamproject.constants.CellType;
 import teamproject.gamelogic.domain.*;
 
 /**

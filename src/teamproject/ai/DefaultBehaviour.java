@@ -15,7 +15,7 @@ public class DefaultBehaviour extends Behaviour {
 	 * @param speed the speed
 	 * @param stash the inventory
 	 */
-	public DefaultBehaviour(Map map, Entity entity, int speed, Inventory stash, Type type) {
-		super(map, entity, speed, stash, type);
+	public DefaultBehaviour(World world, Entity entity, int speed, Inventory stash, Type type) {
+		super(world, entity, speed, stash, type);
 	}
 }

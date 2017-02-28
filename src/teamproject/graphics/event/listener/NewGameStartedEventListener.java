@@ -22,7 +22,7 @@ public class NewGameStartedEventListener implements teamproject.event.listener.N
 		PositionVisualisation.initScreenDimensions();
 
 		// Draw Map
-		args.getStage().setScene(mapV.drawMap(cells));
+		args.getStage().setScene(mapV.drawWorld(cells));
 		args.getStage().show();
 
 		// Add CLick Listener
@@ -35,7 +35,7 @@ public class NewGameStartedEventListener implements teamproject.event.listener.N
 		GamePlay.ghost1 = new GhostVisualisation(ghost, GamePlay.pacman, mapV);
 
 		// Redraw Map
-		mapV.redrawMap();
+		mapV.redrawWorld();
 
 		// Start Timeline
 		mapV.startTimeline();*/

@@ -10,6 +10,7 @@ import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
 import teamproject.event.arguments.LobbyChangedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
+import teamproject.event.arguments.PlayerMovedEventArgs;
 import teamproject.event.listener.EntityAddedListener;
 import teamproject.event.listener.EntityRemovingListener;
 import teamproject.event.listener.GameStartedListener;
@@ -21,6 +22,7 @@ import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Game;
+import teamproject.gamelogic.domain.GameType;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
@@ -207,13 +209,22 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		return p;
 	}
 	
+	private Packet createForceMovePacket(int row, int column, double angle) {
+		Packet p = new Packet("force-move");
+		p.setInteger("row", row);
+		p.setInteger("col", column);
+		p.setDouble("angle", angle);
+		return p;
+	}
+	
 	@Override
 	public void onEntityMoved(EntityMovedEventArgs args) {
 		if(args.getEntity().getType()==EntityType.PLAYER){
 			Packet p = new Packet("remote-player-moved");
 			p.setInteger("row", args.getRow());
 			p.setInteger("col", args.getCol());
-			p.setDouble("angle", args.getAngle());
+			if(args instanceof PlayerMovedEventArgs)
+				p.setDouble("angle", ((PlayerMovedEventArgs) args).getAngle());
 			p.setInteger("player-id", args.getEntity().getID());
 			
 			if(server.getConnectedClients().contains(args.getEntity().getID())) {
@@ -248,13 +259,13 @@ public class ServerInstance implements Runnable, ServerTrigger,
 
 	private void triggerPlayerMoved(int sender, Packet p) {
 		int row = p.getInteger("row"), col = p.getInteger("col");
-		double angle = p.getDouble("angle");
 		
 		Entity e = game.getWorld().getEntity(sender);
 		
 		if(e != null && e instanceof Player) {
 			Player player = (Player)e;
-			player.setAngle(angle);
+			if(p.hasParameter("angle"))
+				player.setAngle(p.getDouble("angle"));
 			player.setPosition(new Position(row, col));
 		} else {
 			throw new IllegalStateException("Sender ID does not correspond to player.");
@@ -345,7 +356,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 
 	@Override
 	public void onGameStarted(Game game) {
-		if(game.isServerGame()) {
+		if(game.getGameType() == GameType.MULTIPLAYER_SERVER) {
 			if(this.game != null) {
 				// cleanup hooks to old game
 				
@@ -359,6 +370,11 @@ public class ServerInstance implements Runnable, ServerTrigger,
 				RemotePlayer player = new RemotePlayer(info.getID(), info.getName());
 				player.setPosition(new Position(0, 0));
 				game.getWorld().addEntity(player);
+
+				manager.dispatch(i, createForceMovePacket(
+						player.getPosition().getRow(),
+						player.getPosition().getColumn(),
+						player.getAngle()));
 			}
 		}
 	}

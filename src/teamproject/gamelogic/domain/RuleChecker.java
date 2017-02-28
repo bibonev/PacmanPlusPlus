@@ -2,9 +2,7 @@ package teamproject.gamelogic.domain;
 
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
-import teamproject.constants.CellType;
 import teamproject.constants.GameOutcome;
-import teamproject.constants.GameType;
 
 /**
  * Check different rules, constraints and states
@@ -23,7 +21,7 @@ public class RuleChecker {
 	 */
 	public static boolean checkCellValidity(final Cell cell) {
 		return cell.getPosition().getRow() >= 0 && cell.getPosition().getColumn() >= 0
-				&& cell.getState() != CellState.OBSTACLE && cell.getType() == CellType.NORMAL;
+				&& cell.getState() != CellState.OBSTACLE;
 
 	}
 
@@ -47,8 +45,8 @@ public class RuleChecker {
 	 */
 	// TODO: possibly add the type as a game field instead of passing them
 	// separately
-	public static GameOutcome getGameOutcome(final Game game, final GameType type) {
-		return type.equals(GameType.SINGLEPLAYER) ? getSinglePlayerGameOutcome(game) : getMultiplayerGameOutcome(game);
+	public static GameOutcome getGameOutcome(final Game game) {
+		return game.getGameType().equals(GameType.SINGLEPLAYER) ? getSinglePlayerGameOutcome(game) : getMultiplayerGameOutcome(game);
 	}
 
 	/**
@@ -76,8 +74,17 @@ public class RuleChecker {
 
 		for (final Cell[] cellRow : cells) {
 			for (int j = 0; j < cells[0].length; j++) {
-				ghostAtePlayer = ghostAtePlayer || cellRow[j].getState().equals(CellState.PLAYER_AND_ENEMY);
-				foodLeft = foodLeft || cellRow[j].getState().equals(CellState.FOOD);
+				if(cellRow[j].getState().equals(CellState.FOOD)) {
+					foodLeft = true;
+					break;
+				}
+			}
+		}
+		
+		for(final Ghost ghost : game.getWorld().getGhosts()) {
+			if(ghost.getPosition().equals(game.getPlayer().getPosition())) {
+				ghostAtePlayer  = true;
+				break;
 			}
 		}
 

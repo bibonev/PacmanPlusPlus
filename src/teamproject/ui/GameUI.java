@@ -20,6 +20,7 @@ import teamproject.event.listener.LobbyStateChangedListener;
 import teamproject.gamelogic.core.GameCommandService;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.domain.Game;
+import teamproject.gamelogic.domain.GameType;
 import teamproject.graphics.PositionVisualisation;
 import teamproject.graphics.Render;
 import teamproject.networking.integration.ClientInstance;
@@ -143,6 +144,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 
 	public void switchToMenu() {
+		System.out.println("Here");
 		setScreen(menuScreen.getPane());
 		final Label label = new Label("PacMan " + getName());
 		banner.setLeft(label);
@@ -209,8 +211,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public String getName() {
 		return name;
 	}
-
-	// TODO move creation of client/server instances into GameCommandService at some point
+	
 	public void createNewPendingMultiPlayerGame() {
 		multiPlayerLobbyScreen.addNames();
 		
@@ -292,25 +293,27 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	@Override
 	public void onGameStarted(Game game) {
-		if(!game.isServerGame()) {
+		if(game.getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
 				switchToGame();
 				
-				final Render mapV = new Render(this, game.getPlayer(), game.getWorld(), true);
-		
+				switchToMultiPlayerLobby();
+				
+				final Render mapV = new Render(this, game);
+
 				// Initialize Screen dimensions
 				PositionVisualisation.initScreenDimensions();
-		
+
 				// Draw Map
-				thisStage.setScene(mapV.drawMap());
+				thisStage.setScene(mapV.drawWorld());
 				thisStage.show();
-		
+
 				// Add CLick Listener
 				mapV.addClickListener();
-		
+
 				// Redraw Map
-				mapV.redrawMap();
-		
+				mapV.redrawWorld();
+
 				// Start Timeline
 				mapV.startTimeline();
 			});

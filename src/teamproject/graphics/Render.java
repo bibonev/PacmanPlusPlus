@@ -10,19 +10,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 import teamproject.ai.AIGhost;
-import teamproject.constants.Images;
-import teamproject.constants.ScreenSize;
+import teamproject.constants.*;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.listener.EntityMovedListener;
 import teamproject.event.listener.RemoteEntityUpdatedListener;
 import teamproject.gamelogic.domain.*;
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.ControlledPlayer;
-import teamproject.gamelogic.domain.Entity;
-import teamproject.gamelogic.domain.EntityMovement;
-import teamproject.gamelogic.domain.Ghost;
-import teamproject.gamelogic.domain.Player;
-import teamproject.gamelogic.domain.World;
+import teamproject.gamelogic.domain.GameType;
 import teamproject.ui.GameUI;
 
 /**
@@ -34,31 +27,21 @@ public class Render implements RemoteEntityUpdatedListener {
 	private ControlledPlayer controlledPlayer;
 	private GameUI gameUI;
 	private World world;
-	private boolean serverMode;
-
-	private EntityMovement moveControlledPlayer;
-	private HashMap<Entity, EntityMovement> ghostMovements;
+	private Game game;
 
 	/**
 	 * Initialize new visualisation of the map
 	 *
 	 * @param gameUI
-	 * @param player
-	 * @param world
+	 * @param game
 	 * @param serverMode
 	 */
-	public Render(final GameUI gameUI, final ControlledPlayer player, final World world, final boolean serverMode) {
+	public Render(final GameUI gameUI, final Game game) {
 		this.gameUI = gameUI;
-		this.world = world;
-		this.serverMode = serverMode;
+		this.world = game.getWorld();
+		this.game = game;
 
-		controlledPlayer = player;
-		moveControlledPlayer = new EntityMovement(controlledPlayer, world);
-
-		ghostMovements = new HashMap<>();
-		for (final AIGhost ghost : world.getEntities(AIGhost.class)) {
-			ghostMovements.put(ghost, new EntityMovement(ghost, world));
-		}
+		controlledPlayer = game.getPlayer();
 	}
 
 	/**
@@ -66,7 +49,7 @@ public class Render implements RemoteEntityUpdatedListener {
 	 *
 	 * @return the stage that contians the scene with the map
 	 */
-	public Scene drawMap() {
+	public Scene drawWorld() {
 		final Cell[][] cells = world.getMap().getCells();
 		Images.Border = new ImageView("border.jpg");
 		root = new Pane();
@@ -82,7 +65,7 @@ public class Render implements RemoteEntityUpdatedListener {
 	/**
 	 * Redraw the map
 	 */
-	public void redrawMap() {
+	public void redrawWorld() {
 		final Cell[][] cells = world.getMap().getCells();
 		PositionVisualisation.initScreenDimensions();
 
@@ -95,50 +78,31 @@ public class Render implements RemoteEntityUpdatedListener {
 		}
 
 		for (final Ghost ghost : world.getGhosts()) {
-			root.getChildren().add(new GhostVisualisation(ghost, controlledPlayer).getNode());
+			root.getChildren().add(new GhostVisualisation(ghost.getPosition()).getNode());
 		}
 
 		root.requestFocus();
 	}
 
-	private void addToRoot(final Pane root, final Cell[][] cells) {
-		for (final Cell[] cell : cells) {
-			for (final Cell c : cell) {
-				final CellVisualisation cv = new CellVisualisation(c);
-				root.getChildren().add(cv.getNode());
-			}
-		}
-	}
-
 	/**
 	 *
-	 * Click listener for moving the ghost
+	 * Click listener for moving the player
 	 */
 	public void addClickListener() {
 		root.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.UP) {
-				moveControlledPlayer.moveUp();
-				redrawMap();
+				controlledPlayer.moveUp();
+				redrawWorld();
 			} else if (event.getCode() == KeyCode.DOWN) {
-				moveControlledPlayer.moveDown();
-				redrawMap();
+				controlledPlayer.moveDown();
+				redrawWorld();
 			} else if (event.getCode() == KeyCode.LEFT) {
-				moveControlledPlayer.moveLeft();
-				redrawMap();
+				controlledPlayer.moveLeft();
+				redrawWorld();
 			} else if (event.getCode() == KeyCode.RIGHT) {
-				moveControlledPlayer.moveRight();
-				redrawMap();
+				controlledPlayer.moveRight();
+				redrawWorld();
 			}
-		});
-	}
-
-	/**
-	 * End the game
-	 */
-	void gameEnded() {
-		timeLine.stop();
-		gameUI.switchToMenu();
-		root.setOnKeyPressed(e -> {
 		});
 	}
 
@@ -150,12 +114,12 @@ public class Render implements RemoteEntityUpdatedListener {
 			ghost.getOnMovedEvent().addListener(this);
 		}
 		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-			if(serverMode) {
+			if(game.getGameType() == GameType.SINGLEPLAYER) {
 				for(AIGhost ghost : world.getEntities(AIGhost.class)) {
 					ghost.run();
 				}
 			}
-			redrawMap();
+			redrawWorld();
 			}
 		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
@@ -164,7 +128,38 @@ public class Render implements RemoteEntityUpdatedListener {
 
 	@Override
 	public void onEntityMoved(final EntityMovedEventArgs args) {
-		ghostMovements.get(args.getEntity()).moveTo(args.getRow(), args.getCol(), args.getAngle());
-		redrawMap();
+		redrawWorld();
+
+        if(RuleChecker.getGameOutcome(game)
+                == GameOutcome.LOCAL_PLAYER_LOST){
+            gameEnded();
+        } else if(RuleChecker.getGameOutcome(game)
+				== GameOutcome.LOCAL_PLAYER_WON){
+			gameEnded();
+		}
 	}
+
+    /**
+     * Add to parent root all nodes
+     * @param root
+     * @param cells
+     */
+    private void addToRoot(final Pane root, final Cell[][] cells) {
+        for (final Cell[] cell : cells) {
+            for (final Cell c : cell) {
+				final CellVisualisation cv = new CellVisualisation(c);
+				root.getChildren().add(cv.getNode());
+            }
+        }
+    }
+
+    /**
+     * End the game
+     */
+    private void gameEnded() {
+        timeLine.stop();
+        gameUI.switchToMenu();
+        root.setOnKeyPressed(e -> {
+        });
+    }
 }

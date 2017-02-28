@@ -7,6 +7,7 @@ import teamproject.constants.CellState;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
+import teamproject.event.arguments.PlayerMovedEventArgs;
 import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.RemoteEntityUpdatedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
@@ -15,6 +16,8 @@ import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
+import teamproject.gamelogic.domain.GameType;
+import teamproject.gamelogic.domain.LocalPlayer;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RemoteGhost;
 import teamproject.gamelogic.domain.RemotePlayer;
@@ -172,12 +175,16 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	/* HANDLERS to create/deal with outgoing packets */
 	@Override
 	public void onEntityMoved(EntityMovedEventArgs args) {
-		Packet p = new Packet("player-moved");
-		p.setInteger("row", args.getRow());
-		p.setInteger("col", args.getCol());
-		p.setDouble("angle", args.getAngle());
-		logger.log(Level.INFO, "sending player moved packet");
-		manager.dispatch(p);
+		if(args.getEntity() instanceof LocalPlayer) {
+			Packet p = new Packet("player-moved");
+			p.setInteger("row", args.getRow());
+			p.setInteger("col", args.getCol());
+			if(args instanceof PlayerMovedEventArgs) {
+				p.setDouble("angle", ((PlayerMovedEventArgs) args).getAngle());
+			}
+			logger.log(Level.INFO, "sending player moved packet");
+			manager.dispatch(p);
+		}
 	}
 
 	/* TRIGGERS to deal with incoming packets */
@@ -208,7 +215,17 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			triggerLobbyRuleDisplayChanged(p);
 		} else if(p.getPacketName().equals("game-starting")) {
 			triggerGameStarting(p);
+		} else if(p.getPacketName().equals("force-move")) {
+			triggerForceMove(p);
 		}
+	}
+
+	private void triggerForceMove(Packet p) {
+		int row = p.getInteger("row"), col = p.getInteger("col");
+		double angle = p.getDouble("angle");
+		
+		game.getPlayer().setPosition(new Position(row, col));
+		game.getPlayer().setAngle(angle);
 	}
 
 	private void triggerGameStarting(Packet p) {
@@ -278,16 +295,16 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 
 	private void triggerRemotePlayerMoved(Packet p) {
 		int row = p.getInteger("row"), col = p.getInteger("col");
-		double angle = p.getDouble("angle");
 		int playerID = p.getInteger("player-id");
 		
 		Entity e = game.getWorld().getEntity(playerID);
 		logger.log(Level.INFO, "remoteplayer");
 		
 		if(e instanceof RemotePlayer) {
-			RemotePlayer ghost = (RemotePlayer)e;
-			ghost.setPosition(new Position(row, col));
-			ghost.setAngle(angle);
+			RemotePlayer player = (RemotePlayer)e;
+			player.setPosition(new Position(row, col));
+			if(p.hasParameter("angle"))
+				player.setAngle(p.getDouble("angle"));
 		} else {
 			throw new RuntimeException("wut"); // TODO: error reporting
 		}
@@ -330,7 +347,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 
 	@Override
 	public void onGameStarted(Game game) {
-		if(!game.isServerGame()) {
+		if(game.getGameType() == GameType.MULTIPLAYER_CLIENT) {
 			if(this.game != null) {
 				removeWorldGameHooks(game);
 			}

@@ -1,7 +1,8 @@
 package teamproject.gamelogic.domain;
 
+import teamproject.constants.CellState;
 import teamproject.constants.EntityType;
-import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.arguments.PlayerMovedEventArgs;
 
 public abstract class Player extends Entity {
 	private String name;
@@ -39,6 +40,23 @@ public abstract class Player extends Entity {
 	public void setAngle(final double angle) {
 		this.angle = angle;
 		getOnMovedEvent().fire(
-				new EntityMovedEventArgs(getPosition().getRow(), getPosition().getColumn(), angle, this));
+				new PlayerMovedEventArgs(getPosition().getRow(), getPosition().getColumn(), angle, this));
+	}
+	
+	@Override
+	public boolean setPosition(Position position) {
+		boolean returnValue = super.setPosition(position);
+		eatDot();
+		return returnValue;
+	}
+
+	protected void eatDot() {
+		if(getWorld() != null && !getWorld().isRemote()) {
+			Cell currentCell = getWorld().getMap().getCell(getPosition());
+			
+			if(currentCell.getState() == CellState.FOOD) {
+				currentCell.setState(CellState.EMPTY);
+			}
+		}
 	}
 }

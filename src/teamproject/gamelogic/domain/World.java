@@ -3,8 +3,11 @@ package teamproject.gamelogic.domain;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import teamproject.ai.AIGhost;
+import teamproject.constants.CellState;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.listener.EntityAddedListener;
@@ -23,14 +26,34 @@ public class World {
 	private int latestEntityID = 1000;
 	private Event<EntityAddedListener, EntityChangedEventArgs> onEntityAdded;
 	private Event<EntityRemovingListener, EntityChangedEventArgs> onEntityRemoving;
+	private boolean remote;
 
-	public World(final RuleChecker ruleEnforcer, final Map map) {
+	public World(final RuleChecker ruleEnforcer, final Map map, final boolean remote) {
 		entities = new HashMap<>();
 		this.ruleEnforcer = ruleEnforcer;
 		this.map = map;
+		this.remote = remote;
 
 		onEntityAdded = new Event<>((l, c) -> l.onEntityAdded(c));
 		onEntityRemoving = new Event<>((l, c) -> l.onEntityRemoving(c));
+	}
+	
+	/**
+	 * Determines if this world is remote or not. A world is remote if you are a client
+	 * connected to a server (including if you are the host - ie. connected to the server
+	 * running on your own machine).
+	 * 
+	 * A world is <em>not</em> remote when you are playing singleplayer <em>or</em> the game
+	 * is running on the server.
+	 * 
+	 * If the world is a remote world, then the map state and AI should <em>not</em> be
+	 * updated locally - the server will run that logic and send it to the client over the
+	 * network.
+	 * 
+	 * @return Returns whether the game is remote or not.
+	 */
+	public boolean isRemote() {
+		return remote;
 	}
 
 	/**
@@ -70,37 +93,22 @@ public class World {
 	}
 
 	/**
-	 * Add a new player in the world
-	 *
-	 * @param player
-	 *            the player to be added
-	 * @return the id of the newly added player
-	 */
-	public int addPlayer(final Player player) {
-		final int entityID = player.getID();
-		entities.put(entityID, player);
-		player.setID(entityID);
-
-		return entityID;
-	}
-
-	/**
 	 * Add a new entity in the world
 	 *
 	 * @param entity
 	 *            the entity to be added
-	 * @return the id of the newly added player
+	 * @return the id of the newly added entity
 	 */
 	public int addEntity(final Entity entity) {
 		int id;
 		if (entity instanceof Player) {
-			id = addPlayer((Player) entity);
+			id = entity.getID();
 		} else {
-			final int entityID = latestEntityID++;
-			entities.put(entityID, entity);
-			entity.setID(entityID);
-			id = entityID;
+			id = latestEntityID++;
+			entity.setID(id);
 		}
+		entities.put(id, entity);
+		entity.setWorld(this);
 		getOnEntityAddedEvent().fire(new EntityChangedEventArgs(id, this));
 		return id;
 	}
@@ -113,6 +121,28 @@ public class World {
 	 */
 	public Entity getEntity(final int entityID) {
 		return entities.get(entityID);
+	}
+	
+	public boolean isGhostAt(Position position) {
+		for(Entity e : getEntities()) {
+			if(e instanceof Ghost && e.getPosition().equals(position)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public Set<Entity> getEntitiesAt(Position position) {
+		HashSet<Entity> s = new HashSet<Entity>();
+		
+		for(Entity e : getEntities()) {
+			if(e.getPosition().equals(position)) {
+				s.add(e);
+			}
+		}
+		
+		return s;
 	}
 
 	/**
@@ -179,7 +209,7 @@ public class World {
 
 	/**
 	 * Remove an entity
-	 * 
+	 *
 	 * @param entityID
 	 *            the id of the entity to be removed
 	 */
@@ -190,5 +220,15 @@ public class World {
 		} else {
 			throw new IllegalArgumentException("No such entity with ID " + entityID);
 		}
+	}
+	
+	public boolean isOccupiable(Position position) {
+		if(RuleChecker.isOutOfBounds(position.getRow(), position.getColumn()))
+			return false;
+		
+		if(map.getCell(position).getState() == CellState.OBSTACLE)
+			return false;
+		
+		return true;
 	}
 }

@@ -6,6 +6,7 @@ import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Position;
+import teamproject.gamelogic.domain.World;
 
 
 /**
@@ -22,8 +23,8 @@ public class GhostBehaviour extends Behaviour {
 	 * @param speed the speed
 	 * @param stash the inventory
 	 */
-	public GhostBehaviour(Map map, Entity entity, int speed, Inventory stash, Type type) {
-		super(map, entity, speed, stash, type);
+	public GhostBehaviour(World world, Entity entity, int speed, Inventory stash, Type type) {
+		super(world, entity, speed, stash, type);
 	}
 	
 	/** 
@@ -40,7 +41,5 @@ public class GhostBehaviour extends Behaviour {
 
 		lastPos=entity.getPosition();
 		entity.setPosition(lockedTarget);
-
-		onEntityMoved.fire(new EntityMovedEventArgs(lockedTarget.getRow(), lockedTarget.getColumn(), 0, entity));
 	}
 }
