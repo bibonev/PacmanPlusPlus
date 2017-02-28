@@ -3,6 +3,7 @@ package teamproject.gamelogic.core;
 import java.util.HashMap;
 
 import teamproject.ai.AIGhost;
+import teamproject.ai.DefaultBehaviour;
 import teamproject.ai.GhostBehaviour;
 import teamproject.constants.EntityType;
 import teamproject.event.Event;
@@ -19,7 +20,7 @@ import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Position;
-import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.RuleChecker;
 import teamproject.gamelogic.domain.World;
 
 public class GameCommandService
@@ -53,7 +54,6 @@ public class GameCommandService
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost2.setBehaviour(b2);
 		
-		
 		world.addEntity(ghost);
 		world.addEntity(ghost1);
 		world.addEntity(ghost2);
@@ -65,7 +65,7 @@ public class GameCommandService
 		final Map map = new Map().generateMap();
 
 		// Create new game and store it
-		final World world = new World(new RuleEnforcer(), map);
+		final World world = new World(new RuleChecker(), map);
 		final ControlledPlayer player = new ControlledPlayer(localPlayerID, localUsername);
 		player.setPosition(new Position(6, 0));
 		
@@ -86,7 +86,7 @@ public class GameCommandService
 		final Map map = new Map().generateMap();
 
 		// Create new game and store it
-		final World world = new World(new RuleEnforcer(), map);
+		final World world = new World(new RuleChecker(), map);
 		
 		final Game game = new Game(world, settings, null, true);
 

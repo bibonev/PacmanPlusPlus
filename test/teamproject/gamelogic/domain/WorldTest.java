@@ -12,7 +12,7 @@ public class WorldTest {
 	@Test
 	public void shouldConstruct() {
 		// Given
-		final RuleEnforcer ruleEnforcer = Randoms.randomRuleEnforcer();
+		final RuleChecker ruleEnforcer = Randoms.randomRuleEnforcer();
 		final Map map = Randoms.randomMap();
 
 		// When

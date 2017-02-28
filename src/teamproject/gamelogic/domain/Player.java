@@ -12,15 +12,31 @@ public abstract class Player extends Entity {
 		this.name = name;
 	}
 
+	/**
+	 * Fetch the player's name
+	 *
+	 * @return the name as a string
+	 */
 	public String getName() {
 		return name;
 	}
-	
+
+	/**
+	 * Fetch the player's angle
+	 *
+	 * @return the angle as a double decimal number
+	 */
 	public double getAngle() {
 		return angle;
 	}
-	
-	public void setAngle(double angle) {
+
+	/**
+	 * Update the player's angle
+	 * 
+	 * @param angle
+	 *            the new angle
+	 */
+	public void setAngle(final double angle) {
 		this.angle = angle;
 		getOnMovedEvent().fire(
 				new EntityMovedEventArgs(getPosition().getRow(), getPosition().getColumn(), angle, this));

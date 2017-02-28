@@ -19,6 +19,8 @@ public class LogInScreen extends Screen {
 	private Label label;
 	private Label title;
 	private TextField text;
+	private Event<UserLoggedInEventListener, UserLoggedInEventArguments> userLogIn = new Event<>((listener, arg) -> listener.onUserLoggedIn(arg));
+
 
 	public LogInScreen(final GameUI game) {
 		super(game);
@@ -43,6 +45,7 @@ public class LogInScreen extends Screen {
 		if (!username.isEmpty()) {
 			// if(checkname(username)){
 			game.setName(username);
+			userLogIn.fire(new UserLoggedInEventArguments(username));
 			game.switchToMenu();
 			// }else{
 			// Alert alert = new Alert(AlertType.ERROR);
