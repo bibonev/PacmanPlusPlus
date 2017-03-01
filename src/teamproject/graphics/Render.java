@@ -89,15 +89,19 @@ public class Render implements RemoteEntityUpdatedListener {
 			if (event.getCode() == KeyCode.UP) {
 				controlledPlayer.moveUp();
 				redrawWorld();
+				checkGameEnding();
 			} else if (event.getCode() == KeyCode.DOWN) {
 				controlledPlayer.moveDown();
 				redrawWorld();
+				checkGameEnding();
 			} else if (event.getCode() == KeyCode.LEFT) {
 				controlledPlayer.moveLeft();
 				redrawWorld();
+				checkGameEnding();
 			} else if (event.getCode() == KeyCode.RIGHT) {
 				controlledPlayer.moveRight();
 				redrawWorld();
+				checkGameEnding();
 			}
 		});
 	}
@@ -125,11 +129,14 @@ public class Render implements RemoteEntityUpdatedListener {
 	@Override
 	public void onEntityMoved(final EntityMovedEventArgs args) {
 		redrawWorld();
+		checkGameEnding();
+	}
 
-        if(RuleChecker.getGameOutcome(game)
-                == GameOutcome.LOCAL_PLAYER_LOST){
-            gameEnded();
-        } else if(RuleChecker.getGameOutcome(game)
+	private void checkGameEnding(){
+		if(RuleChecker.getGameOutcome(game)
+				== GameOutcome.LOCAL_PLAYER_LOST){
+			gameEnded();
+		} else if(RuleChecker.getGameOutcome(game)
 				== GameOutcome.LOCAL_PLAYER_WON){
 			gameEnded();
 		}
