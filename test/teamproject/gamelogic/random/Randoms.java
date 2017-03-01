@@ -1,28 +1,26 @@
 package teamproject.gamelogic.random;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
+import java.util.HashMap;
 import java.util.Random;
 
 import teamproject.constants.CellState;
-import teamproject.constants.CellType;
-import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Cell;
+import teamproject.gamelogic.domain.ControlledPlayer;
+import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
-import teamproject.gamelogic.domain.Ghost;
+import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
+import teamproject.gamelogic.domain.LocalGhost;
+import teamproject.gamelogic.domain.LocalPlayer;
 import teamproject.gamelogic.domain.Map;
-import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
-import teamproject.gamelogic.domain.RuleEnforcer;
+import teamproject.gamelogic.domain.RemoteGhost;
+import teamproject.gamelogic.domain.RemotePlayer;
+import teamproject.gamelogic.domain.RuleChecker;
 import teamproject.gamelogic.domain.Scoreboard;
 import teamproject.gamelogic.domain.World;
-import teamproject.gamelogic.domain.stubs.BehaviourStub;
 import teamproject.gamelogic.domain.stubs.CellStub;
-import teamproject.gamelogic.domain.stubs.GhostStub;
 import teamproject.gamelogic.domain.stubs.MapStub;
-import teamproject.gamelogic.domain.stubs.PositionStub;
 
 public class Randoms {
 
@@ -68,25 +66,19 @@ public class Randoms {
 	}
 
 	public static World randomWorld() {
-		final Collection<Player> players = new ArrayList<Player>();
-		players.add(randomPlayer());
-
-		final Collection<Ghost> ghosts = new ArrayList<Ghost>();
-		ghosts.add(randomGhost());
-
-		return new World(players, randomRuleEnforcer(), ghosts, randomMap());
+		return new World(randomRuleEnforcer(), randomMap());
 	}
 
-	public static Player randomPlayer() {
-		return new Player(Optional.of(randomLong()), randomString());
+	public static RemoteGhost randomRemoteGhost() {
+		return new RemoteGhost(randomInteger());
 	}
 
-	public static Ghost randomGhost() {
-		return new GhostStub(randomBehaviour(), randomString());
+	public static LocalGhost randomLocalGhost() {
+		return new LocalGhost();
 	}
 
-	public static RuleEnforcer randomRuleEnforcer() {
-		return new RuleEnforcer();
+	public static RuleChecker randomRuleEnforcer() {
+		return new RuleChecker();
 	}
 
 	public static Map randomMap() {
@@ -94,15 +86,18 @@ public class Randoms {
 	}
 
 	public static GameSettings randomGameSettings() {
-		return new GameSettings(randomBoolean(), randomBoolean());
+		return new GameSettings();
 	}
 
 	public static Item randomItem() {
 		return new Item(randomString(), randomString());
 	}
 
-	public static CellType randomCellType() {
-		return randomEnum(CellType.class);
+	public static Inventory randomInventory() {
+		final java.util.Map<Item, Integer> items = new HashMap<Item, Integer>();
+		items.put(randomItem(), randomInteger());
+
+		return new Inventory(items);
 	}
 
 	public static CellState randomCellState() {
@@ -110,19 +105,19 @@ public class Randoms {
 	}
 
 	public static Position randomPosition() {
-		return new PositionStub(randomInteger(), randomInteger());
+		return new Position(randomInteger(), randomInteger());
 	}
 
 	public static Position randomPositionInRange(final int range) {
-		return new PositionStub(randomInteger(range), randomInteger(range));
+		return new Position(randomInteger(range), randomInteger(range));
 	}
 
 	public static Cell randomCell() {
-		return new CellStub(randomCellType(), randomCellState(), randomPosition());
+		return new CellStub(randomCellState(), randomPosition());
 	}
 
 	public static Cell randomCell(final Position position) {
-		return new CellStub(randomCellType(), randomCellState(), position);
+		return new CellStub(randomCellState(), position);
 	}
 
 	public static Cell[][] randomCells(final int numberOfCells) {
@@ -130,7 +125,7 @@ public class Randoms {
 
 		for (int i = 0; i < cells.length; i++) {
 			for (int j = 0; j < cells.length; j++) {
-				cells[i][j] = randomCell(new PositionStub(i, j));
+				cells[i][j] = randomCell(new Position(i, j));
 			}
 		}
 
@@ -141,14 +136,26 @@ public class Randoms {
 		final Scoreboard scoreboard = new Scoreboard();
 
 		for (int i = 0; i < randomInteger(); i++) {
-			scoreboard.setScoreForPlayerId(randomLong(), randomInteger());
+			scoreboard.setScoreForPlayerId(randomInteger(), randomInteger());
 		}
 
 		return scoreboard;
 	}
 
-	public static Behaviour randomBehaviour() {
-		return new BehaviourStub(randomEnum(Behaviour.Type.class));
+	public static LocalPlayer randomLocalPlayer() {
+		return new LocalPlayer(Randoms.randomString());
+	}
+
+	public static RemotePlayer randomRemotePlayer() {
+		return new RemotePlayer(Randoms.randomInteger(), Randoms.randomString());
+	}
+
+	public static ControlledPlayer randomControlledPlayer() {
+		return new ControlledPlayer(Randoms.randomInteger(), Randoms.randomString());
+	}
+
+	public static Game randomGame() {
+		return new Game(randomWorld(), randomGameSettings(), randomControlledPlayer());
 	}
 
 }

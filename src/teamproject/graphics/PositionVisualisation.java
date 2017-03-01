@@ -52,7 +52,7 @@ public class PositionVisualisation extends Position {
      * Get the pixel's x-axis position
      * @return pixelX
      */
-    public double getPixelX() {
+    double getPixelX() {
         return pixelX;
     }
 
@@ -60,7 +60,7 @@ public class PositionVisualisation extends Position {
      * Get the pixel's y-axis position
      * @return pixelY
      */
-    public double getPixelY() {
+    double getPixelY() {
         return pixelY;
     }
 
@@ -69,7 +69,7 @@ public class PositionVisualisation extends Position {
      * the screen size and the row that has been assigned
      * @return width
      */
-    public double getWidth() {
+    double getWidth() {
         return width;
     }
 
@@ -78,7 +78,7 @@ public class PositionVisualisation extends Position {
      * the screen size and the row that has been assigned
      * @return height
      */
-    public double getHeight() {
+    double getHeight() {
         return height;
     }
 }

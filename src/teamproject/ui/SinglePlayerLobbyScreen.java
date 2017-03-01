@@ -19,7 +19,7 @@ public class SinglePlayerLobbyScreen extends Screen {
 		
 		play = new Button("Play!");
         play.getStyleClass().add("buttonStyle");
-        play.setOnAction(e-> game.switchToGame());
+        play.setOnAction(e-> game.startNewSinglePlayerGame());
         
         label = new Label("Single Player");
         label.getStyleClass().add("labelStyle");

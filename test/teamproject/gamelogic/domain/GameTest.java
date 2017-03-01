@@ -14,11 +14,13 @@ public class GameTest {
 		// Given
 		final World world = Randoms.randomWorld();
 		final GameSettings gameSettings = Randoms.randomGameSettings();
+		final ControlledPlayer controlledPlayer = Randoms.randomControlledPlayer();
 
 		// When
-		final Game game = new Game(world, gameSettings);
+		final Game game = new Game(world, gameSettings, controlledPlayer);
 
 		// Then
+		assertThat(game.getPlayer(), Is.is(controlledPlayer));
 		assertThat(game.getWorld(), Is.is(world));
 		assertThat(game.getGameSettings(), Is.is(gameSettings));
 	}
