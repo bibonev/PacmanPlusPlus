@@ -1,10 +1,10 @@
 package teamproject.event.arguments;
 
-public class UserLoggedInEventArguments {
+public class UserLoggedInEventArgs {
 
 	private String userName;
 
-	public UserLoggedInEventArguments(final String userName) {
+	public UserLoggedInEventArgs(final String userName) {
 		this.userName = userName;
 	}
 

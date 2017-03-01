@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
+import teamproject.event.Event;
+import teamproject.event.arguments.CellStateChangedEventArgs;
+import teamproject.event.listener.CellStateChangedEventListener;
 import teamproject.graphics.PositionVisualisation;
 
 /**
@@ -17,9 +20,11 @@ public class Map {
 	public static int defaultNumberOfCells = 15;
 	private Cell[][] cells;
 	private ArrayList<PositionVisualisation> obstacles;
+	private Event<CellStateChangedEventListener, CellStateChangedEventArgs> onCellStateChanged;
 
 	public Map(final int numberOfCells) {
 		cells = new Cell[numberOfCells][numberOfCells];
+		onCellStateChanged = new Event<>((l,p) -> l.onCellStateChanged(p));
 	}
 
 	public Map() {
@@ -28,6 +33,7 @@ public class Map {
 
 	public Map(final Cell[][] cells) {
 		this.cells = cells;
+        onCellStateChanged = new Event<>((l,p) -> l.onCellStateChanged(p));
 	}
 
 	/**
@@ -53,13 +59,11 @@ public class Map {
 	/**
 	 * Fetch the cell at position (x, y)
 	 *
-	 * @param x
-	 * @param y
+	 * @param p
 	 * @return a cell
 	 */
 	public Cell getCell(final Position p) {
-		return cells[p.getRow()][p.getColumn()
-		                            ];
+		return cells[p.getRow()][p.getColumn()];
 	}
 
 	/**
@@ -91,6 +95,7 @@ public class Map {
 		final int x = cell.getPosition().getRow();
 		final int y = cell.getPosition().getColumn();
 		cells[x][y] = cell;
+		onCellStateChanged.fire(new CellStateChangedEventArgs(cell, cell.getState()));
 	}
 
 	/**

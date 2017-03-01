@@ -3,12 +3,12 @@ package teamproject.event.arguments;
 import javafx.stage.Stage;
 import teamproject.gamelogic.domain.Game;
 
-public class NewGameStartedEventArguments {
+public class NewGameStartedEventArgs {
 
 	private Game game;
 	private Stage stage;
 
-	public NewGameStartedEventArguments(final Game game, final Stage stage) {
+	public NewGameStartedEventArgs(final Game game, final Stage stage) {
 		this.game = game;
 		this.stage = stage;
 	}

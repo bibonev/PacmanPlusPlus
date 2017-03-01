@@ -1,7 +1,7 @@
 package teamproject.event.listener;
 
-import teamproject.event.arguments.NewGameStartedEventArguments;
+import teamproject.event.arguments.NewGameStartedEventArgs;
 
 public interface NewGameStartedEventListener {
-	void onNewGameStarted(NewGameStartedEventArguments args);
+	void onNewGameStarted(NewGameStartedEventArgs args);
 }
