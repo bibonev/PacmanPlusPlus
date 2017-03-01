@@ -1,7 +1,5 @@
 package teamproject.graphics;
 
-import java.util.HashMap;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
@@ -12,39 +10,34 @@ import javafx.util.Duration;
 import teamproject.ai.AIGhost;
 import teamproject.constants.*;
 import teamproject.event.arguments.EntityMovedEventArgs;
-import teamproject.event.listener.LocalEntityUpdatedListener;
+import teamproject.event.listener.RemoteEntityUpdatedListener;
 import teamproject.gamelogic.domain.*;
+import teamproject.constants.GameType;
 import teamproject.ui.GameUI;
 
 /**
  * Created by Boyan Bonev on 09/02/2017.
  */
-public class Render implements LocalEntityUpdatedListener {
+public class Render implements RemoteEntityUpdatedListener {
 	private Pane root;
 	private Timeline timeLine;
 	private ControlledPlayer controlledPlayer;
 	private GameUI gameUI;
 	private World world;
-	private boolean serverMode;
 	private Game game;
-
-	private EntityMovement moveControlledPlayer;
 
 	/**
 	 * Initialize new visualisation of the map
 	 *
 	 * @param gameUI
 	 * @param game
-	 * @param serverMode
 	 */
-	public Render(final GameUI gameUI, final Game game, final boolean serverMode) {
+	public Render(final GameUI gameUI, final Game game) {
 		this.gameUI = gameUI;
 		this.world = game.getWorld();
-		this.serverMode = serverMode;
 		this.game = game;
 
 		controlledPlayer = game.getPlayer();
-		moveControlledPlayer = new EntityMovement(controlledPlayer, world.getMap());
 	}
 
 	/**
@@ -80,7 +73,7 @@ public class Render implements LocalEntityUpdatedListener {
 			root.getChildren().add(new PacmanVisualisation(player).getNode());
 		}
 
-		for (final AIGhost ghost : world.getGhosts()) {
+		for (final Ghost ghost : world.getGhosts()) {
 			root.getChildren().add(new GhostVisualisation(ghost.getPosition()).getNode());
 		}
 
@@ -94,17 +87,21 @@ public class Render implements LocalEntityUpdatedListener {
 	public void addClickListener() {
 		root.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.UP) {
-				moveControlledPlayer.moveUp();
+				controlledPlayer.moveUp();
 				redrawWorld();
+				checkGameEnding();
 			} else if (event.getCode() == KeyCode.DOWN) {
-				moveControlledPlayer.moveDown();
+				controlledPlayer.moveDown();
 				redrawWorld();
+				checkGameEnding();
 			} else if (event.getCode() == KeyCode.LEFT) {
-				moveControlledPlayer.moveLeft();
+				controlledPlayer.moveLeft();
 				redrawWorld();
+				checkGameEnding();
 			} else if (event.getCode() == KeyCode.RIGHT) {
-				moveControlledPlayer.moveRight();
+				controlledPlayer.moveRight();
 				redrawWorld();
+				checkGameEnding();
 			}
 		});
 	}
@@ -113,19 +110,18 @@ public class Render implements LocalEntityUpdatedListener {
 	 * Start the timeline
 	 */
 	public void startTimeline() {
-		for (final AIGhost ghost : world.getGhosts()) {
-			ghost.getBehaviour().getOnMovedEvent().addListener(this);
+		for(Ghost ghost : world.getGhosts()) {
+			ghost.getOnMovedEvent().addListener(this);
 		}
-
 		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-			if (serverMode) {
-
+			if(game.getGameType() == GameType.SINGLEPLAYER) {
+				for(AIGhost ghost : world.getEntities(AIGhost.class)) {
+					ghost.run();
+				}
 			}
-
-            for (final AIGhost ghost : world.getGhosts()) {
-                ghost.run();
-            }
-		}));
+			redrawWorld();
+			}
+		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
 	}
@@ -133,11 +129,14 @@ public class Render implements LocalEntityUpdatedListener {
 	@Override
 	public void onEntityMoved(final EntityMovedEventArgs args) {
 		redrawWorld();
+		checkGameEnding();
+	}
 
-        if(RuleChecker.getGameOutcome(game, serverMode ? GameType.MULTIPLAYER : GameType.SINGLEPLAYER)
-                == GameOutcome.LOCAL_PLAYER_LOST){
-            gameEnded();
-        } else if(RuleChecker.getGameOutcome(game, serverMode ? GameType.MULTIPLAYER : GameType.SINGLEPLAYER)
+	private void checkGameEnding(){
+		if(RuleChecker.getGameOutcome(game)
+				== GameOutcome.LOCAL_PLAYER_LOST){
+			gameEnded();
+		} else if(RuleChecker.getGameOutcome(game)
 				== GameOutcome.LOCAL_PLAYER_WON){
 			gameEnded();
 		}
@@ -151,12 +150,8 @@ public class Render implements LocalEntityUpdatedListener {
     private void addToRoot(final Pane root, final Cell[][] cells) {
         for (final Cell[] cell : cells) {
             for (final Cell c : cell) {
-            	if (c.getState() != CellState.PLAYER &&
-						c.getState() != CellState.ENEMY &&
-						c.getState() != CellState.PLAYER_AND_ENEMY) {
-					final CellVisualisation cv = new CellVisualisation(c);
-					root.getChildren().add(cv.getNode());
-				}
+				final CellVisualisation cv = new CellVisualisation(c);
+				root.getChildren().add(cv.getNode());
             }
         }
     }

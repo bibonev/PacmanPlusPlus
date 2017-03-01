@@ -1,12 +1,9 @@
 package teamproject.ui;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
-
 import javafx.application.Platform;
 import javafx.scene.control.Label;
-import teamproject.gamelogic.domain.Player;
+import teamproject.gamelogic.core.LobbyPlayerInfo;
 
 /**
  * Screen to be added to the multiplayer lobby to list all current players in the game
@@ -33,11 +30,12 @@ public class PlayersList extends Screen {
         }*/
 	}
 	
-	public void addPlayer(Player player) {
+	public void addPlayer(LobbyPlayerInfo player) {
 		Platform.runLater(() -> {
 			Label label = new Label(player.getName());
 	    	label.getStyleClass().add("labelStyle");
 			pane.getChildren().add(label);
+			playerLabels.put(player.getID(), label);
 		});
 	}
 
@@ -46,5 +44,11 @@ public class PlayersList extends Screen {
 			Label label = playerLabels.remove(playerID);
 			pane.getChildren().remove(label);
 		});
+	}
+	
+	public void clear() {
+		for(int i : playerLabels.keySet()) {
+			removePlayer(i);
+		}
 	}
 }

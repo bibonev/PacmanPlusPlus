@@ -15,8 +15,8 @@ public class PassiveBehaviour extends Behaviour {
 	 * @param speed the speed
 	 * @param stash the inventory
 	 */
-	public PassiveBehaviour(Map map, Entity entity, int speed, Inventory stash, Type type) {
-		super(map, entity, speed, stash, type);
+	public PassiveBehaviour(World world, Entity entity, int speed, Inventory stash, Type type) {
+		super(world, entity, speed, stash, type);
 	}
 
 	@Override

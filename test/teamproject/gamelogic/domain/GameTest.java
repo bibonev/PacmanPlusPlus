@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import teamproject.constants.GameType;
 import teamproject.gamelogic.random.Randoms;
 
 public class GameTest {
@@ -17,7 +18,7 @@ public class GameTest {
 		final ControlledPlayer controlledPlayer = Randoms.randomControlledPlayer();
 
 		// When
-		final Game game = new Game(world, gameSettings, controlledPlayer);
+		final Game game = new Game(world, gameSettings, controlledPlayer, GameType.SINGLEPLAYER);
 
 		// Then
 		assertThat(game.getPlayer(), Is.is(controlledPlayer));

@@ -51,6 +51,18 @@ public class Map {
 	}
 
 	/**
+	 * Fetch the cell at position (x, y)
+	 *
+	 * @param x
+	 * @param y
+	 * @return a cell
+	 */
+	public Cell getCell(final Position p) {
+		return cells[p.getRow()][p.getColumn()
+		                            ];
+	}
+
+	/**
 	 * Get the map size
 	 *
 	 * @return size as integer
@@ -95,9 +107,7 @@ public class Map {
 			for (int j = 0; j < cells[i].length; j++) {
 				final PositionVisualisation position = new PositionVisualisation(i, j);
 
-				if (i == 1 && j == 1) {
-					state = CellState.PLAYER;
-				} else if (isObstacle(position)) {
+				if (isObstacle(position)) {
 					state = CellState.OBSTACLE;
 				} else {
 					state = CellState.FOOD;

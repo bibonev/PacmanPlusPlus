@@ -38,6 +38,10 @@ public abstract class Entity {
 					"Position not set for entity ID " + id + " of type " + getClass().getSimpleName());
 		}
 	}
+	
+	protected boolean canSetPosition(Position p) {
+		return world == null || world.isOccupiable(p);
+	}
 
 	/**
 	 * Update the entity's position
@@ -45,8 +49,15 @@ public abstract class Entity {
 	 * @param position
 	 *            the new position
 	 */
-	public void setPosition(final Position position) {
-		this.position = position;
+	public boolean setPosition(final Position position) {
+		if(canSetPosition(position)) {
+			this.position = position;
+			getOnMovedEvent().fire(
+					new EntityMovedEventArgs(position.getRow(), position.getColumn(), this));
+		return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -104,5 +115,9 @@ public abstract class Entity {
 	 */
 	public EntityType getType() {
 		return type;
+	}
+	
+	public World getWorld() {
+		return this.world;
 	}
 }

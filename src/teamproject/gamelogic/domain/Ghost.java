@@ -1,13 +1,10 @@
 package teamproject.gamelogic.domain;
 
-/**
- * Abstract ghost
- * 
- * @author aml
- *
- */
+import teamproject.constants.EntityType;
+
 public abstract class Ghost extends Entity {
 	public Ghost() {
 		super();
+		setType(EntityType.GHOST);
 	}
 }

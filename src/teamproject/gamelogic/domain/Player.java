@@ -1,17 +1,15 @@
 package teamproject.gamelogic.domain;
 
-/**
- * Represent an abstract player
- *
- * @author aml
- *
- */
+import teamproject.constants.CellState;
+import teamproject.constants.EntityType;
+import teamproject.event.arguments.PlayerMovedEventArgs;
 
 public abstract class Player extends Entity {
 	private String name;
 	private double angle;
 
 	public Player(final String name) {
+		setType(EntityType.PLAYER);
 		this.name = name;
 	}
 
@@ -41,5 +39,24 @@ public abstract class Player extends Entity {
 	 */
 	public void setAngle(final double angle) {
 		this.angle = angle;
+		getOnMovedEvent().fire(
+				new PlayerMovedEventArgs(getPosition().getRow(), getPosition().getColumn(), angle, this));
+	}
+	
+	@Override
+	public boolean setPosition(Position position) {
+		boolean returnValue = super.setPosition(position);
+		eatDot();
+		return returnValue;
+	}
+
+	protected void eatDot() {
+		if(getWorld() != null && !getWorld().isRemote()) {
+			Cell currentCell = getWorld().getMap().getCell(getPosition());
+			
+			if(currentCell.getState() == CellState.FOOD) {
+				currentCell.setState(CellState.EMPTY);
+			}
+		}
 	}
 }
