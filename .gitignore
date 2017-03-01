@@ -15,3 +15,7 @@ hs_err_pid*
 \.idea/
 .project
 .classpath
+lib/
+
+# remove all .log files
+*.log

@@ -1,21 +1,73 @@
 package teamproject.gamelogic.domain;
 
-public abstract class Position {
+/**
+ * Represent a position given by a row and a column
+ * 
+ * @author aml
+ *
+ */
+public class Position {
+	private int row;
+	private int column;
 
-	private int x;
-	private int y;
-
-	public Position(final int x, final int y) {
-		this.x = x;
-		this.y = y;
+	public Position(final int row, final int column) {
+		this.row = row;
+		this.column = column;
 	}
 
-	public int getX() {
-		return x;
+	/**
+	 * Fetch the row
+	 * 
+	 * @return row
+	 */
+	public int getRow() {
+		return row;
 	}
 
-	public int getY() {
-		return y;
+	/**
+	 * Fetch the column
+	 * 
+	 * @return column
+	 */
+	public int getColumn() {
+		return column;
+	}
+	
+	/**
+	 * Creates aa new Position object with this position and the
+	 * position {@code p} added together like vectors.
+	 * 
+	 * @param p
+	 * @return
+	 */
+	public Position add(Position p) {
+		return new Position(this.row + p.row, this.column + p.column);
+	}
+	
+	/**
+	 * Creates a new Position object with this position and the
+	 * position {@code (row, column)} added like vectors.
+	 * @param row
+	 * @param column
+	 * @return
+	 */
+	public Position add(int row, int column) {
+		return new Position(this.row + row, this.column + column);
 	}
 
+	@Override
+	public boolean equals(final Object obj) {
+		if (obj != null && obj instanceof Position) {
+			final Position p = (Position) obj;
+
+			return p.row == row && p.column == column;
+		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("(%d, %d)", getRow(), getColumn());
+	}
 }

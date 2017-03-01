@@ -1,5 +1,10 @@
 package teamproject.gamelogic.domain;
 
-public class Ghost {
+import teamproject.constants.EntityType;
 
+public abstract class Ghost extends Entity {
+	public Ghost() {
+		super();
+		setType(EntityType.GHOST);
+	}
 }
