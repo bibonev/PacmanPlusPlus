@@ -1,15 +1,26 @@
 package teamproject.networking.integration;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import teamproject.constants.CellState;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityMovedEventArgs;
-import teamproject.event.listener.LocalEntityUpdatedListener;
-import teamproject.event.listener.LocalPlayerMovedListener;
+import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
+import teamproject.event.arguments.PlayerMovedEventArgs;
+import teamproject.event.listener.GameStartedListener;
+import teamproject.event.listener.RemoteEntityUpdatedListener;
+import teamproject.event.listener.MultiplayerGameStartingListener;
+import teamproject.gamelogic.core.Lobby;
+import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
+import teamproject.gamelogic.domain.Game;
+import teamproject.gamelogic.domain.GameSettings;
+import teamproject.constants.GameType;
+import teamproject.gamelogic.domain.LocalPlayer;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RemoteGhost;
 import teamproject.gamelogic.domain.RemotePlayer;
-import teamproject.gamelogic.domain.World;
 import teamproject.networking.ClientManager;
 import teamproject.networking.StandardClientManager;
 import teamproject.networking.data.Packet;
@@ -19,14 +30,17 @@ import teamproject.networking.socket.Client;
 import teamproject.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger ,
-		ClientDisconnectedListener, LocalEntityUpdatedListener {
+		ClientDisconnectedListener, RemoteEntityUpdatedListener, GameStartedListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
-	private World world;
+	private Game game;
+	private Lobby lobby;
 	private String username;
 	private GameUI gameUI;
 	private boolean alreadyDoneHandshake;
+	private Logger logger = Logger.getLogger("network-client");
+	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	
 	/**
 	 * Creates a new client instance which, when ran, will connect to the server
@@ -42,12 +56,17 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	 * 
 	 * @param serverAddress The IP address of the server to connect to.
 	 */
-	public ClientInstance(GameUI gameUI, World world, String username, String serverAddress) {
-		this.world = world;
+	public ClientInstance(GameUI gameUI, String username, String serverAddress) {
 		this.username = username;
 		this.serverAddress = serverAddress;
 		this.gameUI = gameUI;
 		this.alreadyDoneHandshake = false;
+		this.lobby = new Lobby();
+		this.gameUI.setLobby(this.lobby);
+		this.game = null;
+		this.multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
+		
+		logger.setLevel(Level.FINEST);
 	}
 	
 	@Override
@@ -122,6 +141,10 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		 */
 	}
 	
+	private void addWorldGameHooks(Game game) {
+		game.getPlayer().getOnMovedEvent().addListener(this);
+	}
+	
 	/**
 	 * In order to prevent resource leaks and to stop the event listener lists growing
 	 * increasingly large as the player joins successive online games, any of the game
@@ -136,22 +159,37 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		 * 
 		 * this.gameWorld.getPlayerMovedEvent().removeListener(this);
 		 */
+		
+		if(game != null) removeWorldGameHooks(game);
+	}
+	
+	private void removeWorldGameHooks(Game game) {
+		game.getPlayer().getOnMovedEvent().removeListener(this);
+	}
+	
+	public Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> getMultiplayerGameStartingEvent() {
+		return multiplayerGameStartingEvent;
 	}
 
 	/* HANDLERS to create/deal with outgoing packets */
 	@Override
 	public void onEntityMoved(EntityMovedEventArgs args) {
-		Packet p = new Packet("player-moved");
-		p.setInteger("row", args.getRow());
-		p.setInteger("col", args.getCol());
-		p.setDouble("angle", args.getAngle());
-		manager.dispatch(p);
+		if(args.getEntity() instanceof LocalPlayer) {
+			Packet p = new Packet("player-moved");
+			p.setInteger("row", args.getRow());
+			p.setInteger("col", args.getCol());
+			if(args instanceof PlayerMovedEventArgs) {
+				p.setDouble("angle", ((PlayerMovedEventArgs) args).getAngle());
+			}
+			logger.log(Level.INFO, "sending player moved packet");
+			manager.dispatch(p);
+		}
 	}
 
 	/* TRIGGERS to deal with incoming packets */
 	@Override
 	public void trigger(Packet p) {
-		System.out.println("--" + p.getPacketName());
+		logger.log(Level.INFO, "Packet received: {0}", p.getPacketName());
 		if(p.getPacketName().equals("server-handshake")) {
 			triggerHandshake(p);
 		} else if(p.getPacketName().equals("remote-player-moved")) {
@@ -160,56 +198,112 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			triggerRemoteGhostMoved(p);
 		} else if(p.getPacketName().equals("game-tile-changed")) {
 			triggerGameTileChanged(p);
+		} else if(p.getPacketName().equals("remote-ghost-joined")) {
+			triggerRemoteGhostJoined(p);
 		} else if(p.getPacketName().equals("remote-player-joined")) {
 			triggerRemotePlayerJoined(p);
 		} else if(p.getPacketName().equals("remote-player-left")) {
 			triggerRemotePlayerLeft(p);
-		} else if(p.getPacketName().equals("remote-ghost-joined")) {
-			triggerRemoteGhostJoined(p);
 		} else if(p.getPacketName().equals("remote-ghost-left")) {
 			triggerRemoteGhostLeft(p);
+		} else if(p.getPacketName().equals("lobby-player-enter")) {
+			triggerLobbyPlayerEnter(p);
+		} else if(p.getPacketName().equals("lobby-player-left")) {
+			triggerLobbyPlayerLeave(p);
+		} else if(p.getPacketName().equals("lobby-rule-display-changed")) {
+			triggerLobbyRuleDisplayChanged(p);
+		} else if(p.getPacketName().equals("game-starting")) {
+			triggerGameStarting(p);
+		} else if(p.getPacketName().equals("force-move")) {
+			triggerForceMove(p);
 		}
+	}
+
+	private void triggerForceMove(Packet p) {
+		int row = p.getInteger("row"), col = p.getInteger("col");
+		double angle = p.getDouble("angle");
+		
+		game.getPlayer().setPosition(new Position(row, col));
+		game.getPlayer().setAngle(angle);
+	}
+
+	private void triggerGameStarting(Packet p) {
+		GameSettings settings = new GameSettings();
+		// reconstruct game settings as needed
+		
+
+		MultiplayerGameStartingEventArgs args = new MultiplayerGameStartingEventArgs(settings, client.getClientID(), username);
+		
+		this.getMultiplayerGameStartingEvent().fire(args);
+	}
+
+	private void triggerLobbyPlayerLeave(Packet p) {
+		int playerID = p.getInteger("player-id");
+		
+		lobby.removePlayer(playerID);
+	}
+
+	private void triggerLobbyRuleDisplayChanged(Packet p) {
+		int size = p.getInteger("rule-strings.length");
+		String[] s = new String[size];
+		
+		for(int i = 0; i < size; i++) {
+			s[i] = p.getString("rule-strings[" + i + "]");
+		}
+		
+		lobby.setSettingsString(s);
+	}
+
+	private void triggerLobbyPlayerEnter(Packet p) {
+		int playerID = p.getInteger("player-id");
+		String playerName = p.getString("player-name");
+		
+		LobbyPlayerInfo lobbyPlayerInfo = new LobbyPlayerInfo(playerID, playerName); 
+		
+		lobby.addPlayer(playerID, lobbyPlayerInfo);
 	}
 
 	private void triggerRemoteGhostLeft(Packet p) {
 		int ghostID = p.getInteger("ghost-id");
 		
-		world.removeEntity(ghostID);
+		game.getWorld().removeEntity(ghostID);
 	}
 
 	private void triggerRemoteGhostJoined(Packet p) {
 		int ghostID = p.getInteger("ghost-id");
 		
-		world.addEntity(new RemoteGhost(ghostID));
+		RemoteGhost ghost = new RemoteGhost(ghostID);
+		ghost.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
+		game.getWorld().addEntity(ghost);
 	}
 
 	private void triggerRemotePlayerJoined(Packet p) {
 		int playerID = p.getInteger("player-id");
 		String name = p.getString("name");
+
 		RemotePlayer player = new RemotePlayer(playerID, name);
+		player.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
 		
-		gameUI.multiPlayerLobbyScreen.list.addPlayer(player);
-		world.addPlayer(player);
+		game.getWorld().addEntity(player);
 	}
 
 	private void triggerRemotePlayerLeft(Packet p) {
 		int playerID = p.getInteger("player-id");
-		
-		gameUI.multiPlayerLobbyScreen.list.removePlayer(playerID);
-		world.removeEntity(playerID);
+		game.getWorld().removeEntity(playerID);
 	}
 
 	private void triggerRemotePlayerMoved(Packet p) {
 		int row = p.getInteger("row"), col = p.getInteger("col");
-		double angle = p.getDouble("angle");
 		int playerID = p.getInteger("player-id");
 		
-		Entity e = world.getEntity(playerID);
+		Entity e = game.getWorld().getEntity(playerID);
+		logger.log(Level.INFO, "remoteplayer");
 		
 		if(e instanceof RemotePlayer) {
-			RemotePlayer ghost = (RemotePlayer)e;
-			ghost.setPosition(new Position(row, col));
-			ghost.setAngle(angle);
+			RemotePlayer player = (RemotePlayer)e;
+			player.setPosition(new Position(row, col));
+			if(p.hasParameter("angle"))
+				player.setAngle(p.getDouble("angle"));
 		} else {
 			throw new RuntimeException("wut"); // TODO: error reporting
 		}
@@ -219,14 +313,14 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		int x = p.getInteger("x"), y = p.getInteger("y");
 		CellState cellState = CellState.valueOf(p.getString("cell-state"));
 		
-		world.getMap().getCell(x, y).setState(cellState);
+		game.getWorld().getMap().getCell(x, y).setState(cellState);
 	}
 
 	private void triggerRemoteGhostMoved(Packet p) {
 		int row = p.getInteger("row"), col = p.getInteger("col");
 		int ghostID = p.getInteger("ghost-id");
 		
-		Entity e = world.getEntity(ghostID);
+		Entity e = game.getWorld().getEntity(ghostID);
 		
 		if(e instanceof RemoteGhost) {
 			RemoteGhost ghost = (RemoteGhost)e;
@@ -247,6 +341,17 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			manager.dispatch(p2);
 		} else {
 			throw new RuntimeException("Already received handshake packet from server.");
+		}
+	}
+
+	@Override
+	public void onGameStarted(Game game) {
+		if(game.getGameType() == GameType.MULTIPLAYER_CLIENT) {
+			if(this.game != null) {
+				removeWorldGameHooks(game);
+			}
+			this.game = game;
+			addWorldGameHooks(game);
 		}
 	}
 }

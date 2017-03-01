@@ -56,11 +56,9 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 			while (alive) {
 				Socket clientSocket = null;
 				try {
-					System.out.println("waiting");
 					clientSocket = this.serverSocket.accept();
 					int clientID = currentClientNumber++;
 					Client client = new Client(clientSocket, clientID);
-					System.out.println("gotcha");
 					client.start();
 					clients.put(clientID, client);
 					clientConnectedEvent.fire(clientID);

@@ -1,5 +1,7 @@
 package teamproject.gamelogic.domain;
 
+import teamproject.constants.GameType;
+
 /**
  * Represent a game (round?)
  * 
@@ -10,11 +12,13 @@ public class Game {
 	private World world;
 	private GameSettings gameSettings;
 	private ControlledPlayer player;
+	private GameType type;
 
-	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player) {
+	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player, final GameType type) {
 		this.world = world;
 		this.gameSettings = gameSettings;
 		this.player = player;
+		this.type = type;
 	}
 
 	/**
@@ -62,5 +66,14 @@ public class Game {
 	 */
 	public ControlledPlayer getPlayer() {
 		return player;
+	}
+
+	/**
+	 * Determines the type of the game - ie. singleplayer,
+	 * multiplayer serverside, or multiplayer clientside.
+	 * @return
+	 */
+	public GameType getGameType() {
+		return type;
 	}
 }

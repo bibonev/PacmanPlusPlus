@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import teamproject.ai.AIGhost;
 import teamproject.constants.CellState;
 import teamproject.constants.GameOutcome;
 import teamproject.constants.GameType;
@@ -64,10 +65,15 @@ public class RuleCheckerTest {
 	public void shouldReportPlayerLost_PlayerEaten() {
 		// Given
 		final Game game = Randoms.randomGame();
-		game.getWorld().getMap().getCell(0, 0).setState(CellState.PLAYER_AND_ENEMY);
+		final ControlledPlayer player = new ControlledPlayer(1, "TestPlayer");
+		player.setPosition(new Position(6, 0));
+
+		AIGhost ghost = new AIGhost();
+		ghost.setPosition(new Position(6, 0));
+		game.getWorld().addEntity(ghost);
 
 		// Then
-		assertThat(RuleChecker.getGameOutcome(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.LOCAL_PLAYER_LOST));
+		assertThat(RuleChecker.getGameOutcome(game), Is.is(GameOutcome.LOCAL_PLAYER_LOST));
 	}
 
 	@Test
@@ -86,7 +92,7 @@ public class RuleCheckerTest {
 		}
 
 		// Then
-		assertThat(RuleChecker.getGameOutcome(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.LOCAL_PLAYER_WON));
+		assertThat(RuleChecker.getGameOutcome(game), Is.is(GameOutcome.LOCAL_PLAYER_WON));
 	}
 
 	@Test
@@ -95,20 +101,20 @@ public class RuleCheckerTest {
 		final Game game = Randoms.randomGame();
 		final Cell[][] cells = game.getWorld().getMap().getCells();
 
+		final ControlledPlayer player = new ControlledPlayer(1, "TestPlayer");
+		player.setPosition(new Position(6, 0));
+
+		AIGhost ghost = new AIGhost();
+		ghost.setPosition(new Position(14, 14));
+		game.getWorld().addEntity(ghost);
+
 		// Make sure there's food left
 		cells[0][0].setState(CellState.FOOD);
 
 		// Make sure player's not eaten
-		for (final Cell[] cellRow : cells) {
-			for (int j = 0; j < cells[0].length; j++) {
-				if (cellRow[j].getState().equals(CellState.PLAYER_AND_ENEMY)) {
-					cellRow[j].setState(CellState.ENEMY);
-				}
-			}
-		}
 
 		// Then
-		assertThat(RuleChecker.getGameOutcome(game, GameType.SINGLEPLAYER), Is.is(GameOutcome.STILL_PLAYING));
+		assertThat(RuleChecker.getGameOutcome(game), Is.is(GameOutcome.STILL_PLAYING));
 	}
 
 }

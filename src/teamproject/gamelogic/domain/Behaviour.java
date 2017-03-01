@@ -43,9 +43,6 @@ public abstract class Behaviour {
 	/** The current position of the ai. */
 	public Entity entity;
 
-	/** The movement of the entity. */
-	private EntityMovement entityMovement;
-
 	/**
 	 * The focus variable determines how long it takes before the AI gets bored
 	 * of chasing something or how many consecutive random moves it makes before
@@ -82,6 +79,7 @@ public abstract class Behaviour {
 	private PriorityQueue<Item> priorityTargets;
 
 	private int counter;
+	private World world;
 
 	protected Event<EntityMovedListener, EntityMovedEventArgs> onEntityMoved;
 
@@ -99,11 +97,12 @@ public abstract class Behaviour {
 	 * @param type
 	 *            the type
 	 */
-	public Behaviour(final Map map, final Entity entity, final int speed, final Inventory stash, Type type) {
-		mapSize = map.getMapSize();
+	public Behaviour(final World world, final Entity entity, final int speed, final Inventory stash, Type type) {
+		this.world = world;
+		mapSize = this.world.getMap().getMapSize();
 		this.entity = entity;
-		cells = map.getCells();
-		astar = new AStar(map);
+		cells = this.world.getMap().getCells();
+		astar = new AStar(world.getMap());
 		rng = new Random();
 		focus = rng.nextInt(4) + 1;
 		this.stash = stash;
@@ -112,8 +111,6 @@ public abstract class Behaviour {
 		this.onEntityMoved = entity.getOnMovedEvent();
 		counter = 0;
 		currentPath = new ArrayList<Position>();
-
-		entityMovement = new EntityMovement(entity, map);
 	}
 
 	public Event<EntityMovedListener, EntityMovedEventArgs> getOnMovedEvent() {
@@ -207,12 +204,8 @@ public abstract class Behaviour {
 	 */
 	private ArrayList<Position> scanEnemies() {
 		final ArrayList<Position> enemies = new ArrayList<Position>();
-		for (int i = 0; i < mapSize; i++) {
-			for (int j = 0; j < mapSize; j++) {
-				if (cells[i][j].getState() == CellState.ENEMY) {
-					enemies.add(cells[i][j].getPosition());
-				}
-			}
+		for(Ghost g : world.getEntities(Ghost.class)) {
+			enemies.add(g.getPosition());
 		}
 		return enemies;
 	}
@@ -270,23 +263,23 @@ public abstract class Behaviour {
 		final int row = target.getRow();
 		final int column = target.getColumn();
 
-		if (cells[row][column].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target)) {
 			return true;
 		}
-		if (cells[row - 1][column].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target.add(-1, 0))) {
 			lockedTarget = cells[row - 1][column].getPosition();
 			return true;
 		}
-		if (cells[row + 1][column].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target.add(+1, 0))) {
 			lockedTarget = cells[row + 1][column].getPosition();
 			return true;
 		}
-		if (cells[row][column - 1].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target.add(0, -1))) {
 			lockedTarget = cells[row][column - 1].getPosition();
 			return true;
 		}
 
-		if (cells[row][column + 1].getState() == CellState.ENEMY) {
+		if (world.isGhostAt(target.add(0, +1))) {
 			lockedTarget = cells[row][column + 1].getPosition();
 			return true;
 		}
@@ -330,10 +323,7 @@ public abstract class Behaviour {
 				
 				lastPos=entity.getPosition();
 
-				entityMovement.moveTo(lockedTarget.getRow(), lockedTarget.getColumn(), 0);
-
-				onEntityMoved
-						.fire(new EntityMovedEventArgs(lockedTarget.getRow(), lockedTarget.getColumn(), 0, entity));
+				entity.setPosition(currentPath.get(0));
 
 				lockedTarget = pickRandomTarget();
 
@@ -354,18 +344,14 @@ public abstract class Behaviour {
 			if (currentPath.size() > 0 && isTargetThere(lockedTarget) && 
 					RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()]) ){
 
-				entityMovement.moveTo(currentPath.get(0).getRow(),currentPath.get(0).getColumn(), 0);
-			
-				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+				entity.setPosition(currentPath.get(0));
 				
 				currentPath.remove(0);
 
 			} else {
 				genPath(entity.getPosition(), lockedTarget);
 
-				entityMovement.moveTo(currentPath.get(0).getRow(),currentPath.get(0).getColumn(), 0);
-				
-				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+				entity.setPosition(currentPath.get(0));
 				
 				currentPath.remove(0);
 			}
@@ -392,18 +378,14 @@ public abstract class Behaviour {
 			
 			if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 
-				entityMovement.moveTo(currentPath.get(0).getRow(),currentPath.get(0).getColumn(), 0);
-
-				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+				entity.setPosition(currentPath.get(0));
 
 				currentPath.remove(0);
 
 			} else {
 				genPath(entity.getPosition(), lockedTarget);
 
-				entityMovement.moveTo(currentPath.get(0).getRow(),currentPath.get(0).getColumn(), 0);
-				
-				onEntityMoved.fire(new EntityMovedEventArgs(currentPath.get(0).getRow(), currentPath.get(0).getColumn(), 0, entity));
+				entity.setPosition(currentPath.get(0));
 				
 				currentPath.remove(0);
 			}

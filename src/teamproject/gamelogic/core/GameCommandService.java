@@ -2,114 +2,114 @@ package teamproject.gamelogic.core;
 
 import java.util.HashMap;
 
-import javafx.stage.Stage;
 import teamproject.ai.AIGhost;
 import teamproject.ai.GhostBehaviour;
 import teamproject.constants.EntityType;
 import teamproject.event.Event;
-import teamproject.event.arguments.NewGameStartedEventArguments;
-import teamproject.event.arguments.NewMultiplayerGameRequestedEventArguments;
-import teamproject.event.listener.NewGameStartedEventListener;
-import teamproject.event.listener.NewMultiplayerGameRequestedEventListener;
-import teamproject.gamelogic.domain.*;
+import teamproject.event.arguments.SingleplayerGameStartingEventArgs;
+import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
+import teamproject.event.listener.GameStartedListener;
+import teamproject.event.listener.MultiplayerGameStartingListener;
+import teamproject.event.listener.SingleplayerGameStartingListener;
+import teamproject.gamelogic.domain.Behaviour;
+import teamproject.gamelogic.domain.ControlledPlayer;
+import teamproject.gamelogic.domain.Game;
+import teamproject.gamelogic.domain.GameSettings;
+import teamproject.constants.GameType;
+import teamproject.gamelogic.domain.Inventory;
+import teamproject.gamelogic.domain.Item;
+import teamproject.gamelogic.domain.Map;
+import teamproject.gamelogic.domain.Position;
+import teamproject.gamelogic.domain.RuleChecker;
+import teamproject.gamelogic.domain.World;
 
-public class GameCommandService {
-
-	// TODO: refactor to get some of these things as constructor params rather
-	// than creating
-	// them everytime we call the methods
-
-	public static Game generateNewSinglePlayerGame(final String userName, final GameSettings settings) {
-		// Generate a map
-		// Simplest one for now
-		final Map map = new Map().generateMap();
-
-		// Create new game and store it
-		final World world = new World(new RuleChecker(), map);
-		final ControlledPlayer player = new ControlledPlayer(0, userName);
-		player.setPosition(new Position(6, 0));
-
-		final Game game = new Game(world, settings, player);
-
-		// Collect players
-		// Just the one for now
-
+public class GameCommandService
+		implements SingleplayerGameStartingListener, MultiplayerGameStartingListener {
+	
+	private Event<GameStartedListener, Game> gameStartedEvent = new Event<>((l, g) -> l.onGameStarted(g));
+	
+	public Event<GameStartedListener, Game> getGameStartedEvent() {
+		return gameStartedEvent;
+	}
+	
+	private void populateWorld(World world) {
 		final AIGhost ghost = new AIGhost();
 		ghost.setPosition(new Position(1, 1));
 		ghost.setType(EntityType.GHOST);
-		Behaviour b = new GhostBehaviour(world.getMap(), ghost, 1000,
+		Behaviour b = new GhostBehaviour(world, ghost, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost.setBehaviour(b);
 
 		final AIGhost ghost1 = new AIGhost();
 		ghost1.setPosition(new Position(1, 13));
 		ghost1.setType(EntityType.GHOST);
-		Behaviour b1 = new GhostBehaviour(world.getMap(), ghost1, 1000,
+		Behaviour b1 = new GhostBehaviour(world, ghost1, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost1.setBehaviour(b1);
 
 		final AIGhost ghost2 = new AIGhost();
 		ghost2.setPosition(new Position(13, 13));
 		ghost2.setType(EntityType.GHOST);
-		Behaviour b2 = new GhostBehaviour(world.getMap(), ghost2, 1000,
+		Behaviour b2 = new GhostBehaviour(world, ghost2, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost2.setBehaviour(b2);
 
 		world.addEntity(ghost);
 		world.addEntity(ghost1);
 		world.addEntity(ghost2);
-		world.addEntity(player);
-
-		return game;
 	}
-	
-	public static Game generateNewMultiplayerGame(final String userName, final GameSettings settings) {
+
+	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID, final GameSettings settings, final boolean multiplayer) {
 		// Generate a map
 		// Simplest one for now
 		final Map map = new Map().generateMap();
 
 		// Create new game and store it
-		final World world = new World(new RuleChecker(), map);
-		final ControlledPlayer player = new ControlledPlayer(0, userName);
-		player.setPosition(new Position(0, 0));
+		final World world = new World(new RuleChecker(), map, multiplayer);
+		final ControlledPlayer player = new ControlledPlayer(localPlayerID, localUsername);
+		player.setPosition(new Position(6, 0));
 		
-		final Game game = new Game(world, settings, player);
+		final Game game = new Game(world, settings, player, multiplayer ? GameType.MULTIPLAYER_CLIENT : GameType.SINGLEPLAYER);
 
 		
 		// Collect players
 		// Just the one for now
-
+		
 		world.addEntity(player);
 
 		return game;
 	}
+	
+	private Game generateNewServersideGame(final GameSettings settings) {
+		// Generate a map
+		// Simplest one for now
+		final Map map = new Map().generateMap();
 
-	public void startNewSingleplayerGame(final String userName, final GameSettings settings, final Stage stage) {
-		final Game game = generateNewSinglePlayerGame(userName, settings);
+		// Create new game and store it
+		final World world = new World(new RuleChecker(), map, false);
+		
+		final Game game = new Game(world, settings, null, GameType.MULTIPLAYER_SERVER);
 
-		// Fire NewGameStartedEvent
-		final NewGameStartedEventArguments gameStartedEventArgs = new NewGameStartedEventArguments(game, stage);
-		final Event<NewGameStartedEventListener, NewGameStartedEventArguments> newGameStartedEvent = new Event<>(
-				(listener, s) -> listener.onNewGameStarted(s));
-		newGameStartedEvent.addListener(new teamproject.graphics.event.listener.NewGameStartedEventListener());
-		newGameStartedEvent.fire(gameStartedEventArgs);
+		return game;
 	}
 
-	public void startNewMultiplayerGame() {
-		// TODO: fill up and call this from listener that is linked to
-		// networking
+	@Override
+	public void onSingleplayerGameStarting(SingleplayerGameStartingEventArgs args) {
+		Game g = generateNewClientsideGame(args.getUsername(), 0, args.getSettings(), false);
+		getGameStartedEvent().fire(g);
+		populateWorld(g.getWorld());
 	}
 
-	// TODO: Maybe we could do without passing the stage around? Not sure how to
-	// do this though...
-	public void requestNewMultiplayerGame(final String userName, final GameSettings settings, final Stage stage) {
-		// Fire NewMultiplayerGameRequestedEvent
-		final NewMultiplayerGameRequestedEventArguments multiplayerGameRequestedEventArgs = new NewMultiplayerGameRequestedEventArguments(
-				userName, settings, stage);
-		final Event<NewMultiplayerGameRequestedEventListener, NewMultiplayerGameRequestedEventArguments> multiplayerGameRequestedEvent = new Event<>(
-				(listener, s) -> listener.onNewMultiplayerGameRequested(s));
-		// TODO: Networking to add their listener here
-		multiplayerGameRequestedEvent.fire(multiplayerGameRequestedEventArgs);
+	@Override
+	public void onMultiplayerGameStarting(MultiplayerGameStartingEventArgs args) {
+		Game g;
+		if(args.isServer()) {
+			g = generateNewServersideGame(args.getSettings());
+			getGameStartedEvent().fire(g);
+			populateWorld(g.getWorld());
+		} else {
+			g = generateNewClientsideGame(args.getLocalUsername(), args.getLocalPlayerID(), args.getSettings(), true);
+			getGameStartedEvent().fire(g);
+		}
 	}
-
 }

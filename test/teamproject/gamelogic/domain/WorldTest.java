@@ -16,7 +16,7 @@ public class WorldTest {
 		final Map map = Randoms.randomMap();
 
 		// When
-		final World world = new World(ruleEnforcer, map);
+		final World world = new World(ruleEnforcer, map, true);
 
 		// Then
 		assertThat(world.getRuleEnforcer(), Is.is(ruleEnforcer));
