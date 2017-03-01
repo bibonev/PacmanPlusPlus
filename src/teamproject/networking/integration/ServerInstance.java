@@ -22,7 +22,7 @@ import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Game;
-import teamproject.gamelogic.domain.GameType;
+import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;

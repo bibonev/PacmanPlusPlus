@@ -1,7 +1,5 @@
 package teamproject.graphics;
 
-import java.util.HashMap;
-
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
@@ -12,10 +10,9 @@ import javafx.util.Duration;
 import teamproject.ai.AIGhost;
 import teamproject.constants.*;
 import teamproject.event.arguments.EntityMovedEventArgs;
-import teamproject.event.listener.EntityMovedListener;
 import teamproject.event.listener.RemoteEntityUpdatedListener;
 import teamproject.gamelogic.domain.*;
-import teamproject.gamelogic.domain.GameType;
+import teamproject.constants.GameType;
 import teamproject.ui.GameUI;
 
 /**
@@ -34,7 +31,6 @@ public class Render implements RemoteEntityUpdatedListener {
 	 *
 	 * @param gameUI
 	 * @param game
-	 * @param serverMode
 	 */
 	public Render(final GameUI gameUI, final Game game) {
 		this.gameUI = gameUI;

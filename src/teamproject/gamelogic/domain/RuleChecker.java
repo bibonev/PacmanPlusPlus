@@ -3,6 +3,7 @@ package teamproject.gamelogic.domain;
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
 import teamproject.constants.GameOutcome;
+import teamproject.constants.GameType;
 
 /**
  * Check different rules, constraints and states

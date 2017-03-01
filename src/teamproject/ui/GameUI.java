@@ -20,7 +20,7 @@ import teamproject.event.listener.LobbyStateChangedListener;
 import teamproject.gamelogic.core.GameCommandService;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.domain.Game;
-import teamproject.gamelogic.domain.GameType;
+import teamproject.constants.GameType;
 import teamproject.graphics.PositionVisualisation;
 import teamproject.graphics.Render;
 import teamproject.networking.integration.ClientInstance;

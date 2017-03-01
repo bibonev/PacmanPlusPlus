@@ -1,5 +1,7 @@
 package teamproject.gamelogic.domain;
 
+import teamproject.constants.GameType;
+
 /**
  * Represent a game (round?)
  * 

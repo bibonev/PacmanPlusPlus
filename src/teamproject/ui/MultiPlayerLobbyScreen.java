@@ -2,7 +2,6 @@ package teamproject.ui;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
 import teamproject.event.Event;
 import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
 import teamproject.event.listener.HostStartingMultiplayerGameListener;

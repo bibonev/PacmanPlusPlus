@@ -1,14 +1,9 @@
 package teamproject.graphics;
 
-import javafx.scene.image.ImageView;
 import javafx.scene.Node;
-import java.util.Random;
-
-import teamproject.constants.CellSize;
-import teamproject.constants.CellState;
+import javafx.scene.image.ImageView;
 import teamproject.constants.Images;
-import teamproject.constants.ScreenSize;
-import teamproject.gamelogic.domain.*;
+import teamproject.gamelogic.domain.Position;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.

@@ -1,4 +1,4 @@
-package teamproject.gamelogic.domain;
+package teamproject.constants;
 
 /**
  * Represents the type of the game.

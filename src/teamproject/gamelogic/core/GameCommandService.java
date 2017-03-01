@@ -15,7 +15,7 @@ import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.ControlledPlayer;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
-import teamproject.gamelogic.domain.GameType;
+import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.Inventory;
 import teamproject.gamelogic.domain.Item;
 import teamproject.gamelogic.domain.Map;

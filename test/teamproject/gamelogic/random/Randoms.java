@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import teamproject.constants.CellState;
+import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.ControlledPlayer;
 import teamproject.gamelogic.domain.Game;
@@ -66,7 +67,7 @@ public class Randoms {
 	}
 
 	public static World randomWorld() {
-		return new World(randomRuleEnforcer(), randomMap());
+		return new World(randomRuleEnforcer(), randomMap(), false);
 	}
 
 	public static RemoteGhost randomRemoteGhost() {
@@ -155,7 +156,7 @@ public class Randoms {
 	}
 
 	public static Game randomGame() {
-		return new Game(randomWorld(), randomGameSettings(), randomControlledPlayer());
+		return new Game(randomWorld(), randomGameSettings(), randomControlledPlayer(), GameType.SINGLEPLAYER);
 	}
 
 }

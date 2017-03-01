@@ -1,7 +1,5 @@
 package teamproject.gamelogic.domain;
 
-import teamproject.constants.CellState;
-
 /**
  * Represent a controlled player
  * 
