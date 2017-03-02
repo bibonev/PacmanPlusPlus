@@ -7,6 +7,7 @@ import teamproject.ai.GhostBehaviour;
 import teamproject.constants.EntityType;
 import teamproject.event.Event;
 import teamproject.event.arguments.SingleplayerGameStartingEventArgs;
+import teamproject.event.arguments.GameStartedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
 import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
@@ -26,9 +27,9 @@ import teamproject.gamelogic.domain.World;
 public class GameCommandService
 		implements SingleplayerGameStartingListener, MultiplayerGameStartingListener {
 	
-	private Event<GameStartedListener, Game> gameStartedEvent = new Event<>((l, g) -> l.onGameStarted(g));
+	private Event<GameStartedListener, GameStartedEventArgs> gameStartedEvent = new Event<>((l, g) -> l.onGameStarted(g));
 	
-	public Event<GameStartedListener, Game> getGameStartedEvent() {
+	public Event<GameStartedListener, GameStartedEventArgs> getGameStartedEvent() {
 		return gameStartedEvent;
 	}
 	
@@ -96,7 +97,8 @@ public class GameCommandService
 	@Override
 	public void onSingleplayerGameStarting(SingleplayerGameStartingEventArgs args) {
 		Game g = generateNewClientsideGame(args.getUsername(), 0, args.getSettings(), false);
-		getGameStartedEvent().fire(g);
+		GameLogic gl = new LocalGameLogic(g);
+		getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
 		populateWorld(g.getWorld());
 	}
 
@@ -105,11 +107,13 @@ public class GameCommandService
 		Game g;
 		if(args.isServer()) {
 			g = generateNewServersideGame(args.getSettings());
-			getGameStartedEvent().fire(g);
+			GameLogic gl = new LocalGameLogic(g);
+			getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
 			populateWorld(g.getWorld());
 		} else {
 			g = generateNewClientsideGame(args.getLocalUsername(), args.getLocalPlayerID(), args.getSettings(), true);
-			getGameStartedEvent().fire(g);
+			GameLogic gl = new RemoteGameLogic(g);
+			getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
 		}
 	}
 }

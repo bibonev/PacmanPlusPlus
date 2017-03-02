@@ -136,6 +136,10 @@ public class Map {
 
 		return false;
 	}
+	
+	public void gameStep(Game game) {
+		// nothing to do yet
+	}
 
 	/**
 	 * Initialises obstacles

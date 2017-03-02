@@ -120,4 +120,8 @@ public abstract class Entity {
 	public World getWorld() {
 		return this.world;
 	}
+	
+	public void gameStep(Game game) {
+		// nothing to do in here yet
+	}
 }

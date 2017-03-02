@@ -6,10 +6,11 @@ import java.util.logging.Logger;
 import teamproject.constants.CellState;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.arguments.GameStartedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
 import teamproject.event.arguments.PlayerMovedEventArgs;
 import teamproject.event.listener.GameStartedListener;
-import teamproject.event.listener.RemoteEntityUpdatedListener;
+import teamproject.event.listener.ServerEntityUpdatedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
@@ -30,7 +31,7 @@ import teamproject.networking.socket.Client;
 import teamproject.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger ,
-		ClientDisconnectedListener, RemoteEntityUpdatedListener, GameStartedListener {
+		ClientDisconnectedListener, ServerEntityUpdatedListener, GameStartedListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
@@ -39,7 +40,6 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	private String username;
 	private GameUI gameUI;
 	private boolean alreadyDoneHandshake;
-	private Logger logger = Logger.getLogger("network-client");
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	
 	/**
@@ -65,8 +65,6 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		this.gameUI.setLobby(this.lobby);
 		this.game = null;
 		this.multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
-		
-		logger.setLevel(Level.FINEST);
 	}
 	
 	@Override
@@ -181,7 +179,6 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			if(args instanceof PlayerMovedEventArgs) {
 				p.setDouble("angle", ((PlayerMovedEventArgs) args).getAngle());
 			}
-			logger.log(Level.INFO, "sending player moved packet");
 			manager.dispatch(p);
 		}
 	}
@@ -189,7 +186,6 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	/* TRIGGERS to deal with incoming packets */
 	@Override
 	public void trigger(Packet p) {
-		logger.log(Level.INFO, "Packet received: {0}", p.getPacketName());
 		if(p.getPacketName().equals("server-handshake")) {
 			triggerHandshake(p);
 		} else if(p.getPacketName().equals("remote-player-moved")) {
@@ -297,7 +293,6 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		int playerID = p.getInteger("player-id");
 		
 		Entity e = game.getWorld().getEntity(playerID);
-		logger.log(Level.INFO, "remoteplayer");
 		
 		if(e instanceof RemotePlayer) {
 			RemotePlayer player = (RemotePlayer)e;
@@ -345,12 +340,12 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	}
 
 	@Override
-	public void onGameStarted(Game game) {
-		if(game.getGameType() == GameType.MULTIPLAYER_CLIENT) {
+	public void onGameStarted(GameStartedEventArgs args) {
+		if(args.getGame().getGameType() == GameType.MULTIPLAYER_CLIENT) {
 			if(this.game != null) {
-				removeWorldGameHooks(game);
+				removeWorldGameHooks(this.game);
 			}
-			this.game = game;
+			this.game = args.getGame();
 			addWorldGameHooks(game);
 		}
 	}

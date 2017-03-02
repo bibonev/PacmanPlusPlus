@@ -25,8 +25,8 @@ public class AIGhost extends LocalGhost {
 		this.behaviour = behaviour;
 	}
 
-	public void run() {
+	@Override
+	public void gameStep(Game game) {
 		behaviour.run();
-		
 	}
 }

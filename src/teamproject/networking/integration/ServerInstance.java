@@ -7,6 +7,7 @@ import teamproject.constants.EntityType;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.arguments.GameStartedEventArgs;
 import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
 import teamproject.event.arguments.LobbyChangedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
@@ -16,8 +17,10 @@ import teamproject.event.listener.EntityRemovingListener;
 import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.HostStartingMultiplayerGameListener;
 import teamproject.event.listener.LobbyStateChangedListener;
-import teamproject.event.listener.RemoteEntityUpdatedListener;
+import teamproject.event.listener.ServerEntityUpdatedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
+import teamproject.gamelogic.core.GameLogic;
+import teamproject.gamelogic.core.GameLogicTimer;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
@@ -26,7 +29,7 @@ import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
-import teamproject.gamelogic.domain.RemoteEntityTracker;
+import teamproject.gamelogic.domain.ServerEntityTracker;
 import teamproject.gamelogic.domain.RemotePlayer;
 import teamproject.gamelogic.domain.World;
 import teamproject.networking.ServerManager;
@@ -39,7 +42,7 @@ import teamproject.networking.socket.Server;
 import teamproject.ui.GameUI;
 
 public class ServerInstance implements Runnable, ServerTrigger,
-		ClientConnectedListener, RemoteEntityUpdatedListener,
+		ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener,
 		ClientDisconnectedListener, LobbyStateChangedListener,
 		HostStartingMultiplayerGameListener, GameStartedListener {
@@ -47,10 +50,11 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	private ServerManager manager;
 	private Game game;
 	private GameUI gameUI;
-	private RemoteEntityTracker tracker;
-	private Logger logger = Logger.getLogger("network-server");
+	private ServerEntityTracker tracker;
 	private Lobby lobby;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
+	private GameLogic gameLogic;
+	private GameLogicTimer gameLogicTimer;
 	
 	/**
 	 * Creates a new server instance which, when ran, will connect to the server
@@ -67,8 +71,9 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	public ServerInstance(GameUI gameUI, Lobby lobby) {
 		this.lobby = lobby;
 		this.game = null;
+		this.gameLogic = null;
+		this.gameLogicTimer = null;
 		this.gameUI = gameUI;
-		logger.setLevel(Level.FINEST);
 		this.multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 		
 	}
@@ -132,7 +137,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		 * to the server manager, which turns the packet into bytes and sends it to
 		 * the server.
 		 */
-		tracker = new RemoteEntityTracker(this);
+		tracker = new ServerEntityTracker(this);
 		server.getClientConnectedEvent().addListener(this);
 		server.getClientDisconnectedEvent().addListener(this);
 		lobby.getLobbyStateChangedEvent().addListener(this);
@@ -219,7 +224,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	
 	@Override
 	public void onEntityMoved(EntityMovedEventArgs args) {
-		if(args.getEntity().getType()==EntityType.PLAYER){
+		if(args.getEntity() instanceof Player){
 			Packet p = new Packet("remote-player-moved");
 			p.setInteger("row", args.getRow());
 			p.setInteger("col", args.getCol());
@@ -237,7 +242,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 				manager.dispatchAll(p);
 			}
 		}
-		if(args.getEntity().getType()==EntityType.GHOST){
+		if(args.getEntity() instanceof Ghost){
 			Packet p = new Packet("remote-ghost-moved");
 			p.setInteger("row", args.getRow());
 			p.setInteger("col", args.getCol());
@@ -249,7 +254,6 @@ public class ServerInstance implements Runnable, ServerTrigger,
 
 	@Override
 	public void trigger(int sender, Packet p) {
-		logger.log(Level.INFO, "Packet received: {0}", p.getPacketName());
 		if(p.getPacketName().equals("client-handshake")) {
 			triggerHandshake(sender, p);
 		} else if(p.getPacketName().equals("player-moved")) {
@@ -319,7 +323,6 @@ public class ServerInstance implements Runnable, ServerTrigger,
 
 	@Override
 	public void onClientDisconnected(int clientID) {
-		logger.log(Level.INFO, "Client {0} disconnected.", clientID);
 		lobby.removePlayer(clientID);
 		if(game != null) game.getWorld().removeEntity(clientID);
 	}
@@ -355,16 +358,20 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	}
 
 	@Override
-	public void onGameStarted(Game game) {
-		if(game.getGameType() == GameType.MULTIPLAYER_SERVER) {
+	public void onGameStarted(GameStartedEventArgs args) {
+		if(args.getGame().getGameType() == GameType.MULTIPLAYER_SERVER) {
 			if(this.game != null) {
 				// cleanup hooks to old game
 				
 				removeWorldGameHooks(this.game.getWorld());
+				this.gameLogicTimer.stop();
 			}
-			this.game = game;
+			this.game = args.getGame();
+			this.gameLogic = args.getGameLogic();
+			this.gameLogicTimer = new GameLogicTimer(gameLogic);
+			this.gameLogicTimer.start(250);
+			
 			addWorldGameHooks(game.getWorld());
-			logger.log(Level.INFO, "Adding remote players");
 			for(int i : lobby.getPlayerIDs()) {
 				LobbyPlayerInfo info = lobby.getPlayer(i);
 				RemotePlayer player = new RemotePlayer(info.getID(), info.getName());
