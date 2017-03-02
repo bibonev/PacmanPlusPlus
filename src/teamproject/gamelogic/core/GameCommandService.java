@@ -62,7 +62,7 @@ public class GameCommandService
 	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID, final GameSettings settings, final boolean multiplayer) {
 		// Generate a map
 		// Simplest one for now
-		final Map map = new Map().generateMap();
+		final Map map = Map.generateMap();
 
 		// Create new game and store it
 		final World world = new World(new RuleChecker(), map, multiplayer);
@@ -83,7 +83,7 @@ public class GameCommandService
 	private Game generateNewServersideGame(final GameSettings settings) {
 		// Generate a map
 		// Simplest one for now
-		final Map map = new Map().generateMap();
+		final Map map = Map.generateMap();
 
 		// Create new game and store it
 		final World world = new World(new RuleChecker(), map, false);

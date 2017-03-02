@@ -50,7 +50,7 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	 * etc.) should be passed in to this {@link ClientInstance} object via the
 	 * constructor. This, in turn, will pass those objects into the appropriate
 	 * triggers (so packets received from the network will update the local game
-	 * state accordingly), and also register the created {@link ClientDispatcher}
+	 * state accordingly), and also register the created new instance
 	 * object as a listener to any local events (eg. player moved) which must be
 	 * transmitted over the network.
 	 * 
@@ -216,7 +216,18 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			triggerGameStarting(p);
 		} else if(p.getPacketName().equals("force-move")) {
 			triggerForceMove(p);
+		} else if(p.getPacketName().equals("cell-changed")) {
+			triggerCellChanged(p);
 		}
+	}
+
+	private void triggerCellChanged(Packet p) {
+		int row = p.getInteger("row"), col = p.getInteger("col");
+		String newStateStr = p.getString("new-state");
+
+		CellState newState = CellState.valueOf(newStateStr);
+
+		game.getWorld().getMap().getCell(row, col).setState(newState);
 	}
 
 	private void triggerForceMove(Packet p) {

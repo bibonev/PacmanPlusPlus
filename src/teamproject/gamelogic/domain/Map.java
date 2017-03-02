@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import teamproject.constants.CellSize;
 import teamproject.constants.CellState;
+import teamproject.event.Event;
+import teamproject.event.arguments.CellStateChangedEventArgs;
+import teamproject.event.listener.CellStateChangedEventListener;
 import teamproject.graphics.PositionVisualisation;
 
 /**
@@ -12,14 +15,16 @@ import teamproject.graphics.PositionVisualisation;
  * @author aml
  *
  */
-public class Map {
+public class Map implements CellStateChangedEventListener {
 
 	public static int defaultNumberOfCells = 15;
 	private Cell[][] cells;
 	private ArrayList<PositionVisualisation> obstacles;
+	private Event<CellStateChangedEventListener, CellStateChangedEventArgs> onCellStateChanged;
 
 	public Map(final int numberOfCells) {
 		cells = new Cell[numberOfCells][numberOfCells];
+		onCellStateChanged = new Event<>((l,p) -> l.onCellStateChanged(p));
 	}
 
 	public Map() {
@@ -28,6 +33,7 @@ public class Map {
 
 	public Map(final Cell[][] cells) {
 		this.cells = cells;
+        onCellStateChanged = new Event<>((l,p) -> l.onCellStateChanged(p));
 	}
 
 	/**
@@ -53,13 +59,11 @@ public class Map {
 	/**
 	 * Fetch the cell at position (x, y)
 	 *
-	 * @param x
-	 * @param y
+	 * @param p
 	 * @return a cell
 	 */
 	public Cell getCell(final Position p) {
-		return cells[p.getRow()][p.getColumn()
-		                            ];
+		return cells[p.getRow()][p.getColumn()];
 	}
 
 	/**
@@ -91,6 +95,7 @@ public class Map {
 		final int x = cell.getPosition().getRow();
 		final int y = cell.getPosition().getColumn();
 		cells[x][y] = cell;
+		cell.getOnCellStateChanged().addListener(this);
 	}
 
 	/**
@@ -99,26 +104,27 @@ public class Map {
 	 * @return a map object
 	 */
 	// TODO: Should a map be able generate itself? I don't think so...
-	public Map generateMap() {
-		initializeObstacles();
+	public static Map generateMap() {
+	    Map m = new Map();
+		m.initializeObstacles();
 		CellState state;
 
-		for (int i = 0; i < cells.length; i++) {
-			for (int j = 0; j < cells[i].length; j++) {
+		for (int i = 0; i < m.getMapSize(); i++) {
+			for (int j = 0; j < m.getMapSize(); j++) {
 				final PositionVisualisation position = new PositionVisualisation(i, j);
 
-				if (isObstacle(position)) {
+				if (m.isObstacle(position)) {
 					state = CellState.OBSTACLE;
 				} else {
 					state = CellState.FOOD;
 				}
 
 				final Cell cell = new Cell(state, position);
-				cells[position.getRow()][position.getColumn()] = cell;
+				m.addCell(cell);
 			}
 		}
 
-		return new Map(cells);
+		return m;
 	}
 
 	/**
@@ -198,4 +204,12 @@ public class Map {
 		obstacles.add(new PositionVisualisation(4, 7));
 	}
 
+	@Override
+	public void onCellStateChanged(CellStateChangedEventArgs args) {
+		onCellStateChanged.fire(args);
+	}
+
+    public Event<CellStateChangedEventListener, CellStateChangedEventArgs> getOnCellStateChanged() {
+        return onCellStateChanged;
+    }
 }

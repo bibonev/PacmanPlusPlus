@@ -2,11 +2,11 @@ package teamproject.event.arguments;
 
 import teamproject.constants.GameStateType;
 
-public class GameStateChangedEventArguments {
+public class GameStateChangedEventArgs {
 	private int playerID;
 	private GameStateType type;
 	
-	public GameStateChangedEventArguments(int playerID, GameStateType type){
+	public GameStateChangedEventArgs(int playerID, GameStateType type){
 		this.playerID = playerID;
 		this.type = type;
 	}
