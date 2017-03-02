@@ -114,12 +114,13 @@ public class Render implements RemoteEntityUpdatedListener {
 			ghost.getOnMovedEvent().addListener(this);
 		}
 		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-			if(game.getGameType() == GameType.SINGLEPLAYER) {
-				for(AIGhost ghost : world.getEntities(AIGhost.class)) {
-					ghost.run();
+				if(game.getGameType() == GameType.SINGLEPLAYER) {
+					for(AIGhost ghost : world.getEntities(AIGhost.class)) {
+						ghost.run();
+					}
 				}
-			}
-			redrawWorld();
+
+				redrawWorld();
 			}
 		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);

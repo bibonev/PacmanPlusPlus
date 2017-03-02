@@ -49,4 +49,8 @@ public class Cell {
 		this.state = state;
 		onCellStateChanged.fire(new CellStateChangedEventArgs(this, state));
 	}
+
+	public Event<CellStateChangedEventListener, CellStateChangedEventArgs> getOnCellStateChanged() {
+		return onCellStateChanged;
+	}
 }

@@ -15,7 +15,7 @@ import teamproject.graphics.PositionVisualisation;
  * @author aml
  *
  */
-public class Map {
+public class Map implements CellStateChangedEventListener {
 
 	public static int defaultNumberOfCells = 15;
 	private Cell[][] cells;
@@ -95,7 +95,7 @@ public class Map {
 		final int x = cell.getPosition().getRow();
 		final int y = cell.getPosition().getColumn();
 		cells[x][y] = cell;
-		onCellStateChanged.fire(new CellStateChangedEventArgs(cell, cell.getState()));
+		cell.getOnCellStateChanged().addListener(this);
 	}
 
 	/**
@@ -104,26 +104,27 @@ public class Map {
 	 * @return a map object
 	 */
 	// TODO: Should a map be able generate itself? I don't think so...
-	public Map generateMap() {
-		initializeObstacles();
+	public static Map generateMap() {
+	    Map m = new Map();
+		m.initializeObstacles();
 		CellState state;
 
-		for (int i = 0; i < cells.length; i++) {
-			for (int j = 0; j < cells[i].length; j++) {
+		for (int i = 0; i < m.getMapSize(); i++) {
+			for (int j = 0; j < m.getMapSize(); j++) {
 				final PositionVisualisation position = new PositionVisualisation(i, j);
 
-				if (isObstacle(position)) {
+				if (m.isObstacle(position)) {
 					state = CellState.OBSTACLE;
 				} else {
 					state = CellState.FOOD;
 				}
 
 				final Cell cell = new Cell(state, position);
-				cells[position.getRow()][position.getColumn()] = cell;
+				m.addCell(cell);
 			}
 		}
 
-		return new Map(cells);
+		return m;
 	}
 
 	/**
@@ -203,4 +204,12 @@ public class Map {
 		obstacles.add(new PositionVisualisation(4, 7));
 	}
 
+	@Override
+	public void onCellStateChanged(CellStateChangedEventArgs args) {
+		onCellStateChanged.fire(args);
+	}
+
+    public Event<CellStateChangedEventListener, CellStateChangedEventArgs> getOnCellStateChanged() {
+        return onCellStateChanged;
+    }
 }
