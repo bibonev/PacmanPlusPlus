@@ -5,19 +5,8 @@ import java.util.logging.Logger;
 
 import teamproject.constants.EntityType;
 import teamproject.event.Event;
-import teamproject.event.arguments.EntityChangedEventArgs;
-import teamproject.event.arguments.EntityMovedEventArgs;
-import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
-import teamproject.event.arguments.LobbyChangedEventArgs;
-import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
-import teamproject.event.arguments.PlayerMovedEventArgs;
-import teamproject.event.listener.EntityAddedListener;
-import teamproject.event.listener.EntityRemovingListener;
-import teamproject.event.listener.GameStartedListener;
-import teamproject.event.listener.HostStartingMultiplayerGameListener;
-import teamproject.event.listener.LobbyStateChangedListener;
-import teamproject.event.listener.RemoteEntityUpdatedListener;
-import teamproject.event.listener.MultiplayerGameStartingListener;
+import teamproject.event.arguments.*;
+import teamproject.event.listener.*;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 import teamproject.gamelogic.domain.Entity;
@@ -42,7 +31,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		ClientConnectedListener, RemoteEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener,
 		ClientDisconnectedListener, LobbyStateChangedListener,
-		HostStartingMultiplayerGameListener, GameStartedListener {
+		HostStartingMultiplayerGameListener, GameStartedListener, CellStateChangedEventListener {
 	private Server server;
 	private ServerManager manager;
 	private Game game;
@@ -60,7 +49,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	 * etc.) should be passed in to this {@link ServerInstance} object via the
 	 * constructor. This, in turn, will pass those objects into the appropriate
 	 * triggers (so packets received from the network will update the local game
-	 * state accordingly), and also register the created {@link ServerDispatcher}
+	 * state accordingly), and also register the current server instance
 	 * object as a listener to any local events (eg. player moved) which must be
 	 * transmitted over the network.
 	 */
@@ -143,6 +132,8 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		world.getOnEntityAddedEvent().addListener(tracker);
 		world.getOnEntityRemovingEvent().addListener(this);
 		world.getOnEntityRemovingEvent().addListener(tracker);
+
+		world.getMap().getOnCellStateChanged().addListener(this);
 	}
 	
 	/**
@@ -168,6 +159,8 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		world.getOnEntityAddedEvent().removeListener(tracker);
 		world.getOnEntityRemovingEvent().removeListener(this);
 		world.getOnEntityRemovingEvent().removeListener(tracker);
+
+		world.getMap().getOnCellStateChanged().removeListener(this);
 	}
 
 	@Override
@@ -377,6 +370,16 @@ public class ServerInstance implements Runnable, ServerTrigger,
 						player.getAngle()));
 			}
 		}
+	}
+
+	@Override
+	public void onCellStateChanged(CellStateChangedEventArgs args) {
+	    Packet p = new Packet("cell-changed");
+        Position cellPosition = args.getChangeCell().getPosition();
+	    p.setInteger("row", cellPosition.getRow());
+	    p.setInteger("col", cellPosition.getColumn());
+	    p.setString("new-state", args.getState().name());
+	    manager.dispatchAll(p);
 	}
 
 	/*

@@ -1,7 +1,7 @@
 package teamproject.event.listener;
 
-import teamproject.event.arguments.UserLoggedInEventArguments;
+import teamproject.event.arguments.UserLoggedInEventArgs;
 
 public interface UserLoggedInEventListener {
-	void onUserLoggedIn(UserLoggedInEventArguments args);
+	void onUserLoggedIn(UserLoggedInEventArgs args);
 }
