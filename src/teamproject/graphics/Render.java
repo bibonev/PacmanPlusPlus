@@ -119,7 +119,8 @@ public class Render implements RemoteEntityUpdatedListener {
 						ghost.run();
 					}
 				}
-
+                controlledPlayer.move();
+				checkGameEnding();
 				redrawWorld();
 			}
 		));
