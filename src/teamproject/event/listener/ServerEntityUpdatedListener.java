@@ -1,6 +1,6 @@
 package teamproject.event.listener;
 
-public interface RemoteEntityUpdatedListener extends
+public interface ServerEntityUpdatedListener extends
 		EntityMovedListener {
 	
 }

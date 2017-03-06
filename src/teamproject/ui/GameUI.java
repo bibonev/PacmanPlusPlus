@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import teamproject.audio.Music;
 import teamproject.audio.SoundEffects;
 import teamproject.event.Event;
+import teamproject.event.arguments.GameStartedEventArgs;
 import teamproject.event.arguments.LobbyChangedEventArgs;
 import teamproject.event.listener.GameClosingListener;
 import teamproject.event.listener.GameStartedListener;
@@ -292,14 +293,14 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 
 	@Override
-	public void onGameStarted(Game game) {
-		if(game.getGameType() != GameType.MULTIPLAYER_SERVER) {
+	public void onGameStarted(GameStartedEventArgs args) {
+		if(args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
 				switchToGame();
 				
 				switchToMultiPlayerLobby();
 				
-				final Render mapV = new Render(this, game);
+				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
 
 				// Initialize Screen dimensions
 				PositionVisualisation.initScreenDimensions();

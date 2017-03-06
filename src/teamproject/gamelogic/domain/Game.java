@@ -13,12 +13,22 @@ public class Game {
 	private GameSettings gameSettings;
 	private ControlledPlayer player;
 	private GameType type;
+	private boolean ended;
 
 	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player, final GameType type) {
 		this.world = world;
 		this.gameSettings = gameSettings;
 		this.player = player;
 		this.type = type;
+		this.ended = false;
+	}
+	
+	public boolean hasEnded() {
+		return ended;
+	}
+	
+	public void setEnded() {
+		this.ended = true;
 	}
 
 	/**

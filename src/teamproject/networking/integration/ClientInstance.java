@@ -1,23 +1,27 @@
 package teamproject.networking.integration;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import teamproject.constants.CellState;
+import teamproject.constants.GameOutcome;
+import teamproject.constants.GameOutcomeType;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.arguments.RemoteGameEndedEventArgs;
+import teamproject.event.arguments.GameStartedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
 import teamproject.event.arguments.PlayerMovedEventArgs;
 import teamproject.event.listener.GameStartedListener;
-import teamproject.event.listener.RemoteEntityUpdatedListener;
+import teamproject.event.listener.ServerEntityUpdatedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
+import teamproject.event.listener.RemoteGameEndedListener;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
+import teamproject.gamelogic.core.RemoteGameLogic;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.LocalPlayer;
+import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RemoteGhost;
 import teamproject.gamelogic.domain.RemotePlayer;
@@ -30,17 +34,18 @@ import teamproject.networking.socket.Client;
 import teamproject.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger ,
-		ClientDisconnectedListener, RemoteEntityUpdatedListener, GameStartedListener {
+		ClientDisconnectedListener, ServerEntityUpdatedListener, GameStartedListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
 	private Game game;
+	private RemoteGameLogic gameLogic;
 	private Lobby lobby;
 	private String username;
 	private GameUI gameUI;
 	private boolean alreadyDoneHandshake;
-	private Logger logger = Logger.getLogger("network-client");
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
+	private Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> onRemoteGameEndedEvent;
 	
 	/**
 	 * Creates a new client instance which, when ran, will connect to the server
@@ -64,9 +69,9 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		this.lobby = new Lobby();
 		this.gameUI.setLobby(this.lobby);
 		this.game = null;
+		this.gameLogic = null;
 		this.multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
-		
-		logger.setLevel(Level.FINEST);
+		this.onRemoteGameEndedEvent = new Event<>((l, a) -> l.onRemoteGameEnded(a));
 	}
 	
 	@Override
@@ -141,8 +146,9 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		 */
 	}
 	
-	private void addWorldGameHooks(Game game) {
+	private void addWorldGameHooks(Game game, RemoteGameLogic logic) {
 		game.getPlayer().getOnMovedEvent().addListener(this);
+		this.getOnRemoteGameEndedEvent().addListener(gameLogic);
 	}
 	
 	/**
@@ -160,11 +166,12 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		 * this.gameWorld.getPlayerMovedEvent().removeListener(this);
 		 */
 		
-		if(game != null) removeWorldGameHooks(game);
+		if(game != null) removeWorldGameHooks(game, gameLogic);
 	}
 	
-	private void removeWorldGameHooks(Game game) {
+	private void removeWorldGameHooks(Game game, RemoteGameLogic remoteGameLogic) {
 		game.getPlayer().getOnMovedEvent().removeListener(this);
+		this.getOnRemoteGameEndedEvent().removeListener(remoteGameLogic);
 	}
 	
 	public Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> getMultiplayerGameStartingEvent() {
@@ -181,7 +188,6 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			if(args instanceof PlayerMovedEventArgs) {
 				p.setDouble("angle", ((PlayerMovedEventArgs) args).getAngle());
 			}
-			logger.log(Level.INFO, "sending player moved packet");
 			manager.dispatch(p);
 		}
 	}
@@ -189,7 +195,6 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	/* TRIGGERS to deal with incoming packets */
 	@Override
 	public void trigger(Packet p) {
-		logger.log(Level.INFO, "Packet received: {0}", p.getPacketName());
 		if(p.getPacketName().equals("server-handshake")) {
 			triggerHandshake(p);
 		} else if(p.getPacketName().equals("remote-player-moved")) {
@@ -218,7 +223,32 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 			triggerForceMove(p);
 		} else if(p.getPacketName().equals("cell-changed")) {
 			triggerCellChanged(p);
+		} else if(p.getPacketName().equals("game-ended")) {
+			triggerGameEnded(p);
 		}
+	}
+
+	private void triggerGameEnded(Packet p) {
+		String outcomeString = p.getString("outcome");
+		GameOutcome outcome;
+		
+		if(outcomeString.equals("tie")) {
+			outcome = new GameOutcome(GameOutcomeType.TIE);
+		} else if(outcomeString.equals("ghosts-win")) {
+			outcome = new GameOutcome(GameOutcomeType.GHOSTS_WON);
+		} else if(outcomeString.equals("player-win")) {
+			int winnerID = p.getInteger("winner-id");
+			if(lobby.containsPlayer(winnerID)) {
+				Player winner = (Player)game.getWorld().getEntity(winnerID);
+				outcome = new GameOutcome(GameOutcomeType.PLAYER_WON, winner);
+			} else {
+				throw new IllegalStateException("Unknown winner ID: " + winnerID);
+			}
+		} else {
+			throw new IllegalStateException("Unknown game outcome from server: " + outcomeString);
+		}
+		
+		onRemoteGameEndedEvent.fire(new RemoteGameEndedEventArgs(outcome));
 	}
 
 	private void triggerCellChanged(Packet p) {
@@ -308,7 +338,6 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 		int playerID = p.getInteger("player-id");
 		
 		Entity e = game.getWorld().getEntity(playerID);
-		logger.log(Level.INFO, "remoteplayer");
 		
 		if(e instanceof RemotePlayer) {
 			RemotePlayer player = (RemotePlayer)e;
@@ -356,13 +385,18 @@ public class ClientInstance implements Runnable, ClientTrigger ,
 	}
 
 	@Override
-	public void onGameStarted(Game game) {
-		if(game.getGameType() == GameType.MULTIPLAYER_CLIENT) {
+	public void onGameStarted(GameStartedEventArgs args) {
+		if(args.getGame().getGameType() == GameType.MULTIPLAYER_CLIENT) {
 			if(this.game != null) {
-				removeWorldGameHooks(game);
+				removeWorldGameHooks(this.game, gameLogic);
 			}
-			this.game = game;
-			addWorldGameHooks(game);
+			this.game = args.getGame();
+			gameLogic = (RemoteGameLogic)args.getGameLogic();
+			addWorldGameHooks(game, gameLogic);
 		}
+	}
+	
+	public Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> getOnRemoteGameEndedEvent() {
+		return onRemoteGameEndedEvent;
 	}
 }
