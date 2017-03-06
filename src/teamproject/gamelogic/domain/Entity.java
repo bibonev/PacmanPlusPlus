@@ -1,6 +1,5 @@
 package teamproject.gamelogic.domain;
 
-import teamproject.constants.EntityType;
 import teamproject.event.Event;
 import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.event.listener.EntityMovedListener;
@@ -19,7 +18,6 @@ public abstract class Entity {
 	private World world;
 
 	private Event<EntityMovedListener, EntityMovedEventArgs> onMoved;
-	private EntityType type;
 
 	public Entity() {
 		onMoved = new Event<>((l, p) -> l.onEntityMoved(p));
@@ -97,27 +95,12 @@ public abstract class Entity {
 	public Event<EntityMovedListener, EntityMovedEventArgs> getOnMovedEvent() {
 		return onMoved;
 	}
-
-	/**
-	 * Update the entity's type
-	 * 
-	 * @param type
-	 *            the new type
-	 */
-	public void setType(final EntityType type) {
-		this.type = type;
-	}
-
-	/**
-	 * Fetch the entity's type
-	 * 
-	 * @return enum value showing the type
-	 */
-	public EntityType getType() {
-		return type;
-	}
 	
 	public World getWorld() {
 		return this.world;
+	}
+	
+	public void gameStep(Game game) {
+		// nothing to do in here yet
 	}
 }

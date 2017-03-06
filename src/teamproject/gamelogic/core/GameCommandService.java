@@ -4,9 +4,9 @@ import java.util.HashMap;
 
 import teamproject.ai.AIGhost;
 import teamproject.ai.GhostBehaviour;
-import teamproject.constants.EntityType;
 import teamproject.event.Event;
 import teamproject.event.arguments.SingleplayerGameStartingEventArgs;
+import teamproject.event.arguments.GameStartedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
 import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
@@ -26,30 +26,27 @@ import teamproject.gamelogic.domain.World;
 public class GameCommandService
 		implements SingleplayerGameStartingListener, MultiplayerGameStartingListener {
 	
-	private Event<GameStartedListener, Game> gameStartedEvent = new Event<>((l, g) -> l.onGameStarted(g));
+	private Event<GameStartedListener, GameStartedEventArgs> gameStartedEvent = new Event<>((l, g) -> l.onGameStarted(g));
 	
-	public Event<GameStartedListener, Game> getGameStartedEvent() {
+	public Event<GameStartedListener, GameStartedEventArgs> getGameStartedEvent() {
 		return gameStartedEvent;
 	}
 	
 	private void populateWorld(World world) {
 		final AIGhost ghost = new AIGhost();
 		ghost.setPosition(new Position(1, 1));
-		ghost.setType(EntityType.GHOST);
 		Behaviour b = new GhostBehaviour(world, ghost, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost.setBehaviour(b);
 
 		final AIGhost ghost1 = new AIGhost();
 		ghost1.setPosition(new Position(1, 13));
-		ghost1.setType(EntityType.GHOST);
 		Behaviour b1 = new GhostBehaviour(world, ghost1, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost1.setBehaviour(b1);
 
 		final AIGhost ghost2 = new AIGhost();
 		ghost2.setPosition(new Position(13, 13));
-		ghost2.setType(EntityType.GHOST);
 		Behaviour b2 = new GhostBehaviour(world, ghost2, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost2.setBehaviour(b2);
@@ -96,7 +93,8 @@ public class GameCommandService
 	@Override
 	public void onSingleplayerGameStarting(SingleplayerGameStartingEventArgs args) {
 		Game g = generateNewClientsideGame(args.getUsername(), 0, args.getSettings(), false);
-		getGameStartedEvent().fire(g);
+		GameLogic gl = new LocalGameLogic(g);
+		getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
 		populateWorld(g.getWorld());
 	}
 
@@ -105,11 +103,13 @@ public class GameCommandService
 		Game g;
 		if(args.isServer()) {
 			g = generateNewServersideGame(args.getSettings());
-			getGameStartedEvent().fire(g);
+			GameLogic gl = new LocalGameLogic(g);
+			getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
 			populateWorld(g.getWorld());
 		} else {
 			g = generateNewClientsideGame(args.getLocalUsername(), args.getLocalPlayerID(), args.getSettings(), true);
-			getGameStartedEvent().fire(g);
+			GameLogic gl = new RemoteGameLogic(g);
+			getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
 		}
 	}
 }
