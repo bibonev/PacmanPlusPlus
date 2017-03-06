@@ -35,7 +35,7 @@ public class ControlledPlayer extends LocalPlayer {
 		direction = MovementDirection.RIGHT;
 	}
 
-	public void move(){
+	private void move(){
 		switch (direction){
 			case UP:
 				moveUp();
@@ -50,5 +50,10 @@ public class ControlledPlayer extends LocalPlayer {
 				moveRight();
 				break;
 		}
+	}
+
+    @Override
+    public void gameStep(Game game){
+		move();
 	}
 }

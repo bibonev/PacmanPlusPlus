@@ -111,7 +111,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-			gameLogic.gameStep(250);
+			    gameLogic.gameStep(250);
 			}
 		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
@@ -144,9 +144,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 	@Override
 	public void onGameDisplayInvalidated(GameDisplayInvalidatedEventArgs args) {
-		Platform.runLater(() -> {
-			redrawWorld();
-		});
+		Platform.runLater(this::redrawWorld);
 	}
 
 	@Override

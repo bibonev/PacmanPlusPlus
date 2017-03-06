@@ -230,12 +230,7 @@ public class World {
 	}
 	
 	public boolean isOccupiable(Position position) {
-		if(RuleChecker.isOutOfBounds(position.getRow(), position.getColumn()))
-			return false;
-		
-		if(map.getCell(position).getState() == CellState.OBSTACLE)
-			return false;
-		
-		return true;
+		return !RuleChecker.isOutOfBounds(position.getRow(), position.getColumn()) && map.getCell(position).getState() != CellState.OBSTACLE;
+
 	}
 }
