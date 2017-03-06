@@ -10,6 +10,7 @@ import teamproject.event.arguments.GameEndedEventArgs;
 import teamproject.event.listener.GameDisplayInvalidatedListener;
 import teamproject.event.listener.GameEndedListener;
 import teamproject.gamelogic.domain.Cell;
+import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.Ghost;
 
@@ -31,7 +32,11 @@ public class LocalGameLogic implements GameLogic {
 	public void gameStep(int period) {
 		if(!game.hasEnded()) {
 			checkEndingConditions();
-			game.getWorld().gameStep(game);
+			game.getWorld().getMap().gameStep(game);
+			for(Entity entity : game.getWorld().getEntities()){
+				entity.gameStep(game);
+				checkEndingConditions();
+			}
 			checkEndingConditions();
 			invalidateDisplay();
 		}
