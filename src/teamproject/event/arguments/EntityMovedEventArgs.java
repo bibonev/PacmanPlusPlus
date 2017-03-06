@@ -1,6 +1,5 @@
 package teamproject.event.arguments;
 
-import teamproject.constants.EntityType;
 import teamproject.gamelogic.domain.Entity;
 
 public class EntityMovedEventArgs {

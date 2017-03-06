@@ -1,36 +1,39 @@
 package teamproject.networking.integration;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import teamproject.constants.EntityType;
+import teamproject.constants.GameOutcome;
+import teamproject.constants.GameOutcomeType;
+import teamproject.constants.GameType;
 import teamproject.event.Event;
+import teamproject.event.arguments.CellStateChangedEventArgs;
 import teamproject.event.arguments.EntityChangedEventArgs;
 import teamproject.event.arguments.EntityMovedEventArgs;
+import teamproject.event.arguments.GameEndedEventArgs;
 import teamproject.event.arguments.GameStartedEventArgs;
 import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
 import teamproject.event.arguments.LobbyChangedEventArgs;
 import teamproject.event.arguments.MultiplayerGameStartingEventArgs;
 import teamproject.event.arguments.PlayerMovedEventArgs;
+import teamproject.event.listener.CellStateChangedEventListener;
 import teamproject.event.listener.EntityAddedListener;
 import teamproject.event.listener.EntityRemovingListener;
+import teamproject.event.listener.GameEndedListener;
 import teamproject.event.listener.GameStartedListener;
 import teamproject.event.listener.HostStartingMultiplayerGameListener;
 import teamproject.event.listener.LobbyStateChangedListener;
-import teamproject.event.listener.ServerEntityUpdatedListener;
 import teamproject.event.listener.MultiplayerGameStartingListener;
+import teamproject.event.listener.ServerEntityUpdatedListener;
 import teamproject.gamelogic.core.GameLogic;
 import teamproject.gamelogic.core.GameLogicTimer;
 import teamproject.gamelogic.core.Lobby;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
+import teamproject.gamelogic.core.LocalGameLogic;
 import teamproject.gamelogic.domain.Entity;
 import teamproject.gamelogic.domain.Game;
-import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.Ghost;
 import teamproject.gamelogic.domain.Player;
 import teamproject.gamelogic.domain.Position;
-import teamproject.gamelogic.domain.ServerEntityTracker;
 import teamproject.gamelogic.domain.RemotePlayer;
+import teamproject.gamelogic.domain.ServerEntityTracker;
 import teamproject.gamelogic.domain.World;
 import teamproject.networking.ServerManager;
 import teamproject.networking.StandardServerManager;
@@ -45,7 +48,8 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener,
 		ClientDisconnectedListener, LobbyStateChangedListener,
-		HostStartingMultiplayerGameListener, GameStartedListener {
+		HostStartingMultiplayerGameListener, GameStartedListener, CellStateChangedEventListener,
+		GameEndedListener {
 	private Server server;
 	private ServerManager manager;
 	private Game game;
@@ -64,7 +68,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 	 * etc.) should be passed in to this {@link ServerInstance} object via the
 	 * constructor. This, in turn, will pass those objects into the appropriate
 	 * triggers (so packets received from the network will update the local game
-	 * state accordingly), and also register the created {@link ServerDispatcher}
+	 * state accordingly), and also register the current server instance
 	 * object as a listener to any local events (eg. player moved) which must be
 	 * transmitted over the network.
 	 */
@@ -143,11 +147,13 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		lobby.getLobbyStateChangedEvent().addListener(this);
 	}
 	
-	private void addWorldGameHooks(World world) {
+	private void addWorldGameHooks(World world, LocalGameLogic logic) {
 		world.getOnEntityAddedEvent().addListener(this);
 		world.getOnEntityAddedEvent().addListener(tracker);
 		world.getOnEntityRemovingEvent().addListener(this);
 		world.getOnEntityRemovingEvent().addListener(tracker);
+
+		world.getMap().getOnCellStateChanged().addListener(this);
 	}
 	
 	/**
@@ -165,14 +171,16 @@ public class ServerInstance implements Runnable, ServerTrigger,
 		 * this.gameWorld.getPlayerMovedEvent().removeListener(this.dispatcher);
 		 */
 		
-		if(game != null) removeWorldGameHooks(game.getWorld());
+		if(game != null) removeWorldGameHooks(game.getWorld(), (LocalGameLogic)gameLogic);
 	}
 	
-	private void removeWorldGameHooks(World world) {
+	private void removeWorldGameHooks(World world, LocalGameLogic logic) {
 		world.getOnEntityAddedEvent().removeListener(this);
 		world.getOnEntityAddedEvent().removeListener(tracker);
 		world.getOnEntityRemovingEvent().removeListener(this);
 		world.getOnEntityRemovingEvent().removeListener(tracker);
+
+		world.getMap().getOnCellStateChanged().removeListener(this);
 	}
 
 	@Override
@@ -363,7 +371,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 			if(this.game != null) {
 				// cleanup hooks to old game
 				
-				removeWorldGameHooks(this.game.getWorld());
+				removeWorldGameHooks(this.game.getWorld(), (LocalGameLogic)this.gameLogic);
 				this.gameLogicTimer.stop();
 			}
 			this.game = args.getGame();
@@ -371,7 +379,7 @@ public class ServerInstance implements Runnable, ServerTrigger,
 			this.gameLogicTimer = new GameLogicTimer(gameLogic);
 			this.gameLogicTimer.start(250);
 			
-			addWorldGameHooks(game.getWorld());
+			addWorldGameHooks(game.getWorld(), (LocalGameLogic)this.gameLogic);
 			for(int i : lobby.getPlayerIDs()) {
 				LobbyPlayerInfo info = lobby.getPlayer(i);
 				RemotePlayer player = new RemotePlayer(info.getID(), info.getName());
@@ -384,6 +392,43 @@ public class ServerInstance implements Runnable, ServerTrigger,
 						player.getAngle()));
 			}
 		}
+	}
+
+	@Override
+	public void onCellStateChanged(CellStateChangedEventArgs args) {
+	    Packet p = new Packet("cell-changed");
+        Position cellPosition = args.getChangeCell().getPosition();
+	    p.setInteger("row", cellPosition.getRow());
+	    p.setInteger("col", cellPosition.getColumn());
+	    p.setString("new-state", args.getState().name());
+	    manager.dispatchAll(p);
+	}
+
+	@Override
+	public void onGameEnded(GameEndedEventArgs args) {
+		triggerGameEnded(args.getOutcome());
+	}
+
+	private void triggerGameEnded(GameOutcome outcome) {
+		Packet p = new Packet("game-ended");
+		GameOutcomeType o = outcome.getOutcomeType();
+		
+		switch(o) {
+		case GHOSTS_WON:
+			p.setString("outcome", "ghosts-won");
+			break;
+		case PLAYER_WON:
+			p.setString("outcome", "player-won");
+			p.setInteger("winner-id", outcome.getWinner().getID());
+			break;
+		case TIE:
+			p.setString("outcome", "tie");
+			break;
+		default:
+			throw new IllegalStateException("Unhandled game outcome: " + o.name());
+		}
+		
+		manager.dispatchAll(p);
 	}
 
 	/*

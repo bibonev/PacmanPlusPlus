@@ -4,7 +4,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import teamproject.event.Event;
-import teamproject.event.arguments.UserLoggedInEventArguments;
+import teamproject.event.arguments.UserLoggedInEventArgs;
 import teamproject.event.listener.UserLoggedInEventListener;
 
 /**
@@ -19,7 +19,7 @@ public class LogInScreen extends Screen {
 	private Label label;
 	private Label title;
 	private TextField text;
-	private Event<UserLoggedInEventListener, UserLoggedInEventArguments> userLogIn = new Event<>((listener, arg) -> listener.onUserLoggedIn(arg));
+	private Event<UserLoggedInEventListener, UserLoggedInEventArgs> userLogIn = new Event<>((listener, arg) -> listener.onUserLoggedIn(arg));
 
 
 	public LogInScreen(final GameUI game) {
@@ -45,7 +45,7 @@ public class LogInScreen extends Screen {
 		if (!username.isEmpty()) {
 			// if(checkname(username)){
 			game.setName(username);
-			userLogIn.fire(new UserLoggedInEventArguments(username));
+			userLogIn.fire(new UserLoggedInEventArgs(username));
 			game.switchToMenu();
 			// }else{
 			// Alert alert = new Alert(AlertType.ERROR);

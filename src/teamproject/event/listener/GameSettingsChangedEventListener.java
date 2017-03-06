@@ -1,7 +1,7 @@
 package teamproject.event.listener;
 
-import teamproject.event.arguments.GameSettingsChangedEventArguments;
+import teamproject.event.arguments.GameSettingsChangedEventArgs;
 
 public interface GameSettingsChangedEventListener {
-	void onGameSettingsChanged(GameSettingsChangedEventArguments args);
+	void onGameSettingsChanged(GameSettingsChangedEventArgs args);
 }

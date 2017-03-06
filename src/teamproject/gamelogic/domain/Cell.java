@@ -1,6 +1,9 @@
 package teamproject.gamelogic.domain;
 
 import teamproject.constants.CellState;
+import teamproject.event.Event;
+import teamproject.event.arguments.CellStateChangedEventArgs;
+import teamproject.event.listener.CellStateChangedEventListener;
 
 /**
  * Represent a cell on a map
@@ -11,10 +14,12 @@ import teamproject.constants.CellState;
 public class Cell {
 	private CellState state;
 	private Position position;
+	private Event<CellStateChangedEventListener, CellStateChangedEventArgs> onCellStateChanged;
 
 	public Cell(final CellState state, final Position position) {
 		this.state = state;
 		this.position = position;
+		this.onCellStateChanged = new Event<>((l, p) -> l.onCellStateChanged(p));
 	}
 
 	public Cell(final Position position) {
@@ -42,6 +47,10 @@ public class Cell {
 	 */
 	public void setState(final CellState state) {
 		this.state = state;
+		onCellStateChanged.fire(new CellStateChangedEventArgs(this, state));
 	}
 
+	public Event<CellStateChangedEventListener, CellStateChangedEventArgs> getOnCellStateChanged() {
+		return onCellStateChanged;
+	}
 }

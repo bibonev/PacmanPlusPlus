@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import teamproject.ai.AIGhost;
 import teamproject.ai.GhostBehaviour;
-import teamproject.constants.EntityType;
 import teamproject.event.Event;
 import teamproject.event.arguments.SingleplayerGameStartingEventArgs;
 import teamproject.event.arguments.GameStartedEventArgs;
@@ -36,21 +35,18 @@ public class GameCommandService
 	private void populateWorld(World world) {
 		final AIGhost ghost = new AIGhost();
 		ghost.setPosition(new Position(1, 1));
-		ghost.setType(EntityType.GHOST);
 		Behaviour b = new GhostBehaviour(world, ghost, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost.setBehaviour(b);
 
 		final AIGhost ghost1 = new AIGhost();
 		ghost1.setPosition(new Position(1, 13));
-		ghost1.setType(EntityType.GHOST);
 		Behaviour b1 = new GhostBehaviour(world, ghost1, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost1.setBehaviour(b1);
 
 		final AIGhost ghost2 = new AIGhost();
 		ghost2.setPosition(new Position(13, 13));
-		ghost2.setType(EntityType.GHOST);
 		Behaviour b2 = new GhostBehaviour(world, ghost2, 1000,
 				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
 		ghost2.setBehaviour(b2);
@@ -63,7 +59,7 @@ public class GameCommandService
 	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID, final GameSettings settings, final boolean multiplayer) {
 		// Generate a map
 		// Simplest one for now
-		final Map map = new Map().generateMap();
+		final Map map = Map.generateMap();
 
 		// Create new game and store it
 		final World world = new World(new RuleChecker(), map, multiplayer);
@@ -84,7 +80,7 @@ public class GameCommandService
 	private Game generateNewServersideGame(final GameSettings settings) {
 		// Generate a map
 		// Simplest one for now
-		final Map map = new Map().generateMap();
+		final Map map = Map.generateMap();
 
 		// Create new game and store it
 		final World world = new World(new RuleChecker(), map, false);
