@@ -206,6 +206,13 @@ public class World {
 	public void setMap(final Map map) {
 		this.map = map;
 	}
+	
+	public void gameStep(Game game) {
+		map.gameStep(game);
+		for(Entity entity : entities.values()) {
+			entity.gameStep(game);
+		}
+	}
 
 	/**
 	 * Remove an entity

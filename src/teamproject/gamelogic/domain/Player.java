@@ -1,7 +1,6 @@
 package teamproject.gamelogic.domain;
 
 import teamproject.constants.CellState;
-import teamproject.constants.EntityType;
 import teamproject.event.arguments.PlayerMovedEventArgs;
 
 public abstract class Player extends Entity {
@@ -9,7 +8,6 @@ public abstract class Player extends Entity {
 	private double angle;
 
 	public Player(final String name) {
-		setType(EntityType.PLAYER);
 		this.name = name;
 	}
 

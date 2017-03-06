@@ -69,5 +69,7 @@ public class Lobby {
 		}
 	}
 	
-	
+	public boolean containsPlayer(int playerID) {
+		return players.containsKey(playerID);
+	}
 }

@@ -142,6 +142,10 @@ public class Map implements CellStateChangedEventListener {
 
 		return false;
 	}
+	
+	public void gameStep(Game game) {
+		// nothing to do yet
+	}
 
 	/**
 	 * Initialises obstacles
