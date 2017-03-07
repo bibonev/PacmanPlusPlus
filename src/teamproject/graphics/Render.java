@@ -77,7 +77,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         for (final Player player : game.getWorld().getPlayers()) {
             Node playerNode = new PacmanVisualisation(player).getNode();
             TranslateTransition transitionPlayer = new TranslateTransition(Duration.millis(200), playerNode);
-			RotateTransition rotatePlayer = new RotateTransition(Duration.millis(200), playerNode);
+			RotateTransition rotatePlayer = new RotateTransition(Duration.millis(30), playerNode);
 
 			transitions.put(player.getName(), transitionPlayer);
 			rotations.put(player.getName(), rotatePlayer);
@@ -102,7 +102,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		PositionVisualisation.initScreenDimensions();
 
         clearRoot();
-		addToRoot(cells);
+        addToRoot(cells);
 
 		for (final Player player : game.getWorld().getPlayers()) {
 		    ImageView nextNode = new PacmanVisualisation(player).getNode();
@@ -111,20 +111,15 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             transitions.get(player.getName()).setToX(nextNode.getTranslateX());
             rotations.get(player.getName()).setToAngle(nextNode.getRotate());
 
-            System.out.println("X before: " + ImageView.class.cast(root.getChildren().get(root.getChildren().indexOf(transitions.get(player.getName()).getNode()))).getTranslateX() +
-                    ", X now: " + nextNode.getTranslateX());
-
-            System.out.println("Y before: " + ImageView.class.cast(root.getChildren().get(root.getChildren().indexOf(transitions.get(player.getName()).getNode()))).getTranslateY() +
-                    ", Y now: " + nextNode.getTranslateY());
+            root.getChildren().get(root.getChildren().indexOf(transitions.get(player.getName()).getNode())).toFront();
 
             rotations.get(player.getName()).play();
             transitions.get(player.getName()).play();
-			//root.getChildren().addAll(nextNode);
-		}
+        }
 
 		for (final Ghost ghost : game.getWorld().getGhosts()) {
 		    GhostVisualisation ghostVisualisation = new GhostVisualisation(ghost.getPosition());
-			//root.getChildren().add(ghostVisualisation.getNode());
+			root.getChildren().add(ghostVisualisation.getNode());
 		}
 
 		root.requestFocus();
@@ -156,8 +151,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 * Start the timeline
 	 */
 	public void startTimeline() {
-		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-			    gameLogic.gameStep(250);
+		timeLine = new Timeline(new KeyFrame(Duration.millis(350), event -> {
+			    gameLogic.gameStep(350);
 			}
 		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
@@ -171,8 +166,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
     private void addToRoot(final Cell[][] cells) {
         for (final Cell[] cell : cells) {
             for (final Cell c : cell) {
-                final CellVisualisation cv = new CellVisualisation(c);
-                root.getChildren().add(cv.getNode());
+                final Node cv = new CellVisualisation(c).getNode();
+                root.getChildren().add(cv);
             }
         }
     }

@@ -19,7 +19,7 @@ public class PacmanVisualisation {
 	 */
 	public PacmanVisualisation(final Player player) {
 		this.player = player;
-		pacMan = new ImageView("pacman.png");
+		pacMan = new ImageView("pacman-animated.gif");
 	}
 
 	/**
@@ -41,10 +41,8 @@ public class PacmanVisualisation {
 		pacMan.setTranslateX(pv.getPixelX()+ pv.getWidth() / 2 - min / 2);
 		pacMan.setTranslateY(pv.getPixelY()+ pv.getHeight() / 2 - min / 2);
 
-		//pacMan.setX(pv.getPixelX()+ pv.getWidth() / 2 - min / 2);
-		//pacMan.setY(pv.getPixelY()+ pv.getHeight() / 2 - min / 2);
-
 		pacMan.setRotate(player.getAngle());
+		pacMan.toFront();
 
 		return pacMan;
 	}
