@@ -76,7 +76,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
         for (final Player player : game.getWorld().getPlayers()) {
             Node playerNode = new PacmanVisualisation(player).getNode();
-            TranslateTransition transitionPlayer = new TranslateTransition(Duration.millis(200), playerNode);
+            TranslateTransition transitionPlayer = new TranslateTransition(Duration.millis(140), playerNode);
 			RotateTransition rotatePlayer = new RotateTransition(Duration.millis(30), playerNode);
 
 			transitions.put(player.getName(), transitionPlayer);
@@ -88,6 +88,12 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
         for (final Ghost ghost : game.getWorld().getGhosts()) {
             Node ghostNode = new GhostVisualisation(ghost.getPosition()).getNode();
+            TranslateTransition transitionGhost = new TranslateTransition(Duration.millis(140), ghostNode);
+
+            transitions.put(Integer.toString(ghost.getID()), transitionGhost);
+
+            allEntities.add(ghostNode);
+
             root.getChildren().add(ghostNode);
         }
 
@@ -118,8 +124,14 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         }
 
 		for (final Ghost ghost : game.getWorld().getGhosts()) {
-		    GhostVisualisation ghostVisualisation = new GhostVisualisation(ghost.getPosition());
-			root.getChildren().add(ghostVisualisation.getNode());
+		    ImageView nextNode = new GhostVisualisation(ghost.getPosition()).getNode();
+
+		    transitions.get(Integer.toString(ghost.getID())).setToY(nextNode.getTranslateY());
+            transitions.get(Integer.toString(ghost.getID())).setToX(nextNode.getTranslateX());
+
+            root.getChildren().get(root.getChildren().indexOf(transitions.get(Integer.toString(ghost.getID())).getNode())).toFront();
+
+            transitions.get(Integer.toString(ghost.getID())).play();
 		}
 
 		root.requestFocus();
@@ -151,8 +163,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 * Start the timeline
 	 */
 	public void startTimeline() {
-		timeLine = new Timeline(new KeyFrame(Duration.millis(350), event -> {
-			    gameLogic.gameStep(350);
+		timeLine = new Timeline(new KeyFrame(Duration.millis(200), event -> {
+			    gameLogic.gameStep(200);
 			}
 		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);

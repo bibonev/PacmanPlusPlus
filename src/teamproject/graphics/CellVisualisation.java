@@ -6,7 +6,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import teamproject.constants.CellState;
 import teamproject.constants.Colors;
-import teamproject.constants.Images;
 import teamproject.gamelogic.domain.Cell;
 
 /**
@@ -33,17 +32,15 @@ public class CellVisualisation {
 					positionVisualisation.getWidth() / 8);
 			((Circle) node).setFill(Colors.CellFoodColor);
 		} else if (cell.getState() == CellState.OBSTACLE) {
-			Images.Border = new ImageView("border.jpg");
+			node = new ImageView("border.jpg");
 
-			Images.Border.setFitWidth(positionVisualisation.getWidth());
-			Images.Border.setFitHeight(positionVisualisation.getHeight());
+            ((ImageView) node).setFitWidth(positionVisualisation.getWidth());
+            ((ImageView) node).setFitHeight(positionVisualisation.getHeight());
 
-			Images.Border.setX(positionVisualisation.getPixelX() + positionVisualisation.getWidth() / 2
+            ((ImageView) node).setX(positionVisualisation.getPixelX() + positionVisualisation.getWidth() / 2
 					- positionVisualisation.getWidth() / 2);
-			Images.Border.setY(positionVisualisation.getPixelY() + positionVisualisation.getHeight() / 2
+            ((ImageView) node).setY(positionVisualisation.getPixelY() + positionVisualisation.getHeight() / 2
 					- positionVisualisation.getHeight() / 2);
-
-			node = Images.Border;
 		} else if (cell.getState() == CellState.EMPTY) {
 			node = new Rectangle(positionVisualisation.getPixelX(), positionVisualisation.getPixelY(),
 					positionVisualisation.getWidth(), positionVisualisation.getHeight());

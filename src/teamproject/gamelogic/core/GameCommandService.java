@@ -52,8 +52,8 @@ public class GameCommandService
 		ghost2.setBehaviour(b2);
 
 		world.addEntity(ghost);
-		//world.addEntity(ghost1);
-		//world.addEntity(ghost2);
+		world.addEntity(ghost1);
+		world.addEntity(ghost2);
 	}
 
 	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID, final GameSettings settings, final boolean multiplayer) {
