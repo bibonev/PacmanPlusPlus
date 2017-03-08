@@ -1,7 +1,9 @@
 package teamproject.gamelogic.core;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,24 +41,33 @@ public class LocalGameLogic implements GameLogic {
 		if (!game.hasEnded()) {
 			checkEndingConditions();
 			game.getWorld().getMap().gameStep(game);
+			final HashSet<Player> eatenPlayers = new HashSet<>();
+
 			for (final Entity entity : game.getWorld().getEntities()) {
 				entity.gameStep(game);
+				eatenPlayers.addAll(getEatenPlayers());
 				checkEndingConditions();
 			}
-			removeEatenPlayers();
+
+			eatenPlayers.addAll(getEatenPlayers());
+			for (final Player p : eatenPlayers) {
+				game.getWorld().removeEntity(p.getID());
+			}
 			checkEndingConditions();
 			invalidateDisplay();
 		}
 	}
 
-	private void removeEatenPlayers() {
+	private Set<Player> getEatenPlayers() {
+		final Set<Player> players = new HashSet<>();
 		for (final Ghost g : game.getWorld().getEntities(Ghost.class)) {
 			for (final Player p : game.getWorld().getPlayers()) {
 				if (g.getPosition().equals(p.getPosition())) {
-					game.getWorld().removeEntity(p.getID());
+					players.add(p);
 				}
 			}
 		}
+		return players;
 	}
 
 	private boolean ghostsEatenPlayers() {
