@@ -6,9 +6,11 @@ import teamproject.event.arguments.PlayerMovedEventArgs;
 public abstract class Player extends Entity {
 	private String name;
 	private double angle;
+	private int dotsEaten;
 
 	public Player(final String name) {
 		this.name = name;
+		dotsEaten = 0;
 	}
 
 	/**
@@ -29,31 +31,36 @@ public abstract class Player extends Entity {
 		return angle;
 	}
 
+	public int getDotsEaten() {
+		return dotsEaten;
+	}
+
 	/**
 	 * Update the player's angle
-	 * 
+	 *
 	 * @param angle
 	 *            the new angle
 	 */
 	public void setAngle(final double angle) {
 		this.angle = angle;
-		getOnMovedEvent().fire(
-				new PlayerMovedEventArgs(getPosition().getRow(), getPosition().getColumn(), angle, this));
+		getOnMovedEvent()
+				.fire(new PlayerMovedEventArgs(getPosition().getRow(), getPosition().getColumn(), angle, this));
 	}
-	
+
 	@Override
-	public boolean setPosition(Position position) {
-		boolean returnValue = super.setPosition(position);
+	public boolean setPosition(final Position position) {
 		eatDot();
+		final boolean returnValue = super.setPosition(position);
 		return returnValue;
 	}
 
 	protected void eatDot() {
-		if(getWorld() != null && !getWorld().isRemote()) {
-			Cell currentCell = getWorld().getMap().getCell(getPosition());
-			
-			if(currentCell.getState() == CellState.FOOD) {
+		if (getWorld() != null && !getWorld().isRemote()) {
+			final Cell currentCell = getWorld().getMap().getCell(getPosition());
+
+			if (currentCell.getState() == CellState.FOOD) {
 				currentCell.setState(CellState.EMPTY);
+				dotsEaten++;
 			}
 		}
 	}

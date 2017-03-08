@@ -1,8 +1,11 @@
 package teamproject.ui;
 
+import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import teamproject.event.Event;
 import teamproject.event.arguments.UserLoggedInEventArgs;
 import teamproject.event.listener.UserLoggedInEventListener;
@@ -33,6 +36,17 @@ public class LogInScreen extends Screen {
 
 		text = new TextField();
 		text.getStyleClass().add("labelStyle");
+		text.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER))
+                {
+                	switchScreen(text.getText());
+                }
+            }
+        });
 
 		login = new Button("Log in");
 		login.getStyleClass().add("buttonStyle");

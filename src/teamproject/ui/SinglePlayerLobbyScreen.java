@@ -17,6 +17,7 @@ public class SinglePlayerLobbyScreen extends Screen {
 	
 	private Button play;
 	private Label label;
+	private Button back;
 	private Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> onStartingSingleplayerGame;
 
 	public SinglePlayerLobbyScreen(GameUI game){
@@ -30,7 +31,11 @@ public class SinglePlayerLobbyScreen extends Screen {
         label = new Label("Single Player");
         label.getStyleClass().add("labelStyle");
 		
-	    pane.getChildren().addAll(label, play);
+        back = new Button("Back");
+        back.getStyleClass().add("buttonStyle");
+		back.setOnAction(e -> game.switchToMenu());
+        
+	    pane.getChildren().addAll(label, play, back);
 	    
 	    onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
 	}

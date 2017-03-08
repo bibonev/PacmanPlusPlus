@@ -14,6 +14,7 @@ public class MultiPlayerOptionScreen extends Screen {
 	
 	private Button joinGame;
 	private Button startGame;
+	private Button back;
 
 	public MultiPlayerOptionScreen(GameUI game){
 		super(game);
@@ -28,7 +29,11 @@ public class MultiPlayerOptionScreen extends Screen {
         startGame.setTooltip(new Tooltip("Initiate a new game"));
         startGame.setOnAction(e-> startNewGame());
         
-        pane.getChildren().addAll(joinGame, startGame);
+        back = new Button("Back");
+        back.getStyleClass().add("buttonStyle");
+		back.setOnAction(e -> game.switchToMenu());
+        
+        pane.getChildren().addAll(joinGame, startGame, back);
 	}
 	
 	private void startNewGame(){

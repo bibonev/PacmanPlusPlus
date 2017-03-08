@@ -98,7 +98,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	private void setup() {
 		music = new Music();
-		sounds = new SoundEffects();
+		//sounds = new SoundEffects();
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
 		gameScreen = new GameScreen(this, music);
@@ -240,11 +240,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		server.run();
 		client.run();
 		// create new lobby for a multiplayer game
-	}
-
-	public boolean checkGame(final String ip) {
-		// check game
-		return true;
 	}
 
 	// TODO move creation of client instance into GameCommandService at some point
