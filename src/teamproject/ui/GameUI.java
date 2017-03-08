@@ -98,7 +98,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	private void setup() {
 		music = new Music();
-		sounds = new SoundEffects();
+		//sounds = new SoundEffects();
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
 		gameScreen = new GameScreen(this, music);
