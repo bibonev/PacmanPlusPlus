@@ -1,8 +1,10 @@
 package teamproject.gamelogic.domain;
-import teamproject.constants.*;
+
+import teamproject.constants.MovementDirection;
+
 /**
  * Represent a controlled player
- * 
+ *
  * @author aml
  *
  */
@@ -14,46 +16,60 @@ public class ControlledPlayer extends LocalPlayer {
 		setID(id);
 		direction = MovementDirection.RIGHT;
 	}
-	
-	public void moveUp() {
-		setPosition(getPosition().add(-1, 0));
-		direction = MovementDirection.UP;
-	}
-	
-	public void moveDown() {
-		setPosition(getPosition().add(1, 0));
-		direction = MovementDirection.DOWN;
-	}
-	
-	public void moveLeft() {
-		setPosition(getPosition().add(0, -1));
-		direction = MovementDirection.LEFT;
-	}
-	
-	public void moveRight() {
-		setPosition(getPosition().add(0, 1));
-		direction = MovementDirection.RIGHT;
-	}
 
-	private void move(){
-		switch (direction){
-			case UP:
-				moveUp();
-				break;
-			case DOWN:
-				moveDown();
-				break;
-			case LEFT:
-				moveLeft();
-				break;
-			case RIGHT:
-				moveRight();
-				break;
+	public void moveUp() {
+		final Position newPosition = getPosition().add(-1, 0);
+		if (getWorld().isOccupiable(newPosition)) {
+			direction = MovementDirection.UP;
 		}
 	}
 
-    @Override
-    public void gameStep(Game game){
+	public void moveDown() {
+		final Position newPosition = getPosition().add(1, 0);
+		if (getWorld().isOccupiable(newPosition)) {
+			direction = MovementDirection.DOWN;
+		}
+	}
+
+	public void moveLeft() {
+		final Position newPosition = getPosition().add(0, -1);
+		if (getWorld().isOccupiable(newPosition)) {
+			direction = MovementDirection.LEFT;
+		}
+	}
+
+	public void moveRight() {
+		final Position newPosition = getPosition().add(0, 1);
+		if (getWorld().isOccupiable(newPosition)) {
+			direction = MovementDirection.RIGHT;
+		}
+	}
+
+	private void move() {
+		Position newPosition;
+		switch (direction) {
+		case UP:
+			newPosition = getPosition().add(-1, 0);
+			break;
+		case DOWN:
+			newPosition = getPosition().add(1, 0);
+			break;
+		case LEFT:
+			newPosition = getPosition().add(0, -1);
+			break;
+		case RIGHT:
+			newPosition = getPosition().add(0, 1);
+			break;
+		default:
+			throw new IllegalStateException("Unknown direction: " + direction.name());
+		}
+		if (getWorld().isOccupiable(newPosition)) {
+			setPosition(newPosition);
+		}
+	}
+
+	@Override
+	public void gameStep(final Game game) {
 		move();
 	}
 }
