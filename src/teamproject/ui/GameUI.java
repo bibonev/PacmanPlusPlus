@@ -145,7 +145,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 
 	public void switchToMenu() {
-		System.out.println("Here");
 		setScreen(menuScreen.getPane());
 		final Label label = new Label("PacMan " + getName());
 		banner.setLeft(label);
