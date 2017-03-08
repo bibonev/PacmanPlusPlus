@@ -1,12 +1,16 @@
 package teamproject.graphics;
 
 import javafx.animation.KeyFrame;
+import javafx.animation.RotateTransition;
 import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import teamproject.constants.*;
 import teamproject.event.arguments.GameDisplayInvalidatedEventArgs;
@@ -16,6 +20,9 @@ import teamproject.event.listener.GameEndedListener;
 import teamproject.gamelogic.core.GameLogic;
 import teamproject.gamelogic.domain.*;
 import teamproject.ui.GameUI;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by Boyan Bonev on 09/02/2017.
@@ -27,8 +34,12 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private GameUI gameUI;
 	private Game game;
 	private GameLogic gameLogic;
+	private ArrayList<Node> allEntities;
+	private HashMap<String, RotateTransition> rotations;
+	private HashMap<String, TranslateTransition> transitions;
+    private boolean flag;
 
-	/**
+    /**
 	 * Initialize new visualisation of the map
 	 *
 	 * @param gameUI
@@ -40,7 +51,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameLogic = gameLogic;
 		this.gameLogic.getOnGameDisplayInvalidated().addListener(this);
 		this.gameLogic.getOnGameEnded().addListener(this);
+        this.flag = false;
 
+		this.transitions = new HashMap<>();
+		this.rotations = new HashMap<>();
+		this.allEntities = new ArrayList<>();
 		controlledPlayer = game.getPlayer();
 	}
 
@@ -51,13 +66,36 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 */
 	public Scene drawWorld() {
 		final Cell[][] cells = game.getWorld().getMap().getCells();
-		Images.Border = new ImageView("border.jpg");
+
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
 
 		final Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
 
-		addToRoot(root, cells);
+		addToRoot(cells);
+
+        for (final Player player : game.getWorld().getPlayers()) {
+            Node playerNode = new PacmanVisualisation(player).getNode();
+            TranslateTransition transitionPlayer = new TranslateTransition(Duration.millis(140), playerNode);
+			RotateTransition rotatePlayer = new RotateTransition(Duration.millis(30), playerNode);
+
+			transitions.put(player.getName(), transitionPlayer);
+			rotations.put(player.getName(), rotatePlayer);
+
+			allEntities.add(playerNode);
+            root.getChildren().add(playerNode);
+        }
+
+        for (final Ghost ghost : game.getWorld().getGhosts()) {
+            Node ghostNode = new GhostVisualisation(ghost.getPosition()).getNode();
+            TranslateTransition transitionGhost = new TranslateTransition(Duration.millis(140), ghostNode);
+
+            transitions.put(Integer.toString(ghost.getID()), transitionGhost);
+
+            allEntities.add(ghostNode);
+
+            root.getChildren().add(ghostNode);
+        }
 
 		return scene;
 	}
@@ -69,16 +107,31 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		final Cell[][] cells = game.getWorld().getMap().getCells();
 		PositionVisualisation.initScreenDimensions();
 
-		root.getChildren().clear();
-
-		addToRoot(root, cells);
+        clearRoot();
+        addToRoot(cells);
 
 		for (final Player player : game.getWorld().getPlayers()) {
-			root.getChildren().add(new PacmanVisualisation(player).getNode());
-		}
+		    ImageView nextNode = new PacmanVisualisation(player).getNode();
+
+            transitions.get(player.getName()).setToY(nextNode.getTranslateY());
+            transitions.get(player.getName()).setToX(nextNode.getTranslateX());
+            rotations.get(player.getName()).setToAngle(nextNode.getRotate());
+
+            root.getChildren().get(root.getChildren().indexOf(transitions.get(player.getName()).getNode())).toFront();
+
+            rotations.get(player.getName()).play();
+            transitions.get(player.getName()).play();
+        }
 
 		for (final Ghost ghost : game.getWorld().getGhosts()) {
-			root.getChildren().add(new GhostVisualisation(ghost.getPosition()).getNode());
+		    ImageView nextNode = new GhostVisualisation(ghost.getPosition()).getNode();
+
+		    transitions.get(Integer.toString(ghost.getID())).setToY(nextNode.getTranslateY());
+            transitions.get(Integer.toString(ghost.getID())).setToX(nextNode.getTranslateX());
+
+            root.getChildren().get(root.getChildren().indexOf(transitions.get(Integer.toString(ghost.getID())).getNode())).toFront();
+
+            transitions.get(Integer.toString(ghost.getID())).play();
 		}
 
 		root.requestFocus();
@@ -110,8 +163,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 * Start the timeline
 	 */
 	public void startTimeline() {
-		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-			    gameLogic.gameStep(250);
+		timeLine = new Timeline(new KeyFrame(Duration.millis(200), event -> {
+			    gameLogic.gameStep(200);
 			}
 		));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
@@ -119,15 +172,28 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	}
 
     /**
-     * Add to parent root all nodes
-     * @param root
+     * Add all nodes to parent root
      * @param cells
      */
-    private void addToRoot(final Pane root, final Cell[][] cells) {
+    private void addToRoot(final Cell[][] cells) {
         for (final Cell[] cell : cells) {
             for (final Cell c : cell) {
-				final CellVisualisation cv = new CellVisualisation(c);
-				root.getChildren().add(cv.getNode());
+                final Node cv = new CellVisualisation(c).getNode();
+                root.getChildren().add(cv);
+            }
+        }
+    }
+
+    /**
+     * Remove nodes that have been affected (like tokens)
+     */
+    private void clearRoot() {
+        int countOfNodes = root.getChildren().size();
+        for (int index = 0; index < countOfNodes; index++) {
+            if (index < root.getChildren().size()){
+                if(!allEntities.contains(root.getChildren().get(index))){
+                    root.getChildren().remove(index);
+                }
             }
         }
     }
