@@ -243,11 +243,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		// create new lobby for a multiplayer game
 	}
 
-	public boolean checkGame(final String ip) {
-		// check game
-		return true;
-	}
-
 	// TODO move creation of client instance into GameCommandService at some point
 	public void joinGame(final String gameIp) {
 		ClientInstance client = new ClientInstance(this, name, gameIp);
