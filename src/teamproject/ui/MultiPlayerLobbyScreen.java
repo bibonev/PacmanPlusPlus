@@ -1,7 +1,12 @@
 package teamproject.ui;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
 import teamproject.event.Event;
 import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
 import teamproject.event.listener.HostStartingMultiplayerGameListener;
@@ -16,15 +21,22 @@ import teamproject.gamelogic.domain.GameSettings;
  */
 public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyListener {
 	
+	private BorderPane bPane;
 	private Button play;
 	private Button leaveGame;
+	private Button settings;
 	private Label label;	
+	
 	public PlayersList list;
+	private GameSettings gameSettings;
+	
 	private Event<UserLeavingLobbyListener, Object> userLeavingLobbyEvent;
 	private Event<HostStartingMultiplayerGameListener, Object> hostStartingGameListener;
 
 	public MultiPlayerLobbyScreen(GameUI game){
 		super(game);
+		
+		gameSettings = new GameSettings();
 		
         play = new Button("Start Game");
         play.getStyleClass().add("buttonStyle");
@@ -33,11 +45,28 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
         leaveGame = new Button("Leave game");
         leaveGame.getStyleClass().add("buttonStyle");
         leaveGame.setOnAction(e-> leaveGame());
-                
+        
+        settings = new Button("Change Game Settings");
+        settings.getStyleClass().add("buttonStyle");
+        settings.setOnAction(e -> showSettings());
+        
+        FlowPane buttons = new FlowPane();
+
+        buttons.setPadding(new Insets(5, 5, 5, 5));
+        buttons.setVgap(4);
+        buttons.setHgap(4);
+        buttons.setOrientation(Orientation.VERTICAL);
+        buttons.setAlignment(Pos.TOP_CENTER);
+        buttons.getStyleClass().add("paneStyle");
+        buttons.getChildren().addAll(play, leaveGame, settings);
+        
         label = new Label("Multiplayer");
     	label.getStyleClass().add("labelStyle");
 		
-	    pane.getChildren().addAll(label, play, leaveGame);
+    	bPane = new BorderPane();
+    	bPane.setTop(label);
+    	bPane.setLeft(buttons);
+   	    pane.getChildren().add(bPane);
 	    
 	    userLeavingLobbyEvent = new Event<>((l, a) -> l.onUserLeavingLobby());
 	    userLeavingLobbyEvent.addListener(this);
@@ -48,6 +77,13 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 	    addNames();
 	}
 
+	public void showSettings(){
+		System.out.println("settings"); //TODO 
+	}
+	
+	public void setMultiplayerSettings(GameSettings newSettings){
+		gameSettings = newSettings;
+	}
 	
 	public GameSettings getMultiplayerSettings() {
 		// TODO Rose: when we get round to adding game settings that we need
@@ -57,7 +93,7 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 		// object from it
 		
 		// temporary implementation
-		return new GameSettings();
+		return gameSettings;
 	}
 	
 	private void play(){
@@ -78,7 +114,7 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 	
 	public void addNames(){
 		list = new PlayersList(game);
-		pane.getChildren().add(list.getPane());
+		bPane.setCenter(list.getPane());
 	}
 	
 	public Event<UserLeavingLobbyListener, Object> getUserLeavingLobbyEvent() {

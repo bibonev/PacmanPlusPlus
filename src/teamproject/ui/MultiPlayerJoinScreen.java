@@ -1,10 +1,13 @@
 package teamproject.ui;
 
+import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 
 /**
  * Screen for entering an IP address to join a pre-existing game
@@ -29,12 +32,23 @@ public class MultiPlayerJoinScreen extends Screen {
 		
 		ip = new TextField();
         ip.getStyleClass().add("labelStyle");
+        ip.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER))
+                {
+                	joinGame(ip.getText());
+                }
+            }
+        });
 		
 		label = new Label("IP address: ");
         label.getStyleClass().add("labelStyle");
 		
 		back = new Button("Back");
-        back.getStyleClass().add("butonStyle");
+        back.getStyleClass().add("buttonStyle");
 		back.setOnAction(e -> game.switchToMenu());
 		
 		pane.getChildren().addAll(label, ip, join, back);
@@ -44,11 +58,11 @@ public class MultiPlayerJoinScreen extends Screen {
 		if(text.isEmpty()){
 			return;
 		}
-		if(game.checkGame(text)){
 			//fire event to join a game
+		try{
 			game.joinGame(text);
 			game.switchToMultiPlayerLobby();
-		}else{
+		}catch(RuntimeException ex){
 			Alert alert = new Alert(AlertType.ERROR);
 			alert.setTitle("IP Address Issue");
 			alert.setHeaderText("The IP Address you have entered is not valid");
