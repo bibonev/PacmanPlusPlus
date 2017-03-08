@@ -43,8 +43,8 @@ public abstract class Player extends Entity {
 	
 	@Override
 	public boolean setPosition(Position position) {
-		boolean returnValue = super.setPosition(position);
 		eatDot();
+		boolean returnValue = super.setPosition(position);
 		return returnValue;
 	}
 

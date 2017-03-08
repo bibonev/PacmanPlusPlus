@@ -90,8 +90,10 @@ public class LocalGameLogic implements GameLogic {
 	}
 	
 	private void onGameEnded(GameOutcome outcome) {
-		this.game.setEnded();
-		this.onGameEnded.fire(new GameEndedEventArgs(this, outcome));
+		if(!this.game.hasEnded()) {
+			this.game.setEnded();
+			this.onGameEnded.fire(new GameEndedEventArgs(this, outcome));
+		}
 	}
 	
 	public Event<GameDisplayInvalidatedListener, GameDisplayInvalidatedEventArgs> getOnGameDisplayInvalidated() {
