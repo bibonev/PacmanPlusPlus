@@ -1,7 +1,5 @@
 package teamproject.ai;
 
-import java.util.Optional;
-
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.LocalPlayer;
 import teamproject.gamelogic.domain.Map;

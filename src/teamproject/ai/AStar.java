@@ -20,9 +20,6 @@ import teamproject.gamelogic.domain.Position;
  */
 public class AStar {
 
-	/** The diagonal cost. */
-	private final int DIAGONAL_COST = 14;
-
 	/** The vertical/horizontal cost. */
 	private final int V_H_COST = 10;
 
