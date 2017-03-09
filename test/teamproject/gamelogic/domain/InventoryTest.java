@@ -8,6 +8,7 @@ import java.util.Map;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import teamproject.abilities.Ability;
 import teamproject.gamelogic.random.Randoms;
 
 public class InventoryTest {
@@ -15,11 +16,11 @@ public class InventoryTest {
 	@Test
 	public void shouldConstruct() {
 		// Given
-		final Map<Item, Integer> items = new HashMap<Item, Integer>();
+		final Map<Ability, Integer> items = new HashMap<Ability, Integer>();
 		items.put(Randoms.randomItem(), Randoms.randomInteger());
 
 		// When
-		final Inventory inventory = new Inventory(items);
+		final SkillSet inventory = new SkillSet(items);
 
 		// Then
 		assertThat(inventory.getItems(), Is.is(items));

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Random;
 
+import teamproject.abilities.Ability;
 import teamproject.ai.AStar;
 import teamproject.ai.Target;
 import teamproject.constants.CellState;
@@ -69,14 +70,14 @@ public abstract class Behaviour {
 	protected Position lastPos;
 
 	/** The inventory. */
-	private Inventory stash;
+	private SkillSet stash;
 
 	/** The current path. */
 	private ArrayList<Position> currentPath;
 
 	/** The priority targets. */
 	// to be used in more complex behaviors
-	private PriorityQueue<Item> priorityTargets;
+	private PriorityQueue<Ability> priorityTargets;
 
 	private int counter;
 	private World world;
@@ -97,7 +98,7 @@ public abstract class Behaviour {
 	 * @param type
 	 *            the type
 	 */
-	public Behaviour(final World world, final Entity entity, final int speed, final Inventory stash, Type type) {
+	public Behaviour(final World world, final Entity entity, final int speed, final SkillSet stash, Type type) {
 		this.world = world;
 		mapSize = this.world.getMap().getMapSize();
 		this.entity = entity;

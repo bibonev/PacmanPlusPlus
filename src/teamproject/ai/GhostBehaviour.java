@@ -1,10 +1,8 @@
 package teamproject.ai;
 
-import teamproject.event.arguments.EntityMovedEventArgs;
 import teamproject.gamelogic.domain.Behaviour;
 import teamproject.gamelogic.domain.Entity;
-import teamproject.gamelogic.domain.Inventory;
-import teamproject.gamelogic.domain.Map;
+import teamproject.gamelogic.domain.SkillSet;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.World;
 
@@ -23,8 +21,8 @@ public class GhostBehaviour extends Behaviour {
 	 * @param speed the speed
 	 * @param stash the inventory
 	 */
-	public GhostBehaviour(World world, Entity entity, int speed, Inventory stash, Type type) {
-		super(world, entity, speed, stash, type);
+	public GhostBehaviour(World world, Entity entity, int speed, Type type) {
+		super(world, entity, speed, new SkillSet(), type);
 	}
 	
 	/** 

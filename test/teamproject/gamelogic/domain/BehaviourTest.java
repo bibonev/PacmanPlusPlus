@@ -17,7 +17,7 @@ public class BehaviourTest {
 		final World world = Randoms.randomWorld();
 		final Entity ghostEntity = Randoms.randomLocalGhost();
 		final int speed = Randoms.randomInteger();
-		final Inventory stash = Randoms.randomInventory();
+		final SkillSet stash = Randoms.randomInventory();
 
 		// When
 		final Behaviour behaviour = new BehaviourStub(world, ghostEntity, speed, stash, type);

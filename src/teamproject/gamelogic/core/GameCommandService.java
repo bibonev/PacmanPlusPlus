@@ -1,7 +1,7 @@
 package teamproject.gamelogic.core;
 
-import java.util.HashMap;
-
+import teamproject.abilities.Ability;
+import teamproject.abilities.PacBomb;
 import teamproject.ai.AIGhost;
 import teamproject.ai.GhostBehaviour;
 import teamproject.event.Event;
@@ -16,8 +16,7 @@ import teamproject.gamelogic.domain.ControlledPlayer;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
 import teamproject.constants.GameType;
-import teamproject.gamelogic.domain.Inventory;
-import teamproject.gamelogic.domain.Item;
+import teamproject.gamelogic.domain.SkillSet;
 import teamproject.gamelogic.domain.Map;
 import teamproject.gamelogic.domain.Position;
 import teamproject.gamelogic.domain.RuleChecker;
@@ -35,20 +34,17 @@ public class GameCommandService
 	private void populateWorld(World world) {
 		final AIGhost ghost = new AIGhost();
 		ghost.setPosition(new Position(1, 1));
-		Behaviour b = new GhostBehaviour(world, ghost, 1000,
-				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
+		Behaviour b = new GhostBehaviour(world, ghost, 1000, Behaviour.Type.GHOST);
 		ghost.setBehaviour(b);
 
 		final AIGhost ghost1 = new AIGhost();
 		ghost1.setPosition(new Position(1, 13));
-		Behaviour b1 = new GhostBehaviour(world, ghost1, 1000,
-				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
+		Behaviour b1 = new GhostBehaviour(world, ghost1, 1000, Behaviour.Type.GHOST);
 		ghost1.setBehaviour(b1);
 
 		final AIGhost ghost2 = new AIGhost();
 		ghost2.setPosition(new Position(13, 13));
-		Behaviour b2 = new GhostBehaviour(world, ghost2, 1000,
-				new Inventory(new HashMap<Item, Integer>()), Behaviour.Type.GHOST);
+		Behaviour b2 = new GhostBehaviour(world, ghost2, 1000, Behaviour.Type.GHOST);
 		ghost2.setBehaviour(b2);
 
 		world.addEntity(ghost);

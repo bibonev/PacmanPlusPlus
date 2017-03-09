@@ -3,14 +3,14 @@ package teamproject.gamelogic.random;
 import java.util.HashMap;
 import java.util.Random;
 
+import teamproject.abilities.Ability;
 import teamproject.constants.CellState;
 import teamproject.constants.GameType;
 import teamproject.gamelogic.domain.Cell;
 import teamproject.gamelogic.domain.ControlledPlayer;
 import teamproject.gamelogic.domain.Game;
 import teamproject.gamelogic.domain.GameSettings;
-import teamproject.gamelogic.domain.Inventory;
-import teamproject.gamelogic.domain.Item;
+import teamproject.gamelogic.domain.SkillSet;
 import teamproject.gamelogic.domain.LocalGhost;
 import teamproject.gamelogic.domain.LocalPlayer;
 import teamproject.gamelogic.domain.Map;
@@ -90,15 +90,15 @@ public class Randoms {
 		return new GameSettings();
 	}
 
-	public static Item randomItem() {
-		return new Item(randomString(), randomString());
+	public static Ability randomItem() {
+		return new Ability(randomString(), randomString());
 	}
 
-	public static Inventory randomInventory() {
-		final java.util.Map<Item, Integer> items = new HashMap<Item, Integer>();
+	public static SkillSet randomInventory() {
+		final java.util.Map<Ability, Integer> items = new HashMap<Ability, Integer>();
 		items.put(randomItem(), randomInteger());
 
-		return new Inventory(items);
+		return new SkillSet(items);
 	}
 
 	public static CellState randomCellState() {

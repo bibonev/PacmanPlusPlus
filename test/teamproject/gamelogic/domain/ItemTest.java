@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
+import teamproject.abilities.Ability;
 import teamproject.gamelogic.random.Randoms;
 
 public class ItemTest {
@@ -16,7 +17,7 @@ public class ItemTest {
 		final String description = Randoms.randomString();
 
 		// When
-		final Item item = new Item(name, description);
+		final Ability item = new Ability(name, description);
 
 		// Then
 		assertThat(item.getName(), Is.is(name));
