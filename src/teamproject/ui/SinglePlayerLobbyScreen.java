@@ -2,6 +2,7 @@ package teamproject.ui;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import teamproject.event.Event;
 import teamproject.event.arguments.SingleplayerGameStartingEventArgs;
 import teamproject.event.listener.SingleplayerGameStartingListener;
@@ -29,13 +30,15 @@ public class SinglePlayerLobbyScreen extends Screen {
         		new SingleplayerGameStartingEventArgs(getSinglePlayerSettings(), game.getName())));
         
         label = new Label("Single Player");
-        label.getStyleClass().add("labelStyle");
+        label.getStyleClass().add("miniTitleStyle");
 		
         back = new Button("Back");
-        back.getStyleClass().add("buttonStyle");
+        back.getStyleClass().add("backButtonStyle");
 		back.setOnAction(e -> game.switchToMenu());
+		Separator separator = new Separator();
+        separator.getStyleClass().add("separator");
         
-	    pane.getChildren().addAll(label, play, back);
+	    pane.getChildren().addAll(label, separator, play, back);
 	    
 	    onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
 	}

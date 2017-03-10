@@ -1,11 +1,9 @@
 package teamproject.ui;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 
@@ -27,6 +25,7 @@ public abstract class Screen {
         pane.setPadding(new Insets(5, 0, 5, 0));
         pane.setVgap(4);
         pane.setHgap(4);
+        pane.setColumnHalignment(HPos.CENTER); 
         pane.setOrientation(Orientation.VERTICAL);
         pane.getStyleClass().add("paneStyle");
         pane.setAlignment(Pos.TOP_CENTER);

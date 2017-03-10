@@ -1,10 +1,12 @@
 package teamproject.ui;
 
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -21,10 +23,14 @@ public class MultiPlayerJoinScreen extends Screen {
 	private Button back;
     private TextField ip;
     private Label label;
+    private Label title;
 
 
 	public MultiPlayerJoinScreen(GameUI game) {
 		super(game);
+		
+		title = new Label("Joining a Multiplayer Game");
+		title.getStyleClass().add("miniTitleStyle");
 		
 		join = new Button("Join game");
 		join.getStyleClass().add("buttonStyle");
@@ -32,6 +38,7 @@ public class MultiPlayerJoinScreen extends Screen {
 		
 		ip = new TextField();
         ip.getStyleClass().add("labelStyle");
+        ip.setAlignment(Pos.CENTER);
         ip.setOnKeyPressed(new EventHandler<KeyEvent>()
         {
             @Override
@@ -48,10 +55,13 @@ public class MultiPlayerJoinScreen extends Screen {
         label.getStyleClass().add("labelStyle");
 		
 		back = new Button("Back");
-        back.getStyleClass().add("buttonStyle");
-		back.setOnAction(e -> game.switchToMenu());
+        back.getStyleClass().add("backButtonStyle");
+		back.setOnAction(e -> game.switchToMultiPlayerOption());
 		
-		pane.getChildren().addAll(label, ip, join, back);
+		Separator separator = new Separator();
+        separator.getStyleClass().add("separator");
+		
+		pane.getChildren().addAll(title, separator, label, ip, join, back);
 	}
 	
 	private void joinGame(String text){

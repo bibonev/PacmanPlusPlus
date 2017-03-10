@@ -2,6 +2,7 @@ package teamproject.ui;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Tooltip;
 
 /**
@@ -40,8 +41,11 @@ public class MenuScreen extends Screen {
         close.setOnAction(e-> game.close());
         
         title = new Label("Main Menu");
-        title.getStyleClass().add("titleStyle");
+        title.getStyleClass().add("miniTitleStyle");
+        
+        Separator separator = new Separator();
+        separator.getStyleClass().add("separator");
 		
-        pane.getChildren().addAll(title, singlePlayer, multiPlayer, login, close);
+        pane.getChildren().addAll(title, separator, singlePlayer, multiPlayer, login, close);
 	}
 }

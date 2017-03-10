@@ -5,6 +5,7 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import teamproject.event.Event;
@@ -51,20 +52,26 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
         settings.setOnAction(e -> showSettings());
         
         FlowPane buttons = new FlowPane();
-
         buttons.setPadding(new Insets(5, 5, 5, 5));
         buttons.setVgap(4);
         buttons.setHgap(4);
         buttons.setOrientation(Orientation.VERTICAL);
         buttons.setAlignment(Pos.TOP_CENTER);
         buttons.getStyleClass().add("paneStyle");
-        buttons.getChildren().addAll(play, leaveGame, settings);
+        buttons.getChildren().addAll( play, leaveGame, settings);
         
         label = new Label("Multiplayer");
-    	label.getStyleClass().add("labelStyle");
-		
+    	label.getStyleClass().add("miniTitleStyle");
+    	
+    	BorderPane labelPane = new BorderPane();
+    	labelPane.setTop(label);
+    	labelPane.setAlignment(label, Pos.CENTER);
+    	Separator separator = new Separator();
+        separator.getStyleClass().add("separator");
+    	labelPane.setBottom(separator);
+    	
     	bPane = new BorderPane();
-    	bPane.setTop(label);
+    	bPane.setTop(labelPane);
     	bPane.setLeft(buttons);
    	    pane.getChildren().add(bPane);
 	    

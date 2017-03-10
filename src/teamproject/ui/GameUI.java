@@ -73,8 +73,9 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 		centerPane = new StackPane();
 		pane.setCenter(centerPane);
+		pane.getStyleClass().add("paneStyle");
 		final Scene scene = new Scene(pane, 500, 500);
-		scene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
+		//scene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
 
 		final String css = this.getClass().getResource("style.css").toExternalForm();
 		scene.getStylesheets().add(css);
@@ -110,17 +111,17 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
 	}
 	
-	private void sendMoveEvent(KeyCode key){
-		if(key == KeyCode.R){
-			if(isPlaying){
-				music.stopMusic();
-				isPlaying = false;
-			}else{
-				music.playMusic();
-				isPlaying = true;
-			}
-		}
-	}
+//	private void sendMoveEvent(KeyCode key){
+//		if(key == KeyCode.R){
+//			if(isPlaying){
+//				music.stopMusic();
+//				isPlaying = false;
+//			}else{
+//				music.playMusic();
+//				isPlaying = true;
+//			}
+//		}
+//	}
 
 	private void setUpSettingsButton() {
 
@@ -147,6 +148,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void switchToMenu() {
 		setScreen(menuScreen.getPane());
 		final Label label = new Label("PacMan " + getName());
+		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		settings.setDisable(false);
 		isPlaying = false;
@@ -154,6 +156,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToLogIn() {
 		final Label label = new Label("PacMan");
+		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		setScreen(logInScreen.getPane());
 	}

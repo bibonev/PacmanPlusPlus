@@ -1,6 +1,7 @@
 package teamproject.ui;
 
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -51,6 +52,8 @@ public class LogInScreen extends Screen {
 		login = new Button("Log in");
 		login.getStyleClass().add("buttonStyle");
 		login.setOnAction(e -> switchScreen(text.getText()));
+		
+		text.setAlignment(Pos.CENTER);
 
 		pane.getChildren().addAll(title, label, text, login);
 	}
