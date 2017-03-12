@@ -1,6 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.GameStateChangedEventArgs;
+import main.java.event.arguments.GameStateChangedEventArgs;
 
 public interface GameStateChangedEventListener {
 	void onGameStateChanged(GameStateChangedEventArgs args);

@@ -1,6 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.UserLoggedInEventArgs;
+import main.java.event.arguments.UserLoggedInEventArgs;
 
 public interface UserLoggedInEventListener {
 	void onUserLoggedIn(UserLoggedInEventArgs args);

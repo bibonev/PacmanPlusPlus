@@ -1,6 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.SingleplayerGameStartingEventArgs;
+import main.java.event.arguments.SingleplayerGameStartingEventArgs;
 
 public interface SingleplayerGameStartingListener {
 	public void onSingleplayerGameStarting(SingleplayerGameStartingEventArgs eventArgs);

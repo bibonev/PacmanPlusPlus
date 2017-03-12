@@ -1,26 +1,27 @@
-package teamproject.networking.data;
+package test.java.networking.data;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import teamproject.event.Event;
-import teamproject.networking.NetworkServer;
-import teamproject.networking.NetworkSocket;
-import teamproject.networking.event.ClientConnectedListener;
-import teamproject.networking.event.ClientDisconnectedListener;
+import main.java.event.Event;
+import main.java.networking.NetworkServer;
+import main.java.networking.NetworkSocket;
+import main.java.networking.event.ClientConnectedListener;
+import main.java.networking.event.ClientDisconnectedListener;
 
 public class MockServer implements NetworkServer, ClientDisconnectedListener {
 	private Event<ClientConnectedListener, Integer> connectedEvent = new Event<>((l, i) -> l.onClientConnected(i));
-	private Event<ClientDisconnectedListener, Integer> disconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
+	private Event<ClientDisconnectedListener, Integer> disconnectedEvent = new Event<>(
+			(l, i) -> l.onClientDisconnected(i));
 	private Map<Integer, MockSocket> sockets = new HashMap<Integer, MockSocket>();
 	private boolean alive = true;
 	private int currentID = 0;
 
 	@Override
 	public Set<Integer> getConnectedClients() {
-		if(alive) {
+		if (alive) {
 			return sockets.keySet();
 		} else {
 			return new HashSet<Integer>(0);
@@ -28,9 +29,9 @@ public class MockServer implements NetworkServer, ClientDisconnectedListener {
 	}
 
 	@Override
-	public NetworkSocket getClient(int clientID) {
-		if(alive) {
-			if(sockets.containsKey(clientID)) {
+	public NetworkSocket getClient(final int clientID) {
+		if (alive) {
+			if (sockets.containsKey(clientID)) {
 				return sockets.get(clientID);
 			} else {
 				throw new IllegalArgumentException();
@@ -39,10 +40,10 @@ public class MockServer implements NetworkServer, ClientDisconnectedListener {
 			throw new IllegalStateException();
 		}
 	}
-	
+
 	public int addClient() {
-		int id = currentID++;
-		MockSocket s = new MockSocket(id);
+		final int id = currentID++;
+		final MockSocket s = new MockSocket(id);
 		s.getDisconnectedEvent().addListener(this);
 		return id;
 	}
@@ -68,8 +69,8 @@ public class MockServer implements NetworkServer, ClientDisconnectedListener {
 	}
 
 	@Override
-	public void onClientDisconnected(int clientID) {
+	public void onClientDisconnected(final int clientID) {
 		sockets.remove(clientID);
 	}
-	
+
 }

@@ -1,6 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.EntityMovedEventArgs;
+import main.java.event.arguments.EntityMovedEventArgs;
 
 public interface EntityMovedListener {
 	public void onEntityMoved(EntityMovedEventArgs args);

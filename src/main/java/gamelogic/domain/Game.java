@@ -1,10 +1,10 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
-import teamproject.constants.GameType;
+import main.java.constants.GameType;
 
 /**
  * Represent a game (round?)
- * 
+ *
  * @author aml
  *
  */
@@ -15,25 +15,26 @@ public class Game {
 	private GameType type;
 	private boolean ended;
 
-	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player, final GameType type) {
+	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player,
+			final GameType type) {
 		this.world = world;
 		this.gameSettings = gameSettings;
 		this.player = player;
 		this.type = type;
-		this.ended = false;
+		ended = false;
 	}
-	
+
 	public boolean hasEnded() {
 		return ended;
 	}
-	
+
 	public void setEnded() {
-		this.ended = true;
+		ended = true;
 	}
 
 	/**
 	 * Fetch the game's world
-	 * 
+	 *
 	 * @return the world
 	 */
 	public World getWorld() {
@@ -42,7 +43,7 @@ public class Game {
 
 	/**
 	 * Fetch in game settings
-	 * 
+	 *
 	 * @return the settings
 	 */
 	public GameSettings getGameSettings() {
@@ -51,7 +52,7 @@ public class Game {
 
 	/**
 	 * Update the world
-	 * 
+	 *
 	 * @param world
 	 *            the new world
 	 */
@@ -61,7 +62,7 @@ public class Game {
 
 	/**
 	 * Update the in game settings
-	 * 
+	 *
 	 * @param gameSettings
 	 *            the new settings
 	 */
@@ -71,7 +72,7 @@ public class Game {
 
 	/**
 	 * Fetch the controlled player
-	 * 
+	 *
 	 * @return the controlled player
 	 */
 	public ControlledPlayer getPlayer() {
@@ -79,8 +80,9 @@ public class Game {
 	}
 
 	/**
-	 * Determines the type of the game - ie. singleplayer,
-	 * multiplayer serverside, or multiplayer clientside.
+	 * Determines the type of the game - ie. singleplayer, multiplayer
+	 * serverside, or multiplayer clientside.
+	 * 
 	 * @return
 	 */
 	public GameType getGameType() {

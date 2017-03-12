@@ -1,4 +1,4 @@
-package teamproject.ui;
+package main.java.ui;
 
 import java.util.HashMap;
 
@@ -10,7 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
-import teamproject.gamelogic.core.LobbyPlayerInfo;
+import main.java.gamelogic.core.LobbyPlayerInfo;
 
 /**
  * Screen to be added to the multiplayer lobby to list all current players in
@@ -24,23 +24,23 @@ public class PlayersList {
 	private FlowPane pane;
 
 	public PlayersList(final GameUI game) {
-		
+
 		pane = new FlowPane();
-        pane.setPadding(new Insets(5, 0, 5, 0));
-        pane.setVgap(4);
-        pane.setHgap(4);
-        pane.setColumnHalignment(HPos.CENTER); 
-        pane.setOrientation(Orientation.VERTICAL);
-        pane.getStyleClass().add("paneStyle");
-        pane.setAlignment(Pos.TOP_CENTER);
+		pane.setPadding(new Insets(5, 0, 5, 0));
+		pane.setVgap(4);
+		pane.setHgap(4);
+		pane.setColumnHalignment(HPos.CENTER);
+		pane.setOrientation(Orientation.VERTICAL);
+		pane.getStyleClass().add("paneStyle");
+		pane.setAlignment(Pos.TOP_CENTER);
 
 		playerLabels = new HashMap<>();
 
 		/*
 		 * Collection<Player> players = game.getGame().getWorld().getPlayers();
-		 * 
+		 *
 		 * Iterator<Player> it = players.iterator();
-		 * 
+		 *
 		 * while(it.hasNext()){ Label name = new Label(it.next().getName());
 		 * name.setStyle(labelStyle); pane.getChildren().add(name); }
 		 */
@@ -69,8 +69,8 @@ public class PlayersList {
 			removePlayer(i);
 		}
 	}
-	
-	public Pane getPane(){
+
+	public Pane getPane() {
 		return pane;
 	}
 }

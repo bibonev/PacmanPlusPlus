@@ -1,7 +1,7 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
-import teamproject.constants.CellState;
-import teamproject.event.arguments.PlayerMovedEventArgs;
+import main.java.constants.CellState;
+import main.java.event.arguments.PlayerMovedEventArgs;
 
 public abstract class Player extends Entity {
 	private String name;

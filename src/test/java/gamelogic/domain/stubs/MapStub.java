@@ -1,7 +1,7 @@
-package teamproject.gamelogic.domain.stubs;
+package test.java.gamelogic.domain.stubs;
 
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.Map;
+import main.java.gamelogic.domain.Cell;
+import main.java.gamelogic.domain.Map;
 
 public class MapStub extends Map {
 

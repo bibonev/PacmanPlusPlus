@@ -1,6 +1,6 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
-import teamproject.constants.MovementDirection;
+import main.java.constants.MovementDirection;
 
 /**
  * Represent a controlled player

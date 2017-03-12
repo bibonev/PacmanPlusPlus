@@ -1,4 +1,4 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
 import java.util.HashMap;
 

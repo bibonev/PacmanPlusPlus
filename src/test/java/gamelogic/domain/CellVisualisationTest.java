@@ -1,13 +1,15 @@
-package teamproject.gamelogic.domain;
+package test.java.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
 
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-import teamproject.gamelogic.domain.stubs.CellStub;
-import teamproject.gamelogic.random.Randoms;
-import teamproject.constants.CellState;
+import main.java.constants.CellState;
+import main.java.gamelogic.domain.Cell;
+import main.java.gamelogic.domain.Position;
+import test.java.gamelogic.domain.stubs.CellStub;
+import test.java.gamelogic.random.Randoms;
 
 public class CellVisualisationTest {
 

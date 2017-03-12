@@ -1,19 +1,19 @@
-package teamproject.gamelogic.core;
+package main.java.gamelogic.core;
 
-import teamproject.constants.GameOutcome;
-import teamproject.event.Event;
-import teamproject.event.arguments.EntityChangedEventArgs;
-import teamproject.event.arguments.EntityMovedEventArgs;
-import teamproject.event.arguments.GameDisplayInvalidatedEventArgs;
-import teamproject.event.arguments.GameEndedEventArgs;
-import teamproject.event.arguments.RemoteGameEndedEventArgs;
-import teamproject.event.listener.EntityAddedListener;
-import teamproject.event.listener.EntityMovedListener;
-import teamproject.event.listener.EntityRemovingListener;
-import teamproject.event.listener.GameDisplayInvalidatedListener;
-import teamproject.event.listener.GameEndedListener;
-import teamproject.event.listener.RemoteGameEndedListener;
-import teamproject.gamelogic.domain.Game;
+import main.java.constants.GameOutcome;
+import main.java.event.Event;
+import main.java.event.arguments.EntityChangedEventArgs;
+import main.java.event.arguments.EntityMovedEventArgs;
+import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
+import main.java.event.arguments.GameEndedEventArgs;
+import main.java.event.arguments.RemoteGameEndedEventArgs;
+import main.java.event.listener.EntityAddedListener;
+import main.java.event.listener.EntityMovedListener;
+import main.java.event.listener.EntityRemovingListener;
+import main.java.event.listener.GameDisplayInvalidatedListener;
+import main.java.event.listener.GameEndedListener;
+import main.java.event.listener.RemoteGameEndedListener;
+import main.java.gamelogic.domain.Game;
 
 public class RemoteGameLogic implements GameLogic, EntityAddedListener, EntityRemovingListener, EntityMovedListener,
 		RemoteGameEndedListener {

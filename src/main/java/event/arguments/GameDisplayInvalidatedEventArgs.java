@@ -1,14 +1,14 @@
-package teamproject.event.arguments;
+package main.java.event.arguments;
 
-import teamproject.gamelogic.core.GameLogic;
+import main.java.gamelogic.core.GameLogic;
 
 public class GameDisplayInvalidatedEventArgs {
 	private GameLogic logic;
-	
-	public GameDisplayInvalidatedEventArgs(GameLogic logic) {
+
+	public GameDisplayInvalidatedEventArgs(final GameLogic logic) {
 		this.logic = logic;
 	}
-	
+
 	public GameLogic getLogic() {
 		return logic;
 	}

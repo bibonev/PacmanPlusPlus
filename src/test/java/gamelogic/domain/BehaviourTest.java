@@ -1,12 +1,16 @@
-package teamproject.gamelogic.domain;
+package test.java.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
 
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-import teamproject.gamelogic.domain.stubs.BehaviourStub;
-import teamproject.gamelogic.random.Randoms;
+import main.java.gamelogic.domain.Behaviour;
+import main.java.gamelogic.domain.Entity;
+import main.java.gamelogic.domain.SkillSet;
+import main.java.gamelogic.domain.World;
+import test.java.gamelogic.domain.stubs.BehaviourStub;
+import test.java.gamelogic.random.Randoms;
 
 public class BehaviourTest {
 
@@ -17,7 +21,7 @@ public class BehaviourTest {
 		final World world = Randoms.randomWorld();
 		final Entity ghostEntity = Randoms.randomLocalGhost();
 		final int speed = Randoms.randomInteger();
-		final SkillSet stash = Randoms.randomInventory();
+		final SkillSet stash = Randoms.randomSkillSet();
 
 		// When
 		final Behaviour behaviour = new BehaviourStub(world, ghostEntity, speed, stash, type);

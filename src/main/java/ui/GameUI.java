@@ -1,4 +1,4 @@
-package teamproject.ui;
+package main.java.ui;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -7,25 +7,24 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-import teamproject.audio.Music;
-import teamproject.audio.SoundEffects;
-import teamproject.event.Event;
-import teamproject.event.arguments.GameStartedEventArgs;
-import teamproject.event.arguments.LobbyChangedEventArgs;
-import teamproject.event.listener.GameClosingListener;
-import teamproject.event.listener.GameStartedListener;
-import teamproject.event.listener.LobbyStateChangedListener;
-import teamproject.gamelogic.core.GameCommandService;
-import teamproject.gamelogic.core.Lobby;
-import teamproject.gamelogic.domain.Game;
-import teamproject.constants.GameType;
-import teamproject.graphics.PositionVisualisation;
-import teamproject.graphics.Render;
-import teamproject.networking.integration.ClientInstance;
-import teamproject.networking.integration.ServerInstance;
+import main.java.audio.Music;
+import main.java.audio.SoundEffects;
+import main.java.constants.GameType;
+import main.java.event.Event;
+import main.java.event.arguments.GameStartedEventArgs;
+import main.java.event.arguments.LobbyChangedEventArgs;
+import main.java.event.listener.GameClosingListener;
+import main.java.event.listener.GameStartedListener;
+import main.java.event.listener.LobbyStateChangedListener;
+import main.java.gamelogic.core.GameCommandService;
+import main.java.gamelogic.core.Lobby;
+import main.java.gamelogic.domain.Game;
+import main.java.graphics.PositionVisualisation;
+import main.java.graphics.Render;
+import main.java.networking.integration.ClientInstance;
+import main.java.networking.integration.ServerInstance;
 
 /**
  * UI to be run, contains all screens
@@ -52,13 +51,13 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public Screen currentScreen;
 	public LogInScreen logInScreen;
 	public MenuScreen menuScreen;
-	//private GameScreen gameScreen;
+	// private GameScreen gameScreen;
 	private SettingsScreen settingsScreen;
 	private SinglePlayerLobbyScreen singlePlayerLobbyScreen;
 	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
 	private MultiPlayerOptionScreen multiPlayerOptionScreen;
 	private MultiPlayerJoinScreen multiPlayerJoinScreen;
-	
+
 	private Event<GameClosingListener, Object> onGameClosing = new Event<>((l, a) -> l.onGameClosing());
 	private GameCommandService gameCommandService;
 
@@ -77,7 +76,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		pane.setCenter(centerPane);
 		pane.getStyleClass().add("paneStyle");
 		uiScene = new Scene(pane, 500, 500);
-		uiScene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
+		uiScene.setOnKeyPressed(e -> sendMoveEvent(e.getCode()));
 
 		final String css = this.getClass().getResource("style.css").toExternalForm();
 		uiScene.getStylesheets().add(css);
@@ -89,19 +88,19 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		switchToLogIn();
 		primaryStage.show();
 	}
-	
+
 	@Override
 	public void stop() throws Exception {
-		this.onGameClosing.fire(null);
+		onGameClosing.fire(null);
 	}
-	
-	public Event<GameClosingListener,Object> getOnGameClosingEvent() {
-		return this.onGameClosing;
+
+	public Event<GameClosingListener, Object> getOnGameClosingEvent() {
+		return onGameClosing;
 	}
 
 	private void setup() {
 		music = new Music();
-		//sounds = new SoundEffects();
+		// sounds = new SoundEffects();
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
 		settingsScreen = new SettingsScreen(this);
@@ -111,28 +110,26 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerOptionScreen = new MultiPlayerOptionScreen(this);
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
 	}
-	
-	private void sendMoveEvent(KeyCode key){
-		if(key == KeyCode.UP){
+
+	private void sendMoveEvent(final KeyCode key) {
+		if (key == KeyCode.UP) {
 			currentScreen.changeSelection(true);
-		}
-		else if(key == KeyCode.DOWN){
+		} else if (key == KeyCode.DOWN) {
 			currentScreen.changeSelection(false);
-		}
-		else if(key ==KeyCode.ENTER){
+		} else if (key == KeyCode.ENTER) {
 			currentScreen.makeSelection();
 		}
-		
-//		
-//		if(key == KeyCode.R){
-//			if(isPlaying){
-//				music.stopMusic();
-//				isPlaying = false;
-//			}else{
-//				music.playMusic();
-//				isPlaying = true;
-//			}
-//		}
+
+		//
+		// if(key == KeyCode.R){
+		// if(isPlaying){
+		// music.stopMusic();
+		// isPlaying = false;
+		// }else{
+		// music.playMusic();
+		// isPlaying = true;
+		// }
+		// }
 	}
 
 	private void setUpSettingsButton() {
@@ -160,7 +157,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
-		music.stopMusic(); //TODO move to when game ends
+		music.stopMusic(); // TODO move to when game ends
 		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
 		label.getStyleClass().add("labelStyle");
@@ -180,7 +177,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		settings.setDisable(true);
 		music.playMusic();
 		isPlaying = true;
-		//setScreen(gameScreen);
+		// setScreen(gameScreen);
 	}
 
 	public void switchToSettings() {
@@ -229,51 +226,50 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public String getName() {
 		return name;
 	}
-	
+
 	public void createNewPendingMultiPlayerGame() {
 		multiPlayerLobbyScreen.addNames();
-		
-		this.lobby = new Lobby();
-		ServerInstance server = new ServerInstance(this, lobby);
-		ClientInstance client = new ClientInstance(this, name, "localhost");
-		
-		this.onGameClosing.addListener(() -> {
+
+		lobby = new Lobby();
+		final ServerInstance server = new ServerInstance(this, lobby);
+		final ClientInstance client = new ClientInstance(this, name, "localhost");
+
+		onGameClosing.addListener(() -> {
 			server.stop();
 			client.stop();
 		});
-		
-		this.multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(
-				() -> {
-					client.stop();
-					server.stop();
-				});
-		this.multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
-		this.multiPlayerLobbyScreen.setStartGameEnabled(true);
-		this.gameCommandService.getGameStartedEvent().addListener(client);
-		this.gameCommandService.getGameStartedEvent().addListener(server);
-		
+
+		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(() -> {
+			client.stop();
+			server.stop();
+		});
+		multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
+		multiPlayerLobbyScreen.setStartGameEnabled(true);
+		gameCommandService.getGameStartedEvent().addListener(client);
+		gameCommandService.getGameStartedEvent().addListener(server);
+
 		server.getMultiplayerGameStartingEvent().addListener(gameCommandService);
 		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
-		
+
 		server.run();
 		client.run();
 		// create new lobby for a multiplayer game
 	}
 
-	// TODO move creation of client instance into GameCommandService at some point
+	// TODO move creation of client instance into GameCommandService at some
+	// point
 	public void joinGame(final String gameIp) {
-		ClientInstance client = new ClientInstance(this, name, gameIp);
-		
-		this.onGameClosing.addListener(() -> {
+		final ClientInstance client = new ClientInstance(this, name, gameIp);
+
+		onGameClosing.addListener(() -> {
 			client.stop();
 		});
-		
-		this.multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(
-				() -> client.stop());
-		this.multiPlayerLobbyScreen.setStartGameEnabled(false);
-		this.gameCommandService.getGameStartedEvent().addListener(client);
+
+		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(() -> client.stop());
+		multiPlayerLobbyScreen.setStartGameEnabled(false);
+		gameCommandService.getGameStartedEvent().addListener(client);
 		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
-		
+
 		client.run();
 		// join game with ip
 	}
@@ -287,31 +283,31 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 
 	@Override
-	public void onLobbyStateChanged(LobbyChangedEventArgs args) {
-		if(args instanceof LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) {
-			multiPlayerLobbyScreen.list.removePlayer(
-					((LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) args).getPlayerID());
-		} else if(args instanceof LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) {
-			multiPlayerLobbyScreen.list.addPlayer(
-					((LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) args).getPlayerInfo());
+	public void onLobbyStateChanged(final LobbyChangedEventArgs args) {
+		if (args instanceof LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) {
+			multiPlayerLobbyScreen.list
+					.removePlayer(((LobbyChangedEventArgs.LobbyPlayerLeftEventArgs) args).getPlayerID());
+		} else if (args instanceof LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) {
+			multiPlayerLobbyScreen.list
+					.addPlayer(((LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) args).getPlayerInfo());
 		} else {
 			// TODO: update rules display
 		}
 	}
 
-	public void setLobby(Lobby lobby) {
+	public void setLobby(final Lobby lobby) {
 		this.lobby = lobby;
 		lobby.getLobbyStateChangedEvent().addListener(this);
 	}
 
 	@Override
-	public void onGameStarted(GameStartedEventArgs args) {
-		if(args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
+	public void onGameStarted(final GameStartedEventArgs args) {
+		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
 				switchToGame();
-				
+
 				switchToMultiPlayerLobby();
-				
+
 				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
 
 				// Initialize Screen dimensions

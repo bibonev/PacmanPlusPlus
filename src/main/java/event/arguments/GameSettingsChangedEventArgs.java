@@ -1,8 +1,8 @@
-package teamproject.event.arguments;
+package main.java.event.arguments;
 
 import java.util.Map;
 
-import teamproject.constants.GameSetting;
+import main.java.constants.GameSetting;
 
 public class GameSettingsChangedEventArgs {
 

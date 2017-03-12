@@ -1,4 +1,4 @@
-package teamproject.gamelogic.domain;
+package test.java.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
 
@@ -7,7 +7,8 @@ import java.util.HashMap;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-import teamproject.gamelogic.random.Randoms;
+import main.java.gamelogic.domain.Scoreboard;
+import test.java.gamelogic.random.Randoms;
 
 public class ScoreboardTest {
 

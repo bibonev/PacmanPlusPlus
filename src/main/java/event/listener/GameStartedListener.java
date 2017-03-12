@@ -1,7 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.GameStartedEventArgs;
-import teamproject.gamelogic.domain.Game;
+import main.java.event.arguments.GameStartedEventArgs;
 
 public interface GameStartedListener {
 	public void onGameStarted(GameStartedEventArgs args);

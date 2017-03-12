@@ -1,22 +1,22 @@
-package teamproject.event.arguments;
+package main.java.event.arguments;
 
-import teamproject.gamelogic.core.GameLogic;
-import teamproject.gamelogic.domain.Game;
+import main.java.gamelogic.core.GameLogic;
+import main.java.gamelogic.domain.Game;
 
 public class GameStartedEventArgs {
 	private Game game;
 	private GameLogic gameLogic;
-	
-	public GameStartedEventArgs(Game game, GameLogic gameLogic) {
+
+	public GameStartedEventArgs(final Game game, final GameLogic gameLogic) {
 		this.game = game;
 		this.gameLogic = gameLogic;
-		
+
 	}
-	
+
 	public Game getGame() {
 		return game;
 	}
-	
+
 	public GameLogic getGameLogic() {
 		return gameLogic;
 	}

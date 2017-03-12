@@ -1,8 +1,8 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
 /**
  * Represent a remote player (used for multiplayer games)
- * 
+ *
  * @author aml
  *
  */

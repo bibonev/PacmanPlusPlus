@@ -1,22 +1,27 @@
 /**
- * 
+ *
  */
-package teamproject.networking.socket;
+package main.java.networking.socket;
 
-import teamproject.event.Event;
-import teamproject.networking.NetworkSocket;
-import teamproject.networking.NetworkListener;
-import teamproject.networking.event.ClientDisconnectedListener;
-
-import java.net.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
-import java.io.*;
+
+import main.java.event.Event;
+import main.java.networking.NetworkListener;
+import main.java.networking.NetworkSocket;
+import main.java.networking.event.ClientDisconnectedListener;
 
 /**
- * Represents connection between client and server. Handles sending and receiving 
- * data to and from the server and calling the particular events
+ * Represents connection between client and server. Handles sending and
+ * receiving data to and from the server and calling the particular events
+ *
  * @author Simeon Kostadinov
  */
 
@@ -36,51 +41,52 @@ public class Client implements NetworkSocket, Runnable {
 	/**
 	 * Initialise Client object using a hostname
 	 */
-	public Client(String hostname) {
+	public Client(final String hostname) {
 		this();
 		this.hostname = hostname;
-		this.serverSide = false;
+		serverSide = false;
 	}
 
 	/**
 	 * Initialise Client object using the created socket and clientID
 	 */
-	public Client(Socket socket, int clientID) {
+	public Client(final Socket socket, final int clientID) {
 		this();
 		this.socket = socket;
 		this.clientID = clientID;
-		this.serverSide = true;
+		serverSide = true;
 	}
 
 	private Client() {
-		this.receiveEvent = new Event<>((l, b) -> l.receive(b));
-		this.disconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
+		receiveEvent = new Event<>((l, b) -> l.receive(b));
+		disconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
 	}
-	
+
 	/**
 	 * Method for killing a particular client and closing the socket
 	 */
 	@Override
 	public void die() {
-		if(alive) {
+		if (alive) {
 			try {
 				alive = false;
 				sender.die();
 				receiver.die();
 				socket.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new RuntimeException("Could not close client.", e);
 			}
 		}
 	}
-	
+
 	@Override
 	public boolean isAlive() {
 		return alive;
 	}
-	
+
 	/**
-	 * Starting the thread and establishing the InputStream and OutputStream connections
+	 * Starting the thread and establishing the InputStream and OutputStream
+	 * connections
 	 */
 	public void start() {
 		try {
@@ -91,9 +97,9 @@ public class Client implements NetworkSocket, Runnable {
 			in = new DataInputStream(socket.getInputStream());
 			out = new DataOutputStream(socket.getOutputStream());
 
-		} catch (UnknownHostException e) {
+		} catch (final UnknownHostException e) {
 			throw new RuntimeException("Unknown host.", e);
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			throw new RuntimeException("Couldn't get input and output streams for client.", e);
 		}
 
@@ -106,7 +112,8 @@ public class Client implements NetworkSocket, Runnable {
 	}
 
 	/**
-	 * Start both sender and receiver and fire disconnect event when they are closing
+	 * Start both sender and receiver and fire disconnect event when they are
+	 * closing
 	 */
 	@Override
 	public void run() {
@@ -119,7 +126,7 @@ public class Client implements NetworkSocket, Runnable {
 			receiver.join();
 			sender.die();
 			die();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new RuntimeException(e);
 		} finally {
 			disconnectedEvent.fire(clientID);
@@ -130,8 +137,8 @@ public class Client implements NetworkSocket, Runnable {
 	}
 
 	@Override
-	public void send(byte[] data) {
-		if(alive) {
+	public void send(final byte[] data) {
+		if (alive) {
 			sender.send(data);
 		} else {
 			throw new IllegalStateException("Cannot send data to a closed socket.");
@@ -139,11 +146,11 @@ public class Client implements NetworkSocket, Runnable {
 	}
 
 	public int getClientID() {
-		if(alive) {
-			if (this.clientID == -1) {
+		if (alive) {
+			if (clientID == -1) {
 				throw new RuntimeException("Not yet received client ID from server.");
 			} else {
-				return this.clientID;
+				return clientID;
 			}
 		} else {
 			throw new IllegalStateException("Cannot get client ID of a closed socket.");
@@ -154,13 +161,13 @@ public class Client implements NetworkSocket, Runnable {
 	public Event<NetworkListener, byte[]> getReceiveEvent() {
 		return receiveEvent;
 	}
-	
+
 	@Override
 	public Event<ClientDisconnectedListener, Integer> getDisconnectedEvent() {
 		return disconnectedEvent;
 	}
 
-	public void setClientID(int clientID) {
+	public void setClientID(final int clientID) {
 		if (!serverSide) {
 			this.clientID = clientID;
 		} else {
@@ -177,31 +184,32 @@ class ClientSender extends Thread {
 	private DataOutputStream out = null;
 	private BlockingQueue<byte[]> packets;
 
-	public ClientSender(DataOutputStream out) {
+	public ClientSender(final DataOutputStream out) {
 		this.out = out;
 		packets = new LinkedBlockingQueue<byte[]>();
 	}
 
+	@Override
 	public void run() {
 		try {
 			while (alive) {
-				byte[] packet = packets.take();
-				if(packet.length > 0) {
+				final byte[] packet = packets.take();
+				if (packet.length > 0) {
 					out.writeInt(packet.length);
 					out.write(packet);
 				}
 			}
-		} catch(EOFException e) {
+		} catch (final EOFException e) {
 			e.printStackTrace();
 			// connection dropped
 			return;
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			if (alive) {
 				throw new RuntimeException("Could not send packet.", e);
 			} else {
 				// connection already dropped, just close thread
 			}
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			throw new RuntimeException("Client thread interrupted.", e);
 		} finally {
 			alive = false;
@@ -209,13 +217,13 @@ class ClientSender extends Thread {
 	}
 
 	public void die() {
-		if(alive) {
+		if (alive) {
 			alive = false;
 			packets.add(new byte[0]);
 		}
 	}
 
-	public void send(byte[] packet) {
+	public void send(final byte[] packet) {
 		if (alive) {
 			packets.add(packet);
 		}
@@ -223,31 +231,33 @@ class ClientSender extends Thread {
 }
 
 /**
- * ClientReceiver thread is used to recieve the packet byte array from the server
+ * ClientReceiver thread is used to recieve the packet byte array from the
+ * server
  */
 class ClientReceiver extends Thread {
 	private boolean alive = true;
 	private DataInputStream in = null;
 	private Consumer<byte[]> onReceive;
 
-	public ClientReceiver(DataInputStream in, Consumer<byte[]> onReceive) {
+	public ClientReceiver(final DataInputStream in, final Consumer<byte[]> onReceive) {
 		this.in = in;
 		this.onReceive = onReceive;
 	}
 
+	@Override
 	public void run() {
 		while (alive) {
 			try {
-				int length = in.readInt();
+				final int length = in.readInt();
 
 				if (length > 0) {
-					byte[] message = new byte[length];
+					final byte[] message = new byte[length];
 					in.read(message);
-					this.onReceive.accept(message);
+					onReceive.accept(message);
 				}
-			} catch(EOFException e) {
+			} catch (final EOFException e) {
 				return;
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				if (alive) {
 					throw new RuntimeException(e);
 				} else {
@@ -258,7 +268,7 @@ class ClientReceiver extends Thread {
 	}
 
 	public void die() {
-		if(alive) {
+		if (alive) {
 			alive = false;
 		}
 	}

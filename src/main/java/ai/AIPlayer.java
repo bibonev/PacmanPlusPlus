@@ -1,8 +1,8 @@
-package teamproject.ai;
+package main.java.ai;
 
-import teamproject.gamelogic.domain.Behaviour;
-import teamproject.gamelogic.domain.LocalPlayer;
-import teamproject.gamelogic.domain.Map;
+import main.java.gamelogic.domain.Behaviour;
+import main.java.gamelogic.domain.LocalPlayer;
+import main.java.gamelogic.domain.Map;
 
 /**
  * The AI player. Each AI player has a unique behavior that tells it which items

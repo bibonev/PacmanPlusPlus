@@ -1,8 +1,7 @@
-package teamproject.graphics;
+package main.java.graphics;
 
-import javafx.scene.Node;
 import javafx.scene.image.ImageView;
-import teamproject.gamelogic.domain.Player;
+import main.java.gamelogic.domain.Player;
 
 /**
  * Created by Boyan Bonev on 11/02/2017.
@@ -27,8 +26,9 @@ public class PacmanVisualisation {
 	 *
 	 * @return Node
 	 */
-	ImageView getNode() {
-		PositionVisualisation pv = new PositionVisualisation(player.getPosition().getRow(), player.getPosition().getColumn());
+	public ImageView getNode() {
+		final PositionVisualisation pv = new PositionVisualisation(player.getPosition().getRow(),
+				player.getPosition().getColumn());
 
 		double min = pv.getHeight();
 		if (pv.getWidth() < pv.getHeight()) {
@@ -38,8 +38,8 @@ public class PacmanVisualisation {
 		pacMan.setFitWidth(min);
 		pacMan.setFitHeight(min);
 
-		pacMan.setTranslateX(pv.getPixelX()+ pv.getWidth() / 2 - min / 2);
-		pacMan.setTranslateY(pv.getPixelY()+ pv.getHeight() / 2 - min / 2);
+		pacMan.setTranslateX(pv.getPixelX() + pv.getWidth() / 2 - min / 2);
+		pacMan.setTranslateY(pv.getPixelY() + pv.getHeight() / 2 - min / 2);
 
 		pacMan.setRotate(player.getAngle());
 		pacMan.toFront();

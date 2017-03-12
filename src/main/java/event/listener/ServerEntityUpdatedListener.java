@@ -1,6 +1,5 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-public interface ServerEntityUpdatedListener extends
-		EntityMovedListener {
-	
+public interface ServerEntityUpdatedListener extends EntityMovedListener {
+
 }

@@ -4,17 +4,17 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import main.java.gamelogic.domain.LocalGhost;
+import main.java.gamelogic.domain.SkillSet;
 
-public class LocalGhostTest {
+public class SkillSetTest {
 
 	@Test
 	public void shouldConstruct() {
 		// When
-		final LocalGhost ghost = new LocalGhost();
+		final SkillSet skillSet = new SkillSet();
 
 		// Then
-		assertNotNull(ghost);
+		assertNotNull(skillSet);
 	}
 
 }

@@ -1,7 +1,7 @@
-package teamproject.event.arguments;
+package main.java.event.arguments;
 
 import javafx.stage.Stage;
-import teamproject.gamelogic.domain.Game;
+import main.java.gamelogic.domain.Game;
 
 public class NewGameStartedEventArgs {
 

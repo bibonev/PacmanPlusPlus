@@ -1,4 +1,4 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -6,12 +6,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import teamproject.ai.AIGhost;
-import teamproject.constants.CellState;
-import teamproject.event.Event;
-import teamproject.event.arguments.EntityChangedEventArgs;
-import teamproject.event.listener.EntityAddedListener;
-import teamproject.event.listener.EntityRemovingListener;
+import main.java.constants.CellState;
+import main.java.event.Event;
+import main.java.event.arguments.EntityChangedEventArgs;
+import main.java.event.listener.EntityAddedListener;
+import main.java.event.listener.EntityRemovingListener;
 
 /**
  * Represent a game's world
@@ -37,19 +36,19 @@ public class World {
 		onEntityAdded = new Event<>((l, c) -> l.onEntityAdded(c));
 		onEntityRemoving = new Event<>((l, c) -> l.onEntityRemoving(c));
 	}
-	
+
 	/**
-	 * Determines if this world is remote or not. A world is remote if you are a client
-	 * connected to a server (including if you are the host - ie. connected to the server
-	 * running on your own machine).
-	 * 
-	 * A world is <em>not</em> remote when you are playing singleplayer <em>or</em> the game
-	 * is running on the server.
-	 * 
-	 * If the world is a remote world, then the map state and AI should <em>not</em> be
-	 * updated locally - the server will run that logic and send it to the client over the
-	 * network.
-	 * 
+	 * Determines if this world is remote or not. A world is remote if you are a
+	 * client connected to a server (including if you are the host - ie.
+	 * connected to the server running on your own machine).
+	 *
+	 * A world is <em>not</em> remote when you are playing singleplayer
+	 * <em>or</em> the game is running on the server.
+	 *
+	 * If the world is a remote world, then the map state and AI should
+	 * <em>not</em> be updated locally - the server will run that logic and send
+	 * it to the client over the network.
+	 *
 	 * @return Returns whether the game is remote or not.
 	 */
 	public boolean isRemote() {
@@ -122,26 +121,26 @@ public class World {
 	public Entity getEntity(final int entityID) {
 		return entities.get(entityID);
 	}
-	
-	public boolean isGhostAt(Position position) {
-		for(Entity e : getEntities()) {
-			if(e instanceof Ghost && e.getPosition().equals(position)) {
+
+	public boolean isGhostAt(final Position position) {
+		for (final Entity e : getEntities()) {
+			if (e instanceof Ghost && e.getPosition().equals(position)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
-	public Set<Entity> getEntitiesAt(Position position) {
-		HashSet<Entity> s = new HashSet<Entity>();
-		
-		for(Entity e : getEntities()) {
-			if(e.getPosition().equals(position)) {
+
+	public Set<Entity> getEntitiesAt(final Position position) {
+		final HashSet<Entity> s = new HashSet<Entity>();
+
+		for (final Entity e : getEntities()) {
+			if (e.getPosition().equals(position)) {
 				s.add(e);
 			}
 		}
-		
+
 		return s;
 	}
 
@@ -182,7 +181,7 @@ public class World {
 	public Collection<Player> getPlayers() {
 		return getEntities(Player.class);
 	}
-	
+
 	public Collection<Ghost> getGhosts() {
 		return getEntities(Ghost.class);
 	}
@@ -206,10 +205,10 @@ public class World {
 	public void setMap(final Map map) {
 		this.map = map;
 	}
-	
-	public void gameStep(Game game) {
+
+	public void gameStep(final Game game) {
 		map.gameStep(game);
-		for(Entity entity : entities.values()) {
+		for (final Entity entity : entities.values()) {
 			entity.gameStep(game);
 		}
 	}
@@ -228,9 +227,10 @@ public class World {
 			throw new IllegalArgumentException("No such entity with ID " + entityID);
 		}
 	}
-	
-	public boolean isOccupiable(Position position) {
-		return !RuleChecker.isOutOfBounds(position.getRow(), position.getColumn()) && map.getCell(position).getState() != CellState.OBSTACLE;
+
+	public boolean isOccupiable(final Position position) {
+		return !RuleChecker.isOutOfBounds(position.getRow(), position.getColumn())
+				&& map.getCell(position).getState() != CellState.OBSTACLE;
 
 	}
 }

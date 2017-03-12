@@ -1,10 +1,14 @@
-package teamproject.gamelogic.domain.stubs;
+package test.java.gamelogic.domain.stubs;
 
-import teamproject.gamelogic.domain.*;
+import main.java.gamelogic.domain.Behaviour;
+import main.java.gamelogic.domain.Entity;
+import main.java.gamelogic.domain.SkillSet;
+import main.java.gamelogic.domain.World;
 
 public class BehaviourStub extends Behaviour {
 
-	public BehaviourStub(final World world, final Entity entity, final int speed, final SkillSet stash, final Type type) {
+	public BehaviourStub(final World world, final Entity entity, final int speed, final SkillSet stash,
+			final Type type) {
 		super(world, entity, speed, stash, type);
 	}
 
