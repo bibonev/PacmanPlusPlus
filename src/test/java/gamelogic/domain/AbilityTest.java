@@ -5,10 +5,11 @@ import static org.junit.Assert.assertThat;
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-import main.java.gamelogic.domain.LocalPlayer;
+import main.java.gamelogic.domain.Ability;
+import test.java.gamelogic.domain.stubs.AbilityStub;
 import test.java.gamelogic.random.Randoms;
 
-public class LocalPlayerTest {
+public class AbilityTest {
 
 	@Test
 	public void shouldConstruct() {
@@ -16,10 +17,10 @@ public class LocalPlayerTest {
 		final String name = Randoms.randomString();
 
 		// When
-		final LocalPlayer player = new LocalPlayer(name);
+		final Ability ability = new AbilityStub(name);
 
 		// Then
-		assertThat(player.getName(), Is.is(name));
+		assertThat(ability.getName(), Is.is(name));
 	}
 
 }

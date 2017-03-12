@@ -1,12 +1,16 @@
-package teamproject.gamelogic.domain;
+package test.java.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
 
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-import teamproject.constants.GameType;
-import teamproject.gamelogic.random.Randoms;
+import main.java.constants.GameType;
+import main.java.gamelogic.domain.ControlledPlayer;
+import main.java.gamelogic.domain.Game;
+import main.java.gamelogic.domain.GameSettings;
+import main.java.gamelogic.domain.World;
+import test.java.gamelogic.random.Randoms;
 
 public class GameTest {
 

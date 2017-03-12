@@ -1,6 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.NewGameStartedEventArgs;
+import main.java.event.arguments.NewGameStartedEventArgs;
 
 public interface NewGameStartedEventListener {
 	void onNewGameStarted(NewGameStartedEventArgs args);

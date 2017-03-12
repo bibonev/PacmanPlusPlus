@@ -1,6 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.EntityChangedEventArgs;
+import main.java.event.arguments.EntityChangedEventArgs;
 
 public interface EntityAddedListener {
 	public void onEntityAdded(EntityChangedEventArgs args);

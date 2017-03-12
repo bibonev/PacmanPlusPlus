@@ -1,12 +1,15 @@
-package teamproject.gamelogic.domain;
+package test.java.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
 
 import org.hamcrest.core.Is;
 import org.junit.Test;
 
-import teamproject.gamelogic.domain.stubs.MapStub;
-import teamproject.gamelogic.random.Randoms;
+import main.java.gamelogic.domain.Cell;
+import main.java.gamelogic.domain.Map;
+import main.java.gamelogic.domain.Position;
+import test.java.gamelogic.domain.stubs.MapStub;
+import test.java.gamelogic.random.Randoms;
 
 public class MapTest {
 

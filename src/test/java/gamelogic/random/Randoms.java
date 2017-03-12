@@ -1,27 +1,27 @@
-package teamproject.gamelogic.random;
+package test.java.gamelogic.random;
 
-import java.util.HashMap;
 import java.util.Random;
 
-import teamproject.abilities.Ability;
-import teamproject.constants.CellState;
-import teamproject.constants.GameType;
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.ControlledPlayer;
-import teamproject.gamelogic.domain.Game;
-import teamproject.gamelogic.domain.GameSettings;
-import teamproject.gamelogic.domain.SkillSet;
-import teamproject.gamelogic.domain.LocalGhost;
-import teamproject.gamelogic.domain.LocalPlayer;
-import teamproject.gamelogic.domain.Map;
-import teamproject.gamelogic.domain.Position;
-import teamproject.gamelogic.domain.RemoteGhost;
-import teamproject.gamelogic.domain.RemotePlayer;
-import teamproject.gamelogic.domain.RuleChecker;
-import teamproject.gamelogic.domain.Scoreboard;
-import teamproject.gamelogic.domain.World;
-import teamproject.gamelogic.domain.stubs.CellStub;
-import teamproject.gamelogic.domain.stubs.MapStub;
+import main.java.constants.CellState;
+import main.java.constants.GameType;
+import main.java.gamelogic.domain.Ability;
+import main.java.gamelogic.domain.Cell;
+import main.java.gamelogic.domain.ControlledPlayer;
+import main.java.gamelogic.domain.Game;
+import main.java.gamelogic.domain.GameSettings;
+import main.java.gamelogic.domain.LocalGhost;
+import main.java.gamelogic.domain.LocalPlayer;
+import main.java.gamelogic.domain.Map;
+import main.java.gamelogic.domain.Position;
+import main.java.gamelogic.domain.RemoteGhost;
+import main.java.gamelogic.domain.RemotePlayer;
+import main.java.gamelogic.domain.RuleChecker;
+import main.java.gamelogic.domain.Scoreboard;
+import main.java.gamelogic.domain.SkillSet;
+import main.java.gamelogic.domain.World;
+import test.java.gamelogic.domain.stubs.AbilityStub;
+import test.java.gamelogic.domain.stubs.CellStub;
+import test.java.gamelogic.domain.stubs.MapStub;
 
 public class Randoms {
 
@@ -75,7 +75,9 @@ public class Randoms {
 	}
 
 	public static LocalGhost randomLocalGhost() {
-		return new LocalGhost();
+		final LocalGhost localGhost = new LocalGhost();
+		localGhost.setPosition(randomPosition());
+		return localGhost;
 	}
 
 	public static RuleChecker randomRuleEnforcer() {
@@ -90,15 +92,12 @@ public class Randoms {
 		return new GameSettings();
 	}
 
-	public static Ability randomItem() {
-		return new Ability(randomString(), randomString());
+	public static Ability randomAbility() {
+		return new AbilityStub(randomString());
 	}
 
-	public static SkillSet randomInventory() {
-		final java.util.Map<Ability, Integer> items = new HashMap<Ability, Integer>();
-		items.put(randomItem(), randomInteger());
-
-		return new SkillSet(items);
+	public static SkillSet randomSkillSet() {
+		return new SkillSet();
 	}
 
 	public static CellState randomCellState() {

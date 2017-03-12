@@ -1,6 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.HostStartingMultiplayerGameEventArgs;
+import main.java.event.arguments.HostStartingMultiplayerGameEventArgs;
 
 public interface HostStartingMultiplayerGameListener {
 	public void onHostStartingGame(HostStartingMultiplayerGameEventArgs args);

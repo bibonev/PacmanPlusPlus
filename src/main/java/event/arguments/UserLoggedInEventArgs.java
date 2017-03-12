@@ -1,4 +1,4 @@
-package teamproject.event.arguments;
+package main.java.event.arguments;
 
 public class UserLoggedInEventArgs {
 

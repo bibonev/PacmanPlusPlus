@@ -1,8 +1,8 @@
-package teamproject.gamelogic.domain.stubs;
+package test.java.gamelogic.domain.stubs;
 
-import teamproject.constants.CellState;
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.Position;
+import main.java.constants.CellState;
+import main.java.gamelogic.domain.Cell;
+import main.java.gamelogic.domain.Position;
 
 public class CellStub extends Cell {
 

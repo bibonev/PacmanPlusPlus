@@ -1,10 +1,10 @@
-package teamproject;
+package main.java;
 
 public class Pair<T, U> {
 	private T left;
 	private U right;
 
-	public Pair(T left, U right) {
+	public Pair(final T left, final U right) {
 		this.left = left;
 		this.right = right;
 	}
@@ -23,12 +23,12 @@ public class Pair<T, U> {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if(obj instanceof Pair<?, ?>) {
-			Pair<?, ?> pair = (Pair<?, ?>)obj;
+	public boolean equals(final Object obj) {
+		if (obj instanceof Pair<?, ?>) {
+			final Pair<?, ?> pair = (Pair<?, ?>) obj;
 
-			boolean leftEqual = pair.left == null ? this.left == null : pair.left.equals(this.left);
-			boolean rightEqual = pair.right == null ? this.right == null : pair.right.equals(this.right);
+			final boolean leftEqual = pair.left == null ? this.left == null : pair.left.equals(this.left);
+			final boolean rightEqual = pair.right == null ? this.right == null : pair.right.equals(this.right);
 
 			return leftEqual && rightEqual;
 		} else {
@@ -38,8 +38,8 @@ public class Pair<T, U> {
 
 	@Override
 	public int hashCode() {
-		int leftHash = left.hashCode();
-		int rightHash = right.hashCode();
-		return leftHash ^ ((rightHash >> 16) & 0x0000ffff) ^ ((rightHash << 16) & 0xffff0000);
+		final int leftHash = left.hashCode();
+		final int rightHash = right.hashCode();
+		return leftHash ^ rightHash >> 16 & 0x0000ffff ^ rightHash << 16 & 0xffff0000;
 	}
 }

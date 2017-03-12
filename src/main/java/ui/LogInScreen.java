@@ -1,15 +1,12 @@
-package teamproject.ui;
+package main.java.ui;
 
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import teamproject.event.Event;
-import teamproject.event.arguments.UserLoggedInEventArgs;
-import teamproject.event.listener.UserLoggedInEventListener;
+import main.java.event.Event;
+import main.java.event.arguments.UserLoggedInEventArgs;
+import main.java.event.listener.UserLoggedInEventListener;
 
 /**
  * Screen for logging in
@@ -23,8 +20,8 @@ public class LogInScreen extends Screen {
 	private Label label;
 	private Label title;
 	private TextField text;
-	private Event<UserLoggedInEventListener, UserLoggedInEventArgs> userLogIn = new Event<>((listener, arg) -> listener.onUserLoggedIn(arg));
-
+	private Event<UserLoggedInEventListener, UserLoggedInEventArgs> userLogIn = new Event<>(
+			(listener, arg) -> listener.onUserLoggedIn(arg));
 
 	public LogInScreen(final GameUI game) {
 		super(game);
@@ -42,7 +39,7 @@ public class LogInScreen extends Screen {
 		login.getStyleClass().add("buttonStyle");
 		login.setOnAction(e -> switchScreen(text.getText()));
 		select(login);
-		
+
 		text.setAlignment(Pos.CENTER);
 
 		pane.getChildren().addAll(title, label, text, login);
@@ -67,8 +64,8 @@ public class LogInScreen extends Screen {
 	}
 
 	@Override
-	public void changeSelection(boolean up) {
-		//Do nothing only one button
+	public void changeSelection(final boolean up) {
+		// Do nothing only one button
 	}
 
 	@Override
@@ -78,6 +75,6 @@ public class LogInScreen extends Screen {
 
 	@Override
 	public void unselectAll() {
-		//do nothing only one button
+		// do nothing only one button
 	}
 }

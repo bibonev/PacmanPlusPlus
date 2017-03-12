@@ -1,8 +1,8 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
 /**
  * Represent in game settings
- * 
+ *
  * @author aml
  *
  */

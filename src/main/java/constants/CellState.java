@@ -1,4 +1,4 @@
-package teamproject.constants;
+package main.java.constants;
 
 /**
  * Created by boyanbonev on 03/02/2017. Represents the size of the cells (count)

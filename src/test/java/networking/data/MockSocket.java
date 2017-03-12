@@ -1,9 +1,9 @@
-package teamproject.networking.data;
+package test.java.networking.data;
 
-import teamproject.event.Event;
-import teamproject.networking.NetworkListener;
-import teamproject.networking.NetworkSocket;
-import teamproject.networking.event.ClientDisconnectedListener;
+import main.java.event.Event;
+import main.java.networking.NetworkListener;
+import main.java.networking.NetworkSocket;
+import main.java.networking.event.ClientDisconnectedListener;
 
 public class MockSocket implements NetworkSocket {
 	private Event<NetworkListener, byte[]> recvEvent = new Event<>((l, d) -> l.receive(d));
@@ -11,14 +11,14 @@ public class MockSocket implements NetworkSocket {
 	private Event<ClientDisconnectedListener, Integer> discEvent = new Event<>((l, d) -> l.onClientDisconnected(d));
 	private boolean alive = true;
 	private int clientID;
-	
-	public MockSocket(int clientID) {
+
+	public MockSocket(final int clientID) {
 		this.clientID = clientID;
 	}
 
 	@Override
-	public void send(byte[] data) {
-		if(alive) {
+	public void send(final byte[] data) {
+		if (alive) {
 			mockSendEvent.fire(data);
 		} else {
 			throw new IllegalStateException();
@@ -29,24 +29,26 @@ public class MockSocket implements NetworkSocket {
 	public Event<NetworkListener, byte[]> getReceiveEvent() {
 		return recvEvent;
 	}
-	
+
 	/**
-	 * Gets the mock event which is fired when data is received over the network.
-	 * 
+	 * Gets the mock event which is fired when data is received over the
+	 * network.
+	 *
 	 * @return The mock data sending event.
 	 */
 	public Event<MockSendListener, byte[]> getMockSendListener() {
 		return mockSendEvent;
 	}
-	
+
 	/**
 	 * Instructs the mock socket object to act as if the data contained in
 	 * {@code data} was received over the network.
-	 * 
-	 * @param data The fake data to receive.
+	 *
+	 * @param data
+	 *            The fake data to receive.
 	 */
-	public void receive(byte[] data) {
-		if(alive) {
+	public void receive(final byte[] data) {
+		if (alive) {
 			recvEvent.fire(data);
 		} else {
 			throw new IllegalStateException();
@@ -60,7 +62,7 @@ public class MockSocket implements NetworkSocket {
 
 	@Override
 	public void die() {
-		if(alive) {
+		if (alive) {
 			alive = false;
 			discEvent.fire(clientID);
 		}
@@ -70,7 +72,7 @@ public class MockSocket implements NetworkSocket {
 	public boolean isAlive() {
 		return alive;
 	}
-	
+
 	public static interface MockSendListener {
 		public void onDataSent(byte[] data);
 	}

@@ -1,13 +1,13 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
 import java.util.ArrayList;
 
-import teamproject.constants.CellSize;
-import teamproject.constants.CellState;
-import teamproject.event.Event;
-import teamproject.event.arguments.CellStateChangedEventArgs;
-import teamproject.event.listener.CellStateChangedEventListener;
-import teamproject.graphics.PositionVisualisation;
+import main.java.constants.CellSize;
+import main.java.constants.CellState;
+import main.java.event.Event;
+import main.java.event.arguments.CellStateChangedEventArgs;
+import main.java.event.listener.CellStateChangedEventListener;
+import main.java.graphics.PositionVisualisation;
 
 /**
  * Represent a Pacman game map
@@ -24,7 +24,7 @@ public class Map implements CellStateChangedEventListener {
 
 	public Map(final int numberOfCells) {
 		cells = new Cell[numberOfCells][numberOfCells];
-		onCellStateChanged = new Event<>((l,p) -> l.onCellStateChanged(p));
+		onCellStateChanged = new Event<>((l, p) -> l.onCellStateChanged(p));
 	}
 
 	public Map() {
@@ -33,7 +33,7 @@ public class Map implements CellStateChangedEventListener {
 
 	public Map(final Cell[][] cells) {
 		this.cells = cells;
-        onCellStateChanged = new Event<>((l,p) -> l.onCellStateChanged(p));
+		onCellStateChanged = new Event<>((l, p) -> l.onCellStateChanged(p));
 	}
 
 	/**
@@ -105,7 +105,7 @@ public class Map implements CellStateChangedEventListener {
 	 */
 	// TODO: Should a map be able generate itself? I don't think so...
 	public static Map generateMap() {
-	    Map m = new Map();
+		final Map m = new Map();
 		m.initializeObstacles();
 		CellState state;
 
@@ -142,8 +142,8 @@ public class Map implements CellStateChangedEventListener {
 
 		return false;
 	}
-	
-	public void gameStep(Game game) {
+
+	public void gameStep(final Game game) {
 		// nothing to do yet
 	}
 
@@ -209,11 +209,11 @@ public class Map implements CellStateChangedEventListener {
 	}
 
 	@Override
-	public void onCellStateChanged(CellStateChangedEventArgs args) {
+	public void onCellStateChanged(final CellStateChangedEventArgs args) {
 		onCellStateChanged.fire(args);
 	}
 
-    public Event<CellStateChangedEventListener, CellStateChangedEventArgs> getOnCellStateChanged() {
-        return onCellStateChanged;
-    }
+	public Event<CellStateChangedEventListener, CellStateChangedEventArgs> getOnCellStateChanged() {
+		return onCellStateChanged;
+	}
 }

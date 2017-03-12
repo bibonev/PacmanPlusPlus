@@ -1,20 +1,20 @@
-package teamproject.event.arguments;
+package main.java.event.arguments;
 
-import teamproject.gamelogic.domain.GameSettings;
+import main.java.gamelogic.domain.GameSettings;
 
 public class SingleplayerGameStartingEventArgs {
 	private GameSettings settings;
 	private String username;
-	
+
 	public GameSettings getSettings() {
 		return settings;
 	}
-	
+
 	public String getUsername() {
 		return username;
 	}
-	
-	public SingleplayerGameStartingEventArgs(GameSettings settings, String username) {
+
+	public SingleplayerGameStartingEventArgs(final GameSettings settings, final String username) {
 		this.settings = settings;
 		this.username = username;
 	}

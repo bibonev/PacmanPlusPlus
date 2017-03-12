@@ -1,4 +1,4 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,13 +7,12 @@ import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-import teamproject.abilities.Ability;
-import teamproject.ai.AStar;
-import teamproject.ai.Target;
-import teamproject.constants.CellState;
-import teamproject.event.Event;
-import teamproject.event.arguments.EntityMovedEventArgs;
-import teamproject.event.listener.EntityMovedListener;
+import main.java.ai.AStar;
+import main.java.ai.Target;
+import main.java.constants.CellState;
+import main.java.event.Event;
+import main.java.event.arguments.EntityMovedEventArgs;
+import main.java.event.listener.EntityMovedListener;
 
 /**
  * The default behavior, which picks the closes enemy or moves at random if
@@ -66,7 +65,7 @@ public abstract class Behaviour {
 
 	/** The map size. */
 	private int mapSize;
-	
+
 	protected Position lastPos;
 
 	/** The inventory. */
@@ -98,7 +97,7 @@ public abstract class Behaviour {
 	 * @param type
 	 *            the type
 	 */
-	public Behaviour(final World world, final Entity entity, final int speed, final SkillSet stash, Type type) {
+	public Behaviour(final World world, final Entity entity, final int speed, final SkillSet stash, final Type type) {
 		this.world = world;
 		mapSize = this.world.getMap().getMapSize();
 		this.entity = entity;
@@ -108,8 +107,8 @@ public abstract class Behaviour {
 		focus = rng.nextInt(4) + 1;
 		this.stash = stash;
 		this.type = type;
-		lastPos=entity.getPosition();
-		this.onEntityMoved = entity.getOnMovedEvent();
+		lastPos = entity.getPosition();
+		onEntityMoved = entity.getOnMovedEvent();
 		counter = 0;
 		currentPath = new ArrayList<Position>();
 	}
@@ -128,7 +127,7 @@ public abstract class Behaviour {
 
 		final ArrayList<Position> enemies = scanEnemies();
 
-		//System.out.println(enemies.size());
+		// System.out.println(enemies.size());
 		if (enemies.size() == 0) {
 			return pickRandomTarget();
 		}
@@ -174,28 +173,30 @@ public abstract class Behaviour {
 		final int column = entity.getPosition().getColumn();
 		final ArrayList<Position> availableCells = new ArrayList<Position>();
 
-		if (row > 0 && RuleChecker.checkCellValidity(cells[row - 1][column]) && (cells[row - 1][column].getPosition().equals(lastPos)==false)) {
+		if (row > 0 && RuleChecker.checkCellValidity(cells[row - 1][column])
+				&& cells[row - 1][column].getPosition().equals(lastPos) == false) {
 			availableCells.add(new Position(row - 1, column));
 		}
-		if (row < mapSize - 1 && RuleChecker.checkCellValidity(cells[row + 1][column]) && (cells[row + 1][column].getPosition().equals(lastPos)==false)) {
+		if (row < mapSize - 1 && RuleChecker.checkCellValidity(cells[row + 1][column])
+				&& cells[row + 1][column].getPosition().equals(lastPos) == false) {
 			availableCells.add(new Position(row + 1, column));
 		}
-		if (column > 0 && RuleChecker.checkCellValidity(cells[row][column - 1]) && (cells[row][column - 1].getPosition().equals(lastPos)==false)) {
+		if (column > 0 && RuleChecker.checkCellValidity(cells[row][column - 1])
+				&& cells[row][column - 1].getPosition().equals(lastPos) == false) {
 			availableCells.add(new Position(row, column - 1));
 		}
-		if (column < mapSize - 1 && RuleChecker.checkCellValidity(cells[row][column + 1]) && (cells[row][column + 1].getPosition().equals(lastPos)==false)) {
+		if (column < mapSize - 1 && RuleChecker.checkCellValidity(cells[row][column + 1])
+				&& cells[row][column + 1].getPosition().equals(lastPos) == false) {
 			availableCells.add(new Position(row, column + 1));
 		}
 		tarType = Target.RANDOM;
-		int size = availableCells.size();
-		if(size == 0){
+		final int size = availableCells.size();
+		if (size == 0) {
 			return lastPos;
-		}
-		else{
+		} else {
 			return availableCells.get(rng.nextInt(size));
 		}
-		
-		
+
 	}
 
 	/**
@@ -205,7 +206,7 @@ public abstract class Behaviour {
 	 */
 	private ArrayList<Position> scanEnemies() {
 		final ArrayList<Position> enemies = new ArrayList<Position>();
-		for(Ghost g : world.getEntities(Ghost.class)) {
+		for (final Ghost g : world.getEntities(Ghost.class)) {
 			enemies.add(g.getPosition());
 		}
 		return enemies;
@@ -321,8 +322,8 @@ public abstract class Behaviour {
 		// of consecutive moves before it scans for new enemies
 		case RANDOM: {
 			if (counter < focus) {
-				
-				lastPos=entity.getPosition();
+
+				lastPos = entity.getPosition();
 
 				entity.setPosition(currentPath.get(0));
 
@@ -342,18 +343,18 @@ public abstract class Behaviour {
 		// target
 		case STATIONARY: {
 
-			if (currentPath.size() > 0 && isTargetThere(lockedTarget) && 
-					RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()]) ){
+			if (currentPath.size() > 0 && isTargetThere(lockedTarget) && RuleChecker
+					.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 
 				entity.setPosition(currentPath.get(0));
-				
+
 				currentPath.remove(0);
 
 			} else {
 				genPath(entity.getPosition(), lockedTarget);
 
 				entity.setPosition(currentPath.get(0));
-				
+
 				currentPath.remove(0);
 			}
 		}
@@ -367,16 +368,16 @@ public abstract class Behaviour {
 		// if target is lost the ai gives up and chooses a new target
 		case ENEMY: {
 
-			if (currentPath.size() > 0){
+			if (currentPath.size() > 0) {
 				genPath(entity.getPosition(), lockedTarget);
-				int size = currentPath.size();
+				final int size = currentPath.size();
 				int i = 0;
-				while(i<=focus){
+				while (i <= focus) {
 					currentPath.remove(size - i);
 					i++;
 				}
 			}
-			
+
 			if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
 
 				entity.setPosition(currentPath.get(0));
@@ -387,7 +388,7 @@ public abstract class Behaviour {
 				genPath(entity.getPosition(), lockedTarget);
 
 				entity.setPosition(currentPath.get(0));
-				
+
 				currentPath.remove(0);
 			}
 		}

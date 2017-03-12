@@ -1,4 +1,4 @@
-package teamproject.gamelogic.domain;
+package test.java.gamelogic.domain;
 
 import org.junit.Test;
 

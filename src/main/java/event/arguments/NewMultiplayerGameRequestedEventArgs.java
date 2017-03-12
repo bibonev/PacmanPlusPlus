@@ -1,7 +1,7 @@
-package teamproject.event.arguments;
+package main.java.event.arguments;
 
 import javafx.stage.Stage;
-import teamproject.gamelogic.domain.GameSettings;
+import main.java.gamelogic.domain.GameSettings;
 
 public class NewMultiplayerGameRequestedEventArgs {
 
@@ -9,8 +9,7 @@ public class NewMultiplayerGameRequestedEventArgs {
 	private GameSettings settings;
 	private Stage stage;
 
-	public NewMultiplayerGameRequestedEventArgs(final String userName, final GameSettings settings,
-                                                final Stage stage) {
+	public NewMultiplayerGameRequestedEventArgs(final String userName, final GameSettings settings, final Stage stage) {
 		this.userName = userName;
 		this.settings = settings;
 		this.stage = stage;

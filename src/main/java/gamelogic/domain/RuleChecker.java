@@ -1,9 +1,7 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
-import teamproject.constants.CellSize;
-import teamproject.constants.CellState;
-import teamproject.constants.GameOutcomeType;
-import teamproject.constants.GameType;
+import main.java.constants.CellSize;
+import main.java.constants.CellState;
 
 /**
  * Check different rules, constraints and states

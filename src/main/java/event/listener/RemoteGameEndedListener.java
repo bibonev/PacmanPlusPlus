@@ -1,6 +1,6 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
-import teamproject.event.arguments.RemoteGameEndedEventArgs;
+import main.java.event.arguments.RemoteGameEndedEventArgs;
 
 public interface RemoteGameEndedListener {
 	public void onRemoteGameEnded(RemoteGameEndedEventArgs args);

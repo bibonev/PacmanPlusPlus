@@ -1,13 +1,13 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
-import teamproject.constants.CellState;
-import teamproject.event.Event;
-import teamproject.event.arguments.CellStateChangedEventArgs;
-import teamproject.event.listener.CellStateChangedEventListener;
+import main.java.constants.CellState;
+import main.java.event.Event;
+import main.java.event.arguments.CellStateChangedEventArgs;
+import main.java.event.listener.CellStateChangedEventListener;
 
 /**
  * Represent a cell on a map
- * 
+ *
  * @author aml
  *
  */
@@ -19,7 +19,7 @@ public class Cell {
 	public Cell(final CellState state, final Position position) {
 		this.state = state;
 		this.position = position;
-		this.onCellStateChanged = new Event<>((l, p) -> l.onCellStateChanged(p));
+		onCellStateChanged = new Event<>((l, p) -> l.onCellStateChanged(p));
 	}
 
 	public Cell(final Position position) {
@@ -32,7 +32,7 @@ public class Cell {
 
 	/**
 	 * Get the cell's position
-	 * 
+	 *
 	 * @return a position object
 	 */
 	public Position getPosition() {
@@ -41,7 +41,7 @@ public class Cell {
 
 	/**
 	 * Update the state of the cell
-	 * 
+	 *
 	 * @param state
 	 *            the new cell state
 	 */

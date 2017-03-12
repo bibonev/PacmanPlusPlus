@@ -1,4 +1,4 @@
-package teamproject.gamelogic.core;
+package main.java.gamelogic.core;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -7,19 +7,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import teamproject.constants.CellState;
-import teamproject.constants.GameOutcome;
-import teamproject.constants.GameOutcomeType;
-import teamproject.event.Event;
-import teamproject.event.arguments.GameDisplayInvalidatedEventArgs;
-import teamproject.event.arguments.GameEndedEventArgs;
-import teamproject.event.listener.GameDisplayInvalidatedListener;
-import teamproject.event.listener.GameEndedListener;
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.Entity;
-import teamproject.gamelogic.domain.Game;
-import teamproject.gamelogic.domain.Ghost;
-import teamproject.gamelogic.domain.Player;
+import main.java.constants.CellState;
+import main.java.constants.GameOutcome;
+import main.java.constants.GameOutcomeType;
+import main.java.event.Event;
+import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
+import main.java.event.arguments.GameEndedEventArgs;
+import main.java.event.listener.GameDisplayInvalidatedListener;
+import main.java.event.listener.GameEndedListener;
+import main.java.gamelogic.domain.Cell;
+import main.java.gamelogic.domain.Entity;
+import main.java.gamelogic.domain.Game;
+import main.java.gamelogic.domain.Ghost;
+import main.java.gamelogic.domain.Player;
 
 public class LocalGameLogic implements GameLogic {
 	private Game game;

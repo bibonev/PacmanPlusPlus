@@ -2,20 +2,20 @@
  * Algorithm property of Jatin Thakur
  */
 
-package teamproject.ai;
+package main.java.ai;
 
-import java.util.PriorityQueue;
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 
-import teamproject.constants.CellState;
-import teamproject.gamelogic.domain.Cell;
-import teamproject.gamelogic.domain.Map;
-import teamproject.gamelogic.domain.Position;
+import main.java.constants.CellState;
+import main.java.gamelogic.domain.Cell;
+import main.java.gamelogic.domain.Map;
+import main.java.gamelogic.domain.Position;
 
 /**
  * The Class AStar. Contains the algorithm as well as the basic outline of the
  * game map
- * 
+ *
  * @author Lyubomir Pashev
  */
 public class AStar {
@@ -42,15 +42,15 @@ public class AStar {
 	/**
 	 * Instantiates a new A*. Gets the game map and based on that it creates its
 	 * own grid filled with AStarCells that have costs and parent cells
-	 * 
+	 *
 	 * @param map
 	 *            the map
 	 */
-	public AStar(Map map) {
+	public AStar(final Map map) {
 
 		mapSize = map.getMapSize();
-		Cell[][] cells = map.getCells();
-		ArrayList<Position> blocked = new ArrayList<Position>();
+		final Cell[][] cells = map.getCells();
+		final ArrayList<Position> blocked = new ArrayList<Position>();
 		grid = new AStarCell[mapSize][mapSize];
 		closed = new boolean[mapSize][mapSize];
 
@@ -95,7 +95,7 @@ public class AStar {
 		 * @param cell
 		 *            the cell
 		 */
-		AStarCell(int i, int j) {
+		AStarCell(final int i, final int j) {
 			this.i = i;
 			this.j = j;
 		}
@@ -111,7 +111,7 @@ public class AStar {
 
 		@Override
 		public String toString() {
-			return "[" + this.i + ", " + this.j + "]";
+			return "[" + i + ", " + j + "]";
 		}
 	}
 
@@ -123,7 +123,7 @@ public class AStar {
 	 * @param j
 	 *            the Y coord
 	 */
-	private void setBlocked(int i, int j) {
+	private void setBlocked(final int i, final int j) {
 		grid[i][j] = null;
 	}
 
@@ -133,7 +133,7 @@ public class AStar {
 	 * @param start
 	 *            the new start cell
 	 */
-	private void setStartCell(Position start) {
+	private void setStartCell(final Position start) {
 		startI = start.getRow();
 		startJ = start.getColumn();
 	}
@@ -144,7 +144,7 @@ public class AStar {
 	 * @param target
 	 *            the new end cell
 	 */
-	private void setEndCell(Position target) {
+	private void setEndCell(final Position target) {
 		endI = target.getRow();
 		endJ = target.getColumn();
 	}
@@ -159,17 +159,19 @@ public class AStar {
 	 * @param cost
 	 *            the cost
 	 */
-	void checkAndUpdateCost(AStarCell current, AStarCell t, int cost) {
-		if (t == null || closed[t.i][t.j])
+	void checkAndUpdateCost(final AStarCell current, final AStarCell t, final int cost) {
+		if (t == null || closed[t.i][t.j]) {
 			return;
-		int t_final_cost = t.heuristicCost + cost;
+		}
+		final int t_final_cost = t.heuristicCost + cost;
 
-		boolean inOpen = open.contains(t);
+		final boolean inOpen = open.contains(t);
 		if (!inOpen || t_final_cost < t.finalCost) {
 			t.finalCost = t_final_cost;
 			t.parent = current;
-			if (!inOpen)
+			if (!inOpen) {
 				open.add(t);
+			}
 		}
 	}
 
@@ -177,18 +179,18 @@ public class AStar {
 	 * A* algorithm. Initializes costs for every cell, the start cell and the
 	 * goal cell Updates costs at each step until the goal cell is reached
 	 * Computes a path from start to goal
-	 * 
+	 *
 	 * @param start
 	 *            the start cell
 	 * @param target
 	 *            the target cell
 	 * @return the back traced path
 	 */
-	public ArrayList<Position> AStarAlg(Position start, Position target) {
+	public ArrayList<Position> AStarAlg(final Position start, final Position target) {
 
-		open = new PriorityQueue<>((Object o1, Object o2) -> {
-			AStarCell c1 = (AStarCell) o1;
-			AStarCell c2 = (AStarCell) o2;
+		open = new PriorityQueue<>((final Object o1, final Object o2) -> {
+			final AStarCell c1 = (AStarCell) o1;
+			final AStarCell c2 = (AStarCell) o2;
 
 			return c1.finalCost < c2.finalCost ? -1 : c1.finalCost > c2.finalCost ? 1 : 0;
 		});
@@ -218,8 +220,9 @@ public class AStar {
 		// the algorithm
 		while (!current.equals(grid[endI][endJ])) {
 			current = open.poll();
-			if (current == null)
+			if (current == null) {
 				break;
+			}
 			closed[current.i][current.j] = true;
 
 			AStarCell t;
@@ -248,7 +251,7 @@ public class AStar {
 		open = null;
 		// trace back the path
 		// path is reversed; goes from END to START
-		ArrayList<Position> path = new ArrayList<Position>();
+		final ArrayList<Position> path = new ArrayList<Position>();
 		AStarCell finalcell = grid[endI][endJ];
 		while (finalcell.parent != null) {
 			path.add(finalcell.parent.getPos());

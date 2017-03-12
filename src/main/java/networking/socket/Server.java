@@ -1,22 +1,23 @@
-package teamproject.networking.socket;
+package main.java.networking.socket;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import teamproject.event.Event;
-import teamproject.networking.NetworkServer;
-import teamproject.networking.NetworkSocket;
-import teamproject.networking.event.ClientConnectedListener;
-import teamproject.networking.event.ClientDisconnectedListener;
+import main.java.event.Event;
+import main.java.networking.NetworkServer;
+import main.java.networking.NetworkSocket;
+import main.java.networking.event.ClientConnectedListener;
+import main.java.networking.event.ClientDisconnectedListener;
 
 /**
  * Represents running a server connecting and adding each client and sets up the
  * listners for each event
- * 
+ *
  * @author Simeon Kostadinov
  */
 
@@ -34,8 +35,8 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	 * connect and disconnect
 	 */
 	public Server() {
-		this.serverPort = Port.number;
-		this.clients = new HashMap<Integer, Client>();
+		serverPort = Port.number;
+		clients = new HashMap<Integer, Client>();
 
 		clientConnectedEvent = new Event<>((l, i) -> l.onClientConnected(i));
 		clientDisconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
@@ -50,20 +51,20 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	 */
 	@Override
 	public void run() {
-		this.serverSocket = openServerSocket();
+		serverSocket = openServerSocket();
 
 		try {
 			while (alive) {
 				Socket clientSocket = null;
 				try {
-					clientSocket = this.serverSocket.accept();
-					int clientID = currentClientNumber++;
-					Client client = new Client(clientSocket, clientID);
+					clientSocket = serverSocket.accept();
+					final int clientID = currentClientNumber++;
+					final Client client = new Client(clientSocket, clientID);
 					client.start();
 					clients.put(clientID, client);
 					clientConnectedEvent.fire(clientID);
 					client.getDisconnectedEvent().addListener(this);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					if (alive) {
 						throw new RuntimeException("Error accepting client.", e);
 					} else {
@@ -82,6 +83,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		return alive;
 	}
 
+	@Override
 	public Event<ClientConnectedListener, Integer> getClientConnectedEvent() {
 		return clientConnectedEvent;
 	}
@@ -91,13 +93,14 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		return clientDisconnectedEvent;
 	}
 
+	@Override
 	public void die() {
 		if (alive) {
 			alive = false;
 			if (!serverSocket.isClosed()) {
 				try {
 					serverSocket.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					throw new RuntimeException("Couldn't kill server.", e);
 				}
 			}
@@ -106,9 +109,9 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 
 	private ServerSocket openServerSocket() {
 		try {
-			return new ServerSocket(this.serverPort);
-		} catch (IOException e) {
-			throw new RuntimeException("Cannot open port " + this.serverPort + ":", e);
+			return new ServerSocket(serverPort);
+		} catch (final IOException e) {
+			throw new RuntimeException("Cannot open port " + serverPort + ":", e);
 		}
 	}
 
@@ -122,7 +125,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	}
 
 	@Override
-	public NetworkSocket getClient(int clientID) {
+	public NetworkSocket getClient(final int clientID) {
 		if (clients.containsKey(clientID)) {
 			return clients.get(clientID);
 		} else {
@@ -134,7 +137,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	 * Listener implementation for disconnecting a client
 	 */
 	@Override
-	public void onClientDisconnected(int clientID) {
+	public void onClientDisconnected(final int clientID) {
 		clientDisconnectedEvent.fire(clientID);
 		clients.get(clientID).getDisconnectedEvent().removeListener(this);
 		clients.remove(clientID);

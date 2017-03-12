@@ -1,8 +1,8 @@
-package teamproject.gamelogic.domain;
+package main.java.gamelogic.domain;
 
 /**
  * Represent a position given by a row and a column
- * 
+ *
  * @author aml
  *
  */
@@ -17,7 +17,7 @@ public class Position {
 
 	/**
 	 * Fetch the row
-	 * 
+	 *
 	 * @return row
 	 */
 	public int getRow() {
@@ -26,32 +26,33 @@ public class Position {
 
 	/**
 	 * Fetch the column
-	 * 
+	 *
 	 * @return column
 	 */
 	public int getColumn() {
 		return column;
 	}
-	
+
 	/**
-	 * Creates aa new Position object with this position and the
-	 * position {@code p} added together like vectors.
-	 * 
+	 * Creates aa new Position object with this position and the position
+	 * {@code p} added together like vectors.
+	 *
 	 * @param p
 	 * @return
 	 */
-	public Position add(Position p) {
-		return new Position(this.row + p.row, this.column + p.column);
+	public Position add(final Position p) {
+		return new Position(row + p.row, column + p.column);
 	}
-	
+
 	/**
-	 * Creates a new Position object with this position and the
-	 * position {@code (row, column)} added like vectors.
+	 * Creates a new Position object with this position and the position
+	 * {@code (row, column)} added like vectors.
+	 * 
 	 * @param row
 	 * @param column
 	 * @return
 	 */
-	public Position add(int row, int column) {
+	public Position add(final int row, final int column) {
 		return new Position(this.row + row, this.column + column);
 	}
 
@@ -65,7 +66,7 @@ public class Position {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.format("(%d, %d)", getRow(), getColumn());

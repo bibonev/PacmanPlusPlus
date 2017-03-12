@@ -1,8 +1,8 @@
-package teamproject.event.arguments;
+package main.java.event.arguments;
 
 import javafx.stage.Stage;
-import teamproject.constants.GameType;
-import teamproject.gamelogic.domain.GameSettings;
+import main.java.constants.GameType;
+import main.java.gamelogic.domain.GameSettings;
 
 public class NewGameRequestedEventArgs {
 
@@ -11,7 +11,8 @@ public class NewGameRequestedEventArgs {
 	private String userName;
 	private Stage stage;
 
-	public NewGameRequestedEventArgs(final GameType type, final GameSettings settings, final String userName, final Stage stage) {
+	public NewGameRequestedEventArgs(final GameType type, final GameSettings settings, final String userName,
+			final Stage stage) {
 		this.type = type;
 		this.settings = settings;
 		this.userName = userName;
@@ -30,7 +31,7 @@ public class NewGameRequestedEventArgs {
 		return userName;
 	}
 
-	public Stage getStage(){
+	public Stage getStage() {
 		return stage;
 	}
 }

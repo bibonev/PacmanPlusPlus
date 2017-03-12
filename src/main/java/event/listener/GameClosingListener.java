@@ -1,4 +1,4 @@
-package teamproject.event.listener;
+package main.java.event.listener;
 
 public interface GameClosingListener {
 	public void onGameClosing();
