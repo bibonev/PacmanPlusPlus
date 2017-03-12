@@ -90,17 +90,6 @@ public class Randoms {
 		return new GameSettings();
 	}
 
-	public static Ability randomItem() {
-		return new Ability(randomString(), randomString());
-	}
-
-	public static SkillSet randomInventory() {
-		final java.util.Map<Ability, Integer> items = new HashMap<Ability, Integer>();
-		items.put(randomItem(), randomInteger());
-
-		return new SkillSet(items);
-	}
-
 	public static CellState randomCellState() {
 		return randomEnum(CellState.class);
 	}

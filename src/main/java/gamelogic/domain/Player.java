@@ -7,6 +7,7 @@ public abstract class Player extends Entity {
 	private String name;
 	private double angle;
 	private int dotsEaten;
+	private SkillSet skillSet;
 
 	public Player(final String name) {
 		this.name = name;
@@ -33,6 +34,25 @@ public abstract class Player extends Entity {
 
 	public int getDotsEaten() {
 		return dotsEaten;
+	}
+
+	/**
+	 * Fetch the player's skillset
+	 *
+	 * @return player skillset
+	 */
+	public SkillSet getSkillSet() {
+		return skillSet;
+	}
+
+
+	/**
+	 * Set the player's skillset
+	 *
+	 * @return player skillset
+	 */
+	public void setSkillSet(SkillSet skillSet) {
+		this.skillSet = skillSet;
 	}
 
 	/**

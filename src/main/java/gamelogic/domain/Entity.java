@@ -16,6 +16,7 @@ public abstract class Entity {
 	private Position position;
 	private int id = -1;
 	private World world;
+	private boolean shield = false;
 
 	private Event<EntityMovedListener, EntityMovedEventArgs> onMoved;
 
@@ -75,6 +76,26 @@ public abstract class Entity {
 	protected void setID(final int id) {
 		this.id = id;
 	}
+
+	/**
+	 * Fetch the entity's shield
+	 *
+	 * @return a boolean
+	 */
+	public boolean getShield() {
+		return this.shield;
+	}
+
+	/**
+	 * Update the entity's shield
+	 *
+	 * @param shield
+	 *            the new shield value
+	 */
+	public void setShield(final boolean shield) {
+		this.shield = shield;
+	}
+
 
 	/**
 	 * Update the world
