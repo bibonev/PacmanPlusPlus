@@ -1,6 +1,7 @@
 package teamproject.ui;
 
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -36,21 +37,13 @@ public class LogInScreen extends Screen {
 
 		text = new TextField();
 		text.getStyleClass().add("labelStyle");
-		text.setOnKeyPressed(new EventHandler<KeyEvent>()
-        {
-            @Override
-            public void handle(KeyEvent ke)
-            {
-                if (ke.getCode().equals(KeyCode.ENTER))
-                {
-                	switchScreen(text.getText());
-                }
-            }
-        });
 
 		login = new Button("Log in");
 		login.getStyleClass().add("buttonStyle");
 		login.setOnAction(e -> switchScreen(text.getText()));
+		select(login);
+		
+		text.setAlignment(Pos.CENTER);
 
 		pane.getChildren().addAll(title, label, text, login);
 	}
@@ -71,5 +64,20 @@ public class LogInScreen extends Screen {
 			// alert.showAndWait();
 			// }
 		}
+	}
+
+	@Override
+	public void changeSelection(boolean up) {
+		//Do nothing only one button
+	}
+
+	@Override
+	public void makeSelection() {
+		switchScreen(text.getText());
+	}
+
+	@Override
+	public void unselectAll() {
+		//do nothing only one button
 	}
 }

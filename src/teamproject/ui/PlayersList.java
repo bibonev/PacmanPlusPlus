@@ -3,7 +3,13 @@ package teamproject.ui;
 import java.util.HashMap;
 
 import javafx.application.Platform;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import teamproject.gamelogic.core.LobbyPlayerInfo;
 
 /**
@@ -13,11 +19,20 @@ import teamproject.gamelogic.core.LobbyPlayerInfo;
  * @author Rose Kirtley
  *
  */
-public class PlayersList extends Screen {
+public class PlayersList {
 	private HashMap<Integer, Label> playerLabels;
+	private FlowPane pane;
 
 	public PlayersList(final GameUI game) {
-		super(game);
+		
+		pane = new FlowPane();
+        pane.setPadding(new Insets(5, 0, 5, 0));
+        pane.setVgap(4);
+        pane.setHgap(4);
+        pane.setColumnHalignment(HPos.CENTER); 
+        pane.setOrientation(Orientation.VERTICAL);
+        pane.getStyleClass().add("paneStyle");
+        pane.setAlignment(Pos.TOP_CENTER);
 
 		playerLabels = new HashMap<>();
 
@@ -53,5 +68,9 @@ public class PlayersList extends Screen {
 		for (final int i : playerLabels.keySet()) {
 			removePlayer(i);
 		}
+	}
+	
+	public Pane getPane(){
+		return pane;
 	}
 }
