@@ -16,7 +16,7 @@ public class Music {
 
 	private boolean isOn;
 	private MediaPlayer mediaPlayer;
-	private String musicFile = "src/teamproject/audio/musicShort.mp3"; // could
+	private String musicFile = "src/main/java/audio/musicShort.mp3"; // could
 																		// change
 																		// to
 																		// longer
