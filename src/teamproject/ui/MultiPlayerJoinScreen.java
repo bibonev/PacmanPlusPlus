@@ -35,21 +35,12 @@ public class MultiPlayerJoinScreen extends Screen {
 		join = new Button("Join game");
 		join.getStyleClass().add("buttonStyle");
 		join.setOnAction(e-> joinGame(ip.getText()));
+		join.setDefaultButton(true);
+		setUpHover(join);
 		
 		ip = new TextField();
         ip.getStyleClass().add("labelStyle");
         ip.setAlignment(Pos.CENTER);
-        ip.setOnKeyPressed(new EventHandler<KeyEvent>()
-        {
-            @Override
-            public void handle(KeyEvent ke)
-            {
-                if (ke.getCode().equals(KeyCode.ENTER))
-                {
-                	joinGame(ip.getText());
-                }
-            }
-        });
 		
 		label = new Label("IP address: ");
         label.getStyleClass().add("labelStyle");
@@ -57,6 +48,7 @@ public class MultiPlayerJoinScreen extends Screen {
 		back = new Button("Back");
         back.getStyleClass().add("backButtonStyle");
 		back.setOnAction(e -> game.switchToMultiPlayerOption());
+		setUpHover(back);
 		
 		Separator separator = new Separator();
         separator.getStyleClass().add("separator");
@@ -82,4 +74,29 @@ public class MultiPlayerJoinScreen extends Screen {
 		}
 	}
 
+	@Override
+	public void changeSelection(boolean up) {
+		if(join.isDefaultButton()){
+			unselect(join);
+			selectBack(back);
+		}else{
+			select(join);
+			unselectBack(back);
+		}
+	}
+
+	@Override
+	public void makeSelection() {
+		if(join.isDefaultButton()){
+			joinGame(ip.getText());
+		}else{
+			game.switchToMultiPlayerOption();
+		}
+	}
+
+	@Override
+	public void unselectAll() {
+		reset(join);
+		resetBack(back);	
+	}
 }

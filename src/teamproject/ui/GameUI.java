@@ -40,6 +40,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	private SoundEffects sounds;
 
 	private Stage thisStage;
+	private Scene uiScene;
 	private BorderPane pane;
 	private BorderPane banner;
 	public Button settings;
@@ -48,9 +49,10 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	private boolean isPlaying;
 	private String name;
 
+	public Screen currentScreen;
 	public LogInScreen logInScreen;
-	private MenuScreen menuScreen;
-	private GameScreen gameScreen;
+	public MenuScreen menuScreen;
+	//private GameScreen gameScreen;
 	private SettingsScreen settingsScreen;
 	private SinglePlayerLobbyScreen singlePlayerLobbyScreen;
 	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
@@ -74,16 +76,16 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		centerPane = new StackPane();
 		pane.setCenter(centerPane);
 		pane.getStyleClass().add("paneStyle");
-		final Scene scene = new Scene(pane, 500, 500);
-		//scene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
+		uiScene = new Scene(pane, 500, 500);
+		uiScene.setOnKeyPressed(e-> sendMoveEvent(e.getCode()));
 
 		final String css = this.getClass().getResource("style.css").toExternalForm();
-		scene.getStylesheets().add(css);
+		uiScene.getStylesheets().add(css);
 		pane.getStyleClass().add("paneStyle");
 
 		setUpSettingsButton();
 
-		primaryStage.setScene(scene);
+		primaryStage.setScene(uiScene);
 		switchToLogIn();
 		primaryStage.show();
 	}
@@ -102,7 +104,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		//sounds = new SoundEffects();
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
-		gameScreen = new GameScreen(this, music);
 		settingsScreen = new SettingsScreen(this);
 		singlePlayerLobbyScreen = new SinglePlayerLobbyScreen(this);
 		singlePlayerLobbyScreen.getOnStartingSingleplayerGame().addListener(gameCommandService);
@@ -111,7 +112,18 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
 	}
 	
-//	private void sendMoveEvent(KeyCode key){
+	private void sendMoveEvent(KeyCode key){
+		if(key == KeyCode.UP){
+			currentScreen.changeSelection(true);
+		}
+		else if(key == KeyCode.DOWN){
+			currentScreen.changeSelection(false);
+		}
+		else if(key ==KeyCode.ENTER){
+			currentScreen.makeSelection();
+		}
+		
+//		
 //		if(key == KeyCode.R){
 //			if(isPlaying){
 //				music.stopMusic();
@@ -121,7 +133,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 //				isPlaying = true;
 //			}
 //		}
-//	}
+	}
 
 	private void setUpSettingsButton() {
 
@@ -140,13 +152,16 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		launch(args);
 	}
 
-	private void setScreen(final Pane screen) {
+	private void setScreen(final Screen screen) {
+		currentScreen = screen;
 		centerPane.getChildren().remove(0, centerPane.getChildren().size());
-		centerPane.getChildren().add(screen);
+		centerPane.getChildren().add(screen.getPane());
 	}
 
 	public void switchToMenu() {
-		setScreen(menuScreen.getPane());
+		thisStage.setScene(uiScene);
+		music.stopMusic(); //TODO move to when game ends
+		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
@@ -158,14 +173,14 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		final Label label = new Label("PacMan");
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
-		setScreen(logInScreen.getPane());
+		setScreen(logInScreen);
 	}
 
 	public void switchToGame() {
 		settings.setDisable(true);
 		music.playMusic();
 		isPlaying = true;
-		setScreen(gameScreen.getPane());
+		//setScreen(gameScreen);
 	}
 
 	public void switchToSettings() {
@@ -179,20 +194,20 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 
 	public void switchToSinglePlayerLobby() {
-		setScreen(singlePlayerLobbyScreen.getPane());
+		setScreen(singlePlayerLobbyScreen);
 	}
 
 	public void switchToMultiPlayerLobby() {
-		setScreen(multiPlayerLobbyScreen.getPane());
+		setScreen(multiPlayerLobbyScreen);
 
 	}
 
 	public void switchToMultiPlayerOption() {
-		setScreen(multiPlayerOptionScreen.getPane());
+		setScreen(multiPlayerOptionScreen);
 	}
 
 	public void switchToMultiPlayerJoin() {
-		setScreen(multiPlayerJoinScreen.getPane());
+		setScreen(multiPlayerJoinScreen);
 	}
 
 	public void close() {

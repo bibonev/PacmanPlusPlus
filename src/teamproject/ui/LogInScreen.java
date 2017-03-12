@@ -37,21 +37,11 @@ public class LogInScreen extends Screen {
 
 		text = new TextField();
 		text.getStyleClass().add("labelStyle");
-		text.setOnKeyPressed(new EventHandler<KeyEvent>()
-        {
-            @Override
-            public void handle(KeyEvent ke)
-            {
-                if (ke.getCode().equals(KeyCode.ENTER))
-                {
-                	switchScreen(text.getText());
-                }
-            }
-        });
 
 		login = new Button("Log in");
 		login.getStyleClass().add("buttonStyle");
 		login.setOnAction(e -> switchScreen(text.getText()));
+		select(login);
 		
 		text.setAlignment(Pos.CENTER);
 
@@ -74,5 +64,20 @@ public class LogInScreen extends Screen {
 			// alert.showAndWait();
 			// }
 		}
+	}
+
+	@Override
+	public void changeSelection(boolean up) {
+		//Do nothing only one button
+	}
+
+	@Override
+	public void makeSelection() {
+		switchScreen(text.getText());
+	}
+
+	@Override
+	public void unselectAll() {
+		//do nothing only one button
 	}
 }

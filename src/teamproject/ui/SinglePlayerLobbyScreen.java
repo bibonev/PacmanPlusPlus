@@ -28,6 +28,7 @@ public class SinglePlayerLobbyScreen extends Screen {
         play.getStyleClass().add("buttonStyle");
         play.setOnAction(e-> getOnStartingSingleplayerGame().fire(
         		new SingleplayerGameStartingEventArgs(getSinglePlayerSettings(), game.getName())));
+        setUpHover(play);
         
         label = new Label("Single Player");
         label.getStyleClass().add("miniTitleStyle");
@@ -35,6 +36,8 @@ public class SinglePlayerLobbyScreen extends Screen {
         back = new Button("Back");
         back.getStyleClass().add("backButtonStyle");
 		back.setOnAction(e -> game.switchToMenu());
+		setUpHover(back);
+		
 		Separator separator = new Separator();
         separator.getStyleClass().add("separator");
         
@@ -56,5 +59,32 @@ public class SinglePlayerLobbyScreen extends Screen {
 	
 	public Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> getOnStartingSingleplayerGame() {
 		return onStartingSingleplayerGame;
+	}
+
+	@Override
+	public void changeSelection(boolean up) {
+		if(play.isDefaultButton()){
+			unselect(play);
+			selectBack(back);
+		}else{
+			select(play);
+			unselectBack(back);
+		}
+	}
+
+	@Override
+	public void makeSelection() {
+		if(play.isDefaultButton()){
+			getOnStartingSingleplayerGame().fire(
+	        		new SingleplayerGameStartingEventArgs(getSinglePlayerSettings(), game.getName()));
+		}else{
+			game.switchToMenu();
+		}
+	}
+
+	@Override
+	public void unselectAll() {
+		reset(play);
+		resetBack(back);
 	}
 }

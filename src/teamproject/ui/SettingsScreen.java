@@ -42,5 +42,21 @@ public class SettingsScreen extends Screen {
         separator.getStyleClass().add("separator");
 		
 	    pane.getChildren().addAll(label, separator , music, sounds, returnButton);
+	}
+
+	@Override
+	public void changeSelection(boolean up) {
+		//Only one button
+	}
+
+	@Override
+	public void makeSelection() {
+		game.returnBack();
+		
+	}
+
+	@Override
+	public void unselectAll() {
+		//only one button
 	}	
 }
