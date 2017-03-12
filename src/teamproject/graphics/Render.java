@@ -34,9 +34,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private GameUI gameUI;
 	private Game game;
 	private GameLogic gameLogic;
-	private ArrayList<Node> allEntities;
-	private HashMap<String, RotateTransition> rotations;
-	private HashMap<String, TranslateTransition> transitions;
+	private HashMap<Integer, Node> allEntities;
+	private Node[][] worldNodes;
+	private HashMap<Integer, RotateTransition> rotations;
+	private HashMap<Integer, TranslateTransition> transitions;
     private boolean flag;
 
     /**
@@ -55,7 +56,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
-		this.allEntities = new ArrayList<>();
+		this.allEntities = new HashMap<>();
 		controlledPlayer = game.getPlayer();
 	}
 
@@ -66,23 +67,23 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 */
 	public Scene drawWorld() {
 		final Cell[][] cells = game.getWorld().getMap().getCells();
+		int rows = game.getWorld().getMap().getMapSize(), columns = rows;
+		worldNodes = new Node[rows][columns];
 
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
 
 		final Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
-
-		addToRoot(cells);
-
-        for (final Player player : game.getWorld().getPlayers()) {
+		
+		for (final Player player : game.getWorld().getPlayers()) {
             Node playerNode = new PacmanVisualisation(player).getNode();
             TranslateTransition transitionPlayer = new TranslateTransition(Duration.millis(140), playerNode);
 			RotateTransition rotatePlayer = new RotateTransition(Duration.millis(30), playerNode);
 
-			transitions.put(player.getName(), transitionPlayer);
-			rotations.put(player.getName(), rotatePlayer);
+			transitions.put(player.getID(), transitionPlayer);
+			rotations.put(player.getID(), rotatePlayer);
 
-			allEntities.add(playerNode);
+			allEntities.put(player.getID(), playerNode);
             root.getChildren().add(playerNode);
         }
 
@@ -90,48 +91,49 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             Node ghostNode = new GhostVisualisation(ghost.getPosition()).getNode();
             TranslateTransition transitionGhost = new TranslateTransition(Duration.millis(140), ghostNode);
 
-            transitions.put(Integer.toString(ghost.getID()), transitionGhost);
+            transitions.put(ghost.getID(), transitionGhost);
 
-            allEntities.add(ghostNode);
+            allEntities.put(ghost.getID(), ghostNode);
 
             root.getChildren().add(ghostNode);
         }
 
+		redrawWorld();
+
 		return scene;
 	}
 
+	private int test = 0;
 	/**
 	 * Redraw the map
 	 */
 	public void redrawWorld() {
-		final Cell[][] cells = game.getWorld().getMap().getCells();
+		System.out.println("redraw " + test++);
 		PositionVisualisation.initScreenDimensions();
 
-        clearRoot();
-        addToRoot(cells);
+    	redrawCells();
 
 		for (final Player player : game.getWorld().getPlayers()) {
 		    ImageView nextNode = new PacmanVisualisation(player).getNode();
 
-            transitions.get(player.getName()).setToY(nextNode.getTranslateY());
-            transitions.get(player.getName()).setToX(nextNode.getTranslateX());
-            rotations.get(player.getName()).setToAngle(nextNode.getRotate());
+            transitions.get(player.getID()).setToY(nextNode.getTranslateY());
+            transitions.get(player.getID()).setToX(nextNode.getTranslateX());
+            rotations.get(player.getID()).setToAngle(nextNode.getRotate());
 
-            root.getChildren().get(root.getChildren().indexOf(transitions.get(player.getName()).getNode())).toFront();
-
-            rotations.get(player.getName()).play();
-            transitions.get(player.getName()).play();
+            root.getChildren().get(root.getChildren().indexOf(allEntities.get(player.getID()))).toFront();
+            rotations.get(player.getID()).play();
+            transitions.get(player.getID()).play();
         }
 
 		for (final Ghost ghost : game.getWorld().getGhosts()) {
 		    ImageView nextNode = new GhostVisualisation(ghost.getPosition()).getNode();
 
-		    transitions.get(Integer.toString(ghost.getID())).setToY(nextNode.getTranslateY());
-            transitions.get(Integer.toString(ghost.getID())).setToX(nextNode.getTranslateX());
+		    transitions.get(ghost.getID()).setToY(nextNode.getTranslateY());
+            transitions.get(ghost.getID()).setToX(nextNode.getTranslateX());
 
-            root.getChildren().get(root.getChildren().indexOf(transitions.get(Integer.toString(ghost.getID())).getNode())).toFront();
+            root.getChildren().get(root.getChildren().indexOf(allEntities.get(ghost.getID()))).toFront();
 
-            transitions.get(Integer.toString(ghost.getID())).play();
+            transitions.get(ghost.getID()).play();
 		}
 
 		root.requestFocus();
@@ -145,16 +147,12 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		root.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.UP) {
 				controlledPlayer.moveUp();
-				redrawWorld();
 			} else if (event.getCode() == KeyCode.DOWN) {
 				controlledPlayer.moveDown();
-				redrawWorld();
 			} else if (event.getCode() == KeyCode.LEFT) {
 				controlledPlayer.moveLeft();
-				redrawWorld();
 			} else if (event.getCode() == KeyCode.RIGHT) {
 				controlledPlayer.moveRight();
-				redrawWorld();
 			}
 		});
 	}
@@ -170,33 +168,25 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
 	}
-
-    /**
-     * Add all nodes to parent root
-     * @param cells
-     */
-    private void addToRoot(final Cell[][] cells) {
-        for (final Cell[] cell : cells) {
-            for (final Cell c : cell) {
-                final Node cv = new CellVisualisation(c).getNode();
-                root.getChildren().add(cv);
-            }
-        }
-    }
-
-    /**
-     * Remove nodes that have been affected (like tokens)
-     */
-    private void clearRoot() {
-        int countOfNodes = root.getChildren().size();
-        for (int index = 0; index < countOfNodes; index++) {
-            if (index < root.getChildren().size()){
-                if(!allEntities.contains(root.getChildren().get(index))){
-                    root.getChildren().remove(index);
-                }
-            }
-        }
-    }
+	
+	// only redraw cells that have changed state
+	private void redrawCells() {
+		final Cell[][] cells = game.getWorld().getMap().getCells();
+		int rows = game.getWorld().getMap().getMapSize(), columns = rows;
+		
+		for(int row = 0; row < rows; row++) {
+			for(int column = 0; column < columns; column++) {
+				boolean firstDraw = worldNodes[row][column] == null;
+				if(firstDraw || cells[row][column].needsRedraw()) {
+					if(!firstDraw) root.getChildren().remove(worldNodes[row][column]);
+					Node cv = new CellVisualisation(cells[row][column]).getNode();
+					worldNodes[row][column] = cv;
+					root.getChildren().add(cv);
+					cells[row][column].clearNeedsRedrawFlag();
+				}
+			}
+		}
+	}
 
     /**
      * End the game

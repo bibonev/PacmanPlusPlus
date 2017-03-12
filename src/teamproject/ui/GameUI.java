@@ -312,9 +312,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				// Add CLick Listener
 				mapV.addClickListener();
 
-				// Redraw Map
-				mapV.redrawWorld();
-
 				// Start Timeline
 				mapV.startTimeline();
 			});

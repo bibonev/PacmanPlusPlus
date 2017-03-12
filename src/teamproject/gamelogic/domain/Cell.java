@@ -14,6 +14,7 @@ import teamproject.event.listener.CellStateChangedEventListener;
 public class Cell {
 	private CellState state;
 	private Position position;
+	private boolean needsRedraw;
 	private Event<CellStateChangedEventListener, CellStateChangedEventArgs> onCellStateChanged;
 
 	public Cell(final CellState state, final Position position) {
@@ -48,9 +49,18 @@ public class Cell {
 	public void setState(final CellState state) {
 		this.state = state;
 		onCellStateChanged.fire(new CellStateChangedEventArgs(this, state));
+		needsRedraw = true;
 	}
 
 	public Event<CellStateChangedEventListener, CellStateChangedEventArgs> getOnCellStateChanged() {
 		return onCellStateChanged;
+	}
+	
+	public boolean needsRedraw() {
+		return needsRedraw;
+	}
+	
+	public void clearNeedsRedrawFlag() {
+		this.needsRedraw = false;
 	}
 }

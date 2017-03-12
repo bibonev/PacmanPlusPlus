@@ -34,18 +34,7 @@ public class RemoteGameLogic implements GameLogic, EntityAddedListener, EntityRe
 	
 	public void gameStep(int period) {
 		game.getWorld().gameStep(game);
-		checkGameEnding();
 		invalidateDisplay();
-	}
-
-	private void checkGameEnding() {
-		/* if(RuleChecker.getGameOutcome(game)
-				== GameOutcome.LOCAL_PLAYER_LOST){
-			gameEnded();
-		} else if(RuleChecker.getGameOutcome(game)
-				== GameOutcome.LOCAL_PLAYER_WON){
-			gameEnded();
-		} */
 	}
 	
 	private void invalidateDisplay() {
