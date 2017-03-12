@@ -30,7 +30,7 @@ public class GhostBehaviour extends Behaviour {
 	}
 
 	/**
-	 * @see teamproject.gamelogic.domain.Behaviour#pickTarget()
+	 * @see java.gamelogic.domain.Behaviour#pickTarget()
 	 */
 	@Override
 	public Position pickTarget() {
