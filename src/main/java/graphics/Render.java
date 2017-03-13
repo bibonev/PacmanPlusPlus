@@ -42,9 +42,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private GameUI gameUI;
 	private Game game;
 	private GameLogic gameLogic;
-	private ArrayList<Node> allEntities;
-	private HashMap<String, RotateTransition> rotations;
-	private HashMap<String, TranslateTransition> transitions;
+	private HashMap<Integer, Node> allEntities;
+	private Node[][] worldNodes;
+	private HashMap<Integer, RotateTransition> rotations;
+	private HashMap<Integer, TranslateTransition> transitions;
 	private boolean flag;
 
 	/**
@@ -61,9 +62,9 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameLogic.getOnGameEnded().addListener(this);
 		flag = false;
 
-		transitions = new HashMap<>();
-		rotations = new HashMap<>();
-		allEntities = new ArrayList<>();
+		this.transitions = new HashMap<>();
+		this.rotations = new HashMap<>();
+		this.allEntities = new HashMap<>();
 		controlledPlayer = game.getPlayer();
 	}
 
@@ -72,79 +73,102 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 *
 	 * @return the stage that contians the scene with the map
 	 */
-	public Scene drawWorld() {
+	public Scene setupWorld() {
 		final Cell[][] cells = game.getWorld().getMap().getCells();
+		int rows = game.getWorld().getMap().getMapSize(), columns = rows;
+		worldNodes = new Node[rows][columns];
 
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
 
 		final Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
-
-		addToRoot(cells);
-
-		for (final Player player : game.getWorld().getPlayers()) {
-			final Node playerNode = new PacmanVisualisation(player).getNode();
-			final TranslateTransition transitionPlayer = new TranslateTransition(Duration.millis(140), playerNode);
-			final RotateTransition rotatePlayer = new RotateTransition(Duration.millis(30), playerNode);
-
-			transitions.put(player.getName(), transitionPlayer);
-			rotations.put(player.getName(), rotatePlayer);
-
-			allEntities.add(playerNode);
-			root.getChildren().add(playerNode);
-		}
-
-		for (final Ghost ghost : game.getWorld().getGhosts()) {
-			final Node ghostNode = new GhostVisualisation(ghost.getPosition()).getNode();
-			final TranslateTransition transitionGhost = new TranslateTransition(Duration.millis(140), ghostNode);
-
-			transitions.put(Integer.toString(ghost.getID()), transitionGhost);
-
-			allEntities.add(ghostNode);
-
-			root.getChildren().add(ghostNode);
-		}
+		redrawWorld();
 
 		return scene;
+	}
+
+	private void setupGhostAnimation(final Ghost ghost) {
+		Node ghostNode = new GhostVisualisation(ghost.getPosition()).getNode();
+		TranslateTransition transitionGhost = new TranslateTransition(Duration.millis(140), ghostNode);
+
+		transitions.put(ghost.getID(), transitionGhost);
+
+		allEntities.put(ghost.getID(), ghostNode);
+
+		root.getChildren().add(ghostNode);
+	}
+
+	private void setupPlayerAnimation(final Player player) {
+		Node playerNode = new PacmanVisualisation(player).getNode();
+		TranslateTransition transitionPlayer = new TranslateTransition(Duration.millis(140), playerNode);
+		RotateTransition rotatePlayer = new RotateTransition(Duration.millis(30), playerNode);
+
+		transitions.put(player.getID(), transitionPlayer);
+		rotations.put(player.getID(), rotatePlayer);
+
+		allEntities.put(player.getID(), playerNode);
+		root.getChildren().add(playerNode);
 	}
 
 	/**
 	 * Redraw the map
 	 */
 	public void redrawWorld() {
-		final Cell[][] cells = game.getWorld().getMap().getCells();
 		PositionVisualisation.initScreenDimensions();
 
-		clearRoot();
-		addToRoot(cells);
+    	redrawCells();
 
 		for (final Player player : game.getWorld().getPlayers()) {
-			final ImageView nextNode = new PacmanVisualisation(player).getNode();
+		    ImageView nextNode = new PacmanVisualisation(player).getNode();
+		    
+		    if(!allEntities.containsKey(player.getID()))
+		    	setupPlayerAnimation(player);
 
-			transitions.get(player.getName()).setToY(nextNode.getTranslateY());
-			transitions.get(player.getName()).setToX(nextNode.getTranslateX());
-			rotations.get(player.getName()).setToAngle(nextNode.getRotate());
+            transitions.get(player.getID()).setToY(nextNode.getTranslateY());
+            transitions.get(player.getID()).setToX(nextNode.getTranslateX());
+            rotations.get(player.getID()).setToAngle(nextNode.getRotate());
 
-			root.getChildren().get(root.getChildren().indexOf(transitions.get(player.getName()).getNode())).toFront();
-
-			rotations.get(player.getName()).play();
-			transitions.get(player.getName()).play();
-		}
+            root.getChildren().get(root.getChildren().indexOf(allEntities.get(player.getID()))).toFront();
+            rotations.get(player.getID()).play();
+            transitions.get(player.getID()).play();
+        }
 
 		for (final Ghost ghost : game.getWorld().getGhosts()) {
-			final ImageView nextNode = new GhostVisualisation(ghost.getPosition()).getNode();
+		    ImageView nextNode = new GhostVisualisation(ghost.getPosition()).getNode();
+		    
+		    if(!allEntities.containsKey(ghost.getID())) {
+		    	setupGhostAnimation(ghost);
+		    }
 
-			transitions.get(Integer.toString(ghost.getID())).setToY(nextNode.getTranslateY());
-			transitions.get(Integer.toString(ghost.getID())).setToX(nextNode.getTranslateX());
+		    transitions.get(ghost.getID()).setToY(nextNode.getTranslateY());
+            transitions.get(ghost.getID()).setToX(nextNode.getTranslateX());
 
-			root.getChildren()
-					.get(root.getChildren().indexOf(transitions.get(Integer.toString(ghost.getID())).getNode()))
-					.toFront();
+            root.getChildren().get(root.getChildren().indexOf(allEntities.get(ghost.getID()))).toFront();
 
-			transitions.get(Integer.toString(ghost.getID())).play();
+            transitions.get(ghost.getID()).play();
 		}
 
 		root.requestFocus();
+	}
+
+	
+	// only redraw cells that have changed state
+	private void redrawCells() {
+		final Cell[][] cells = game.getWorld().getMap().getCells();
+		int rows = game.getWorld().getMap().getMapSize(), columns = rows;
+		
+		for(int row = 0; row < rows; row++) {
+			for(int column = 0; column < columns; column++) {
+				boolean firstDraw = worldNodes[row][column] == null;
+				if(firstDraw || cells[row][column].needsRedraw()) {
+					if(!firstDraw) root.getChildren().remove(worldNodes[row][column]);
+					Node cv = new CellVisualisation(cells[row][column]).getNode();
+					worldNodes[row][column] = cv;
+					root.getChildren().add(cv);
+					cells[row][column].clearNeedsRedrawFlag();
+				}
+			}
+		}
 	}
 
 	/**
@@ -193,18 +217,21 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 			}
 		}
 	}
-
-	/**
-	 * Remove nodes that have been affected (like tokens)
-	 */
-	private void clearRoot() {
-		final int countOfNodes = root.getChildren().size();
-		for (int index = 0; index < countOfNodes; index++) {
-			if (index < root.getChildren().size()) {
-				if (!allEntities.contains(root.getChildren().get(index))) {
-					root.getChildren().remove(index);
-				}
+	
+	private String getGameOutcomeText(final GameOutcome gameOutcome) {
+		switch(gameOutcome.getOutcomeType()) {
+		case GHOSTS_WON:
+			return "Damn! The ghosts won this time...";
+		case PLAYER_WON:
+			if(gameOutcome.getWinner().getID() == game.getPlayer().getID()) {
+				return "Wohoo, you won!";
+			} else {
+				return "Damn, " + gameOutcome.getWinner().getName() + " won this time!";
 			}
+		case TIE:
+			return "No one won. Stop being bad at the game";
+		default:
+			return "A " + gameOutcome.getOutcomeType().name() + " happened";
 		}
 	}
 
@@ -213,8 +240,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
 		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
 
-		final Label outcomneLabel = new Label(
-				gameOutcome.getOutcomeType() == GameOutcomeType.GHOSTS_WON ? "Damn! You lost!" : "Wohoo, You won!");
+		final Label outcomneLabel = new Label(getGameOutcomeText(gameOutcome));
 		outcomneLabel.setStyle(
 				"-fx-text-fill: goldenrod; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
 
