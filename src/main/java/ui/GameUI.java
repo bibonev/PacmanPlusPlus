@@ -1,5 +1,7 @@
 package main.java.ui;
 
+import java.util.List;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -9,6 +11,8 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import main.java.audio.DefaultMusic;
+import main.java.audio.DisabledMusic;
 import main.java.audio.Music;
 import main.java.audio.SoundEffects;
 import main.java.constants.GameType;
@@ -63,9 +67,13 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	@Override
 	public void start(final Stage primaryStage) throws Exception {
+		boolean audioDisabled = false;
+		List<String> params = getParameters().getUnnamed();
+		if(params.contains("--noaudio")) audioDisabled = true;
+		
 		gameCommandService = new GameCommandService();
 		gameCommandService.getGameStartedEvent().addListener(this);
-		setup();
+		setup(audioDisabled);
 
 		thisStage = primaryStage;
 		primaryStage.setTitle("PacMac");
@@ -98,8 +106,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		return onGameClosing;
 	}
 
-	private void setup() {
-		music = new Music();
+	private void setup(boolean audioDisabled) {
+		music = audioDisabled ? new DisabledMusic() : new DefaultMusic();
 		// sounds = new SoundEffects();
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
@@ -314,14 +322,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				PositionVisualisation.initScreenDimensions();
 
 				// Draw Map
-				thisStage.setScene(mapV.drawWorld());
+				thisStage.setScene(mapV.setupWorld());
 				thisStage.show();
 
 				// Add CLick Listener
 				mapV.addClickListener();
-
-				// Redraw Map
-				mapV.redrawWorld();
 
 				// Start Timeline
 				mapV.startTimeline();

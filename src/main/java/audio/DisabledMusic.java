@@ -13,16 +13,13 @@ import javafx.util.Duration;
  * @author Rose Kirtley
  *
  */
-public interface Music {
-	/**
-	 * Set whether the background music is playing or not
-	 * 
-	 * @param bool,
-	 *            true for music to play, false to turn music off
-	 */
-	public void setOn(final boolean bool);
+public class DisabledMusic implements Music {
+	@Override
+	public void setOn(boolean bool) {}
 
-	public void playMusic();
+	@Override
+	public void playMusic() {}
 
-	public void stopMusic();
+	@Override
+	public void stopMusic() {}
 }
