@@ -14,7 +14,6 @@ import javafx.util.Duration;
  *
  */
 public interface Music {
-
 	/**
 	 * Set whether the background music is playing or not
 	 * 
