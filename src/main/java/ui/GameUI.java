@@ -2,8 +2,14 @@ package main.java.ui;
 
 import java.util.List;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import main.java.audio.DefaultMusic;
 import main.java.audio.DisabledMusic;
 import main.java.audio.Music;
@@ -48,6 +55,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	private BorderPane banner;
 	public Button settings;
 	private StackPane centerPane;
+	
+	private static final Integer STARTTIME = 3;
+	private Timeline timeline;
+	private Label timerLabel = new Label();
+	private IntegerProperty timeSeconds = new SimpleIntegerProperty(STARTTIME);
 
 	private boolean isPlaying;
 	private String name;
@@ -55,7 +67,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public Screen currentScreen;
 	public LogInScreen logInScreen;
 	public MenuScreen menuScreen;
-	// private GameScreen gameScreen;
 	private SettingsScreen settingsScreen;
 	private SinglePlayerLobbyScreen singlePlayerLobbyScreen;
 	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
@@ -91,6 +102,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		pane.getStyleClass().add("paneStyle");
 
 		setUpSettingsButton();
+		
+		timerLabel.setText(timeSeconds.toString());
+		timerLabel.getStyleClass().add("countdown");
+		timerLabel.setAlignment(Pos.CENTER);
+	    timerLabel.textProperty().bind(timeSeconds.asString());
 
 		primaryStage.setScene(uiScene);
 		switchToLogIn();
@@ -117,6 +133,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(this);
 		multiPlayerOptionScreen = new MultiPlayerOptionScreen(this);
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
+		
 	}
 
 	private void sendMoveEvent(final KeyCode key) {
@@ -124,10 +141,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 			currentScreen.changeSelection(true);
 		} else if (key == KeyCode.DOWN) {
 			currentScreen.changeSelection(false);
-		} else if (key == KeyCode.ENTER) {
-			currentScreen.makeSelection();
 		}
-
+		
 		//
 		// if(key == KeyCode.R){
 		// if(isPlaying){
@@ -185,7 +200,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		settings.setDisable(true);
 		music.playMusic();
 		isPlaying = true;
-		// setScreen(gameScreen);
 	}
 
 	public void switchToSettings() {
@@ -312,25 +326,45 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void onGameStarted(final GameStartedEventArgs args) {
 		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
-				switchToGame();
-
-				switchToMultiPlayerLobby();
-
-				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
-
-				// Initialize Screen dimensions
-				PositionVisualisation.initScreenDimensions();
-
-				// Draw Map
-				thisStage.setScene(mapV.setupWorld());
-				thisStage.show();
-
-				// Add CLick Listener
-				mapV.addClickListener();
-
-				// Start Timeline
-				mapV.startTimeline();
+				timer(args);
 			});
 		}
+	}
+	
+	public void timerEnded(GameStartedEventArgs args){
+		switchToGame();
+
+		final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
+
+		// Initialize Screen dimensions
+		PositionVisualisation.initScreenDimensions();
+
+		// Draw Map
+		thisStage.setScene(mapV.setupWorld());
+		thisStage.show();
+
+		// Add CLick Listener
+		mapV.addClickListener();
+
+		// Start Timeline
+		mapV.startTimeline();
+	}
+
+	private void timer(GameStartedEventArgs args){
+		centerPane.getChildren().add(timerLabel);
+		 if(timeline != null)
+             timeline.stop();
+
+         timeSeconds.set(STARTTIME);
+         timeline = new Timeline();
+
+         KeyValue keyValue = new KeyValue(timeSeconds, 1);
+         KeyFrame keyFrame = new KeyFrame(Duration.seconds(STARTTIME + 1), keyValue);
+
+         timeline.getKeyFrames().add(keyFrame);
+         timeline.playFromStart();
+         
+         timeline.setOnFinished(e -> timerEnded(args));
+		
 	}
 }
