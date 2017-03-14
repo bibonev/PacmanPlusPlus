@@ -144,20 +144,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		} else if (key == KeyCode.DOWN) {
 			currentScreen.changeSelection(false);
 		}
-<<<<<<< HEAD
-=======
-		
-		//
-		// if(key == KeyCode.R){
-		// if(isPlaying){
-		// music.stopMusic();
-		// isPlaying = false;
-		// }else{
-		// music.playMusic();
-		// isPlaying = true;
-		// }
-		// }
->>>>>>> countdown added
 	}
 
 	private void setUpSettingsButton() {
@@ -326,12 +312,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 	
 	public void timerEnded(GameStartedEventArgs args){
+
 		final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
 
 		args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) music);
 		args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) sounds);
-		
-		switchToMultiPlayerLobby();
 		
 		// Initialize Screen dimensions
 		PositionVisualisation.initScreenDimensions();
