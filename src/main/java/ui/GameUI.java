@@ -20,6 +20,7 @@ import main.java.event.Event;
 import main.java.event.arguments.GameStartedEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
 import main.java.event.listener.GameClosingListener;
+import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.GameStartedListener;
 import main.java.event.listener.LobbyStateChangedListener;
 import main.java.gamelogic.core.GameCommandService;
@@ -49,7 +50,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public Button settings;
 	private StackPane centerPane;
 
-	private boolean isPlaying;
 	private String name;
 
 	public Screen currentScreen;
@@ -108,7 +108,9 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	private void setup(boolean audioDisabled) {
 		music = audioDisabled ? new DisabledMusic() : new DefaultMusic();
-		// sounds = new SoundEffects();
+		gameCommandService.getGameStartedEvent().addListener((GameStartedListener) music);
+		sounds = new SoundEffects(this);
+		gameCommandService.getGameStartedEvent().addListener((GameStartedListener) sounds);
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
 		settingsScreen = new SettingsScreen(this);
@@ -127,17 +129,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		} else if (key == KeyCode.ENTER) {
 			currentScreen.makeSelection();
 		}
-
-		//
-		// if(key == KeyCode.R){
-		// if(isPlaying){
-		// music.stopMusic();
-		// isPlaying = false;
-		// }else{
-		// music.playMusic();
-		// isPlaying = true;
-		// }
-		// }
 	}
 
 	private void setUpSettingsButton() {
@@ -165,13 +156,12 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
-		music.stopMusic(); // TODO move to when game ends
+		//music.stopMusic(); // TODO move to when game ends
 		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		settings.setDisable(false);
-		isPlaying = false;
 	}
 
 	public void switchToLogIn() {
@@ -179,13 +169,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		setScreen(logInScreen);
-	}
-
-	public void switchToGame() {
-		settings.setDisable(true);
-		music.playMusic();
-		isPlaying = true;
-		// setScreen(gameScreen);
 	}
 
 	public void switchToSettings() {
@@ -217,10 +200,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void close() {
 		thisStage.close();
-	}
-
-	public void setIsPlaying(final boolean bool) {
-		isPlaying = bool;
 	}
 
 	public Game getGame() {
@@ -312,8 +291,9 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void onGameStarted(final GameStartedEventArgs args) {
 		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
-				switchToGame();
-
+				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) music);
+				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) sounds);
+				
 				switchToMultiPlayerLobby();
 
 				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());

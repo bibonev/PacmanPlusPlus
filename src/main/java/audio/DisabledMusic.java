@@ -6,6 +6,10 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
+import main.java.event.arguments.GameEndedEventArgs;
+import main.java.event.arguments.GameStartedEventArgs;
+import main.java.event.listener.GameEndedListener;
+import main.java.event.listener.GameStartedListener;
 
 /**
  * Class for playing background music
@@ -13,7 +17,7 @@ import javafx.util.Duration;
  * @author Rose Kirtley
  *
  */
-public class DisabledMusic implements Music {
+public class DisabledMusic implements Music, GameStartedListener, GameEndedListener {
 	@Override
 	public void setOn(boolean bool) {}
 
@@ -22,4 +26,10 @@ public class DisabledMusic implements Music {
 
 	@Override
 	public void stopMusic() {}
+
+	@Override
+	public void onGameEnded(GameEndedEventArgs args) {}
+
+	@Override
+	public void onGameStarted(GameStartedEventArgs args) {}
 }
