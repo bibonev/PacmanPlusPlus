@@ -26,6 +26,7 @@ import main.java.constants.GameType;
 import main.java.event.Event;
 import main.java.event.arguments.GameStartedEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
+import main.java.event.listener.CountDownStartingListener;
 import main.java.event.listener.GameClosingListener;
 import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.GameStartedListener;
@@ -35,6 +36,7 @@ import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.domain.Game;
 import main.java.graphics.PositionVisualisation;
 import main.java.graphics.Render;
+import main.java.networking.data.Packet;
 import main.java.networking.integration.ClientInstance;
 import main.java.networking.integration.ServerInstance;
 
@@ -171,7 +173,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
-		//music.stopMusic(); // TODO move to when game ends
 		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
 		label.getStyleClass().add("labelStyle");
@@ -246,6 +247,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 			server.stop();
 		});
 		multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
+		multiPlayerLobbyScreen.getCountDownStartingListener().addListener(server);
 		multiPlayerLobbyScreen.setStartGameEnabled(true);
 		gameCommandService.getGameStartedEvent().addListener(client);
 		gameCommandService.getGameStartedEvent().addListener(server);
@@ -306,33 +308,36 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void onGameStarted(final GameStartedEventArgs args) {
 		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
-				timer(args);
+				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
+
+				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) music);
+				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) sounds);
+				
+				// Initialize Screen dimensions
+				PositionVisualisation.initScreenDimensions();
+
+				// Draw Map
+				thisStage.setScene(mapV.setupWorld());
+				thisStage.show();
+
+				// Add CLick Listener
+				mapV.addClickListener();
+
+				// Start Timeline
+				mapV.startTimeline();
 			});
 		}
 	}
 	
-	public void timerEnded(GameStartedEventArgs args){
-
-		final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
-
-		args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) music);
-		args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) sounds);
-		
-		// Initialize Screen dimensions
-		PositionVisualisation.initScreenDimensions();
-
-		// Draw Map
-		thisStage.setScene(mapV.setupWorld());
-		thisStage.show();
-
-		// Add CLick Listener
-		mapV.addClickListener();
-
-		// Start Timeline
-		mapV.startTimeline();
+	public void timerEnded(){
+		if(multiPlayerLobbyScreen.thisClient){
+			multiPlayerLobbyScreen.getHostStartingGameListener().fire(null);
+			multiPlayerLobbyScreen.thisClient = false;
+		}
 	}
 
-	private void timer(GameStartedEventArgs args){
+	public void timer(){
+		Platform.runLater(() -> {
 		centerPane.getChildren().add(timerLabel);
 		 if(timeline != null)
              timeline.stop();
@@ -346,7 +351,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
          timeline.getKeyFrames().add(keyFrame);
          timeline.playFromStart();
          
-         timeline.setOnFinished(e -> timerEnded(args));
-		
+         timeline.setOnFinished(e -> timerEnded());
+		});
 	}
 }
