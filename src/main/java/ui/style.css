@@ -107,6 +107,12 @@
         -fx-text-fill: rgba(255,255,255,1); 
 }
 
+.countdown {
+        -fx-font-family: "Courier New";
+        -fx-font-size: 100px; 
+        -fx-text-fill: rgba(255,255,255,1); 
+}
+
 .text-field {
         -fx-font-family: "Courier New";
         -fx-background-color: rgba(1,1,1,1);

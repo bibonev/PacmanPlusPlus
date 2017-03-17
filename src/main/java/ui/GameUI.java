@@ -2,8 +2,14 @@ package main.java.ui;
 
 import java.util.List;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,22 +17,28 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import main.java.audio.DefaultMusic;
+import main.java.audio.DefaultSoundEffects;
 import main.java.audio.DisabledMusic;
+import main.java.audio.DisabledSoundEffects;
 import main.java.audio.Music;
 import main.java.audio.SoundEffects;
 import main.java.constants.GameType;
 import main.java.event.Event;
 import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
+import main.java.event.listener.CountDownStartingListener;
 import main.java.event.listener.GameClosingListener;
 import main.java.event.listener.GameCreatedListener;
+import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.LobbyStateChangedListener;
 import main.java.gamelogic.core.GameCommandService;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.domain.Game;
 import main.java.graphics.PositionVisualisation;
 import main.java.graphics.Render;
+import main.java.networking.data.Packet;
 import main.java.networking.integration.ClientInstance;
 import main.java.networking.integration.ServerInstance;
 
@@ -48,14 +60,17 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	private BorderPane banner;
 	public Button settings;
 	private StackPane centerPane;
+	
+	private static final Integer STARTTIME = 3;
+	private Timeline timeline;
+	private Label timerLabel = new Label();
+	private IntegerProperty timeSeconds = new SimpleIntegerProperty(STARTTIME);
 
-	private boolean isPlaying;
 	private String name;
 
 	public Screen currentScreen;
 	public LogInScreen logInScreen;
 	public MenuScreen menuScreen;
-	// private GameScreen gameScreen;
 	private SettingsScreen settingsScreen;
 	private SinglePlayerLobbyScreen singlePlayerLobbyScreen;
 	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
@@ -91,6 +106,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		pane.getStyleClass().add("paneStyle");
 
 		setUpSettingsButton();
+		
+		timerLabel.setText(timeSeconds.toString());
+		timerLabel.getStyleClass().add("countdown");
+		timerLabel.setAlignment(Pos.CENTER);
+	    timerLabel.textProperty().bind(timeSeconds.asString());
 
 		primaryStage.setScene(uiScene);
 		switchToLogIn();
@@ -108,7 +128,9 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	private void setup(boolean audioDisabled) {
 		music = audioDisabled ? new DisabledMusic() : new DefaultMusic();
-		// sounds = new SoundEffects();
+		gameCommandService.getGameCreatedEvent().addListener(music);
+		sounds = audioDisabled ? new DisabledSoundEffects() : new DefaultSoundEffects(this);
+		gameCommandService.getGameCreatedEvent().addListener(sounds);
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
 		settingsScreen = new SettingsScreen(this);
@@ -117,6 +139,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(this);
 		multiPlayerOptionScreen = new MultiPlayerOptionScreen(this);
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
+		
 	}
 
 	private void sendMoveEvent(final KeyCode key) {
@@ -124,20 +147,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 			currentScreen.changeSelection(true);
 		} else if (key == KeyCode.DOWN) {
 			currentScreen.changeSelection(false);
-		} else if (key == KeyCode.ENTER) {
-			currentScreen.makeSelection();
 		}
-
-		//
-		// if(key == KeyCode.R){
-		// if(isPlaying){
-		// music.stopMusic();
-		// isPlaying = false;
-		// }else{
-		// music.playMusic();
-		// isPlaying = true;
-		// }
-		// }
 	}
 
 	private void setUpSettingsButton() {
@@ -165,13 +175,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
-		music.stopMusic(); // TODO move to when game ends
 		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		settings.setDisable(false);
-		isPlaying = false;
 	}
 
 	public void switchToLogIn() {
@@ -179,13 +187,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		setScreen(logInScreen);
-	}
-
-	public void switchToGame() {
-		settings.setDisable(true);
-		music.playMusic();
-		isPlaying = true;
-		// setScreen(gameScreen);
 	}
 
 	public void switchToSettings() {
@@ -219,10 +220,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		thisStage.close();
 	}
 
-	public void setIsPlaying(final boolean bool) {
-		isPlaying = bool;
-	}
-
 	public Game getGame() {
 		return game;
 	}
@@ -252,6 +249,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 			server.stop();
 		});
 		multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
+		multiPlayerLobbyScreen.getCountDownStartingListener().addListener(server);
 		multiPlayerLobbyScreen.setStartGameEnabled(true);
 		gameCommandService.getGameCreatedEvent().addListener(client);
 		gameCommandService.getGameCreatedEvent().addListener(server);
@@ -312,11 +310,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void onGameCreated(final GameCreatedEventArgs args) {
 		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
-				switchToGame();
-
-				switchToMultiPlayerLobby();
 				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
 
+				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) music);
+				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) sounds);
+				
 				// Initialize Screen dimensions
 				PositionVisualisation.initScreenDimensions();
 
@@ -331,5 +329,31 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				mapV.startTimeline();
 			});
 		}
+	}
+	
+	public void timerEnded(){
+		if(multiPlayerLobbyScreen.thisClient){
+			multiPlayerLobbyScreen.getHostStartingGameListener().fire(null);
+			multiPlayerLobbyScreen.thisClient = false;
+		}
+	}
+
+	public void timer(){
+		Platform.runLater(() -> {
+		centerPane.getChildren().add(timerLabel);
+		 if(timeline != null)
+             timeline.stop();
+
+         timeSeconds.set(STARTTIME);
+         timeline = new Timeline();
+
+         KeyValue keyValue = new KeyValue(timeSeconds, 1);
+         KeyFrame keyFrame = new KeyFrame(Duration.seconds(STARTTIME + 1), keyValue);
+
+         timeline.getKeyFrames().add(keyFrame);
+         timeline.playFromStart();
+         
+         timeline.setOnFinished(e -> timerEnded());
+		});
 	}
 }

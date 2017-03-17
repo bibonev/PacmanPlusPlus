@@ -14,6 +14,7 @@ import main.java.event.arguments.LobbyChangedEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
 import main.java.event.arguments.PlayerMovedEventArgs;
 import main.java.event.listener.CellStateChangedEventListener;
+import main.java.event.listener.CountDownStartingListener;
 import main.java.event.listener.EntityAddedListener;
 import main.java.event.listener.EntityRemovingListener;
 import main.java.event.listener.GameEndedListener;
@@ -46,7 +47,7 @@ import main.java.ui.GameUI;
 
 public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,
-		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener {
+		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener, CountDownStartingListener {
 	private Server server;
 	private ServerManager manager;
 	private Game game;
@@ -277,6 +278,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	private void triggerClientReadyToStart(int sender, Packet p) {
+		if(!lobby.getPlayer(sender).isReady())
 		lobby.getPlayer(sender).setReady(true);
 		
 		if(lobby.allReady()) {
@@ -493,6 +495,12 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			throw new IllegalStateException("Unhandled game outcome: " + o.name());
 		}
 
+		manager.dispatchAll(p);
+	}
+
+	@Override
+	public void onCountDownStarted() {
+		final Packet p = new Packet("count-down-started");
 		manager.dispatchAll(p);
 	}
 

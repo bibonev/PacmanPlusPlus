@@ -252,7 +252,13 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerLocalPlayerDied(p);
 		} else if (p.getPacketName().equals("local-player-joined")) {
 			triggerLocalPlayerJoined(p);
+		} else if (p.getPacketName().equals("count-down-started")) {
+			triggerCountDown(p);
 		}
+	}
+	
+	private void triggerCountDown(final Packet p) {
+		gameUI.timer();
 	}
 
 	private void triggerLocalPlayerJoined(Packet p) {

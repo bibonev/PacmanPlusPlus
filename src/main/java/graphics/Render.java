@@ -91,6 +91,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 		final Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
 		redrawWorld();
+		gameLogic.readyToStart();
 
 		return scene;
 	}
@@ -201,10 +202,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 					controlledPlayer.moveRight();
 					redrawWorld();
 				}
-			} else {
-
-				
-				gameLogic.readyToStart();
 			}
 		});
 	}
