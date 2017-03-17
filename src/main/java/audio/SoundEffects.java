@@ -86,7 +86,6 @@ public class SoundEffects implements GameEndedListener, GameStartedListener {
 
 	@Override
 	public void onGameEnded(GameEndedEventArgs args) {
-		System.out.println("game eneded");
 		if (isOn) {
 			if(args.getOutcome().getOutcomeType() == GameOutcomeType.PLAYER_WON &&
 					args.getOutcome().getWinner().getName()==game.getName()){
@@ -99,7 +98,6 @@ public class SoundEffects implements GameEndedListener, GameStartedListener {
 
 	@Override
 	public void onGameStarted(GameStartedEventArgs args) {
-		System.out.println("game started");
 		if (isOn) {
 			startPlayer.play();
 		}

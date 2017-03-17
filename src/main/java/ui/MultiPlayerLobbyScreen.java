@@ -10,6 +10,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import main.java.event.Event;
 import main.java.event.arguments.HostStartingMultiplayerGameEventArgs;
+import main.java.event.listener.CountDownStartingListener;
 import main.java.event.listener.HostStartingMultiplayerGameListener;
 import main.java.event.listener.UserLeavingLobbyListener;
 import main.java.gamelogic.domain.GameSettings;
@@ -28,11 +29,13 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 	private Button settings;
 	private Label label;
 
+	public boolean thisClient;
 	public PlayersList list;
 	private GameSettings gameSettings;
 
 	private Event<UserLeavingLobbyListener, Object> userLeavingLobbyEvent;
 	private Event<HostStartingMultiplayerGameListener, Object> hostStartingGameListener;
+	private Event<CountDownStartingListener, Object> countDownStartingListener;
 
 	public MultiPlayerLobbyScreen(final GameUI game) {
 		super(game);
@@ -84,6 +87,9 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 		hostStartingGameListener = new Event<>(
 				(l, a) -> l.onHostStartingGame(new HostStartingMultiplayerGameEventArgs(getMultiplayerSettings())));
 
+		countDownStartingListener = new Event<>((l, a) -> l.onCountDownStarted());
+
+		
 		addNames();
 	}
 
@@ -107,8 +113,8 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 	}
 
 	private void play() {
-		// pane.getChildren().remove(list.getPane());
-		getHostStartingGameListener().fire(null);
+		thisClient = true;
+		getCountDownStartingListener().fire(null);
 	}
 
 	public void setStartGameEnabled(final boolean enabled) {
@@ -117,7 +123,6 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 
 	private void leaveGame() {
 		// fire event for leaving a multiplayer game
-		// pane.getChildren().remove(list.getPane());
 		game.switchToMenu();
 		userLeavingLobbyEvent.fire(null);
 	}
@@ -133,6 +138,10 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 
 	public Event<HostStartingMultiplayerGameListener, Object> getHostStartingGameListener() {
 		return hostStartingGameListener;
+	}
+	
+	public Event<CountDownStartingListener, Object> getCountDownStartingListener(){
+		return countDownStartingListener;
 	}
 
 	@Override
