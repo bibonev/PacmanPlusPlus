@@ -20,14 +20,19 @@ import javafx.util.Duration;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
 import main.java.constants.ScreenSize;
+import main.java.event.Event;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
+import main.java.event.arguments.GameStartedEventArgs;
+import main.java.event.arguments.SingleplayerGameStartingEventArgs;
 import main.java.event.listener.GameDisplayInvalidatedListener;
 import main.java.event.listener.GameEndedListener;
+import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Game;
+import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.Player;
 import main.java.ui.GameUI;
@@ -47,9 +52,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private HashMap<Integer, RotateTransition> rotations;
 	private HashMap<Integer, TranslateTransition> transitions;
 	private boolean flag;
+	private Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> onStartingSingleplayerGame;
 
 	/**
-	 * Initialize new visualisation of the map
+	 * Initialise new visualisation of the map
 	 *
 	 * @param gameUI
 	 * @param game
@@ -60,12 +66,13 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameLogic = gameLogic;
 		this.gameLogic.getOnGameDisplayInvalidated().addListener(this);
 		this.gameLogic.getOnGameEnded().addListener(this);
-		flag = false;
+		this.flag = false;
 
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
 		this.allEntities = new HashMap<>();
-		controlledPlayer = game.getPlayer();
+		this.controlledPlayer = game.getPlayer();
+		this.onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
 	}
 
 	/**
@@ -194,7 +201,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	}
 
 	/**
-	 * Start the timeline
+	 * Start the time line
 	 */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(200), event -> {
@@ -202,20 +209,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
-	}
-
-	/**
-	 * Add all nodes to parent root
-	 *
-	 * @param cells
-	 */
-	private void addToRoot(final Cell[][] cells) {
-		for (final Cell[] cell : cells) {
-			for (final Cell c : cell) {
-				final Node cv = new CellVisualisation(c).getNode();
-				root.getChildren().add(cv);
-			}
-		}
 	}
 	
 	private String getGameOutcomeText(final GameOutcome gameOutcome) {
@@ -259,24 +252,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		return pane;
 	}
 
-	/**
-	 * End the game
-	 */
-	private void gameEnded(final GameOutcome gameOutcome) {
-		timeLine.stop();
-
-		root.getChildren().add(gameEndedWindow(gameOutcome));
-		root.setOnKeyPressed(e -> {
-			if (e.getCode() == KeyCode.SPACE) {
-				addClickListener();
-				startTimeline();
-				redrawWorld();
-			} else if (e.getCode() == KeyCode.ESCAPE) {
-				gameUI.switchToMenu();
-			}
-		});
-	}
-
 	@Override
 	public void onGameDisplayInvalidated(final GameDisplayInvalidatedEventArgs args) {
 		if (!game.hasEnded()) {
@@ -286,6 +261,20 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 	@Override
 	public void onGameEnded(final GameEndedEventArgs args) {
-		gameEnded(args.getOutcome());
+		timeLine.stop();
+
+		root.getChildren().add(gameEndedWindow(args.getOutcome()));
+		root.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.SPACE) {
+				getOnStartingSingleplayerGame().fire(
+						new SingleplayerGameStartingEventArgs(new GameSettings(), this.gameUI.getName()));
+			} else if (e.getCode() == KeyCode.ESCAPE) {
+				gameUI.switchToMenu();
+			}
+		});
+	}
+	
+	public Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> getOnStartingSingleplayerGame() {
+		return onStartingSingleplayerGame;
 	}
 }
