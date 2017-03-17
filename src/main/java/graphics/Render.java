@@ -22,8 +22,12 @@ import main.java.constants.GameOutcomeType;
 import main.java.constants.ScreenSize;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
+import main.java.event.arguments.LocalPlayerDespawnEventArgs;
+import main.java.event.arguments.LocalPlayerSpawnEventArgs;
 import main.java.event.listener.GameDisplayInvalidatedListener;
 import main.java.event.listener.GameEndedListener;
+import main.java.event.listener.LocalPlayerDespawnListener;
+import main.java.event.listener.LocalPlayerSpawnListener;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.ControlledPlayer;
@@ -35,7 +39,8 @@ import main.java.ui.GameUI;
 /**
  * Created by Boyan Bonev on 09/02/2017.
  */
-public class Render implements GameDisplayInvalidatedListener, GameEndedListener {
+public class Render implements GameDisplayInvalidatedListener, GameEndedListener,
+		LocalPlayerSpawnListener, LocalPlayerDespawnListener {
 	private Pane root;
 	private Timeline timeLine;
 	private ControlledPlayer controlledPlayer;
@@ -47,6 +52,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private HashMap<Integer, RotateTransition> rotations;
 	private HashMap<Integer, TranslateTransition> transitions;
 	private boolean flag;
+	private Node playerRespawnWindow;
+	private Node gameOverWindow;
 
 	/**
 	 * Initialize new visualisation of the map
@@ -60,12 +67,13 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameLogic = gameLogic;
 		this.gameLogic.getOnGameDisplayInvalidated().addListener(this);
 		this.gameLogic.getOnGameEnded().addListener(this);
+		this.gameLogic.getOnLocalPlayerSpawn().addListener(this);
+		this.gameLogic.getOnLocalPlayerDespawn().addListener(this);
 		flag = false;
 
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
 		this.allEntities = new HashMap<>();
-		controlledPlayer = game.getPlayer();
 	}
 
 	/**
@@ -177,18 +185,26 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 */
 	public void addClickListener() {
 		root.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.UP) {
-				controlledPlayer.moveUp();
-				redrawWorld();
-			} else if (event.getCode() == KeyCode.DOWN) {
-				controlledPlayer.moveDown();
-				redrawWorld();
-			} else if (event.getCode() == KeyCode.LEFT) {
-				controlledPlayer.moveLeft();
-				redrawWorld();
-			} else if (event.getCode() == KeyCode.RIGHT) {
-				controlledPlayer.moveRight();
-				redrawWorld();
+			if(controlledPlayer != null) {
+				// ie. the player isn't dead
+				
+				if (event.getCode() == KeyCode.UP) {
+					controlledPlayer.moveUp();
+					redrawWorld();
+				} else if (event.getCode() == KeyCode.DOWN) {
+					controlledPlayer.moveDown();
+					redrawWorld();
+				} else if (event.getCode() == KeyCode.LEFT) {
+					controlledPlayer.moveLeft();
+					redrawWorld();
+				} else if (event.getCode() == KeyCode.RIGHT) {
+					controlledPlayer.moveRight();
+					redrawWorld();
+				}
+			} else {
+
+				
+				gameLogic.readyToStart();
 			}
 		});
 	}
@@ -203,27 +219,13 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
 	}
-
-	/**
-	 * Add all nodes to parent root
-	 *
-	 * @param cells
-	 */
-	private void addToRoot(final Cell[][] cells) {
-		for (final Cell[] cell : cells) {
-			for (final Cell c : cell) {
-				final Node cv = new CellVisualisation(c).getNode();
-				root.getChildren().add(cv);
-			}
-		}
-	}
 	
 	private String getGameOutcomeText(final GameOutcome gameOutcome) {
 		switch(gameOutcome.getOutcomeType()) {
 		case GHOSTS_WON:
 			return "Damn! The ghosts won this time...";
 		case PLAYER_WON:
-			if(gameOutcome.getWinner().getID() == game.getPlayer().getID()) {
+			if(gameOutcome.getWinner().getID() == controlledPlayer.getID()) {
 				return "Wohoo, you won!";
 			} else {
 				return "Damn, " + gameOutcome.getWinner().getName() + " won this time!";
@@ -235,7 +237,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}
 	}
 
-	private StackPane gameEndedWindow(final GameOutcome gameOutcome) {
+	private StackPane getGameOverWindow(final GameOutcome gameOutcome) {
 		final StackPane pane = new StackPane();
 		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
 		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
@@ -259,19 +261,48 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		return pane;
 	}
 
+	private StackPane getPlayerRespawnWindow(final String deathReason, boolean mayRetry) {
+		final StackPane pane = new StackPane();
+		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
+		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
+
+		final Label outcomneLabel = new Label("You died!");
+		outcomneLabel.setStyle(
+				"-fx-text-fill: goldenrod; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
+
+		final Label escLable = new Label(deathReason);
+		escLable.setStyle(
+				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
+
+		String retryString = mayRetry ? "Press SPACE to respawn" : "You're knocked out of the round!";
+		final Label spaceLabel = new Label(retryString);
+		spaceLabel.setStyle(
+				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center");
+		StackPane.setAlignment(outcomneLabel, Pos.TOP_CENTER);
+		StackPane.setAlignment(escLable, Pos.CENTER);
+		StackPane.setAlignment(spaceLabel, Pos.CENTER);
+
+		pane.getChildren().addAll(outcomneLabel, escLable, spaceLabel);
+		return pane;
+	}
+	
+	private void clearWindows() {
+		if(root.getChildren().contains(gameOverWindow))
+			root.getChildren().remove(gameOverWindow);
+		if(root.getChildren().contains(playerRespawnWindow))
+			root.getChildren().remove(playerRespawnWindow);
+	}
+
 	/**
 	 * End the game
 	 */
 	private void gameEnded(final GameOutcome gameOutcome) {
 		timeLine.stop();
-
-		root.getChildren().add(gameEndedWindow(gameOutcome));
+clearWindows();
+		gameOverWindow = getGameOverWindow(gameOutcome);
+		root.getChildren().add(gameOverWindow);
 		root.setOnKeyPressed(e -> {
-			if (e.getCode() == KeyCode.SPACE) {
-				addClickListener();
-				startTimeline();
-				redrawWorld();
-			} else if (e.getCode() == KeyCode.ESCAPE) {
+			if (e.getCode() == KeyCode.ESCAPE) {
 				gameUI.switchToMenu();
 			}
 		});
@@ -286,6 +317,38 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 	@Override
 	public void onGameEnded(final GameEndedEventArgs args) {
-		gameEnded(args.getOutcome());
+		Platform.runLater(() -> {
+			gameEnded(args.getOutcome());
+		});
+	}
+
+	@Override
+	public void onLocalPlayerDespawn(LocalPlayerDespawnEventArgs args) {
+		this.controlledPlayer = null;
+		Platform.runLater(() -> {
+			playerDied(args.getMessage(), args.isCanRespawn());
+		});
+	}
+
+	private void playerDied(String message, boolean canRespawn) {
+		clearWindows();
+		playerRespawnWindow = getPlayerRespawnWindow(message, canRespawn);
+		root.getChildren().add(playerRespawnWindow);
+		root.setOnKeyPressed(e -> {
+			if (e.getCode() == KeyCode.ESCAPE) {
+				gameUI.switchToMenu();
+			}
+		});
+	}
+	
+	private void playerRespawn() {
+		clearWindows();
+		this.addClickListener();
+	}
+
+	@Override
+	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
+		this.controlledPlayer = args.getPlayer();
+		Platform.runLater(this::playerRespawn);
 	}
 }

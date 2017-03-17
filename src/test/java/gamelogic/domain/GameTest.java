@@ -1,4 +1,4 @@
-package test.java.gamelogic.domain;
+ package test.java.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
 
@@ -19,13 +19,11 @@ public class GameTest {
 		// Given
 		final World world = Randoms.randomWorld();
 		final GameSettings gameSettings = Randoms.randomGameSettings();
-		final ControlledPlayer controlledPlayer = Randoms.randomControlledPlayer();
 
 		// When
-		final Game game = new Game(world, gameSettings, controlledPlayer, GameType.SINGLEPLAYER);
+		final Game game = new Game(world, gameSettings, GameType.SINGLEPLAYER);
 
 		// Then
-		assertThat(game.getPlayer(), Is.is(controlledPlayer));
 		assertThat(game.getWorld(), Is.is(world));
 		assertThat(game.getGameSettings(), Is.is(gameSettings));
 	}

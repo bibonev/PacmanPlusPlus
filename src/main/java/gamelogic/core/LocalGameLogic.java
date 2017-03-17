@@ -10,26 +10,21 @@ import java.util.stream.Stream;
 import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
-import main.java.event.Event;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
-import main.java.event.listener.GameDisplayInvalidatedListener;
-import main.java.event.listener.GameEndedListener;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.Player;
 
-public class LocalGameLogic implements GameLogic {
+public class LocalGameLogic extends GameLogic {
+
 	private Game game;
-	private Event<GameDisplayInvalidatedListener, GameDisplayInvalidatedEventArgs> onGameDisplayInvalidated;
-	private Event<GameEndedListener, GameEndedEventArgs> onGameEnded;
 
 	public LocalGameLogic(final Game game) {
+		super(game);
 		this.game = game;
-		onGameDisplayInvalidated = new Event<>((l, a) -> l.onGameDisplayInvalidated(a));
-		onGameEnded = new Event<>((l, a) -> l.onGameEnded(a));
 	}
 
 	public Game getGame() {
@@ -38,7 +33,7 @@ public class LocalGameLogic implements GameLogic {
 
 	@Override
 	public void gameStep(final int period) {
-		if (!game.hasEnded()) {
+		if (game.hasStarted() && !game.hasEnded()) {
 			checkEndingConditions();
 			game.getWorld().getMap().gameStep(game);
 			final HashSet<Player> eatenPlayers = new HashSet<>();
@@ -113,23 +108,13 @@ public class LocalGameLogic implements GameLogic {
 	}
 
 	private void invalidateDisplay() {
-		onGameDisplayInvalidated.fire(new GameDisplayInvalidatedEventArgs(this));
+		getOnGameDisplayInvalidated().fire(new GameDisplayInvalidatedEventArgs(this));
 	}
 
 	private void onGameEnded(final GameOutcome outcome) {
 		if (!game.hasEnded()) {
 			game.setEnded();
-			onGameEnded.fire(new GameEndedEventArgs(this, outcome));
+			getOnGameEnded().fire(new GameEndedEventArgs(this, outcome));
 		}
-	}
-
-	@Override
-	public Event<GameDisplayInvalidatedListener, GameDisplayInvalidatedEventArgs> getOnGameDisplayInvalidated() {
-		return onGameDisplayInvalidated;
-	}
-
-	@Override
-	public Event<GameEndedListener, GameEndedEventArgs> getOnGameEnded() {
-		return onGameEnded;
 	}
 }

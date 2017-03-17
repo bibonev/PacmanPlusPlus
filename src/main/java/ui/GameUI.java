@@ -17,10 +17,10 @@ import main.java.audio.Music;
 import main.java.audio.SoundEffects;
 import main.java.constants.GameType;
 import main.java.event.Event;
-import main.java.event.arguments.GameStartedEventArgs;
+import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
 import main.java.event.listener.GameClosingListener;
-import main.java.event.listener.GameStartedListener;
+import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.LobbyStateChangedListener;
 import main.java.gamelogic.core.GameCommandService;
 import main.java.gamelogic.core.Lobby;
@@ -36,7 +36,7 @@ import main.java.networking.integration.ServerInstance;
  * @author Rose Kirtley
  *
  */
-public class GameUI extends Application implements LobbyStateChangedListener, GameStartedListener {
+public class GameUI extends Application implements LobbyStateChangedListener, GameCreatedListener {
 	private Lobby lobby;
 	private Game game;
 	private Music music;
@@ -72,7 +72,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		if(params.contains("--noaudio")) audioDisabled = true;
 		
 		gameCommandService = new GameCommandService();
-		gameCommandService.getGameStartedEvent().addListener(this);
+		gameCommandService.getGameCreatedEvent().addListener(this);
 		setup(audioDisabled);
 
 		thisStage = primaryStage;
@@ -253,11 +253,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		});
 		multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
 		multiPlayerLobbyScreen.setStartGameEnabled(true);
-		gameCommandService.getGameStartedEvent().addListener(client);
-		gameCommandService.getGameStartedEvent().addListener(server);
+		gameCommandService.getGameCreatedEvent().addListener(client);
+		gameCommandService.getGameCreatedEvent().addListener(server);
 
-		server.getMultiplayerGameStartingEvent().addListener(gameCommandService);
 		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
+		server.getMultiplayerGameStartingEvent().addListener(gameCommandService);
 
 		server.run();
 		client.run();
@@ -275,7 +275,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(() -> client.stop());
 		multiPlayerLobbyScreen.setStartGameEnabled(false);
-		gameCommandService.getGameStartedEvent().addListener(client);
+		gameCommandService.getGameCreatedEvent().addListener(client);
 		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
 
 		client.run();
@@ -309,13 +309,12 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 
 	@Override
-	public void onGameStarted(final GameStartedEventArgs args) {
+	public void onGameCreated(final GameCreatedEventArgs args) {
 		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
 				switchToGame();
 
 				switchToMultiPlayerLobby();
-
 				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
 
 				// Initialize Screen dimensions
