@@ -73,8 +73,8 @@ public class PacmanVisualisationTest {
 		test = new PacmanVisualisation(testPlayer);
 		final ImageView node = test.getNode();
 
-		assertEquals(53.0, node.getImage().getHeight(), 0.001);
-		assertEquals(50.0, node.getImage().getWidth(), 0.001); // Assert no
+		assertEquals(289.0, node.getImage().getHeight(), 0.001);
+		assertEquals(300.0, node.getImage().getWidth(), 0.001); // Assert no
 																// exception
 	}
 }
