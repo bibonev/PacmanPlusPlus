@@ -308,23 +308,24 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void onGameStarted(final GameStartedEventArgs args) {
 		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
-				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
+				final Render render = new Render(this, args.getGame(), args.getGameLogic());
 
 				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) music);
 				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) sounds);
+				render.getOnStartingSingleplayerGame().addListener(gameCommandService);
 				
 				// Initialize Screen dimensions
 				PositionVisualisation.initScreenDimensions();
 
 				// Draw Map
-				thisStage.setScene(mapV.setupWorld());
+				thisStage.setScene(render.setupWorld());
 				thisStage.show();
 
 				// Add CLick Listener
-				mapV.addClickListener();
+				render.addClickListener();
 
 				// Start Timeline
-				mapV.startTimeline();
+				render.startTimeline();
 			});
 		}
 	}
