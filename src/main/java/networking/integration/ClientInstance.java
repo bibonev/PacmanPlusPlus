@@ -273,7 +273,11 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 
 	private void triggerLocalPlayerDied(final Packet p) {
 		if(game.getWorld().getEntity(client.getClientID()) != null) {
-			System.out.println("die");
+			Entity e = game.getWorld().getEntity(client.getClientID());
+			if(e instanceof ControlledPlayer) {
+				((ControlledPlayer) e).setCanRespawn(p.getBoolean("rejoinable"));
+				((ControlledPlayer) e).setDeathReason(p.getString("message"));
+			}
 			game.getWorld().removeEntity(client.getClientID());
 		}
 	}
@@ -331,6 +335,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 
 	private void triggerGameStarting(final Packet p) {
 		final GameSettings settings = new GameSettings();
+		settings.setInitialPlayerLives(p.getInteger("initial-player-lives"));
 		// reconstruct game settings as needed
 
 		final MultiplayerGameStartingEventArgs args = new MultiplayerGameStartingEventArgs(settings,

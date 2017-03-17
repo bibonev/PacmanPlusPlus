@@ -278,11 +278,22 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	private void triggerClientReadyToStart(int sender, Packet p) {
-		if(!lobby.getPlayer(sender).isReady())
-		lobby.getPlayer(sender).setReady(true);
-		
-		if(lobby.allReady()) {
-			startGame();
+		LobbyPlayerInfo playerInfo = lobby.getPlayer(sender);
+		if(!game.hasStarted()) {
+			if(!playerInfo.isReady()) {
+				playerInfo.setReady(true);
+				
+				if(lobby.allReady()) {
+					startGame();
+				}
+			}
+		} else {
+			if(game.getWorld().getEntity(sender) == null) {
+				if(playerInfo.getRemainingLives() > 0) {
+					playerInfo.setRemainingLives(playerInfo.getRemainingLives() - 1);
+					addHumanPlayerToWorld(sender, 0, 6);
+				}
+			}
 		}
 	}
 
@@ -335,7 +346,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		final Entity e = args.getWorld().getEntity(args.getEntityID());
 
 		if (e instanceof Player) {
-			handleRemovingPlayerFromWorld(e.getID(), "Oops, you died a bit", true);
+			final Packet p = new Packet("remote-player-died");
+			p.setInteger("player-id", e.getID());
+			manager.dispatchAllExcept(p, e.getID());
+			
+			if(e instanceof RemotePlayer && lobby.containsPlayer(e.getID())) {
+				handleRemovingHumanPlayerFromWorld(e.getID(), ((RemotePlayer) e).getDeathReason());
+			}
 		}
 		if (e instanceof Ghost) {
 			final Packet p = new Packet("remote-ghost-left");
@@ -358,24 +375,20 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 
 				manager.dispatch(playerID, createLocalPlayerJoinPacket(player.getPosition().getRow(),
 						player.getPosition().getColumn(), player.getAngle()));
-				
-				System.out.println("player " + info.getName() + " joined");
 			}
 		}
 	}
 	
-	public void handleRemovingPlayerFromWorld(int playerID, String reason, boolean canRejoin) {
-		final Packet p = new Packet("remote-player-died");
-		p.setInteger("player-id", playerID);
-		manager.dispatchAllExcept(p, playerID);
-
-		if(lobby.containsPlayer(playerID)) {
-			// this is an actual person
-			lobby.getPlayer(playerID).setInGame(false);
-			manager.dispatch(playerID, createLocalPlayerDiedPacket(reason, canRejoin));
+	public void handleRemovingHumanPlayerFromWorld(int playerID, String reason) {
+		LobbyPlayerInfo playerInfo = lobby.getPlayer(playerID);
+		playerInfo.setInGame(false);
+		if(playerInfo.getRemainingLives() > 0) {
+			reason = reason + "\nLives remaining: " + playerInfo.getRemainingLives();
 		} else {
-			// this is just an AI player
+			reason = reason + "\nYou have no more lives!";
 		}
+		System.out.println(playerInfo.getName() + " died");
+		manager.dispatch(playerID, createLocalPlayerDiedPacket(reason, playerInfo.getRemainingLives() > 0));
 	}
 	
 	public Packet createLocalPlayerJoinPacket(int row, int col, double angle) {
@@ -404,6 +417,12 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		p.setInteger("player-id", clientID);
 		gameUI.multiPlayerLobbyScreen.list.removePlayer(clientID);
 		manager.dispatchAllExcept(p, clientID);
+		
+		if(lobby.getPlayerCount() == 0) {
+			server.die();
+			if(gameLogicTimer != null)
+				gameLogicTimer.stop();
+		}
 	}
 
 	@Override
@@ -427,6 +446,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	public void onHostStartingGame(final HostStartingMultiplayerGameEventArgs args) {
 		final Packet p = new Packet("game-starting");
 
+		p.setInteger("initial-player-lives", args.getSettings().getInitialPlayerLives());
 		// add game configuration stuff into this packet
 
 		manager.dispatchAll(p);
@@ -456,6 +476,11 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	private void startGame() {
 		game.setStarted();
 		lobby.resetReady();
+		
+		for(final int i : lobby.getPlayerIDs()) {
+			lobby.getPlayer(i).setRemainingLives(game.getGameSettings().getInitialPlayerLives());
+		}
+		
 		for (final int i : lobby.getPlayerIDs()) {
 			addHumanPlayerToWorld(i, 0, 7);
 		}

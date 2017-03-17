@@ -10,7 +10,7 @@ public class LocalPlayerDespawnEventArgs {
 		this.message = message;
 	}
 	
-	public boolean isCanRespawn() {
+	public boolean canRespawn() {
 		return canRespawn;
 	}
 	

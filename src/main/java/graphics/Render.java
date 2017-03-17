@@ -243,43 +243,45 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		outcomneLabel.setStyle(
 				"-fx-text-fill: goldenrod; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
 
-		final Label escLable = new Label("* Press ESC to go back at the menu");
+		final Label escLable = new Label("* Press ESC to go back to the menu");
 		escLable.setStyle(
 				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
 
-		final Label spaceLabel = new Label("* Press SPACE to reply");
+		/* final Label spaceLabel = new Label("* Press SPACE to reply");
 		spaceLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center");
+				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center"); */
 		StackPane.setAlignment(outcomneLabel, Pos.TOP_CENTER);
 		StackPane.setAlignment(escLable, Pos.CENTER);
-		StackPane.setAlignment(spaceLabel, Pos.CENTER);
+		// StackPane.setAlignment(spaceLabel, Pos.CENTER);
 
-		pane.getChildren().addAll(outcomneLabel, escLable, spaceLabel);
+		pane.getChildren().addAll(outcomneLabel, escLable);
 		return pane;
 	}
 
-	private StackPane getPlayerRespawnWindow(final String deathReason, boolean mayRetry) {
+	private StackPane getPlayerRespawnWindow(final String deathReason, final boolean canRejoin) {
 		final StackPane pane = new StackPane();
 		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
 		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
 
-		final Label outcomneLabel = new Label("You died!");
-		outcomneLabel.setStyle(
+		final Label deathLabel = new Label("You died!");
+		deathLabel.setStyle(
 				"-fx-text-fill: goldenrod; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
 
-		final Label escLable = new Label(deathReason);
-		escLable.setStyle(
+		final Label deathReasonLabel = new Label(deathReason);
+		deathReasonLabel.setStyle(
 				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
 
-		String retryString = mayRetry ? "Press SPACE to respawn" : "You're knocked out of the round!";
+		String retryString = canRejoin ?
+				"Press SPACE to respawn" :
+				"You have ran out of lives";
 		final Label spaceLabel = new Label(retryString);
 		spaceLabel.setStyle(
 				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center");
-		StackPane.setAlignment(outcomneLabel, Pos.TOP_CENTER);
-		StackPane.setAlignment(escLable, Pos.CENTER);
-		StackPane.setAlignment(spaceLabel, Pos.CENTER);
+		StackPane.setAlignment(deathLabel, Pos.TOP_CENTER);
+		StackPane.setAlignment(deathReasonLabel, Pos.CENTER);
+		// StackPane.setAlignment(spaceLabel, Pos.CENTER);
 
-		pane.getChildren().addAll(outcomneLabel, escLable, spaceLabel);
+		pane.getChildren().addAll(deathLabel, deathReasonLabel);
 		return pane;
 	}
 	
@@ -323,17 +325,17 @@ clearWindows();
 	public void onLocalPlayerDespawn(LocalPlayerDespawnEventArgs args) {
 		this.controlledPlayer = null;
 		Platform.runLater(() -> {
-			playerDied(args.getMessage(), args.isCanRespawn());
+			playerDied(args.getMessage(), args.canRespawn());
 		});
 	}
 
-	private void playerDied(String message, boolean canRespawn) {
+	private void playerDied(String message, boolean canRejoin) {
 		clearWindows();
-		playerRespawnWindow = getPlayerRespawnWindow(message, canRespawn);
+		playerRespawnWindow = getPlayerRespawnWindow(message, canRejoin);
 		root.getChildren().add(playerRespawnWindow);
 		root.setOnKeyPressed(e -> {
-			if (e.getCode() == KeyCode.ESCAPE) {
-				gameUI.switchToMenu();
+			if (e.getCode() == KeyCode.SPACE) {
+				gameLogic.readyToStart();
 			}
 		});
 	}

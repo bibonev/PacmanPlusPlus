@@ -46,6 +46,7 @@ public class LocalGameLogic extends GameLogic {
 
 			eatenPlayers.addAll(getEatenPlayers());
 			for (final Player p : eatenPlayers) {
+				p.setDeathReason("Eaten by a ghost!");
 				game.getWorld().removeEntity(p.getID());
 			}
 			checkEndingConditions();
