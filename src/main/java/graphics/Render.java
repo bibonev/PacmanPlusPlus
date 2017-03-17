@@ -17,13 +17,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
+
 import main.java.constants.GameOutcome;
-import main.java.constants.GameOutcomeType;
 import main.java.constants.ScreenSize;
 import main.java.event.Event;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
-import main.java.event.arguments.GameStartedEventArgs;
 import main.java.event.arguments.SingleplayerGameStartingEventArgs;
 import main.java.event.listener.GameDisplayInvalidatedListener;
 import main.java.event.listener.GameEndedListener;
@@ -47,6 +46,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private GameUI gameUI;
 	private Game game;
 	private GameLogic gameLogic;
+	private InGameScreens inGameScreens;
 	private HashMap<Integer, Node> allEntities;
 	private Node[][] worldNodes;
 	private HashMap<Integer, RotateTransition> rotations;
@@ -66,6 +66,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameLogic = gameLogic;
 		this.gameLogic.getOnGameDisplayInvalidated().addListener(this);
 		this.gameLogic.getOnGameEnded().addListener(this);
+		this.inGameScreens = new InGameScreens(game);
 		this.flag = false;
 
 		this.transitions = new HashMap<>();
@@ -123,7 +124,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	public void redrawWorld() {
 		PositionVisualisation.initScreenDimensions();
 
-    	redrawCells();
+		redrawCells();
 
 		for (final Player player : game.getWorld().getPlayers()) {
 		    ImageView nextNode = new PacmanVisualisation(player).getNode();
@@ -196,6 +197,20 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 			} else if (event.getCode() == KeyCode.RIGHT) {
 				controlledPlayer.moveRight();
 				redrawWorld();
+			} else if (event.getCode() == KeyCode.ESCAPE) {
+				timeLine.pause();
+				root.getChildren().add(this.inGameScreens.pauseGameScreen());
+				pauseClickListener();
+			}
+		});
+	}
+
+	private void pauseClickListener() {
+		root.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				root.getChildren().remove(root.getChildren().size()-1);
+				timeLine.play();
+				addClickListener();
 			}
 		});
 	}
@@ -210,47 +225,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
 	}
-	
-	private String getGameOutcomeText(final GameOutcome gameOutcome) {
-		switch(gameOutcome.getOutcomeType()) {
-		case GHOSTS_WON:
-			return "Damn! The ghosts won this time...";
-		case PLAYER_WON:
-			if(gameOutcome.getWinner().getID() == game.getPlayer().getID()) {
-				return "Wohoo, you won!";
-			} else {
-				return "Damn, " + gameOutcome.getWinner().getName() + " won this time!";
-			}
-		case TIE:
-			return "No one won. Stop being bad at the game";
-		default:
-			return "A " + gameOutcome.getOutcomeType().name() + " happened";
-		}
-	}
-
-	private StackPane gameEndedWindow(final GameOutcome gameOutcome) {
-		final StackPane pane = new StackPane();
-		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
-		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
-
-		final Label outcomneLabel = new Label(getGameOutcomeText(gameOutcome));
-		outcomneLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
-
-		final Label escLable = new Label("* Press ESC to go back at the menu");
-		escLable.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
-
-		final Label spaceLabel = new Label("* Press SPACE to reply");
-		spaceLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center");
-		StackPane.setAlignment(outcomneLabel, Pos.TOP_CENTER);
-		StackPane.setAlignment(escLable, Pos.CENTER);
-		StackPane.setAlignment(spaceLabel, Pos.CENTER);
-
-		pane.getChildren().addAll(outcomneLabel, escLable, spaceLabel);
-		return pane;
-	}
 
 	@Override
 	public void onGameDisplayInvalidated(final GameDisplayInvalidatedEventArgs args) {
@@ -263,7 +237,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	public void onGameEnded(final GameEndedEventArgs args) {
 		timeLine.stop();
 
-		root.getChildren().add(gameEndedWindow(args.getOutcome()));
+		root.getChildren().add(this.inGameScreens.endGameScreen(args.getOutcome()));
 		root.setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.SPACE) {
 				getOnStartingSingleplayerGame().fire(
