@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -170,9 +171,16 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		centerPane.getChildren().remove(0, centerPane.getChildren().size());
 		centerPane.getChildren().add(screen.getPane());
 	}
+	
+	private void adjustScreenPosition(){
+		Rectangle2D primScreenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
+		thisStage.setX((primScreenBounds.getWidth() - thisStage.getWidth()) / 2);
+		thisStage.setY((primScreenBounds.getHeight() - thisStage.getHeight()) / 2);
+	}
 
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
+		adjustScreenPosition();
 		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
 		label.getStyleClass().add("labelStyle");
@@ -316,10 +324,11 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				
 				// Initialize Screen dimensions
 				PositionVisualisation.initScreenDimensions();
-
+		        
 				// Draw Map
 				thisStage.setScene(render.setupWorld());
 				thisStage.show();
+				adjustScreenPosition();
 
 				// Add CLick Listener
 				render.addClickListener();

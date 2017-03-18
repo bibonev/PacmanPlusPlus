@@ -23,21 +23,26 @@ public class InGameScreens {
 
 		final Label pauseLabel = new Label("Paused");
 		pauseLabel.setStyle(
-				"-fx-text-fill: #fafad2; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
+				"-fx-text-fill: #fafad2; -fx-font: bold 50 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
 		
-		final Label escLable = new Label("* Press ESC to go resume the game");
+		final Label escLable = new Label("* Press ESC to resume the game");
 		escLable.setStyle(
-				"-fx-text-fill: #fafad2; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
 		
 		final Label spaceLabel = new Label("* Press SPACE to go to settings");
 		spaceLabel.setStyle(
-				"-fx-text-fill: #fafad2; -fx-font: bold 20 \"serif\"; -fx-padding: 50 32 0 0; -fx-text-alignment: center");
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 75 15 0 0; -fx-text-alignment: center");
 
+		final Label exitLabel = new Label("* Press Q to go back at the menu");
+		exitLabel.setStyle(
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 150 -5 0 0; -fx-text-alignment: center");
+		
 		StackPane.setAlignment(pauseLabel, Pos.TOP_CENTER);
 		StackPane.setAlignment(escLable, Pos.CENTER);
 		StackPane.setAlignment(spaceLabel, Pos.CENTER);
+		StackPane.setAlignment(exitLabel, Pos.CENTER);
 
-		pane.getChildren().addAll(pauseLabel, escLable, spaceLabel);
+		pane.getChildren().addAll(pauseLabel, escLable, spaceLabel, exitLabel);
 		
 		return pane;
 	}
@@ -49,15 +54,15 @@ public class InGameScreens {
 
 		final Label outcomeLabel = new Label(getGameOutcomeText(gameOutcome));
 		outcomeLabel.setStyle(
-				"-fx-text-fill: #fafad2; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
+				"-fx-text-fill: #fafad2; -fx-font: bold 50 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
 
 		final Label escLable = new Label("* Press ESC to go back at the menu");
 		escLable.setStyle(
-				"-fx-text-fill: #fafad2; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
 
-		final Label spaceLabel = new Label("* Press SPACE to reply");
+		final Label spaceLabel = new Label("* Press SPACE to replay");
 		spaceLabel.setStyle(
-				"-fx-text-fill: #fafad2; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center");
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 75 160 0 0; -fx-text-alignment: center");
 		StackPane.setAlignment(outcomeLabel, Pos.TOP_CENTER);
 		StackPane.setAlignment(escLable, Pos.CENTER);
 		StackPane.setAlignment(spaceLabel, Pos.CENTER);
