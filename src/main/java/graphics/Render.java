@@ -211,6 +211,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 				root.getChildren().remove(root.getChildren().size()-1);
 				timeLine.play();
 				addClickListener();
+			} else if (event.getCode() == KeyCode.SPACE) {
+				//gameUI.switchToSettings();
 			}
 		});
 	}
