@@ -17,6 +17,7 @@ import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
 import main.java.event.listener.LocalPlayerSpawnListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
+import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.event.listener.ReadyToStartListener;
 import main.java.event.listener.RemoteGameEndedListener;
 import main.java.event.listener.ServerEntityUpdatedListener;
@@ -41,7 +42,7 @@ import main.java.networking.socket.Client;
 import main.java.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnectedListener, ServerEntityUpdatedListener,
-		GameCreatedListener, LocalPlayerSpawnListener, LocalPlayerDespawnListener, ReadyToStartListener {
+		GameCreatedListener, LocalPlayerSpawnListener, LocalPlayerDespawnListener, ReadyToStartListener, PlayerLeavingGameListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
@@ -82,6 +83,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		gameLogic = null;
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 		onRemoteGameEndedEvent = new Event<>((l, a) -> l.onRemoteGameEnded(a));
+		gameUI.getOnPlayerLeavingGame().addOneTimeListener(this);
 	}
 
 	@Override
@@ -116,6 +118,8 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	@Override
 	public void onClientDisconnected(final int clientID) {
 		removeGameHooks();
+		gameUI.onPlayerLeavingGame();
+		System.out.println("disc");
 	}
 
 	/**
@@ -215,7 +219,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	/* TRIGGERS to deal with incoming packets */
 	@Override
 	public void trigger(final Packet p) {
-		// System.out.println(p.getPacketName());
+		System.out.println("rec " + p.getPacketName());
 		if (p.getPacketName().equals("server-handshake")) {
 			triggerHandshake(p);
 		} else if (p.getPacketName().equals("remote-player-moved")) {
@@ -484,5 +488,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	public void onReadyToStart(ReadyToStartEventArgs args) {
 		Packet p = new Packet("ready-to-start");
 		manager.dispatch(p);
+	}
+
+	@Override
+	public void onPlayerLeavingGame() {
+		client.die();
 	}
 }

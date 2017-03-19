@@ -28,7 +28,7 @@ public class GameLogicTimer {
 
 		public GameLogicTimerTask(final int delay) {
 			this.delay = delay;
-			gameLogic.getOnGameEnded().addListener(this);
+			gameLogic.getOnGameEnded().addOneTimeListener(this);
 		}
 
 		@Override

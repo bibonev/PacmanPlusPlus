@@ -20,6 +20,7 @@ import javafx.util.Duration;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
 import main.java.constants.ScreenSize;
+import main.java.event.Event;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
 import main.java.event.arguments.LocalPlayerDespawnEventArgs;
@@ -28,6 +29,7 @@ import main.java.event.listener.GameDisplayInvalidatedListener;
 import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
 import main.java.event.listener.LocalPlayerSpawnListener;
+import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.ControlledPlayer;
@@ -54,6 +56,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private boolean flag;
 	private Node playerRespawnWindow;
 	private Node gameOverWindow;
+	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame;
 
 	/**
 	 * Initialize new visualisation of the map
@@ -66,7 +69,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.game = game;
 		this.gameLogic = gameLogic;
 		this.gameLogic.getOnGameDisplayInvalidated().addListener(this);
-		this.gameLogic.getOnGameEnded().addListener(this);
+		this.gameLogic.getOnGameEnded().addOneTimeListener(this);
 		this.gameLogic.getOnLocalPlayerSpawn().addListener(this);
 		this.gameLogic.getOnLocalPlayerDespawn().addListener(this);
 		flag = false;
@@ -74,6 +77,12 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
 		this.allEntities = new HashMap<>();
+		
+		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
+	}
+	
+	public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
+		return onPlayerLeavingGame;
 	}
 
 	/**
@@ -210,8 +219,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 * Start the timeline
 	 */
 	public void startTimeline() {
-		timeLine = new Timeline(new KeyFrame(Duration.millis(200), event -> {
-			gameLogic.gameStep(200);
+		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
+			gameLogic.gameStep(250);
 		}));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
@@ -291,6 +300,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		if(root.getChildren().contains(playerRespawnWindow))
 			root.getChildren().remove(playerRespawnWindow);
 	}
+	
+	public void leaveGame() {
+		onPlayerLeavingGame.fire(null);
+		gameUI.switchToMenu();
+	}
 
 	/**
 	 * End the game
@@ -302,7 +316,7 @@ clearWindows();
 		root.getChildren().add(gameOverWindow);
 		root.setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.ESCAPE) {
-				gameUI.switchToMenu();
+				leaveGame();
 			}
 		});
 	}

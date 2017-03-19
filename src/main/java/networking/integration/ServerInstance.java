@@ -154,7 +154,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		world.getOnEntityRemovingEvent().addListener(tracker);
 
 		world.getMap().getOnCellStateChanged().addListener(this);
-		logic.getOnGameEnded().addListener(this);
+		logic.getOnGameEnded().addOneTimeListener(this);
 	}
 
 	/**
@@ -185,7 +185,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		world.getOnEntityRemovingEvent().removeListener(tracker);
 
 		world.getMap().getOnCellStateChanged().removeListener(this);
-		logic.getOnGameEnded().removeListener(this);
 	}
 
 	@Override
@@ -408,6 +407,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 
 	@Override
 	public void onClientDisconnected(final int clientID) {
+		System.out.println("cd " + clientID);
 		lobby.removePlayer(clientID);
 		if (game != null && game.getWorld().getEntity(clientID) != null) {
 			game.getWorld().removeEntity(clientID);
@@ -418,7 +418,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		gameUI.multiPlayerLobbyScreen.list.removePlayer(clientID);
 		manager.dispatchAllExcept(p, clientID);
 		
-		if(lobby.getPlayerCount() == 0) {
+		if(lobby.getPlayerCount() == 0 || clientID == 0) {
 			server.die();
 			if(gameLogicTimer != null)
 				gameLogicTimer.stop();
@@ -444,19 +444,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 
 	@Override
 	public void onHostStartingGame(final HostStartingMultiplayerGameEventArgs args) {
-		final Packet p = new Packet("game-starting");
-
-		p.setInteger("initial-player-lives", args.getSettings().getInitialPlayerLives());
-		// add game configuration stuff into this packet
-
-		manager.dispatchAll(p);
-
 		getMultiplayerGameStartingEvent().fire(new MultiplayerGameStartingEventArgs(args.getSettings()));
 	}
 
 	@Override
 	public void onGameCreated(final GameCreatedEventArgs args) {
 		if (args.getGame().getGameType() == GameType.MULTIPLAYER_SERVER) {
+			System.out.println("starting game");
 			if (game != null) {
 				// cleanup hooks to old game
 
@@ -465,8 +459,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			}
 			game = args.getGame();
 			gameLogic = args.getGameLogic();
-			gameLogicTimer = new GameLogicTimer(gameLogic);
-			gameLogicTimer.start(250);
+			
+			final Packet p = new Packet("game-starting");
+			
+			p.setInteger("initial-player-lives", game.getGameSettings().getInitialPlayerLives());
+			// add game configuration stuff into this packet
+
+			manager.dispatchAll(p);
 
 			addWorldGameHooks(game.getWorld(), (LocalGameLogic) gameLogic);
 		}
@@ -484,6 +483,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		for (final int i : lobby.getPlayerIDs()) {
 			addHumanPlayerToWorld(i, 0, 7);
 		}
+
+		gameLogicTimer = new GameLogicTimer(gameLogic);
+		gameLogicTimer.start(250);
 	}
 
 	@Override

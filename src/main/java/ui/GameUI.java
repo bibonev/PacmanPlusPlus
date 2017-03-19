@@ -33,6 +33,7 @@ import main.java.event.listener.GameClosingListener;
 import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.LobbyStateChangedListener;
+import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.gamelogic.core.GameCommandService;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.domain.Game;
@@ -48,7 +49,7 @@ import main.java.networking.integration.ServerInstance;
  * @author Rose Kirtley
  *
  */
-public class GameUI extends Application implements LobbyStateChangedListener, GameCreatedListener {
+public class GameUI extends Application implements LobbyStateChangedListener, GameCreatedListener, PlayerLeavingGameListener {
 	private Lobby lobby;
 	private Game game;
 	private Music music;
@@ -78,6 +79,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	private MultiPlayerJoinScreen multiPlayerJoinScreen;
 
 	private Event<GameClosingListener, Object> onGameClosing = new Event<>((l, a) -> l.onGameClosing());
+	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
+	
 	private GameCommandService gameCommandService;
 
 	@Override
@@ -87,7 +90,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		if(params.contains("--noaudio")) audioDisabled = true;
 		
 		gameCommandService = new GameCommandService();
-		gameCommandService.getGameCreatedEvent().addListener(this);
+		gameCommandService.getLocalGameCreatedEvent().addListener(this);
+		gameCommandService.getRemoteGameCreatedEvent().addListener(this);
 		setup(audioDisabled);
 
 		thisStage = primaryStage;
@@ -125,12 +129,18 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public Event<GameClosingListener, Object> getOnGameClosingEvent() {
 		return onGameClosing;
 	}
+	
+	public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
+		return onPlayerLeavingGame;
+	}
 
 	private void setup(boolean audioDisabled) {
 		music = audioDisabled ? new DisabledMusic() : new DefaultMusic();
-		gameCommandService.getGameCreatedEvent().addListener(music);
+		gameCommandService.getLocalGameCreatedEvent().addListener(music);
+		gameCommandService.getRemoteGameCreatedEvent().addListener(music);
 		sounds = audioDisabled ? new DisabledSoundEffects() : new DefaultSoundEffects(this);
-		gameCommandService.getGameCreatedEvent().addListener(sounds);
+		gameCommandService.getLocalGameCreatedEvent().addListener(sounds);
+		gameCommandService.getRemoteGameCreatedEvent().addListener(sounds);
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
 		settingsScreen = new SettingsScreen(this);
@@ -239,25 +249,38 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		final ServerInstance server = new ServerInstance(this, lobby);
 		final ClientInstance client = new ClientInstance(this, name, "localhost");
 
-		onGameClosing.addListener(() -> {
+		onGameClosing.addOneTimeListener(() -> {
 			server.stop();
 			client.stop();
 		});
 
-		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(() -> {
+		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> {
 			client.stop();
 			server.stop();
+			multiPlayerLobbyScreen.getHostStartingGameListener().removeListener(server);
+			multiPlayerLobbyScreen.getCountDownStartingListener().removeListener(server);
+			gameCommandService.getRemoteGameCreatedEvent().removeListener(client);
+			gameCommandService.getLocalGameCreatedEvent().removeListener(server);
+
+			client.getMultiplayerGameStartingEvent().removeListener(gameCommandService);
+			server.getMultiplayerGameStartingEvent().removeListener(gameCommandService);
 		});
-		multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
-		multiPlayerLobbyScreen.getCountDownStartingListener().addListener(server);
+		
+		multiPlayerLobbyScreen.getHostStartingGameListener().addOneTimeListener(server);
+		multiPlayerLobbyScreen.getCountDownStartingListener().addOneTimeListener(server);
 		multiPlayerLobbyScreen.setStartGameEnabled(true);
-		gameCommandService.getGameCreatedEvent().addListener(client);
-		gameCommandService.getGameCreatedEvent().addListener(server);
+		gameCommandService.getRemoteGameCreatedEvent().addOneTimeListener(client);
+		gameCommandService.getLocalGameCreatedEvent().addOneTimeListener(server);
 
-		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
-		server.getMultiplayerGameStartingEvent().addListener(gameCommandService);
+		client.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
+		server.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
 
 		server.run();
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		client.run();
 		// create new lobby for a multiplayer game
 	}
@@ -267,14 +290,14 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void joinGame(final String gameIp) {
 		final ClientInstance client = new ClientInstance(this, name, gameIp);
 
-		onGameClosing.addListener(() -> {
+		onGameClosing.addOneTimeListener(() -> {
 			client.stop();
 		});
 
-		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(() -> client.stop());
+		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> client.stop());
 		multiPlayerLobbyScreen.setStartGameEnabled(false);
-		gameCommandService.getGameCreatedEvent().addListener(client);
-		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
+		gameCommandService.getRemoteGameCreatedEvent().addOneTimeListener(client);
+		client.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
 
 		client.run();
 		// join game with ip
@@ -312,8 +335,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 			Platform.runLater(() -> {
 				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
 
-				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) music);
-				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) sounds);
+				args.getGameLogic().getOnGameEnded().addOneTimeListener((GameEndedListener) music);
+				args.getGameLogic().getOnGameEnded().addOneTimeListener((GameEndedListener) sounds);
 				
 				// Initialize Screen dimensions
 				PositionVisualisation.initScreenDimensions();
@@ -327,6 +350,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 				// Start Timeline
 				mapV.startTimeline();
+				
+				mapV.getOnPlayerLeavingGame().addOneTimeListener(this);
 			});
 		}
 	}
@@ -355,5 +380,10 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
          
          timeline.setOnFinished(e -> timerEnded());
 		});
+	}
+
+	@Override
+	public void onPlayerLeavingGame() {
+		this.getOnPlayerLeavingGame().fire(null);
 	}
 }

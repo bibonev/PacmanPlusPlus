@@ -20,11 +20,17 @@ import main.java.gamelogic.domain.World;
 
 public class GameCommandService implements SingleplayerGameStartingListener, MultiplayerGameStartingListener {
 
-	private Event<GameCreatedListener, GameCreatedEventArgs> gameCreatedEvent = new Event<>(
+	private Event<GameCreatedListener, GameCreatedEventArgs> remoteGameCreatedEvent = new Event<>(
+			(l, g) -> l.onGameCreated(g));
+	private Event<GameCreatedListener, GameCreatedEventArgs> localGameCreatedEvent = new Event<>(
 			(l, g) -> l.onGameCreated(g));
 
-	public Event<GameCreatedListener, GameCreatedEventArgs> getGameCreatedEvent() {
-		return gameCreatedEvent;
+	public Event<GameCreatedListener, GameCreatedEventArgs> getLocalGameCreatedEvent() {
+		return localGameCreatedEvent;
+	}
+	
+	public Event<GameCreatedListener, GameCreatedEventArgs> getRemoteGameCreatedEvent() {
+		return remoteGameCreatedEvent;
 	}
 
 	private void populateWorld(final World world) {
@@ -81,7 +87,7 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 	public void onSingleplayerGameStarting(final SingleplayerGameStartingEventArgs args) {
 		final Game g = generateNewClientsideGame(args.getUsername(), 0, args.getSettings(), false);
 		final GameLogic gl = new LocalGameLogic(g);
-		getGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
+		getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
 		populateWorld(g.getWorld());
 	}
 
@@ -91,12 +97,12 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		if (args.isServer()) {
 			g = generateNewServersideGame(args.getSettings());
 			final GameLogic gl = new LocalGameLogic(g);
-			getGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
+			getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
 			populateWorld(g.getWorld());
 		} else {
 			g = generateNewClientsideGame(args.getLocalUsername(), args.getLocalPlayerID(), args.getSettings(), true);
 			final GameLogic gl = new RemoteGameLogic(g);
-			getGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
+			getRemoteGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
 		}
 	}
 }

@@ -65,7 +65,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 					client.start();
 					clients.put(clientID, client);
 					clientConnectedEvent.fire(clientID);
-					client.getDisconnectedEvent().addListener(this);
+					client.getDisconnectedEvent().addOneTimeListener(this);
 				} catch(SocketTimeoutException e) {
 					// do nothing
 				} catch (final IOException e) {
@@ -145,7 +145,6 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	@Override
 	public void onClientDisconnected(final int clientID) {
 		clientDisconnectedEvent.fire(clientID);
-		clients.get(clientID).getDisconnectedEvent().removeListener(this);
 		clients.remove(clientID);
 	}
 }
