@@ -1,7 +1,8 @@
 package main.java.graphics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.RotateTransition;
@@ -18,13 +19,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import main.java.constants.GameOutcome;
-import main.java.constants.GameOutcomeType;
 import main.java.constants.ScreenSize;
 import main.java.event.Event;
+import main.java.event.arguments.EntityChangedEventArgs;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
 import main.java.event.arguments.LocalPlayerDespawnEventArgs;
 import main.java.event.arguments.LocalPlayerSpawnEventArgs;
+import main.java.event.listener.EntityRemovingListener;
 import main.java.event.listener.GameDisplayInvalidatedListener;
 import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
@@ -42,7 +44,7 @@ import main.java.ui.GameUI;
  * Created by Boyan Bonev on 09/02/2017.
  */
 public class Render implements GameDisplayInvalidatedListener, GameEndedListener,
-		LocalPlayerSpawnListener, LocalPlayerDespawnListener {
+		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener {
 	private Pane root;
 	private Timeline timeLine;
 	private ControlledPlayer controlledPlayer;
@@ -53,10 +55,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Node[][] worldNodes;
 	private HashMap<Integer, RotateTransition> rotations;
 	private HashMap<Integer, TranslateTransition> transitions;
-	private boolean flag;
 	private Node playerRespawnWindow;
 	private Node gameOverWindow;
 	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame;
+	private Set<Integer> removedEntityIDs;
 
 	/**
 	 * Initialize new visualisation of the map
@@ -72,13 +74,15 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameLogic.getOnGameEnded().addOneTimeListener(this);
 		this.gameLogic.getOnLocalPlayerSpawn().addListener(this);
 		this.gameLogic.getOnLocalPlayerDespawn().addListener(this);
-		flag = false;
+		this.game.getWorld().getOnEntityRemovingEvent().addListener(this);
 
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
 		this.allEntities = new HashMap<>();
 		
 		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
+		
+		this.removedEntityIDs = new HashSet<>();
 	}
 	
 	public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
@@ -135,6 +139,14 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		PositionVisualisation.initScreenDimensions();
 
     	redrawCells();
+    	
+    	synchronized (removedEntityIDs) {
+			for(int id : removedEntityIDs) {
+				removeEntityFromStage(id);
+			}
+			
+			removedEntityIDs.clear();
+		}
 
 		for (final Player player : game.getWorld().getPlayers()) {
 		    ImageView nextNode = new PacmanVisualisation(player).getNode();
@@ -363,5 +375,28 @@ clearWindows();
 	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
 		this.controlledPlayer = args.getPlayer();
 		Platform.runLater(this::playerRespawn);
+	}
+	
+	private void removeEntityFromStage(int entityID) {
+		if(allEntities.containsKey(entityID)) {
+			root.getChildren().remove(allEntities.remove(entityID));
+			
+			if(transitions.containsKey(entityID)) {
+				root.getChildren().remove(transitions.remove(entityID));
+			}
+			
+			if(rotations.containsKey(entityID)) {
+				root.getChildren().remove(rotations.remove(entityID));
+			}
+		}
+	}
+
+	@Override
+	public void onEntityRemoving(EntityChangedEventArgs args) {
+		Platform.runLater(() -> {
+			synchronized (removedEntityIDs) {
+				removedEntityIDs.add(args.getEntityID());
+			}
+		});
 	}
 }

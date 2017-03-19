@@ -119,7 +119,6 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	public void onClientDisconnected(final int clientID) {
 		removeGameHooks();
 		gameUI.onPlayerLeavingGame();
-		System.out.println("disc");
 	}
 
 	/**
@@ -219,7 +218,6 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	/* TRIGGERS to deal with incoming packets */
 	@Override
 	public void trigger(final Packet p) {
-		System.out.println("rec " + p.getPacketName());
 		if (p.getPacketName().equals("server-handshake")) {
 			triggerHandshake(p);
 		} else if (p.getPacketName().equals("remote-player-moved")) {

@@ -70,12 +70,8 @@ public class Event<TListener, TEventArgs> {
 	public void removeListener(final TListener listener) {
 		if (isListenedToBy(listener)) {
 			listeners.remove(listener);
-		} else {
-			if(oneTimeListeners.contains(listener)) {
-				oneTimeListeners.remove(listener);
-			} else {
-				throw new IllegalArgumentException("Listener cannot be removed because it isn't listening.");
-			}
+		} else if(oneTimeListeners.contains(listener)) {
+			oneTimeListeners.remove(listener);
 		}
 	}
 

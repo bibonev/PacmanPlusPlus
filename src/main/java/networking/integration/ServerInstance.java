@@ -386,7 +386,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		} else {
 			reason = reason + "\nYou have no more lives!";
 		}
-		System.out.println(playerInfo.getName() + " died");
 		manager.dispatch(playerID, createLocalPlayerDiedPacket(reason, playerInfo.getRemainingLives() > 0));
 	}
 	
@@ -407,7 +406,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 
 	@Override
 	public void onClientDisconnected(final int clientID) {
-		System.out.println("cd " + clientID);
 		lobby.removePlayer(clientID);
 		if (game != null && game.getWorld().getEntity(clientID) != null) {
 			game.getWorld().removeEntity(clientID);
@@ -450,7 +448,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	@Override
 	public void onGameCreated(final GameCreatedEventArgs args) {
 		if (args.getGame().getGameType() == GameType.MULTIPLAYER_SERVER) {
-			System.out.println("starting game");
 			if (game != null) {
 				// cleanup hooks to old game
 

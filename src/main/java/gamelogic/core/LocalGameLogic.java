@@ -10,21 +10,31 @@ import java.util.stream.Stream;
 import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
+import main.java.constants.GameType;
+import main.java.event.arguments.EntityChangedEventArgs;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
+import main.java.event.arguments.LocalPlayerDespawnEventArgs;
+import main.java.event.arguments.LocalPlayerSpawnEventArgs;
+import main.java.event.listener.EntityAddedListener;
+import main.java.event.listener.EntityRemovingListener;
 import main.java.gamelogic.domain.Cell;
+import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.Player;
+import main.java.gamelogic.domain.Position;
 
-public class LocalGameLogic extends GameLogic {
-
+public class LocalGameLogic extends GameLogic implements EntityAddedListener, EntityRemovingListener {
 	private Game game;
 
 	public LocalGameLogic(final Game game) {
 		super(game);
 		this.game = game;
+		
+		this.game.getWorld().getOnEntityAddedEvent().addListener(this);
+		this.game.getWorld().getOnEntityRemovingEvent().addListener(this);
 	}
 
 	public Game getGame() {
@@ -116,6 +126,36 @@ public class LocalGameLogic extends GameLogic {
 		if (!game.hasEnded()) {
 			game.setEnded();
 			getOnGameEnded().fire(new GameEndedEventArgs(this, outcome));
+		}
+	}
+
+	@Override
+	public void onEntityRemoving(EntityChangedEventArgs args) {
+		Entity e = args.getWorld().getEntity(args.getEntityID());
+		if(e instanceof ControlledPlayer) {
+			boolean canRespawn = ((ControlledPlayer) e).canRespawn();
+			String deathReason = ((ControlledPlayer) e).getDeathReason();
+			getOnLocalPlayerDespawn().fire(new LocalPlayerDespawnEventArgs(canRespawn, deathReason));
+		}
+	}
+
+	@Override
+	public void onEntityAdded(EntityChangedEventArgs args) {
+		Entity e = args.getWorld().getEntity(args.getEntityID());
+		if(e instanceof ControlledPlayer) {
+			getOnLocalPlayerSpawn().fire(new LocalPlayerSpawnEventArgs((ControlledPlayer) e));
+		}
+	}
+	
+	@Override
+	public void readyToStart() {
+		super.readyToStart();
+		
+		if(game.getGameType() == GameType.SINGLEPLAYER) {
+			ControlledPlayer player = new ControlledPlayer(0, "You");
+			player.setPosition(new Position(0, 6));
+			game.getWorld().addEntity(player);
+			game.setStarted();
 		}
 	}
 }

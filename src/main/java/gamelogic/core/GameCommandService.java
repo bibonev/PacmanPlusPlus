@@ -6,11 +6,14 @@ import main.java.constants.GameType;
 import main.java.event.Event;
 import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
+import main.java.event.arguments.ReadyToStartEventArgs;
 import main.java.event.arguments.SingleplayerGameStartingEventArgs;
 import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
+import main.java.event.listener.ReadyToStartListener;
 import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.domain.Behaviour;
+import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.Map;
@@ -87,6 +90,7 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 	public void onSingleplayerGameStarting(final SingleplayerGameStartingEventArgs args) {
 		final Game g = generateNewClientsideGame(args.getUsername(), 0, args.getSettings(), false);
 		final GameLogic gl = new LocalGameLogic(g);
+		
 		getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
 		populateWorld(g.getWorld());
 	}
