@@ -368,7 +368,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				thisStage.setHeight(388);
 				adjustScreenPosition();
 
-
 				// Add CLick Listener
 				render.addClickListener();
 
