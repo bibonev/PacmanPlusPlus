@@ -1,4 +1,4 @@
-package test.java.networking.data;
+package test.java.networking;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

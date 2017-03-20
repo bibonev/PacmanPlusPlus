@@ -309,6 +309,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 		server.run();
 		try {
+			// really nasty cheap workaround to get around JavaFX being weird
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();

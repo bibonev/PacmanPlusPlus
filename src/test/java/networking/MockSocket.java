@@ -1,4 +1,4 @@
-package test.java.networking.data;
+package test.java.networking;
 
 import main.java.event.Event;
 import main.java.networking.NetworkListener;

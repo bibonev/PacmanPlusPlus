@@ -1,4 +1,4 @@
-package test.java.networking.data;
+package test.java.networking;
 
 import java.util.HashMap;
 import java.util.HashSet;
