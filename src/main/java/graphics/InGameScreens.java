@@ -7,6 +7,7 @@ import javafx.scene.layout.StackPane;
 import main.java.constants.GameOutcome;
 import main.java.constants.ScreenSize;
 import main.java.gamelogic.domain.Game;
+import main.java.gamelogic.domain.Player;
 
 public class InGameScreens {
 	
@@ -14,6 +15,33 @@ public class InGameScreens {
 	
 	public InGameScreens(final Game game){
 		this.game = game;
+	}
+
+	public StackPane getPlayerRespawnWindow(final String deathReason, final boolean canRejoin) {
+		final StackPane pane = new StackPane();
+		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
+		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
+		
+		final Label deathLabel = new Label("You died!");
+		deathLabel.setStyle(
+				"-fx-text-fill: #fafad2; -fx-font: bold 50 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
+
+		final Label reasonLabel = new Label(deathReason);
+		reasonLabel.setStyle(
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
+
+		String retryString = canRejoin ?
+				"Press SPACE to respawn" :
+				"You have ran out of lives";
+		final Label retryLabel = new Label(retryString);
+		retryLabel.setStyle(
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
+		StackPane.setAlignment(deathLabel, Pos.TOP_CENTER);
+		StackPane.setAlignment(reasonLabel, Pos.CENTER);
+		StackPane.setAlignment(retryLabel, Pos.BOTTOM_CENTER);
+
+		pane.getChildren().addAll(deathLabel, reasonLabel, retryLabel);
+		return pane;
 	}
 	
 	public StackPane pauseGameScreen() {
@@ -47,12 +75,12 @@ public class InGameScreens {
 		return pane;
 	}
 	
-	public StackPane endGameScreen(final GameOutcome gameOutcome) {
+	public StackPane endGameScreen(final int localPlayerID, final GameOutcome gameOutcome) {
 		final StackPane pane = new StackPane();
 		pane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7)");
 		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
 
-		final Label outcomeLabel = new Label(getGameOutcomeText(gameOutcome));
+		final Label outcomeLabel = new Label(getGameOutcomeText(localPlayerID, gameOutcome));
 		outcomeLabel.setStyle(
 				"-fx-text-fill: #fafad2; -fx-font: bold 50 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
 
@@ -71,12 +99,12 @@ public class InGameScreens {
 		return pane;
 	}
 	
-	private String getGameOutcomeText(final GameOutcome gameOutcome) {
+	private String getGameOutcomeText(final int localPlayerID, final GameOutcome gameOutcome) {
 		switch(gameOutcome.getOutcomeType()) {
 			case GHOSTS_WON:
 				return "Damn! The ghosts won this time...";
 			case PLAYER_WON:
-				if(gameOutcome.getWinner().getID() == game.getPlayer().getID()) {
+				if(gameOutcome.getWinner().getID() == localPlayerID) {
 					return "Wohoo, you won!";
 				} else {
 					return "Damn, " + gameOutcome.getWinner().getName() + " won this time.";

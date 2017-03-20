@@ -6,7 +6,7 @@ import main.java.gamelogic.domain.Position;
 /**
  * Created by Boyan Bonev on 11/02/2017.
  */
-public class GhostVisualisation {
+public class GhostVisualisation implements Visualisation {
 
 	private PositionVisualisation position;
 	private ImageView node;
@@ -26,6 +26,7 @@ public class GhostVisualisation {
 	 *
 	 * @return Node
 	 */
+	@Override
 	public ImageView getNode() {
 		double min = position.getHeight();
 		if (position.getWidth() < position.getHeight()) {

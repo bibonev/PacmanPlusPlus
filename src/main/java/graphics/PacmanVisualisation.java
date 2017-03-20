@@ -6,7 +6,7 @@ import main.java.gamelogic.domain.Player;
 /**
  * Created by Boyan Bonev on 11/02/2017.
  */
-public class PacmanVisualisation {
+public class PacmanVisualisation implements Visualisation {
 
 	private ImageView pacMan;
 	private Player player;
@@ -26,6 +26,7 @@ public class PacmanVisualisation {
 	 *
 	 * @return Node
 	 */
+	@Override
 	public ImageView getNode() {
 		final PositionVisualisation pv = new PositionVisualisation(player.getPosition().getRow(),
 				player.getPosition().getColumn());

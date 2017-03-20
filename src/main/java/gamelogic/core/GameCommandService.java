@@ -4,11 +4,13 @@ import main.java.ai.AIGhost;
 import main.java.ai.GhostBehaviour;
 import main.java.constants.GameType;
 import main.java.event.Event;
-import main.java.event.arguments.GameStartedEventArgs;
+import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
+import main.java.event.arguments.ReadyToStartEventArgs;
 import main.java.event.arguments.SingleplayerGameStartingEventArgs;
-import main.java.event.listener.GameStartedListener;
+import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
+import main.java.event.listener.ReadyToStartListener;
 import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.domain.Behaviour;
 import main.java.gamelogic.domain.ControlledPlayer;
@@ -17,36 +19,43 @@ import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RuleChecker;
+import main.java.gamelogic.domain.Spawner;
+import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.gamelogic.domain.World;
 
 public class GameCommandService implements SingleplayerGameStartingListener, MultiplayerGameStartingListener {
 
-	private Event<GameStartedListener, GameStartedEventArgs> gameStartedEvent = new Event<>(
-			(l, g) -> l.onGameStarted(g));
+	private Event<GameCreatedListener, GameCreatedEventArgs> remoteGameCreatedEvent = new Event<>(
+			(l, g) -> l.onGameCreated(g));
+	private Event<GameCreatedListener, GameCreatedEventArgs> localGameCreatedEvent = new Event<>(
+			(l, g) -> l.onGameCreated(g));
 
-	public Event<GameStartedListener, GameStartedEventArgs> getGameStartedEvent() {
-		return gameStartedEvent;
+	public Event<GameCreatedListener, GameCreatedEventArgs> getLocalGameCreatedEvent() {
+		return localGameCreatedEvent;
+	}
+	
+	public Event<GameCreatedListener, GameCreatedEventArgs> getRemoteGameCreatedEvent() {
+		return remoteGameCreatedEvent;
 	}
 
 	private void populateWorld(final World world) {
-		final AIGhost ghost = new AIGhost();
-		ghost.setPosition(new Position(1, 1));
-		final Behaviour b = new GhostBehaviour(world, ghost, 1000, Behaviour.Type.GHOST);
-		ghost.setBehaviour(b);
-
-		final AIGhost ghost1 = new AIGhost();
-		ghost1.setPosition(new Position(1, 13));
-		final Behaviour b1 = new GhostBehaviour(world, ghost1, 1000, Behaviour.Type.GHOST);
-		ghost1.setBehaviour(b1);
-
-		final AIGhost ghost2 = new AIGhost();
-		ghost2.setPosition(new Position(13, 13));
-		final Behaviour b2 = new GhostBehaviour(world, ghost2, 1000, Behaviour.Type.GHOST);
-		ghost2.setBehaviour(b2);
-
-		world.addEntity(ghost);
-		world.addEntity(ghost1);
-		world.addEntity(ghost2);
+		Position[] ghostPositions = new Position[] {
+				new Position(1, 1),
+				new Position(1, 13),
+				new Position(13, 13)
+		};
+		
+		for(Position p : ghostPositions) {
+			final AIGhost ghost = new AIGhost();
+			ghost.setPosition(p);
+			final Behaviour b = new GhostBehaviour(world, ghost, 1000, Behaviour.Type.GHOST);
+			ghost.setBehaviour(b);
+			
+			Spawner spawner = new Spawner(5, ghost, SpawnerColor.RED);
+			spawner.setPosition(ghost.getPosition());
+			
+			world.addEntity(spawner);
+		}
 	}
 
 	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID,
@@ -57,16 +66,10 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 
 		// Create new game and store it
 		final World world = new World(new RuleChecker(), map, multiplayer);
-		final ControlledPlayer player = new ControlledPlayer(localPlayerID, localUsername);
-		player.setPosition(new Position(6, 0));
 
-		final Game game = new Game(world, settings, player,
+		final Game game = new Game(world, settings, 
 				multiplayer ? GameType.MULTIPLAYER_CLIENT : GameType.SINGLEPLAYER);
-
-		// Collect players
-		// Just the one for now
-
-		world.addEntity(player);
+		
 
 		return game;
 	}
@@ -79,7 +82,7 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		// Create new game and store it
 		final World world = new World(new RuleChecker(), map, false);
 
-		final Game game = new Game(world, settings, null, GameType.MULTIPLAYER_SERVER);
+		final Game game = new Game(world, settings, GameType.MULTIPLAYER_SERVER);
 
 		return game;
 	}
@@ -88,7 +91,8 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 	public void onSingleplayerGameStarting(final SingleplayerGameStartingEventArgs args) {
 		final Game g = generateNewClientsideGame(args.getUsername(), 0, args.getSettings(), false);
 		final GameLogic gl = new LocalGameLogic(g);
-		getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
+		
+		getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
 		populateWorld(g.getWorld());
 	}
 
@@ -98,12 +102,12 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		if (args.isServer()) {
 			g = generateNewServersideGame(args.getSettings());
 			final GameLogic gl = new LocalGameLogic(g);
-			getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
+			getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
 			populateWorld(g.getWorld());
 		} else {
 			g = generateNewClientsideGame(args.getLocalUsername(), args.getLocalPlayerID(), args.getSettings(), true);
 			final GameLogic gl = new RemoteGameLogic(g);
-			getGameStartedEvent().fire(new GameStartedEventArgs(g, gl));
+			getRemoteGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
 		}
 	}
 }

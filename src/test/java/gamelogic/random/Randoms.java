@@ -155,7 +155,7 @@ public class Randoms {
 	}
 
 	public static Game randomGame() {
-		return new Game(randomWorld(), randomGameSettings(), randomControlledPlayer(), GameType.SINGLEPLAYER);
+		return new Game(randomWorld(), randomGameSettings(),  GameType.SINGLEPLAYER);
 	}
 
 }
