@@ -13,6 +13,6 @@ public class Colors {
 	public static Color CellEmptyColor = Color.BLACK;
 	public static Color CellFoodColor = Color.YELLOW;
 	public static Color ShieldColor = Color.rgb(39, 148, 232, 0.7);
-	public static Color PackManColor = Color.RED;
+	public static Color LaserColor = Color.RED;
 	public static Color Ghost1Color = Color.GREEN;
 }

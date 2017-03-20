@@ -45,10 +45,10 @@ public class PacmanVisualisation implements Visualisation {
 		pacMan.toFront();
 
 
-		if(player.getShield() > 3){
+		if(player.getShield() > 0){
 			Circle shield = new Circle(pv.getPixelX() + pv.getWidth() / 2,
 					pv.getPixelY() + pv.getHeight() / 2,
-					pv.getWidth() / 8);
+					pv.getWidth() / 4);
 			shield.setFill(Colors.ShieldColor);
 
 			StackPane pacManWithShield = new StackPane();

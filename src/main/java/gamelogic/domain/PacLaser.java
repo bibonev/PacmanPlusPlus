@@ -26,6 +26,7 @@ public class PacLaser extends Ability {
 	public void activate() {
 		if(getCD() == 20){
 		    shoot();
+		    owner.setLaserFired(true);
 		    setCD(0);
         }
 
