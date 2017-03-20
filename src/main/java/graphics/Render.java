@@ -8,8 +8,11 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ToolBar;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
@@ -42,6 +45,8 @@ import main.java.ui.GameUI;
 public class Render implements GameDisplayInvalidatedListener, GameEndedListener,
 		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener {
 	private Pane root;
+	private Pane toolbar;
+	private BorderPane parentRoot;
 	private Timeline timeLine;
 	private ControlledPlayer controlledPlayer;
 	private int localPlayerID;
@@ -97,10 +102,19 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		int size = game.getWorld().getMap().getMapSize();
 		worldNodes = new Node[size][size];
 
+		parentRoot = new BorderPane();
+
+		toolbar = new Pane();
+        toolbar.setStyle("-fx-background-color: #404040; -fx-border-color: darkgrey");
+        toolbar.setPrefSize(ScreenSize.Width, 30);
+
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
 
-		final Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
+        parentRoot.setCenter(root);
+        parentRoot.setBottom(toolbar);
+
+		final Scene scene = new Scene(parentRoot, ScreenSize.Width, ScreenSize.Height+30);
 
 		redrawWorld();
 		gameLogic.readyToStart();
@@ -212,6 +226,9 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
+    /**
+     * Starting the timeline
+     */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(GameLogic.GAME_STEP_DURATION), event -> {
             gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
@@ -260,7 +277,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
-	//Getter on the events
+	//Getters on the events
 	
 	public Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> getOnStartingSingleplayerGame() {
 		return onStartingSingleplayerGame;
