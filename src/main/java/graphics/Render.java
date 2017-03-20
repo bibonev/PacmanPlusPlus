@@ -35,6 +35,8 @@ import main.java.event.listener.LocalPlayerSpawnListener;
 import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.core.GameLogic;
+import main.java.gamelogic.core.LocalGameLogic;
+import main.java.gamelogic.core.RemoteGameLogic;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Game;
@@ -178,7 +180,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             transitions.get(player.getID()).setToX(nextNode.getTranslateX());
             rotations.get(player.getID()).setToAngle(nextNode.getRotate());
 
-            //root.getChildren().get(root.getChildren().indexOf(allEntities.get(player.getID()))).toFront();
             rotations.get(player.getID()).play();
             transitions.get(player.getID()).play();
         }
@@ -192,7 +193,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 		    transitions.get(ghost.getID()).setToY(nextNode.getTranslateY());
             transitions.get(ghost.getID()).setToX(nextNode.getTranslateX());
-            //root.getChildren().get(root.getChildren().indexOf(allEntities.get(ghost.getID()))).toFront();
 
             transitions.get(ghost.getID()).play();
 		}
@@ -204,10 +204,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 			SpawnerVisualisation vis = (SpawnerVisualisation) allEntities.get(spawner.getID());
 		    
 		    vis.setNumber(spawner.getTimeRemaining());
-
-            //root.getChildren().get(root.getChildren().indexOf(allEntities.get(ghost.getID()))).toFront();
-
-            // transitions.get(spawner.getID()).play();
 		}
 
 		root.requestFocus();
@@ -280,9 +276,13 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 * Start the time line
 	 */
 	public void startTimeline() {
-		
 		timeLine = new Timeline(new KeyFrame(Duration.millis(GameLogic.GAME_STEP_DURATION), event -> {
-			gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
+			if (gameLogic instanceof LocalGameLogic) {
+                gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
+                gameLogic.checkEndingConditions();
+            } else if (gameLogic instanceof RemoteGameLogic) {
+			    gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
+            }
 		}));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();

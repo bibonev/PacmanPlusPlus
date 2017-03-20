@@ -50,6 +50,11 @@ public class RemoteGameLogic extends GameLogic implements EntityAddedListener, E
 		invalidateDisplay();
 	}
 
+	@Override
+	public void checkEndingConditions() {
+
+	}
+
 	private void invalidateDisplay() {
 		getOnGameDisplayInvalidated().fire(new GameDisplayInvalidatedEventArgs(this));
 	}

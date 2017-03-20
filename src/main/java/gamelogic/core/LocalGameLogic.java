@@ -54,7 +54,6 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 			for (final Entity entity : game.getWorld().getEntities()) {
 				entity.gameStep(game);
 				eatenPlayers.addAll(getEatenPlayers());
-				checkEndingConditions();
 			}
 
 			eatenPlayers.addAll(getEatenPlayers());
@@ -71,7 +70,6 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 					game.getWorld().addEntity(spawner.getEntity());
 				game.getWorld().removeEntity(spawner.getID());
 			}
-			checkEndingConditions();
 			invalidateDisplay();
 		}
 	}
@@ -109,6 +107,7 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 		return true;
 	}
 
+	@Override
 	public void checkEndingConditions() {
 		if (ghostsEatenPlayers()) {
 			final GameOutcome outcome = new GameOutcome(GameOutcomeType.GHOSTS_WON);
@@ -121,6 +120,7 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 					: new GameOutcome(GameOutcomeType.PLAYER_WON, winners.get(0));
 			onGameEnded(outcome);
 		}
+		invalidateDisplay();
 	}
 
 	private List<Player> getWinners() {
