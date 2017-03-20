@@ -133,6 +133,7 @@ public abstract class Player extends Entity {
 	@Override
 	public void gameStep(Game game) {
 		super.gameStep(game);
-		this.getSkillSet().incrementCooldown();
+		if(this.getSkillSet() != null)
+			this.getSkillSet().incrementCooldown();
 	}
 }

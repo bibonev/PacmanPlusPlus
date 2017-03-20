@@ -318,8 +318,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		} else {
 			if(game.getWorld().getEntity(sender) == null) {
 				if(playerInfo.getRemainingLives() > 0) {
+					Position pos = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
 					playerInfo.setRemainingLives(playerInfo.getRemainingLives() - 1);
-					addHumanPlayerToWorld(sender, 0, 6);
+					addHumanPlayerToWorld(sender, pos.getRow(), pos.getColumn());
 				}
 			}
 		}
@@ -540,7 +541,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 		
 		for (final int i : lobby.getPlayerIDs()) {
-			addHumanPlayerToWorld(i, 0, 7);
+			Position p = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
+			addHumanPlayerToWorld(i, p.getRow(), p.getColumn());
 		}
 
 		gameLogicTimer = new GameLogicTimer(gameLogic);

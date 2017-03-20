@@ -281,21 +281,29 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         timeLine.stop();
 
         Node playerNode = root.getChildren().get(root.getChildren().indexOf(allEntities.get(0).getNode()));
-        FadeTransition fadeTransition = new FadeTransition(Duration.millis(3000), playerNode);
-        fadeTransition.setFromValue(1.0);
-        fadeTransition.setToValue(0.0);
-        fadeTransition.setOnFinished(e2 -> {
-            root.getChildren().add(this.inGameScreens.endGameScreen(localPlayerID, gameOutcome));
-            root.setOnKeyPressed(e -> {
-                if (e.getCode() == KeyCode.SPACE) {
-                    getOnStartingSingleplayerGame().fire(
-                            new SingleplayerGameStartingEventArgs(new GameSettings(), this.gameUI.getName()));
-                } else if (e.getCode() == KeyCode.ESCAPE) {
-                    leaveGame();
-                }
-            });
+        if(playerNode != null) {
+	        FadeTransition fadeTransition = new FadeTransition(Duration.millis(3000), playerNode);
+	        fadeTransition.setFromValue(1.0);
+	        fadeTransition.setToValue(0.0);
+	        fadeTransition.setOnFinished(e2 -> {
+	            displayGameEndedScreen(gameOutcome);
+	        });
+	        fadeTransition.play();
+        } else {
+        	displayGameEndedScreen(gameOutcome);
+        }
+    }
+    
+    private void displayGameEndedScreen(final GameOutcome gameOutcome) {
+    	root.getChildren().add(this.inGameScreens.endGameScreen(localPlayerID, gameOutcome));
+        root.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.SPACE) {
+                getOnStartingSingleplayerGame().fire(
+                        new SingleplayerGameStartingEventArgs(new GameSettings(), this.gameUI.getName()));
+            } else if (e.getCode() == KeyCode.ESCAPE) {
+                leaveGame();
+            }
         });
-        fadeTransition.play();
     }
 
     private void playerDied(String message, boolean canRejoin) {

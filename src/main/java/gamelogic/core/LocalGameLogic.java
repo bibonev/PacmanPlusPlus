@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
@@ -24,6 +25,7 @@ import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
+import main.java.gamelogic.domain.RuleChecker;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 
@@ -223,11 +225,57 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 		if (game.getGameType() == GameType.SINGLEPLAYER) {
 			final ControlledPlayer player = new ControlledPlayer(0, "You");
 			player.setSkillSet(LocalSkillSet.createDefaultSkillSet(player));
-			player.setPosition(new Position(0, 6));
+			player.setPosition(getCandidateSpawnPosition());
 			final Spawner spawner = new Spawner(5, player, SpawnerColor.GREEN);
 			spawner.setPosition(player.getPosition());
 			game.getWorld().addEntity(spawner);
 			game.setStarted();
 		}
+	}
+	
+	public double getSpawnPositionRating(Position p) {
+		CellState cellState = game.getWorld().getMap().getCell(p).getState();
+		if(cellState == CellState.OBSTACLE || RuleChecker.isOutOfBounds(p.getRow(), p.getColumn())) return 0;
+		
+		double rating = 1;
+		double aggregateDistance = 0;
+		int entityCount = 0;
+		for(Entity e : game.getWorld().getEntities()) {
+			double distance = Math.abs(e.getPosition().getRow() - p.getRow()) +
+					Math.abs(e.getPosition().getColumn() - p.getColumn());
+			
+			if(e instanceof Spawner) e = ((Spawner) e).getEntity();
+			if(e instanceof Player) {
+				aggregateDistance += distance;
+			}
+			if(e instanceof Ghost) {
+				aggregateDistance += 2 * distance;
+			}
+			entityCount += 1;
+		}
+		rating += aggregateDistance / entityCount;
+		if(cellState == CellState.FOOD) rating *= 0.75;
+		
+		return rating;
+	}
+	
+	public Position getCandidateSpawnPosition() {
+		Position bestPosition = null;
+		double bestRating = 0;
+		int mapSize = game.getWorld().getMap().getMapSize();
+		
+		for(int row = 0; row < mapSize; row++) {
+			for(int col = 0; col < mapSize; col++) {
+				Position position = new Position(row, col);
+				double rating = getSpawnPositionRating(position);
+				
+				if(rating > bestRating) {
+					bestRating = rating;
+					bestPosition = position;
+				}
+			}
+		}
+		
+		return bestPosition;
 	}
 }
