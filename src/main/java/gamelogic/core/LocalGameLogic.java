@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
@@ -48,23 +47,33 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 			checkEndingConditions();
 			game.getWorld().getMap().gameStep(game);
 			final HashSet<Player> eatenPlayers = new HashSet<>();
+            final HashSet<Entity> killedEntities = new HashSet<>();
 
 			for (final Entity entity : game.getWorld().getEntities()) {
 				entity.gameStep(game);
 				eatenPlayers.addAll(getEatenPlayers());
+                killedEntities.addAll(getKilledEntitiesByLaser());
 				checkEndingConditions();
+				if(entity instanceof Player){
+				    ((Player) entity).incrementCoolDown();
+                }
 			}
 
 			eatenPlayers.addAll(getEatenPlayers());
+            killedEntities.addAll(getKilledEntitiesByLaser());
 			for (final Player p : eatenPlayers) {
 				p.setDeathReason("Eaten by a ghost!");
 				game.getWorld().removeEntity(p.getID());
 			}
-			final Set<Spawner> spawnersToRemove = new HashSet<Spawner>();
-			for (final Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
-				if (spawner.isExpired()) {
-					spawnersToRemove.add(spawner);
-				}
+            for (final Entity e : killedEntities) {
+			    if(game.getWorld().getEntities().contains(e)) {
+                    game.getWorld().removeEntity(e.getID());
+                }
+            }
+
+			Set<Spawner> spawnersToRemove = new HashSet<Spawner>();
+			for(Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
+				if(spawner.isExpired()) spawnersToRemove.add(spawner);
 			}
 			for (final Spawner spawner : spawnersToRemove) {
 				if (spawner.getEntity() != null) {
@@ -77,17 +86,32 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 		}
 	}
 
-	private Set<Player> getEatenPlayers() {
+	private Set<Player> getEatenPlayers(){
 		final Set<Player> players = new HashSet<>();
 		for (final Ghost g : game.getWorld().getEntities(Ghost.class)) {
 			for (final Player p : game.getWorld().getPlayers()) {
 				if (g.getPosition().equals(p.getPosition())) {
-					players.add(p);
+					if(p.getShield() == 0) {
+						players.add(p);
+
+					}else{
+						p.reduceShield();
+					}
 				}
 			}
 		}
 		return players;
 	}
+
+	private Set<Entity> getKilledEntitiesByLaser(){
+        final Set<Entity> entities = new HashSet<>();
+        for (final Entity entity : game.getWorld().getEntities()) {
+            if(entity.getIsKilled()) {
+                entities.add(entity);
+            }
+        }
+        return entities;
+    }
 
 	private boolean ghostsEatenPlayers() {
 		for (final Spawner c : game.getWorld().getEntities(Spawner.class)) {

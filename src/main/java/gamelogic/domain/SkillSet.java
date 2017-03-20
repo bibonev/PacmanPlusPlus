@@ -8,6 +8,7 @@ package main.java.gamelogic.domain;
  * keys.
  *
  * @author Lyubomir Pashev
+ * @author Simeon Kostadinov
  *
  */
 public class SkillSet {
@@ -26,14 +27,6 @@ public class SkillSet {
 		this.q = q;
 	}
 
-	/**
-	 * Set q ability.
-	 *
-	 * @param e
-	 */
-	public void setE(final Ability e) {
-		this.e = e;
-	}
 
 	/**
 	 * Set w ability.
@@ -42,6 +35,22 @@ public class SkillSet {
 	 */
 	public void setW(final Ability w) {
 		this.w = w;
+	}
+
+	/**
+	 * Get q ability.
+	 *
+	 */
+	public Ability getQ() {
+		return q;
+	}
+
+	/**
+	 * Get W ability.
+	 *
+	 */
+	public Ability getW() {
+		return w;
 	}
 
 	/**
@@ -58,16 +67,4 @@ public class SkillSet {
 		w.activate();
 	}
 
-	/**
-	 * Use E skill.
-	 */
-	public void activateE() {
-		e.activate();
-	}
-
-	/*
-	 * maybe we'll add a 4th skill if we have time/think of that many skills
-	 *
-	 * public void activateR(){ r.activate(); }
-	 */
 }
