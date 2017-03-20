@@ -16,11 +16,13 @@ public abstract class Player extends Entity {
 	private int dotsEaten;
 	private SkillSet skillSet;
     private int shield;
+    private boolean laserFired;
 
 	public Player(final String name) {
 		this.name = name;
 		dotsEaten = 0;
 		this.shield = 0;
+		this.laserFired = false;
 
 		// Create SkillSet for each Player when added
         PacShield shield = new PacShield();
@@ -30,7 +32,7 @@ public abstract class Player extends Entity {
         laser.setCD(20);
         laser.setOwner(this);
         SkillSet skillSet = new SkillSet();
-        skillSet.setQ(laser); // set E button to activate laser
+        skillSet.setQ(laser); // set Q button to activate laser
         skillSet.setW(shield); // set W button to activate shield
         this.setSkillSet(skillSet);
 	}
@@ -55,6 +57,22 @@ public abstract class Player extends Entity {
 
 	public int getDotsEaten() {
 		return dotsEaten;
+	}
+
+	/**
+	 * Get whether a laserFired has been fired
+	 * @return the laserFired
+	 */
+	public boolean getLaserFired(){
+		return this.laserFired;
+	}
+
+	/**
+	 * Set that a laserFired has been fired
+	 * @param laserFired
+	 */
+	public void setLaserFired(boolean laserFired){
+		this.laserFired = laserFired;
 	}
 
     /**

@@ -6,15 +6,15 @@ import java.util.Set;
 
 import javafx.animation.*;
 import javafx.application.Platform;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 import javafx.util.Duration;
+import main.java.constants.CellSize;
+import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
 import main.java.constants.ScreenSize;
 import main.java.event.Event;
@@ -32,15 +32,7 @@ import main.java.event.listener.LocalPlayerSpawnListener;
 import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.core.GameLogic;
-import main.java.gamelogic.core.LocalGameLogic;
-import main.java.gamelogic.core.RemoteGameLogic;
-import main.java.gamelogic.domain.Cell;
-import main.java.gamelogic.domain.ControlledPlayer;
-import main.java.gamelogic.domain.Game;
-import main.java.gamelogic.domain.GameSettings;
-import main.java.gamelogic.domain.Ghost;
-import main.java.gamelogic.domain.Player;
-import main.java.gamelogic.domain.Spawner;
+import main.java.gamelogic.domain.*;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.ui.GameUI;
 
@@ -57,10 +49,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Game game;
 	private GameLogic gameLogic;
 	private InGameScreens inGameScreens;
+    private Node[][] worldNodes;
 	private HashMap<Integer, Visualisation> allEntities;
-	private Node[][] worldNodes;
 	private HashMap<Integer, RotateTransition> rotations;
 	private HashMap<Integer, TranslateTransition> transitions;
+	private HashMap<Integer, Node> shieldsActivated;
 	private Node playerRespawnWindow;
 	private Node gameOverWindow;
 	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame;
@@ -88,6 +81,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
 		this.allEntities = new HashMap<>();
+		this.shieldsActivated = new HashMap<>();
         this.removedEntityIDs = new HashSet<>();
 		
 		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
@@ -131,10 +125,23 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}
 
 		for (final Player player : game.getWorld().getPlayers()) {
-		    ImageView nextNode = new PacmanVisualisation(player).getNode();
+    	    PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
+		    Node nextNode = pacmanVisualisation.getNode();
 		    
 		    if(!allEntities.containsKey(player.getID()))
 		    	setupPlayerAnimation(player);
+
+		    if(player.getShield() > 0  && !shieldsActivated.containsKey(player.getID())){
+		        shieldsActivated.put(player.getID(), nextNode);
+                shieldVisulisation(player, pacmanVisualisation, nextNode, allEntities.get(player.getID()).getNode(), player.getID());
+            } else if (player.getShield() <= 0 && shieldsActivated.containsKey(player.getID())){
+                shieldVisulisation(player, pacmanVisualisation, nextNode, shieldsActivated.get(player.getID()), player.getID());
+                shieldsActivated.remove(player.getID());
+            }
+
+            if(player.getLaserFired()){
+                laserVisualisation(player);
+            }
 
             transitions.get(player.getID()).setToY(nextNode.getTranslateY());
             transitions.get(player.getID()).setToX(nextNode.getTranslateX());
@@ -169,7 +176,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		root.requestFocus();
 	}
 
-	/**
+    /**
 	 *
 	 * Click listener for moving the player
 	 */
@@ -205,9 +212,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
-	/**
-	 * Start the time line
-	 */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(GameLogic.GAME_STEP_DURATION), event -> {
             gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
@@ -273,9 +277,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         gameUI.switchToMenu();
     }
 
-    /**
-     * End the game
-     */
     private void gameEnded(final GameOutcome gameOutcome) {
         clearWindows();
         timeLine.stop();
@@ -370,7 +371,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             root.getChildren().remove(playerRespawnWindow);
     }
 
-    // only redraw cells that have changed state
     private void redrawCells() {
         final Cell[][] cells = game.getWorld().getMap().getCells();
         int rows = game.getWorld().getMap().getMapSize(), columns = rows;
@@ -400,5 +400,60 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
                 gameUI.switchToMenu();
             }
         });
+    }
+
+    private void laserVisualisation(Player player) {
+        Node shout = new CellVisualisation(new Cell(CellState.LASER, player.getPosition())).getNode();
+        shout.toFront();
+
+        Node shoutStopNode;
+        Position shoutStopPosition;
+        switch ((int)player.getAngle()){
+            case 90:
+                shoutStopPosition = new Position(CellSize.Rows, player.getPosition().getColumn());
+                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                shout.setRotate(90);
+                break;
+            case 0:
+                shoutStopPosition = new Position(player.getPosition().getRow(), CellSize.Columns);
+                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                break;
+            case -90:
+                shoutStopPosition = new Position(0, player.getPosition().getColumn());
+                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                shout.setRotate(90);
+                break;
+            case 180:
+                shoutStopPosition = new Position(player.getPosition().getRow(), 0);
+                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                break;
+            default:
+                shoutStopPosition = new Position(0,0);
+                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                break;
+
+        }
+        root.getChildren().add(shout);
+        TranslateTransition shoutTransition = new TranslateTransition(Duration.millis(1000), shout);
+
+        shoutTransition.setToX(shoutStopNode.getTranslateX());
+        shoutTransition.setToY(shoutStopNode.getTranslateY());
+
+        shoutTransition.setOnFinished(e -> {
+            root.getChildren().remove(shout);
+        });
+        shoutTransition.play();
+        player.setLaserFired(false);
+    }
+
+    private void shieldVisulisation(Player player, PacmanVisualisation pacmanVisualisation, Node nextNode, Node node, int id) {
+        transitions.get(player.getID()).setNode(nextNode);
+        rotations.get(player.getID()).setNode(nextNode);
+
+        root.getChildren().remove(node);
+        root.getChildren().add(nextNode);
+
+        allEntities.remove(id);
+        allEntities.put(id, pacmanVisualisation);
     }
 }

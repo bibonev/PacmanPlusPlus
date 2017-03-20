@@ -2,6 +2,7 @@ package main.java.graphics;
 
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import main.java.constants.CellState;
@@ -49,6 +50,13 @@ public class CellVisualisation implements Visualisation {
 				node = new Rectangle(positionVisualisation.getPixelX(), positionVisualisation.getPixelY(),
 						positionVisualisation.getWidth(), positionVisualisation.getHeight());
 				((Rectangle) node).setFill(Colors.CellEmptyColor);
+			} else if (cell.getState() == CellState.LASER) {
+				node = new Rectangle(positionVisualisation.getWidth() / 4,positionVisualisation.getHeight() / 4);
+				node.setTranslateX(positionVisualisation.getPixelX() + positionVisualisation.getWidth() / 2);
+				node.setTranslateY(positionVisualisation.getPixelY() + positionVisualisation.getHeight() / 2);
+                ((Rectangle) node).setArcWidth(20);
+                ((Rectangle) node).setArcHeight(20);
+				((Rectangle) node).setFill(Colors.LaserColor);
 			}
 		}
 
