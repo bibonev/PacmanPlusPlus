@@ -245,10 +245,10 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 			
 			if(e instanceof Spawner) e = ((Spawner) e).getEntity();
 			if(e instanceof Player) {
-				aggregateDistance += distance;
+				aggregateDistance += Math.log(distance);
 			}
 			if(e instanceof Ghost) {
-				aggregateDistance += 2 * distance;
+				aggregateDistance += 2 * Math.log(distance);
 			}
 			entityCount += 1;
 		}
