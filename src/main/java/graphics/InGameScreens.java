@@ -21,26 +21,26 @@ public class InGameScreens {
 		final StackPane pane = new StackPane();
 		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
 		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
-
+		
 		final Label deathLabel = new Label("You died!");
 		deathLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
+				"-fx-text-fill: #fafad2; -fx-font: bold 50 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
 
-		final Label deathReasonLabel = new Label(deathReason);
-		deathReasonLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
+		final Label reasonLabel = new Label(deathReason);
+		reasonLabel.setStyle(
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
 
 		String retryString = canRejoin ?
 				"Press SPACE to respawn" :
 				"You have ran out of lives";
-		final Label spaceLabel = new Label(retryString);
-		spaceLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center");
+		final Label retryLabel = new Label(retryString);
+		retryLabel.setStyle(
+				"-fx-text-fill: #fafad2; -fx-font: bold 35 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
 		StackPane.setAlignment(deathLabel, Pos.TOP_CENTER);
-		StackPane.setAlignment(deathReasonLabel, Pos.CENTER);
-		// StackPane.setAlignment(spaceLabel, Pos.CENTER);
+		StackPane.setAlignment(reasonLabel, Pos.CENTER);
+		StackPane.setAlignment(retryLabel, Pos.BOTTOM_CENTER);
 
-		pane.getChildren().addAll(deathLabel, deathReasonLabel);
+		pane.getChildren().addAll(deathLabel, reasonLabel, retryLabel);
 		return pane;
 	}
 	
