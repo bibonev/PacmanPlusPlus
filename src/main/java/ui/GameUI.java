@@ -78,6 +78,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
 	private MultiPlayerOptionScreen multiPlayerOptionScreen;
 	private MultiPlayerJoinScreen multiPlayerJoinScreen;
+	private HelpScreen helpScreen;
 
 	private Event<GameClosingListener, Object> onGameClosing = new Event<>((l, a) -> l.onGameClosing());
 	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
@@ -150,6 +151,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(this);
 		multiPlayerOptionScreen = new MultiPlayerOptionScreen(this);
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
+		helpScreen = new HelpScreen(this);
 		
 	}
 
@@ -192,6 +194,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
+		thisStage.setWidth(500);
+		thisStage.setHeight(500);
 		adjustScreenPosition();
 		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
@@ -232,6 +236,13 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToMultiPlayerJoin() {
 		setScreen(multiPlayerJoinScreen);
+	}
+	
+	public void switchToHelp(){
+		thisStage.setWidth(1150);
+		thisStage.setHeight(600);
+		adjustScreenPosition();
+		setScreen(helpScreen);
 	}
 
 	public void close() {
@@ -353,7 +364,10 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				// Draw Map
 				thisStage.setScene(render.setupWorld());
 				thisStage.show();
+				thisStage.setWidth(615);
+				thisStage.setHeight(388);
 				adjustScreenPosition();
+
 
 				// Add CLick Listener
 				render.addClickListener();
