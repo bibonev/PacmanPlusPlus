@@ -354,7 +354,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			}
 		}
 		if (e instanceof Ghost) {
-			final Packet p = new Packet("remote-ghost-left");
+			final Packet p = new Packet("remote-ghost-died");
 			p.setInteger("ghost-id", e.getID());
 			manager.dispatchAll(p);
 		}
@@ -482,7 +482,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 
 		gameLogicTimer = new GameLogicTimer(gameLogic);
-		gameLogicTimer.start(250);
+		gameLogicTimer.start(GameLogic.GAME_STEP_DURATION);
 	}
 
 	@Override

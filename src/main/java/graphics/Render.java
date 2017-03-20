@@ -251,8 +251,9 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 * Start the time line
 	 */
 	public void startTimeline() {
-		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
-			gameLogic.gameStep(250);
+		
+		timeLine = new Timeline(new KeyFrame(Duration.millis(GameLogic.GAME_STEP_DURATION), event -> {
+			gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
 		}));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();

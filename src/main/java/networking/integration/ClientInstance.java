@@ -232,7 +232,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerRemotePlayerJoined(p);
 		} else if (p.getPacketName().equals("remote-player-left")) {
 			triggerRemotePlayerLeft(p);
-		} else if (p.getPacketName().equals("remote-ghost-left")) {
+		} else if (p.getPacketName().equals("remote-ghost-died")) {
 			triggerRemoteGhostLeft(p);
 		} else if (p.getPacketName().equals("lobby-player-enter")) {
 			triggerLobbyPlayerEnter(p);
