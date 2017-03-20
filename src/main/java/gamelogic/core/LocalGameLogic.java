@@ -1,6 +1,7 @@
 package main.java.gamelogic.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -108,12 +109,20 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 	}
 
 	private List<Player> getWinners() {
-		final Stream<Player> playersStream = game.getWorld().getEntities(Player.class).stream();
-		final int maxDotsEaten = playersStream.map(player -> player.getDotsEaten()).max((x, y) -> x > y ? x : y).get();
-
-		final List<Player> winners = new ArrayList<Player>();
-		winners.addAll(
-				playersStream.filter(player -> player.getDotsEaten() == maxDotsEaten).collect(Collectors.toList()));
+		int maxDots = 0;
+		List<Player> winners = new ArrayList<>();
+		Collection<Player> allPlayers = game.getWorld().getPlayers();
+		
+		for(Player player : allPlayers) {
+			if(player.getDotsEaten() >= maxDots) { // add to winner collection
+				if(player.getDotsEaten() > maxDots) { // better than other winners
+					maxDots = player.getDotsEaten();
+					
+					winners.clear();
+				}
+				winners.add(player);
+			}
+		}
 
 		return winners;
 	}
