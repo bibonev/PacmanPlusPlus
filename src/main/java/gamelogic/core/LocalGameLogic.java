@@ -28,6 +28,7 @@ import main.java.gamelogic.domain.Spawner.SpawnerColor;
 
 public class LocalGameLogic extends GameLogic implements EntityAddedListener, EntityRemovingListener {
 	private Game game;
+	private int gameStepsElapsed = 0;
 
 	public LocalGameLogic(final Game game) {
 		super(game);
@@ -63,11 +64,19 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 			eatenPlayers.addAll(getEatenPlayers());
             killedEntities.addAll(getKilledEntitiesByLaser());
 			for (final Player p : eatenPlayers) {
-				p.setDeathReason("Eaten by a ghost!");
-				game.getWorld().removeEntity(p.getID());
+			    if(p.getShield() > 0) {
+			        p.reduceShield();
+			        System.out.println("Saved!");
+                } else {
+                    p.setDeathReason("Eaten by a ghost!");
+                    game.getWorld().removeEntity(p.getID());
+                }
 			}
             for (final Entity e : killedEntities) {
 			    if(game.getWorld().getEntities().contains(e)) {
+			        if(e instanceof Player) {
+			            ((Player) e).setDeathReason("Killed by a laser!");
+                    }
                     game.getWorld().removeEntity(e.getID());
                 }
             }
@@ -83,21 +92,30 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 				game.getWorld().removeEntity(spawner.getID());
 			}
             checkEndingConditions();
+            decayPlayerShields();
 			invalidateDisplay();
+
+
+			gameStepsElapsed += 1;
 		}
 	}
+
+    private void decayPlayerShields() {
+        if(gameStepsElapsed % 20 == 0) {
+            for(Player p : game.getWorld().getPlayers()) {
+                if(p.getShield() > 0)
+                    p.reduceShield();
+                System.out.println("Reduced - " + p.getShield());
+            }
+        }
+    }
 
 	private Set<Player> getEatenPlayers(){
 		final Set<Player> players = new HashSet<>();
 		for (final Ghost g : game.getWorld().getEntities(Ghost.class)) {
 			for (final Player p : game.getWorld().getPlayers()) {
 				if (g.getPosition().equals(p.getPosition())) {
-					if(p.getShield() == 0) {
-						players.add(p);
-
-					}else{
-						p.reduceShield();
-					}
+					players.add(p);
 				}
 			}
 		}

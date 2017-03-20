@@ -15,7 +15,6 @@ public class SkillSet {
 
 	private Ability q;
 	private Ability w;
-	private Ability e;
 	// private Ability r;
 
 	/**
