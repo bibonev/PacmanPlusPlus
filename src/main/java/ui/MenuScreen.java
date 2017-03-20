@@ -21,6 +21,8 @@ public class MenuScreen extends Screen {
 	private boolean multiPlayerSelected;
 	private Button close;
 	private boolean closeSelected;
+	private Button help;
+	private boolean helpSelected;
 	private Label title;
 
 	public MenuScreen(final GameUI game) {
@@ -42,6 +44,11 @@ public class MenuScreen extends Screen {
 		multiPlayer.setTooltip(new Tooltip("Play in multiplayer mode with others"));
 		multiPlayer.setOnAction(e -> game.switchToMultiPlayerOption());
 		setUpHover(multiPlayer);
+		
+		help = new Button("Help");
+		help.getStyleClass().add("buttonStyle");
+		help.setOnAction(e -> game.switchToHelp());
+		setUpHover(help);
 
 		close = new Button("Close");
 		close.getStyleClass().add("buttonStyle");
@@ -54,7 +61,7 @@ public class MenuScreen extends Screen {
 		final Separator separator = new Separator();
 		separator.getStyleClass().add("separator");
 
-		pane.getChildren().addAll(title, separator, singlePlayer, multiPlayer, login, close);
+		pane.getChildren().addAll(title, separator, singlePlayer, multiPlayer, login, help, close);
 	}
 
 	@Override
@@ -65,21 +72,31 @@ public class MenuScreen extends Screen {
 				unselect(singlePlayer);
 				unselect(multiPlayer);
 				unselect(login);
+				unselect(help);
 			} else if (multiPlayer.isDefaultButton()) {
 				select(singlePlayer);
 				unselect(multiPlayer);
 				unselect(login);
 				unselect(close);
+				unselect(help);
 			} else if (login.isDefaultButton()) {
 				select(multiPlayer);
 				unselect(login);
 				unselect(close);
 				unselect(singlePlayer);
-			} else {
-				select(login);
+				unselect(help);
+			} else if (help.isDefaultButton()) {
+				select(multiPlayer);
+				unselect(login);
 				unselect(close);
+				unselect(singlePlayer);
+				unselect(help);
+			} else {
+				select(help);
+				unselect(login);
 				unselect(multiPlayer);
 				unselect(singlePlayer);
+				unselect(close);
 			}
 		} else {
 			if (singlePlayer.isDefaultButton()) {
@@ -87,21 +104,32 @@ public class MenuScreen extends Screen {
 				unselect(singlePlayer);
 				unselect(login);
 				unselect(close);
+				unselect(help);
 			} else if (multiPlayer.isDefaultButton()) {
 				select(login);
 				unselect(multiPlayer);
 				unselect(singlePlayer);
 				unselect(close);
+				unselect(help);
 			} else if (login.isDefaultButton()) {
-				select(close);
+				select(help);
 				unselect(login);
 				unselect(singlePlayer);
 				unselect(multiPlayer);
-			} else {
+				unselect(close);
+			} else if (help.isDefaultButton()) {
+				select(close);
+				unselect(login);
+				unselect(multiPlayer);
+				unselect(singlePlayer);
+				unselect(help);
+				unselect(help);
+			}else {
 				select(singlePlayer);
 				unselect(close);
 				unselect(login);
 				unselect(multiPlayer);
+				unselect(help);
 			}
 		}
 	}
@@ -114,6 +142,8 @@ public class MenuScreen extends Screen {
 			game.switchToMultiPlayerOption();
 		} else if (login.isDefaultButton()) {
 			game.switchToLogIn();
+		} else if (help.isDefaultButton()){
+			game.switchToHelp();
 		} else {
 			game.close();
 		}
@@ -125,5 +155,6 @@ public class MenuScreen extends Screen {
 		reset(multiPlayer);
 		reset(close);
 		reset(login);
+		reset(help);
 	}
 }
