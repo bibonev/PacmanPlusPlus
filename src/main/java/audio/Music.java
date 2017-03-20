@@ -1,11 +1,7 @@
 package main.java.audio;
 
-import java.io.File;
-
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaException;
-import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
+import main.java.event.listener.GameCreatedListener;
+import main.java.event.listener.GameEndedListener;
 
 /**
  * Class for playing background music
@@ -13,7 +9,7 @@ import javafx.util.Duration;
  * @author Rose Kirtley
  *
  */
-public interface Music {
+public interface Music extends GameCreatedListener, GameEndedListener {
 	/**
 	 * Set whether the background music is playing or not
 	 * 

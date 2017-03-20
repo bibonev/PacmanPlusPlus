@@ -55,6 +55,19 @@ public class Lobby {
 		players.put(id, name);
 		lobbyStateChangedEvent.fire(new LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs(id, name));
 	}
+	
+	public boolean allReady() {
+		for(int i : players.keySet()) {
+			if(!players.get(i).isReady()) return false;
+		}
+		return true;
+	}
+	
+	public void resetReady() {
+		for(int i : players.keySet()) {
+			players.get(i).setReady(false);
+		}
+	}
 
 	public LobbyPlayerInfo getPlayer(final int id) {
 		return players.get(id);

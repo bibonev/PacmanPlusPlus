@@ -3,6 +3,7 @@ package main.java.networking.socket;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -54,6 +55,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		serverSocket = openServerSocket();
 
 		try {
+			serverSocket.setSoTimeout(500);
 			while (alive) {
 				Socket clientSocket = null;
 				try {
@@ -63,7 +65,9 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 					client.start();
 					clients.put(clientID, client);
 					clientConnectedEvent.fire(clientID);
-					client.getDisconnectedEvent().addListener(this);
+					client.getDisconnectedEvent().addOneTimeListener(this);
+				} catch(SocketTimeoutException e) {
+					// do nothing
 				} catch (final IOException e) {
 					if (alive) {
 						throw new RuntimeException("Error accepting client.", e);
@@ -73,6 +77,8 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 					}
 				}
 			}
+		} catch(IOException e) {
+			throw new RuntimeException("Could not set socket acceptance timeout.", e);
 		} finally {
 			die();
 		}
@@ -97,7 +103,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	public void die() {
 		if (alive) {
 			alive = false;
-			if (!serverSocket.isClosed()) {
+			if (serverSocket != null && !serverSocket.isClosed()) {
 				try {
 					serverSocket.close();
 				} catch (final IOException e) {
@@ -139,7 +145,6 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	@Override
 	public void onClientDisconnected(final int clientID) {
 		clientDisconnectedEvent.fire(clientID);
-		clients.get(clientID).getDisconnectedEvent().removeListener(this);
 		clients.remove(clientID);
 	}
 }

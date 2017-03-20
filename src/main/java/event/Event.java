@@ -15,7 +15,9 @@ import java.util.function.BiConsumer;
  */
 public class Event<TListener, TEventArgs> {
 	private HashSet<TListener> listeners;
+	private HashSet<TListener> oneTimeListeners;
 	private BiConsumer<TListener, TEventArgs> trigger;
+	private Object fireLock;
 
 	/**
 	 * Creates a new event with the given trigger function.
@@ -25,7 +27,9 @@ public class Event<TListener, TEventArgs> {
 	 *            on a listener, passing the event arguments to it.
 	 */
 	public Event(final BiConsumer<TListener, TEventArgs> trigger) {
+		this.fireLock = new Object();
 		this.listeners = new HashSet<>();
+		this.oneTimeListeners = new HashSet<>();
 		this.trigger = trigger;
 	}
 
@@ -45,6 +49,14 @@ public class Event<TListener, TEventArgs> {
 			throw new IllegalArgumentException("Listener already added to event.");
 		}
 	}
+	
+	public void addOneTimeListener(final TListener listener) {
+		if(oneTimeListeners.contains(listener)) {
+			throw new IllegalArgumentException("One-time listener already added to event.");
+		} else {
+			oneTimeListeners.add(listener);
+		}
+	}
 
 	/**
 	 * Removes a listener from this event.
@@ -58,8 +70,8 @@ public class Event<TListener, TEventArgs> {
 	public void removeListener(final TListener listener) {
 		if (isListenedToBy(listener)) {
 			listeners.remove(listener);
-		} else {
-			throw new IllegalArgumentException("Listener cannot be removed because it isn't listening.");
+		} else if(oneTimeListeners.contains(listener)) {
+			oneTimeListeners.remove(listener);
 		}
 	}
 
@@ -92,8 +104,16 @@ public class Event<TListener, TEventArgs> {
 	 *            The arguments to pass to the event listeners.
 	 */
 	public void fire(final TEventArgs args) {
-		for (final TListener listener : listeners) {
-			trigger.accept(listener, args);
+		synchronized (fireLock) {
+			for (final TListener listener : listeners) {
+				trigger.accept(listener, args);
+			}
+			
+			for (final TListener listener : oneTimeListeners) {
+				trigger.accept(listener, args);
+			}
+			
+			oneTimeListeners.clear();	
 		}
 	}
 }

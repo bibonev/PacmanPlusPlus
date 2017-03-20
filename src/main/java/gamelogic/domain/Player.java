@@ -4,6 +4,7 @@ import main.java.constants.CellState;
 import main.java.event.arguments.PlayerMovedEventArgs;
 
 public abstract class Player extends Entity {
+	private String deathReason;
 	private String name;
 	private double angle;
 	private int dotsEaten;
@@ -75,7 +76,7 @@ public abstract class Player extends Entity {
 	}
 
 	protected void eatDot() {
-		if (getWorld() != null && !getWorld().isRemote()) {
+		if (getWorld() != null/* && !getWorld().isRemote() */) {
 			final Cell currentCell = getWorld().getMap().getCell(getPosition());
 
 			if (currentCell.getState() == CellState.FOOD) {
@@ -83,5 +84,13 @@ public abstract class Player extends Entity {
 				dotsEaten++;
 			}
 		}
+	}
+
+	public String getDeathReason() {
+		return deathReason;
+	}
+
+	public void setDeathReason(String deathReason) {
+		this.deathReason = deathReason;
 	}
 }

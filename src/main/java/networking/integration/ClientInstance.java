@@ -6,17 +6,25 @@ import main.java.constants.GameOutcomeType;
 import main.java.constants.GameType;
 import main.java.event.Event;
 import main.java.event.arguments.EntityMovedEventArgs;
-import main.java.event.arguments.GameStartedEventArgs;
+import main.java.event.arguments.GameCreatedEventArgs;
+import main.java.event.arguments.LocalPlayerDespawnEventArgs;
+import main.java.event.arguments.LocalPlayerSpawnEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
 import main.java.event.arguments.PlayerMovedEventArgs;
+import main.java.event.arguments.ReadyToStartEventArgs;
 import main.java.event.arguments.RemoteGameEndedEventArgs;
-import main.java.event.listener.GameStartedListener;
+import main.java.event.listener.GameCreatedListener;
+import main.java.event.listener.LocalPlayerDespawnListener;
+import main.java.event.listener.LocalPlayerSpawnListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
+import main.java.event.listener.PlayerLeavingGameListener;
+import main.java.event.listener.ReadyToStartListener;
 import main.java.event.listener.RemoteGameEndedListener;
 import main.java.event.listener.ServerEntityUpdatedListener;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.core.RemoteGameLogic;
+import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
@@ -34,12 +42,13 @@ import main.java.networking.socket.Client;
 import main.java.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnectedListener, ServerEntityUpdatedListener,
-		GameStartedListener {
+		GameCreatedListener, LocalPlayerSpawnListener, LocalPlayerDespawnListener, ReadyToStartListener, PlayerLeavingGameListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
 	private Game game;
 	private RemoteGameLogic gameLogic;
+	private ControlledPlayer player;
 	private Lobby lobby;
 	private String username;
 	private GameUI gameUI;
@@ -70,9 +79,11 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		lobby = new Lobby();
 		this.gameUI.setLobby(lobby);
 		game = null;
+		player = null;
 		gameLogic = null;
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 		onRemoteGameEndedEvent = new Event<>((l, a) -> l.onRemoteGameEnded(a));
+		gameUI.getOnPlayerLeavingGame().addOneTimeListener(this);
 	}
 
 	@Override
@@ -107,6 +118,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	@Override
 	public void onClientDisconnected(final int clientID) {
 		removeGameHooks();
+		gameUI.onPlayerLeavingGame();
 	}
 
 	/**
@@ -151,7 +163,9 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	}
 
 	private void addWorldGameHooks(final Game game, final RemoteGameLogic logic) {
-		game.getPlayer().getOnMovedEvent().addListener(this);
+		logic.getOnLocalPlayerSpawn().addListener(this);
+		logic.getOnLocalPlayerDespawn().addListener(this);
+		logic.getOnReadyToStart().addListener(this);
 		getOnRemoteGameEndedEvent().addListener(gameLogic);
 	}
 
@@ -177,8 +191,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	}
 
 	private void removeWorldGameHooks(final Game game, final RemoteGameLogic remoteGameLogic) {
-		game.getPlayer().getOnMovedEvent().removeListener(this);
 		getOnRemoteGameEndedEvent().removeListener(remoteGameLogic);
+		remoteGameLogic.getOnLocalPlayerSpawn().removeListener(this);
+		remoteGameLogic.getOnLocalPlayerDespawn().removeListener(this);
+		remoteGameLogic.getOnReadyToStart().removeListener(this);
 	}
 
 	public Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> getMultiplayerGameStartingEvent() {
@@ -233,23 +249,42 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		} else if (p.getPacketName().equals("game-ended")) {
 			triggerGameEnded(p);
 		} else if (p.getPacketName().equals("remote-player-died")) {
-			triggerPlayerDied(p);
+			triggerRemotePlayerDied(p);
 		} else if (p.getPacketName().equals("local-player-died")) {
 			triggerLocalPlayerDied(p);
+		} else if (p.getPacketName().equals("local-player-joined")) {
+			triggerLocalPlayerJoined(p);
 		} else if (p.getPacketName().equals("count-down-started")) {
 			triggerCountDown(p);
 		}
 	}
-
+	
 	private void triggerCountDown(final Packet p) {
 		gameUI.timer();
 	}
 
-	private void triggerLocalPlayerDied(final Packet p) {
-		// TODO: handling by graphics (send event to them)
+	private void triggerLocalPlayerJoined(Packet p) {
+		final int row = p.getInteger("row"), col = p.getInteger("col");
+		final double angle = p.getDouble("angle");
+
+		ControlledPlayer player = new ControlledPlayer(client.getClientID(), username);
+		player.setPosition(new Position(row, col));
+		player.setAngle(angle);
+		game.getWorld().addEntity(player);
 	}
 
-	private void triggerPlayerDied(final Packet p) {
+	private void triggerLocalPlayerDied(final Packet p) {
+		if(game.getWorld().getEntity(client.getClientID()) != null) {
+			Entity e = game.getWorld().getEntity(client.getClientID());
+			if(e instanceof ControlledPlayer) {
+				((ControlledPlayer) e).setCanRespawn(p.getBoolean("rejoinable"));
+				((ControlledPlayer) e).setDeathReason(p.getString("message"));
+			}
+			game.getWorld().removeEntity(client.getClientID());
+		}
+	}
+
+	private void triggerRemotePlayerDied(final Packet p) {
 		final int playerID = p.getInteger("player-id");
 
 		game.getWorld().removeEntity(playerID);
@@ -261,9 +296,9 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 
 		if (outcomeString.equals("tie")) {
 			outcome = new GameOutcome(GameOutcomeType.TIE);
-		} else if (outcomeString.equals("ghosts-win")) {
+		} else if (outcomeString.equals("ghosts-won")) {
 			outcome = new GameOutcome(GameOutcomeType.GHOSTS_WON);
-		} else if (outcomeString.equals("player-win")) {
+		} else if (outcomeString.equals("player-won")) {
 			final int winnerID = p.getInteger("winner-id");
 			if (lobby.containsPlayer(winnerID)) {
 				final Player winner = (Player) game.getWorld().getEntity(winnerID);
@@ -288,15 +323,21 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	}
 
 	private void triggerForceMove(final Packet p) {
-		final int row = p.getInteger("row"), col = p.getInteger("col");
-		final double angle = p.getDouble("angle");
-
-		game.getPlayer().setPosition(new Position(row, col));
-		game.getPlayer().setAngle(angle);
+		if(player != null) {
+			final int row = p.getInteger("row"), col = p.getInteger("col");
+			final double angle = p.getDouble("angle");
+	
+			player.setPosition(new Position(row, col));
+			player.setAngle(angle);
+		} else {
+			// received force move packet from server, but the
+			// player is despawned - ignore this for now
+		}
 	}
 
 	private void triggerGameStarting(final Packet p) {
 		final GameSettings settings = new GameSettings();
+		settings.setInitialPlayerLives(p.getInteger("initial-player-lives"));
 		// reconstruct game settings as needed
 
 		final MultiplayerGameStartingEventArgs args = new MultiplayerGameStartingEventArgs(settings,
@@ -357,7 +398,8 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 
 	private void triggerRemotePlayerLeft(final Packet p) {
 		final int playerID = p.getInteger("player-id");
-		game.getWorld().removeEntity(playerID);
+		if(game.getWorld().getEntity(playerID) != null)
+			game.getWorld().removeEntity(playerID);
 	}
 
 	private void triggerRemotePlayerMoved(final Packet p) {
@@ -373,7 +415,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 				player.setAngle(p.getDouble("angle"));
 			}
 		} else {
-			throw new RuntimeException("wut"); // TODO: error reporting
+			// won't happen
 		}
 	}
 
@@ -394,7 +436,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			final RemoteGhost ghost = (RemoteGhost) e;
 			ghost.setPosition(new Position(row, col));
 		} else {
-			throw new RuntimeException("wut"); // TODO: error reporting
+			// won't happen
 		}
 	}
 
@@ -413,7 +455,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	}
 
 	@Override
-	public void onGameStarted(final GameStartedEventArgs args) {
+	public void onGameCreated(final GameCreatedEventArgs args) {
 		if (args.getGame().getGameType() == GameType.MULTIPLAYER_CLIENT) {
 			if (game != null) {
 				removeWorldGameHooks(game, gameLogic);
@@ -426,5 +468,28 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 
 	public Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> getOnRemoteGameEndedEvent() {
 		return onRemoteGameEndedEvent;
+	}
+
+	@Override
+	public void onLocalPlayerDespawn(LocalPlayerDespawnEventArgs args) {
+		this.player.getOnMovedEvent().removeListener(this);
+		this.player = null;
+	}
+
+	@Override
+	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
+		this.player = args.getPlayer();
+		this.player.getOnMovedEvent().addListener(this);
+	}
+
+	@Override
+	public void onReadyToStart(ReadyToStartEventArgs args) {
+		Packet p = new Packet("ready-to-start");
+		manager.dispatch(p);
+	}
+
+	@Override
+	public void onPlayerLeavingGame() {
+		client.die();
 	}
 }

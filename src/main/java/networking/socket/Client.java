@@ -36,7 +36,7 @@ public class Client implements NetworkSocket, Runnable {
 	private int clientID = -1;
 	private boolean serverSide;
 	private Event<ClientDisconnectedListener, Integer> disconnectedEvent;
-	private boolean alive = false;
+	private volatile boolean alive = false;
 
 	/**
 	 * Initialise Client object using a hostname

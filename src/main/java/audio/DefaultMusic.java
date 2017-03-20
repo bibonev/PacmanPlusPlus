@@ -8,9 +8,10 @@ import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 import main.java.event.arguments.GameEndedEventArgs;
-import main.java.event.arguments.GameStartedEventArgs;
+import main.java.event.arguments.GameCreatedEventArgs;
+import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.GameEndedListener;
-import main.java.event.listener.GameStartedListener;
+import main.java.event.listener.GameCreatedListener;
 
 /**
  * Class for playing background music
@@ -18,7 +19,7 @@ import main.java.event.listener.GameStartedListener;
  * @author Rose Kirtley
  *
  */
-public class DefaultMusic implements Music, GameStartedListener, GameEndedListener  {
+public class DefaultMusic implements Music, GameCreatedListener, GameEndedListener  {
 	
 	private boolean isOn;
 	private MediaPlayer mediaPlayer;
@@ -78,7 +79,7 @@ public class DefaultMusic implements Music, GameStartedListener, GameEndedListen
 	}
 
 	@Override
-	public void onGameStarted(GameStartedEventArgs args) {
+	public void onGameCreated(GameCreatedEventArgs args) {
 		playMusic();
 	}
 
