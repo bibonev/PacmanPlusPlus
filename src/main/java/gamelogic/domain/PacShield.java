@@ -8,6 +8,7 @@ package main.java.gamelogic.domain;
  *
  */
 public class PacShield extends Ability {
+    public static final int MAX_SHIELD = 4;
 
 	public PacShield() {
 		super("PacShield");
@@ -19,7 +20,7 @@ public class PacShield extends Ability {
     public void activate() {
         // Set the shield power to 10
         if(getCD() == 40){
-            owner.setShield(10);
+            owner.setShield(MAX_SHIELD);
             setCD(0);
         }
     }
