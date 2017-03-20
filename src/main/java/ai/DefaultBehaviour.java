@@ -23,8 +23,7 @@ public class DefaultBehaviour extends Behaviour {
 	 * @param stash
 	 *            the inventory
 	 */
-	public DefaultBehaviour(final World world, final Entity entity, final int speed, final SkillSet stash,
-			final Type type) {
-		super(world, entity, speed, stash, type);
+	public DefaultBehaviour(final World world, final Entity entity, final int speed, final Type type) {
+		super(world, entity, speed, new SkillSet(), type);
 	}
 }
