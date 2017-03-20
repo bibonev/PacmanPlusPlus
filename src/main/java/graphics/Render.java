@@ -26,16 +26,19 @@ import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
 import main.java.event.arguments.LocalPlayerDespawnEventArgs;
 import main.java.event.arguments.LocalPlayerSpawnEventArgs;
+import main.java.event.arguments.SingleplayerGameStartingEventArgs;
 import main.java.event.listener.EntityRemovingListener;
 import main.java.event.listener.GameDisplayInvalidatedListener;
 import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
 import main.java.event.listener.LocalPlayerSpawnListener;
 import main.java.event.listener.PlayerLeavingGameListener;
+import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Game;
+import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.Player;
 import main.java.ui.GameUI;
@@ -48,9 +51,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Pane root;
 	private Timeline timeLine;
 	private ControlledPlayer controlledPlayer;
+	private int localPlayerID;
 	private GameUI gameUI;
 	private Game game;
 	private GameLogic gameLogic;
+	private InGameScreens inGameScreens;
 	private HashMap<Integer, Node> allEntities;
 	private Node[][] worldNodes;
 	private HashMap<Integer, RotateTransition> rotations;
@@ -59,9 +64,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Node gameOverWindow;
 	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame;
 	private Set<Integer> removedEntityIDs;
+	private Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> onStartingSingleplayerGame;
 
 	/**
-	 * Initialize new visualisation of the map
+	 * Initialise new visualisation of the map
 	 *
 	 * @param gameUI
 	 * @param game
@@ -75,6 +81,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameLogic.getOnLocalPlayerSpawn().addListener(this);
 		this.gameLogic.getOnLocalPlayerDespawn().addListener(this);
 		this.game.getWorld().getOnEntityRemovingEvent().addListener(this);
+		this.inGameScreens = new InGameScreens(game);
 
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
@@ -83,10 +90,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
 		
 		this.removedEntityIDs = new HashSet<>();
-	}
-	
-	public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
-		return onPlayerLeavingGame;
+		this.onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
 	}
 
 	/**
@@ -222,13 +226,29 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 				} else if (event.getCode() == KeyCode.RIGHT) {
 					controlledPlayer.moveRight();
 					redrawWorld();
+				} else if (event.getCode() == KeyCode.ESCAPE) {
+					timeLine.pause();
+					root.getChildren().add(this.inGameScreens.pauseGameScreen());
+					pauseClickListener();
 				}
+			} 
+		});
+	}
+
+	private void pauseClickListener() {
+		root.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				root.getChildren().remove(root.getChildren().size()-1);
+				timeLine.play();
+				addClickListener();
+			} else if (event.getCode() == KeyCode.Q) {
+				gameUI.switchToMenu();
 			}
 		});
 	}
 
 	/**
-	 * Start the timeline
+	 * Start the time line
 	 */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(250), event -> {
@@ -236,74 +256,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}));
 		timeLine.setCycleCount(Timeline.INDEFINITE);
 		timeLine.play();
-	}
-	
-	private String getGameOutcomeText(final GameOutcome gameOutcome) {
-		switch(gameOutcome.getOutcomeType()) {
-		case GHOSTS_WON:
-			return "Damn! The ghosts won this time...";
-		case PLAYER_WON:
-			if(gameOutcome.getWinner().getID() == controlledPlayer.getID()) {
-				return "Wohoo, you won!";
-			} else {
-				return "Damn, " + gameOutcome.getWinner().getName() + " won this time!";
-			}
-		case TIE:
-			return "No one won. Stop being bad at the game";
-		default:
-			return "A " + gameOutcome.getOutcomeType().name() + " happened";
-		}
-	}
-
-	private StackPane getGameOverWindow(final GameOutcome gameOutcome) {
-		final StackPane pane = new StackPane();
-		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
-		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
-
-		final Label outcomneLabel = new Label(getGameOutcomeText(gameOutcome));
-		outcomneLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
-
-		final Label escLable = new Label("* Press ESC to go back to the menu");
-		escLable.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
-
-		/* final Label spaceLabel = new Label("* Press SPACE to reply");
-		spaceLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center"); */
-		StackPane.setAlignment(outcomneLabel, Pos.TOP_CENTER);
-		StackPane.setAlignment(escLable, Pos.CENTER);
-		// StackPane.setAlignment(spaceLabel, Pos.CENTER);
-
-		pane.getChildren().addAll(outcomneLabel, escLable);
-		return pane;
-	}
-
-	private StackPane getPlayerRespawnWindow(final String deathReason, final boolean canRejoin) {
-		final StackPane pane = new StackPane();
-		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
-		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
-
-		final Label deathLabel = new Label("You died!");
-		deathLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 30 \"serif\"; -fx-padding: 20 0 0 0; -fx-text-alignment: center");
-
-		final Label deathReasonLabel = new Label(deathReason);
-		deathReasonLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 0; -fx-text-alignment: center");
-
-		String retryString = canRejoin ?
-				"Press SPACE to respawn" :
-				"You have ran out of lives";
-		final Label spaceLabel = new Label(retryString);
-		spaceLabel.setStyle(
-				"-fx-text-fill: goldenrod; -fx-font: bold 20 \"serif\"; -fx-padding: 50 103 0 0; -fx-text-alignment: center");
-		StackPane.setAlignment(deathLabel, Pos.TOP_CENTER);
-		StackPane.setAlignment(deathReasonLabel, Pos.CENTER);
-		// StackPane.setAlignment(spaceLabel, Pos.CENTER);
-
-		pane.getChildren().addAll(deathLabel, deathReasonLabel);
-		return pane;
 	}
 	
 	private void clearWindows() {
@@ -322,12 +274,17 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	 * End the game
 	 */
 	private void gameEnded(final GameOutcome gameOutcome) {
-		timeLine.stop();
-clearWindows();
-		gameOverWindow = getGameOverWindow(gameOutcome);
+		clearWindows();
+		gameOverWindow = inGameScreens.endGameScreen(localPlayerID, gameOutcome);
 		root.getChildren().add(gameOverWindow);
+		timeLine.stop();
+
+		root.getChildren().add(this.inGameScreens.endGameScreen(localPlayerID, gameOutcome));
 		root.setOnKeyPressed(e -> {
-			if (e.getCode() == KeyCode.ESCAPE) {
+			if (e.getCode() == KeyCode.SPACE) {
+				getOnStartingSingleplayerGame().fire(
+						new SingleplayerGameStartingEventArgs(new GameSettings(), this.gameUI.getName()));
+			} else if (e.getCode() == KeyCode.ESCAPE) {
 				leaveGame();
 			}
 		});
@@ -357,7 +314,7 @@ clearWindows();
 
 	private void playerDied(String message, boolean canRejoin) {
 		clearWindows();
-		playerRespawnWindow = getPlayerRespawnWindow(message, canRejoin);
+		playerRespawnWindow = inGameScreens.getPlayerRespawnWindow(message, canRejoin);
 		root.getChildren().add(playerRespawnWindow);
 		root.setOnKeyPressed(e -> {
 			if (e.getCode() == KeyCode.SPACE) {
@@ -374,6 +331,7 @@ clearWindows();
 	@Override
 	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
 		this.controlledPlayer = args.getPlayer();
+		this.localPlayerID = this.controlledPlayer.getID();
 		Platform.runLater(this::playerRespawn);
 	}
 	
@@ -398,5 +356,13 @@ clearWindows();
 				removedEntityIDs.add(args.getEntityID());
 			}
 		});
+	}
+	
+	public Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> getOnStartingSingleplayerGame() {
+		return onStartingSingleplayerGame;
+	}
+	
+	public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
+		return onPlayerLeavingGame;
 	}
 }

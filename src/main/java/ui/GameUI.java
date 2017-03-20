@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -182,9 +183,16 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		centerPane.getChildren().remove(0, centerPane.getChildren().size());
 		centerPane.getChildren().add(screen.getPane());
 	}
+	
+	private void adjustScreenPosition(){
+		Rectangle2D primScreenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
+		thisStage.setX((primScreenBounds.getWidth() - thisStage.getWidth()) / 2);
+		thisStage.setY((primScreenBounds.getHeight() - thisStage.getHeight()) / 2);
+	}
 
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
+		adjustScreenPosition();
 		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
 		label.getStyleClass().add("labelStyle");
@@ -333,25 +341,27 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void onGameCreated(final GameCreatedEventArgs args) {
 		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
-				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
+				final Render render = new Render(this, args.getGame(), args.getGameLogic());
 
 				args.getGameLogic().getOnGameEnded().addOneTimeListener((GameEndedListener) music);
 				args.getGameLogic().getOnGameEnded().addOneTimeListener((GameEndedListener) sounds);
+				render.getOnStartingSingleplayerGame().addOneTimeListener(gameCommandService);
 				
 				// Initialize Screen dimensions
 				PositionVisualisation.initScreenDimensions();
-
+		        
 				// Draw Map
-				thisStage.setScene(mapV.setupWorld());
+				thisStage.setScene(render.setupWorld());
 				thisStage.show();
+				adjustScreenPosition();
 
 				// Add CLick Listener
-				mapV.addClickListener();
+				render.addClickListener();
 
 				// Start Timeline
-				mapV.startTimeline();
+				render.startTimeline();
 				
-				mapV.getOnPlayerLeavingGame().addOneTimeListener(this);
+				render.getOnPlayerLeavingGame().addOneTimeListener(this);
 			});
 		}
 	}
