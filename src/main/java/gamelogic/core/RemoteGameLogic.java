@@ -1,5 +1,8 @@
 package main.java.gamelogic.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import main.java.constants.GameOutcome;
 import main.java.event.arguments.EntityChangedEventArgs;
 import main.java.event.arguments.EntityMovedEventArgs;
@@ -15,6 +18,7 @@ import main.java.event.listener.RemoteGameEndedListener;
 import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
+import main.java.gamelogic.domain.Spawner;
 
 public class RemoteGameLogic extends GameLogic implements EntityAddedListener, EntityRemovingListener, EntityMovedListener,
 		RemoteGameEndedListener {
@@ -36,6 +40,13 @@ public class RemoteGameLogic extends GameLogic implements EntityAddedListener, E
 	@Override
 	public void gameStep(final int period) {
 		game.getWorld().gameStep(game);
+		Set<Integer> toRemove = new HashSet<Integer>();
+		for(Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
+			if(spawner.isExpired()) toRemove.add(spawner.getID());
+		}
+		for(int id : toRemove) {
+			game.getWorld().removeEntity(id);
+		}
 		invalidateDisplay();
 	}
 

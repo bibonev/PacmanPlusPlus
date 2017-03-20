@@ -26,6 +26,8 @@ import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
+import main.java.gamelogic.domain.Spawner;
+import main.java.gamelogic.domain.Spawner.SpawnerColor;
 
 public class LocalGameLogic extends GameLogic implements EntityAddedListener, EntityRemovingListener {
 	private Game game;
@@ -60,6 +62,15 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 				p.setDeathReason("Eaten by a ghost!");
 				game.getWorld().removeEntity(p.getID());
 			}
+			Set<Spawner> spawnersToRemove = new HashSet<Spawner>();
+			for(Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
+				if(spawner.isExpired()) spawnersToRemove.add(spawner);
+			}
+			for(Spawner spawner : spawnersToRemove) {
+				if(spawner.getEntity() != null)
+					game.getWorld().addEntity(spawner.getEntity());
+				game.getWorld().removeEntity(spawner.getID());
+			}
 			checkEndingConditions();
 			invalidateDisplay();
 		}
@@ -78,6 +89,10 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 	}
 
 	private boolean ghostsEatenPlayers() {
+		for(Spawner c : game.getWorld().getEntities(Spawner.class)) {
+			Entity e = c.getEntity();
+			if(e != null && e instanceof Player) return false;
+		}
 		return game.getWorld().getEntities(Player.class).size() == 0;
 	}
 
@@ -163,7 +178,9 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 		if(game.getGameType() == GameType.SINGLEPLAYER) {
 			ControlledPlayer player = new ControlledPlayer(0, "You");
 			player.setPosition(new Position(0, 6));
-			game.getWorld().addEntity(player);
+			Spawner spawner = new Spawner(5, player, SpawnerColor.GREEN);
+			spawner.setPosition(player.getPosition());
+			game.getWorld().addEntity(spawner);
 			game.setStarted();
 		}
 	}

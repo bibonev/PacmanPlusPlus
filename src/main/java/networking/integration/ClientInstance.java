@@ -33,6 +33,8 @@ import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemoteGhost;
 import main.java.gamelogic.domain.RemotePlayer;
+import main.java.gamelogic.domain.Spawner;
+import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.networking.ClientManager;
 import main.java.networking.StandardClientManager;
 import main.java.networking.data.Packet;
@@ -256,9 +258,25 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerLocalPlayerJoined(p);
 		} else if (p.getPacketName().equals("count-down-started")) {
 			triggerCountDown(p);
+		} else if(p.getPacketName().equals("spawner-added")) {
+			triggerSpawnerAdded(p);
 		}
 	}
 	
+	private void triggerSpawnerAdded(Packet p) {
+		Spawner.SpawnerColor color;
+		String spawnerType = p.getString("entity-type");
+		switch(spawnerType) {
+		case "local-player": color = SpawnerColor.GREEN; break;
+		case "remote-player": color = SpawnerColor.YELLOW; break;
+		case "ghost": color = SpawnerColor.RED; break;
+		default: color = SpawnerColor.CYAN; break;
+		}
+		Spawner s = new Spawner(p.getInteger("duration"), null, color);
+		s.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
+		game.getWorld().addEntity(s);
+	}
+
 	private void triggerCountDown(final Packet p) {
 		gameUI.timer();
 	}

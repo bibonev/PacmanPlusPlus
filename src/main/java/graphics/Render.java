@@ -41,6 +41,8 @@ import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.Player;
+import main.java.gamelogic.domain.Spawner;
+import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.ui.GameUI;
 
 /**
@@ -56,7 +58,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Game game;
 	private GameLogic gameLogic;
 	private InGameScreens inGameScreens;
-	private HashMap<Integer, Node> allEntities;
+	private HashMap<Integer, Visualisation> allEntities;
 	private Node[][] worldNodes;
 	private HashMap<Integer, RotateTransition> rotations;
 	private HashMap<Integer, TranslateTransition> transitions;
@@ -114,25 +116,39 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	}
 
 	private void setupGhostAnimation(final Ghost ghost) {
-		Node ghostNode = new GhostVisualisation(ghost.getPosition()).getNode();
+		GhostVisualisation ghostVis = new GhostVisualisation(ghost.getPosition());
+		Node ghostNode = ghostVis.getNode();
 		TranslateTransition transitionGhost = new TranslateTransition(Duration.millis(140), ghostNode);
 
 		transitions.put(ghost.getID(), transitionGhost);
 
-		allEntities.put(ghost.getID(), ghostNode);
+		allEntities.put(ghost.getID(), ghostVis);
 
 		root.getChildren().add(ghostNode);
 	}
 
+	private void setupSpawnerAnimation(final Spawner spawner) {
+		SpawnerVisualisation spawnerVis = new SpawnerVisualisation(spawner);
+		Node spawnerNode = spawnerVis.getNode();
+		spawnerVis.setNumber(spawner.getTimeRemaining());
+		allEntities.put(spawner.getID(), spawnerVis);
+		root.getChildren().add(spawnerNode);
+		
+		if(spawner.getColor() == SpawnerColor.GREEN) {
+			clearWindows();
+		}
+	}
+
 	private void setupPlayerAnimation(final Player player) {
-		Node playerNode = new PacmanVisualisation(player).getNode();
+		PacmanVisualisation playerVis = new PacmanVisualisation(player);
+		Node playerNode = playerVis.getNode();
 		TranslateTransition transitionPlayer = new TranslateTransition(Duration.millis(140), playerNode);
 		RotateTransition rotatePlayer = new RotateTransition(Duration.millis(30), playerNode);
 
 		transitions.put(player.getID(), transitionPlayer);
 		rotations.put(player.getID(), rotatePlayer);
 
-		allEntities.put(player.getID(), playerNode);
+		allEntities.put(player.getID(), playerVis);
 		root.getChildren().add(playerNode);
 	}
 
@@ -162,7 +178,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             transitions.get(player.getID()).setToX(nextNode.getTranslateX());
             rotations.get(player.getID()).setToAngle(nextNode.getRotate());
 
-            root.getChildren().get(root.getChildren().indexOf(allEntities.get(player.getID()))).toFront();
+            //root.getChildren().get(root.getChildren().indexOf(allEntities.get(player.getID()))).toFront();
             rotations.get(player.getID()).play();
             transitions.get(player.getID()).play();
         }
@@ -176,10 +192,22 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 		    transitions.get(ghost.getID()).setToY(nextNode.getTranslateY());
             transitions.get(ghost.getID()).setToX(nextNode.getTranslateX());
-
-            root.getChildren().get(root.getChildren().indexOf(allEntities.get(ghost.getID()))).toFront();
+            //root.getChildren().get(root.getChildren().indexOf(allEntities.get(ghost.getID()))).toFront();
 
             transitions.get(ghost.getID()).play();
+		}
+
+		for (final Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
+		    if(!allEntities.containsKey(spawner.getID())) {
+		    	setupSpawnerAnimation(spawner);
+		    }
+			SpawnerVisualisation vis = (SpawnerVisualisation) allEntities.get(spawner.getID());
+		    
+		    vis.setNumber(spawner.getTimeRemaining());
+
+            //root.getChildren().get(root.getChildren().indexOf(allEntities.get(ghost.getID()))).toFront();
+
+            // transitions.get(spawner.getID()).play();
 		}
 
 		root.requestFocus();
@@ -199,6 +227,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 					Node cv = new CellVisualisation(cells[row][column]).getNode();
 					worldNodes[row][column] = cv;
 					root.getChildren().add(cv);
+					cv.toBack();
 					cells[row][column].clearNeedsRedrawFlag();
 				}
 			}
@@ -338,7 +367,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	
 	private void removeEntityFromStage(int entityID) {
 		if(allEntities.containsKey(entityID)) {
-			root.getChildren().remove(allEntities.remove(entityID));
+			root.getChildren().remove(allEntities.remove(entityID).getNode());
 			
 			if(transitions.containsKey(entityID)) {
 				root.getChildren().remove(transitions.remove(entityID));
