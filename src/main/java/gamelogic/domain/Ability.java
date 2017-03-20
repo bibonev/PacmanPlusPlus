@@ -74,5 +74,4 @@ public abstract class Ability {
 	 * @throws InterruptedException
 	 */
 	public abstract void activate();
-
 }
