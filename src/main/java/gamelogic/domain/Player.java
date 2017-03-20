@@ -30,7 +30,7 @@ public abstract class Player extends Entity {
         laser.setCD(20);
         laser.setOwner(this);
         SkillSet skillSet = new SkillSet();
-        skillSet.setQ(laser); // set E button to activate laser
+        skillSet.setQ(laser); // set Q button to activate laser
         skillSet.setW(shield); // set W button to activate shield
         this.setSkillSet(skillSet);
 	}

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import javafx.scene.Node;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -71,10 +72,9 @@ public class PacmanVisualisationTest {
 	@Test
 	public void testNode() {
 		test = new PacmanVisualisation(testPlayer);
-		final ImageView node = test.getNode();
+		final Node node = test.getNode();
 
-		assertEquals(289.0, node.getImage().getHeight(), 0.001);
-		assertEquals(300.0, node.getImage().getWidth(), 0.001); // Assert no
-																// exception
+		assertEquals(289.0, ((ImageView)(node)).getImage().getHeight(), 0.001);
+		assertEquals(300.0, ((ImageView)(node)).getImage().getWidth(), 0.001);
 	}
 }

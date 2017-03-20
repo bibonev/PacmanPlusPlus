@@ -1,6 +1,10 @@
 package main.java.graphics;
 
+import javafx.scene.Node;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
+import main.java.constants.Colors;
 import main.java.gamelogic.domain.Player;
 
 /**
@@ -27,7 +31,7 @@ public class PacmanVisualisation implements Visualisation {
 	 * @return Node
 	 */
 	@Override
-	public ImageView getNode() {
+	public Node getNode() {
 		final PositionVisualisation pv = new PositionVisualisation(player.getPosition().getRow(),
 				player.getPosition().getColumn());
 
@@ -38,13 +42,26 @@ public class PacmanVisualisation implements Visualisation {
 
 		pacMan.setFitWidth(min);
 		pacMan.setFitHeight(min);
-
-		pacMan.setTranslateX(pv.getPixelX() + pv.getWidth() / 2 - min / 2);
-		pacMan.setTranslateY(pv.getPixelY() + pv.getHeight() / 2 - min / 2);
-
-		pacMan.setRotate(player.getAngle());
 		pacMan.toFront();
 
-		return pacMan;
+
+		if(player.getShield() > 3){
+			Circle shield = new Circle(pv.getPixelX() + pv.getWidth() / 2,
+					pv.getPixelY() + pv.getHeight() / 2,
+					pv.getWidth() / 8);
+			shield.setFill(Colors.ShieldColor);
+
+			StackPane pacManWithShield = new StackPane();
+			pacManWithShield.setTranslateX(pv.getPixelX() + pv.getWidth() / 2 - min / 2);
+			pacManWithShield.setTranslateY(pv.getPixelY() + pv.getHeight() / 2 - min / 2);
+			pacManWithShield.setRotate(player.getAngle());
+			pacManWithShield.getChildren().addAll(pacMan, shield);
+			return pacManWithShield;
+		} else {
+			pacMan.setTranslateX(pv.getPixelX() + pv.getWidth() / 2 - min / 2);
+			pacMan.setTranslateY(pv.getPixelY() + pv.getHeight() / 2 - min / 2);
+			pacMan.setRotate(player.getAngle());
+			return pacMan;
+		}
 	}
 }

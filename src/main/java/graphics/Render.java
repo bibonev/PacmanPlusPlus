@@ -1,5 +1,6 @@
 package main.java.graphics;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,6 +15,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 import main.java.constants.GameOutcome;
 import main.java.constants.ScreenSize;
@@ -57,10 +59,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Game game;
 	private GameLogic gameLogic;
 	private InGameScreens inGameScreens;
+    private Node[][] worldNodes;
 	private HashMap<Integer, Visualisation> allEntities;
-	private Node[][] worldNodes;
 	private HashMap<Integer, RotateTransition> rotations;
 	private HashMap<Integer, TranslateTransition> transitions;
+	private HashMap<Integer, Node> shieldsActivated;
 	private Node playerRespawnWindow;
 	private Node gameOverWindow;
 	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame;
@@ -88,6 +91,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
 		this.allEntities = new HashMap<>();
+		this.shieldsActivated = new HashMap<>();
         this.removedEntityIDs = new HashSet<>();
 		
 		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
@@ -131,10 +135,19 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}
 
 		for (final Player player : game.getWorld().getPlayers()) {
-		    ImageView nextNode = new PacmanVisualisation(player).getNode();
+    	    PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
+		    Node nextNode = pacmanVisualisation.getNode();
 		    
 		    if(!allEntities.containsKey(player.getID()))
 		    	setupPlayerAnimation(player);
+
+		    if(player.getShield() > 3  && !shieldsActivated.containsKey(player.getID())){
+		        shieldsActivated.put(player.getID(), nextNode);
+                shieldVisulisation(player, pacmanVisualisation, nextNode, allEntities.get(player.getID()).getNode(), player.getID());
+            } else if (player.getShield() <= 3 && shieldsActivated.containsKey(player.getID())){
+                shieldVisulisation(player, pacmanVisualisation, nextNode, shieldsActivated.get(player.getID()), player.getID());
+                shieldsActivated.remove(player.getID());
+            }
 
             transitions.get(player.getID()).setToY(nextNode.getTranslateY());
             transitions.get(player.getID()).setToX(nextNode.getTranslateX());
@@ -169,7 +182,18 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		root.requestFocus();
 	}
 
-	/**
+    private void shieldVisulisation(Player player, PacmanVisualisation pacmanVisualisation, Node nextNode, Node node, int id) {
+        transitions.get(player.getID()).setNode(nextNode);
+        rotations.get(player.getID()).setNode(nextNode);
+
+        root.getChildren().remove(node);
+        root.getChildren().add(nextNode);
+
+        allEntities.remove(id);
+        allEntities.put(id, pacmanVisualisation);
+    }
+
+    /**
 	 *
 	 * Click listener for moving the player
 	 */
@@ -205,9 +229,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
-	/**
-	 * Start the time line
-	 */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(GameLogic.GAME_STEP_DURATION), event -> {
             gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
@@ -273,9 +294,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         gameUI.switchToMenu();
     }
 
-    /**
-     * End the game
-     */
     private void gameEnded(final GameOutcome gameOutcome) {
         clearWindows();
         timeLine.stop();
@@ -370,7 +388,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             root.getChildren().remove(playerRespawnWindow);
     }
 
-    // only redraw cells that have changed state
     private void redrawCells() {
         final Cell[][] cells = game.getWorld().getMap().getCells();
         int rows = game.getWorld().getMap().getMapSize(), columns = rows;

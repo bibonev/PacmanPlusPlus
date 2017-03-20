@@ -12,8 +12,7 @@ public class Colors {
 	public static Color CellObstacleColor = Color.YELLOW;
 	public static Color CellEmptyColor = Color.BLACK;
 	public static Color CellFoodColor = Color.YELLOW;
-	public static Color PackManColor = Color.RED; // TODO: Add free choice of
-													// color
-	public static Color Ghost1Color = Color.GREEN; // TODO: Add free choice of
-													// ghost color
+	public static Color ShieldColor = Color.rgb(39, 148, 232, 0.7);
+	public static Color PackManColor = Color.RED;
+	public static Color Ghost1Color = Color.GREEN;
 }
