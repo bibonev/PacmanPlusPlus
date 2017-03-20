@@ -128,6 +128,9 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		timerLabel.setAlignment(Pos.CENTER);
 	    timerLabel.textProperty().bind(timeSeconds.asString());
 
+	    primaryStage.setResizable(false);
+	    thisStage.setResizable(false);
+	    
 		primaryStage.setScene(uiScene);
 		switchToLogIn();
 		primaryStage.show();
