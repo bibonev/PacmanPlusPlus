@@ -62,6 +62,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	private BorderPane banner;
 	public Button settings;
 	private StackPane centerPane;
+	private Scene helpScene;
+	private BorderPane helpPane;
 	
 	private static final Integer STARTTIME = 3;
 	private Timeline timeline;
@@ -107,12 +109,20 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		uiScene = new Scene(pane, 500, 500);
 		uiScene.setOnKeyPressed(e -> sendMoveEvent(e.getCode()));
 
+		helpPane = new BorderPane();
+		helpPane.getStyleClass().add("paneStyle");
+		helpPane.setCenter(helpScreen.getPane());
+
+		helpScene = new Scene(helpPane, 1150, 600);
+		helpScene.setOnKeyPressed(e -> sendMoveEvent(e.getCode()));
+
 		final String css = this.getClass().getResource("style.css").toExternalForm();
 		uiScene.getStylesheets().add(css);
+		helpScene.getStylesheets().add(css);
 		pane.getStyleClass().add("paneStyle");
 
 		setUpSettingsButton();
-		
+				
 		timerLabel.setText(timeSeconds.toString());
 		timerLabel.getStyleClass().add("countdown");
 		timerLabel.setAlignment(Pos.CENTER);
@@ -194,8 +204,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
-		thisStage.setWidth(500);
-		thisStage.setHeight(500);
 		adjustScreenPosition();
 		setScreen(menuScreen);
 		final Label label = new Label("PacMan " + getName());
@@ -239,10 +247,12 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 	
 	public void switchToHelp(){
-		thisStage.setWidth(1150);
-		thisStage.setHeight(600);
+		final Label label = new Label("PacMan " + getName());
+		label.getStyleClass().add("labelStyle");
+		helpPane.setTop(label);
+		thisStage.setScene(helpScene);
 		adjustScreenPosition();
-		setScreen(helpScreen);
+		//setScreen(helpScreen);
 	}
 
 	public void close() {
@@ -364,8 +374,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				// Draw Map
 				thisStage.setScene(render.setupWorld());
 				thisStage.show();
-				thisStage.setWidth(615);
-				thisStage.setHeight(388);
+//				thisStage.setWidth(615);
+//				thisStage.setHeight(388);
 				adjustScreenPosition();
 
 				// Add CLick Listener

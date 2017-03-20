@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
@@ -35,7 +33,7 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 	public LocalGameLogic(final Game game) {
 		super(game);
 		this.game = game;
-		
+
 		this.game.getWorld().getOnEntityAddedEvent().addListener(this);
 		this.game.getWorld().getOnEntityRemovingEvent().addListener(this);
 	}
@@ -61,13 +59,16 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 				p.setDeathReason("Eaten by a ghost!");
 				game.getWorld().removeEntity(p.getID());
 			}
-			Set<Spawner> spawnersToRemove = new HashSet<Spawner>();
-			for(Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
-				if(spawner.isExpired()) spawnersToRemove.add(spawner);
+			final Set<Spawner> spawnersToRemove = new HashSet<Spawner>();
+			for (final Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
+				if (spawner.isExpired()) {
+					spawnersToRemove.add(spawner);
+				}
 			}
-			for(Spawner spawner : spawnersToRemove) {
-				if(spawner.getEntity() != null)
+			for (final Spawner spawner : spawnersToRemove) {
+				if (spawner.getEntity() != null) {
 					game.getWorld().addEntity(spawner.getEntity());
+				}
 				game.getWorld().removeEntity(spawner.getID());
 			}
 			invalidateDisplay();
@@ -87,9 +88,11 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 	}
 
 	private boolean ghostsEatenPlayers() {
-		for(Spawner c : game.getWorld().getEntities(Spawner.class)) {
-			Entity e = c.getEntity();
-			if(e != null && e instanceof Player) return false;
+		for (final Spawner c : game.getWorld().getEntities(Spawner.class)) {
+			final Entity e = c.getEntity();
+			if (e != null && e instanceof Player) {
+				return false;
+			}
 		}
 		return game.getWorld().getEntities(Player.class).size() == 0;
 	}
@@ -125,14 +128,15 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 
 	private List<Player> getWinners() {
 		int maxDots = 0;
-		List<Player> winners = new ArrayList<>();
-		Collection<Player> allPlayers = game.getWorld().getPlayers();
-		
-		for(Player player : allPlayers) {
-			if(player.getDotsEaten() >= maxDots) { // add to winner collection
-				if(player.getDotsEaten() > maxDots) { // better than other winners
+		final List<Player> winners = new ArrayList<>();
+		final Collection<Player> allPlayers = game.getWorld().getPlayers();
+
+		for (final Player player : allPlayers) {
+			if (player.getDotsEaten() >= maxDots) { // add to winner collection
+				if (player.getDotsEaten() > maxDots) { // better than other
+														// winners
 					maxDots = player.getDotsEaten();
-					
+
 					winners.clear();
 				}
 				winners.add(player);
@@ -154,31 +158,31 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 	}
 
 	@Override
-	public void onEntityRemoving(EntityChangedEventArgs args) {
-		Entity e = args.getWorld().getEntity(args.getEntityID());
-		if(e instanceof ControlledPlayer) {
-			boolean canRespawn = ((ControlledPlayer) e).canRespawn();
-			String deathReason = ((ControlledPlayer) e).getDeathReason();
+	public void onEntityRemoving(final EntityChangedEventArgs args) {
+		final Entity e = args.getWorld().getEntity(args.getEntityID());
+		if (e instanceof ControlledPlayer) {
+			final boolean canRespawn = ((ControlledPlayer) e).canRespawn();
+			final String deathReason = ((ControlledPlayer) e).getDeathReason();
 			getOnLocalPlayerDespawn().fire(new LocalPlayerDespawnEventArgs(canRespawn, deathReason));
 		}
 	}
 
 	@Override
-	public void onEntityAdded(EntityChangedEventArgs args) {
-		Entity e = args.getWorld().getEntity(args.getEntityID());
-		if(e instanceof ControlledPlayer) {
+	public void onEntityAdded(final EntityChangedEventArgs args) {
+		final Entity e = args.getWorld().getEntity(args.getEntityID());
+		if (e instanceof ControlledPlayer) {
 			getOnLocalPlayerSpawn().fire(new LocalPlayerSpawnEventArgs((ControlledPlayer) e));
 		}
 	}
-	
+
 	@Override
 	public void readyToStart() {
 		super.readyToStart();
-		
-		if(game.getGameType() == GameType.SINGLEPLAYER) {
-			ControlledPlayer player = new ControlledPlayer(0, "You");
+
+		if (game.getGameType() == GameType.SINGLEPLAYER) {
+			final ControlledPlayer player = new ControlledPlayer(0, "You");
 			player.setPosition(new Position(0, 6));
-			Spawner spawner = new Spawner(5, player, SpawnerColor.GREEN);
+			final Spawner spawner = new Spawner(5, player, SpawnerColor.GREEN);
 			spawner.setPosition(player.getPosition());
 			game.getWorld().addEntity(spawner);
 			game.setStarted();

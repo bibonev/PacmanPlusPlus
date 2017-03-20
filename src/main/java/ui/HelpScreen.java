@@ -174,7 +174,7 @@ public class HelpScreen extends Screen{
 		settings.getStyleClass().add("buttonImageStyle");
 		settings.setTextAlignment(TextAlignment.CENTER);
 		
-		gameSettings = new Label("Game settings");
+		gameSettings = new Label("Change Game Settings");
 		gameSettings.getStyleClass().add("buttonImageStyle");
 		gameSettings.setTextAlignment(TextAlignment.CENTER);
 
@@ -189,10 +189,10 @@ public class HelpScreen extends Screen{
 		join.getStyleClass().add("buttonImageStyle");
 		join.setTextAlignment(TextAlignment.CENTER);
 		
-		start = new Label("Start game");
+		start = new Label("Start Game");
 		start.getStyleClass().add("buttonImageStyle");
 		start.setTextAlignment(TextAlignment.CENTER);
-		start2 = new Label("Start game");
+		start2 = new Label("Start Game");
 		start2.getStyleClass().add("buttonImageStyle");
 		start2.setTextAlignment(TextAlignment.CENTER);
 		
@@ -200,7 +200,7 @@ public class HelpScreen extends Screen{
 		startNew.getStyleClass().add("buttonImageStyle");
 		startNew.setTextAlignment(TextAlignment.CENTER);
 		
-		leave = new Label("Leave game");
+		leave = new Label("Leave Game");
 		leave.getStyleClass().add("buttonImageStyle");
 		leave.setTextAlignment(TextAlignment.CENTER);
 		
