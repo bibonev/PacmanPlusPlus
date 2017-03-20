@@ -35,7 +35,9 @@ import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemotePlayer;
 import main.java.gamelogic.domain.ServerEntityTracker;
+import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.World;
+import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.networking.ServerManager;
 import main.java.networking.StandardServerManager;
 import main.java.networking.data.Packet;
@@ -330,6 +332,11 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			p.setInteger("row", e.getPosition().getRow());
 			p.setInteger("col", e.getPosition().getColumn());
 			manager.dispatchAllExcept(p, e.getID());
+			
+			if(lobby.containsPlayer(e.getID())) {
+				manager.dispatch(e.getID(), createLocalPlayerJoinPacket(e.getPosition().getRow(),
+						e.getPosition().getColumn(), ((Player) e).getAngle()));
+			}
 		}
 		if (e instanceof Ghost) {
 			final Packet p = new Packet("remote-ghost-joined");
@@ -338,6 +345,34 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			p.setInteger("col", e.getPosition().getColumn());
 			manager.dispatchAll(p);
 		}
+		if(e instanceof Spawner) {
+			Spawner s = (Spawner) e;
+			Entity toSpawn = s.getEntity();
+			
+			if(toSpawn instanceof Ghost) {
+				manager.dispatchAll(createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "ghost"));
+			} else if(toSpawn instanceof Player) {
+				manager.dispatchAllExcept(
+						createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "remote-player"),
+						toSpawn.getID());
+				
+				if(lobby.containsPlayer(toSpawn.getID())) {
+					manager.dispatch(
+							toSpawn.getID(),
+							createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "local-player"));
+				}
+			}
+		}
+	}
+	
+	private Packet createSpawnCountdownPacket(Position position, int time, String type) {
+		final Packet p = new Packet("spawner-added");
+		p.setInteger("row", position.getRow());
+		p.setInteger("col", position.getColumn());
+		p.setInteger("duration", time);
+		p.setString("entity-type", type);
+		
+		return p;
 	}
 
 	@Override
@@ -354,7 +389,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			}
 		}
 		if (e instanceof Ghost) {
-			final Packet p = new Packet("remote-ghost-left");
+			final Packet p = new Packet("remote-ghost-died");
 			p.setInteger("ghost-id", e.getID());
 			manager.dispatchAll(p);
 		}
@@ -369,11 +404,10 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			} else {
 				final RemotePlayer player = new RemotePlayer(info.getID(), info.getName());
 				player.setPosition(new Position(row, col));
-				game.getWorld().addEntity(player);
+				final Spawner spawner = new Spawner(5, player, SpawnerColor.GREEN);
+				spawner.setPosition(player.getPosition());
+				game.getWorld().addEntity(spawner);
 				info.setInGame(true);
-
-				manager.dispatch(playerID, createLocalPlayerJoinPacket(player.getPosition().getRow(),
-						player.getPosition().getColumn(), player.getAngle()));
 			}
 		}
 	}
@@ -482,7 +516,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 
 		gameLogicTimer = new GameLogicTimer(gameLogic);
-		gameLogicTimer.start(250);
+		gameLogicTimer.start(GameLogic.GAME_STEP_DURATION);
 	}
 
 	@Override

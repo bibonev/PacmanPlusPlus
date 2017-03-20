@@ -19,6 +19,8 @@ import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RuleChecker;
+import main.java.gamelogic.domain.Spawner;
+import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.gamelogic.domain.World;
 
 public class GameCommandService implements SingleplayerGameStartingListener, MultiplayerGameStartingListener {
@@ -37,24 +39,23 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 	}
 
 	private void populateWorld(final World world) {
-		final AIGhost ghost = new AIGhost();
-		ghost.setPosition(new Position(1, 1));
-		final Behaviour b = new GhostBehaviour(world, ghost, 1000, Behaviour.Type.GHOST);
-		ghost.setBehaviour(b);
-
-		final AIGhost ghost1 = new AIGhost();
-		ghost1.setPosition(new Position(1, 13));
-		final Behaviour b1 = new GhostBehaviour(world, ghost1, 1000, Behaviour.Type.GHOST);
-		ghost1.setBehaviour(b1);
-
-		final AIGhost ghost2 = new AIGhost();
-		ghost2.setPosition(new Position(13, 13));
-		final Behaviour b2 = new GhostBehaviour(world, ghost2, 1000, Behaviour.Type.GHOST);
-		ghost2.setBehaviour(b2);
-
-		world.addEntity(ghost);
-		world.addEntity(ghost1);
-		world.addEntity(ghost2);
+		Position[] ghostPositions = new Position[] {
+				new Position(1, 1),
+				new Position(1, 13),
+				new Position(13, 13)
+		};
+		
+		for(Position p : ghostPositions) {
+			final AIGhost ghost = new AIGhost();
+			ghost.setPosition(p);
+			final Behaviour b = new GhostBehaviour(world, ghost, 1000, Behaviour.Type.GHOST);
+			ghost.setBehaviour(b);
+			
+			Spawner spawner = new Spawner(5, ghost, SpawnerColor.RED);
+			spawner.setPosition(ghost.getPosition());
+			
+			world.addEntity(spawner);
+		}
 	}
 
 	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID,

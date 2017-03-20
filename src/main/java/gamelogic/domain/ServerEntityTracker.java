@@ -16,23 +16,13 @@ public class ServerEntityTracker implements EntityAddedListener, EntityRemovingL
 	public void onEntityRemoving(final EntityChangedEventArgs args) {
 		final Entity e = args.getWorld().getEntity(args.getEntityID());
 
-		if (e instanceof Player) {
-			((Player) e).getOnMovedEvent().removeListener(entityListener);
-		}
-		if (e instanceof Ghost) {
-			((Ghost) e).getOnMovedEvent().removeListener(entityListener);
-		}
+		e.getOnMovedEvent().removeListener(entityListener);
 	}
 
 	@Override
 	public void onEntityAdded(final EntityChangedEventArgs args) {
 		final Entity e = args.getWorld().getEntity(args.getEntityID());
 
-		if (e instanceof Player) {
-			((Player) e).getOnMovedEvent().addListener(entityListener);
-		}
-		if (e instanceof Ghost) {
-			((Ghost) e).getOnMovedEvent().addListener(entityListener);
-		}
+		e.getOnMovedEvent().addListener(entityListener);
 	}
 }

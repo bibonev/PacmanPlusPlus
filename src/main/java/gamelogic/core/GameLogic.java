@@ -14,6 +14,7 @@ import main.java.event.listener.ReadyToStartListener;
 import main.java.gamelogic.domain.Game;
 
 public abstract class GameLogic {
+	public static final int GAME_STEP_DURATION = 250;
 	private Game game;
 	private Event<GameDisplayInvalidatedListener, GameDisplayInvalidatedEventArgs> onGameDisplayInvalidated;
 	private Event<GameEndedListener, GameEndedEventArgs> onGameEnded;
