@@ -4,6 +4,7 @@
 package main.java.gamelogic.domain;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,8 +28,6 @@ public class PacBomb extends Ability {
 	@Override
 	public void activate() {
 		final World world = owner.getWorld();
-
-		final Collection<Entity> entities = world.getEntities();
 
 		final int len = world.getMap().getMapSize();
 
@@ -54,14 +53,8 @@ public class PacBomb extends Ability {
 			colend = 0;
 		}
 
-		// 2 second detonation delay
-		try {
-			TimeUnit.SECONDS.sleep(2);
-		} catch (final InterruptedException e) {
-			System.out.println("This was the PacBomb activation delay. Something interrupted the sleep");
-		}
 
-		for (final Entity entity : entities) {
+		for (final Entity entity : world.getEntities()) {
 			final int enrow = entity.getPosition().getRow();
 			final int encol = entity.getPosition().getColumn();
 			if (enrow >= rowstart && enrow <= rowend && encol >= colstart && encol <= colend) {

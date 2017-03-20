@@ -25,12 +25,12 @@ public class AIPlayer extends LocalPlayer {
 	 * @param map
 	 *            the map
 	 */
-	public AIPlayer(final String name, final Behaviour behavior, final Map map) {
-		super(name);
-		this.behavior = behavior;
+	public AIPlayer() {
+		super("AI");
 	}
 
-	public Behaviour getBehaviour() {
-		return behavior;
+	public void setBehaviour(Behaviour behavior) {
+
+		this.behavior = behavior;
 	}
 }
