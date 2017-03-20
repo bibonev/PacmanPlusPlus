@@ -194,6 +194,12 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 					timeLine.pause();
 					root.getChildren().add(this.inGameScreens.pauseGameScreen());
 					pauseClickListener();
+				} else if (event.getCode() == KeyCode.Q) {
+                    controlledPlayer.getSkillSet().activateQ();
+                    redrawWorld();
+				} else if (event.getCode() == KeyCode.W) {
+					controlledPlayer.getSkillSet().activateW();
+					redrawWorld();
 				}
 			} 
 		});

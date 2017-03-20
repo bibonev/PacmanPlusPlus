@@ -4,12 +4,13 @@ package main.java.gamelogic.domain;
  * Represent an item from the inventory
  *
  * @author Lyubomir Pashev
+ * @author Simeon Kostadinov
  *
  */
 public abstract class Ability {
 
 	private String name;
-	protected Entity owner;
+	protected Player owner;
 	private int cooldown;
 
 	public Ability(final String name) {
@@ -44,7 +45,7 @@ public abstract class Ability {
 	 *
 	 * @return the owner
 	 */
-	public Entity getOwner() {
+	public Player getOwner() {
 		return owner;
 	}
 
@@ -53,7 +54,7 @@ public abstract class Ability {
 	 *
 	 * @param owner
 	 */
-	public void setOwner(final Entity owner) {
+	public void setOwner(final Player owner) {
 		this.owner = owner;
 	}
 
