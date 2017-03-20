@@ -74,4 +74,6 @@ public abstract class Ability {
 	 * @throws InterruptedException
 	 */
 	public abstract void activate();
+
+	public abstract void incrementCooldown();
 }

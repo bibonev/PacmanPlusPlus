@@ -21,6 +21,7 @@ import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.Ghost;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.Spawner;
@@ -56,9 +57,6 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 				invalidateDisplay();
                 killedEntities.addAll(getKilledEntitiesByLaser());
 				checkEndingConditions();
-				if(entity instanceof Player){
-				    ((Player) entity).incrementCoolDown();
-                }
 			}
 
 			eatenPlayers.addAll(getEatenPlayers());
@@ -105,7 +103,6 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
             for(Player p : game.getWorld().getPlayers()) {
                 if(p.getShield() > 0)
                     p.reduceShield();
-                System.out.println("Reduced - " + p.getShield());
             }
         }
     }
@@ -225,6 +222,7 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 
 		if (game.getGameType() == GameType.SINGLEPLAYER) {
 			final ControlledPlayer player = new ControlledPlayer(0, "You");
+			player.setSkillSet(LocalSkillSet.createDefaultSkillSet(player));
 			player.setPosition(new Position(0, 6));
 			final Spawner spawner = new Spawner(5, player, SpawnerColor.GREEN);
 			spawner.setPosition(player.getPosition());

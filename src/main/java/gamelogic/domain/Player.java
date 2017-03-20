@@ -21,18 +21,6 @@ public abstract class Player extends Entity {
 		this.name = name;
 		dotsEaten = 0;
 		this.shield = 0;
-
-		// Create SkillSet for each Player when added
-        PacShield shield = new PacShield();
-        shield.setCD(40);
-        shield.setOwner(this);
-        PacLaser laser = new PacLaser();
-        laser.setCD(20);
-        laser.setOwner(this);
-        SkillSet skillSet = new SkillSet();
-        skillSet.setQ(laser); // set E button to activate laser
-        skillSet.setW(shield); // set W button to activate shield
-        this.setSkillSet(skillSet);
 	}
 
 	/**
@@ -83,17 +71,8 @@ public abstract class Player extends Entity {
     public void setShield(final int shield) {
         this.shield = shield;
     }
-
-    public void incrementCoolDown(){
-        int coolDown = skillSet.getQ().getCD();
-        if(coolDown < 20){
-            skillSet.getQ().setCD(coolDown + 1);
-        }
-        coolDown = skillSet.getW().getCD();
-        if(coolDown < 40 && shield == 0){
-            skillSet.getW().setCD(coolDown + 1);
-        }
-    }
+    
+    
 	/**
 	 * Fetch the player's skillset
 	 *
@@ -149,5 +128,11 @@ public abstract class Player extends Entity {
 
 	public void setDeathReason(String deathReason) {
 		this.deathReason = deathReason;
+	}
+	
+	@Override
+	public void gameStep(Game game) {
+		super.gameStep(game);
+		this.getSkillSet().incrementCooldown();
 	}
 }

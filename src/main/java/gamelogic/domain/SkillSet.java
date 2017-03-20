@@ -11,59 +11,17 @@ package main.java.gamelogic.domain;
  * @author Simeon Kostadinov
  *
  */
-public class SkillSet {
-
-	private Ability q;
-	private Ability w;
-	// private Ability r;
-
-	/**
-	 * Set q ability.
-	 *
-	 * @param q
-	 */
-	public void setQ(final Ability q) {
-		this.q = q;
-	}
-
-
-	/**
-	 * Set w ability.
-	 *
-	 * @param w
-	 */
-	public void setW(final Ability w) {
-		this.w = w;
-	}
-
-	/**
-	 * Get q ability.
-	 *
-	 */
-	public Ability getQ() {
-		return q;
-	}
-
-	/**
-	 * Get W ability.
-	 *
-	 */
-	public Ability getW() {
-		return w;
-	}
+public interface SkillSet {
 
 	/**
 	 * Use Q skill.
 	 */
-	public void activateQ() {
-		q.activate();
-	}
+	public void activateQ();
 
 	/**
 	 * Use W skill.
 	 */
-	public void activateW() {
-		w.activate();
-	}
+	public void activateW();
 
+	public void incrementCooldown();
 }

@@ -2,6 +2,7 @@ package main.java.ai;
 
 import main.java.gamelogic.domain.Behaviour;
 import main.java.gamelogic.domain.Entity;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.SkillSet;
 import main.java.gamelogic.domain.World;
 
@@ -24,6 +25,6 @@ public class DefaultBehaviour extends Behaviour {
 	 *            the inventory
 	 */
 	public DefaultBehaviour(final World world, final Entity entity, final int speed, final Type type) {
-		super(world, entity, speed, new SkillSet(), type);
+		super(world, entity, speed, new LocalSkillSet(), type);
 	}
 }
