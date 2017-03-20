@@ -4,6 +4,7 @@ import java.util.Random;
 
 import main.java.constants.CellState;
 import main.java.constants.GameType;
+import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.domain.Ability;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.ControlledPlayer;
@@ -155,7 +156,11 @@ public class Randoms {
 	}
 
 	public static Game randomGame() {
-		return new Game(randomWorld(), randomGameSettings(),  GameType.SINGLEPLAYER);
+		return new Game(randomWorld(), randomGameSettings(), GameType.SINGLEPLAYER);
+	}
+
+	public static LobbyPlayerInfo randomLobbyPlayerInfo() {
+		return new LobbyPlayerInfo(Randoms.randomInteger(), Randoms.randomString());
 	}
 
 }

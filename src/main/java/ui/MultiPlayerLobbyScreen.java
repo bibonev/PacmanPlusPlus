@@ -47,7 +47,7 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 		play.setOnAction(e -> play());
 		setUpHover(play);
 
-		leaveGame = new Button("Leave game");
+		leaveGame = new Button("Leave Game");
 		leaveGame.getStyleClass().add("buttonStyle");
 		leaveGame.setOnAction(e -> leaveGame());
 		setUpHover(leaveGame);
