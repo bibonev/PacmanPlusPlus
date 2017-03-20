@@ -23,7 +23,7 @@ public class SkillsTest {
 		// Pacbomb test will be implemented later when introduced cooldown
 
 		// Then
-		//qqAssert.assertTrue(pacShield.getOwner().getShield());
+		//Assert.assertTrue(pacShield.getOwner().getShield() == );
 	}
 
 }
