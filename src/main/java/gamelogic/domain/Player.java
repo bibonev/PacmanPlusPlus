@@ -16,11 +16,13 @@ public abstract class Player extends Entity {
 	private int dotsEaten;
 	private SkillSet skillSet;
     private int shield;
+    private boolean laserFired;
 
 	public Player(final String name) {
 		this.name = name;
 		dotsEaten = 0;
 		this.shield = 0;
+		this.laserFired = false;
 	}
 
 	/**
@@ -43,6 +45,22 @@ public abstract class Player extends Entity {
 
 	public int getDotsEaten() {
 		return dotsEaten;
+	}
+
+	/**
+	 * Get whether a laserFired has been fired
+	 * @return the laserFired
+	 */
+	public boolean getLaserFired(){
+		return this.laserFired;
+	}
+
+	/**
+	 * Set that a laserFired has been fired
+	 * @param laserFired
+	 */
+	public void setLaserFired(boolean laserFired){
+		this.laserFired = laserFired;
 	}
 
     /**

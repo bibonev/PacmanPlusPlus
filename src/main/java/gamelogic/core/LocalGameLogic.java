@@ -66,7 +66,6 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 			for (final Player p : eatenPlayers) {
 			    if(p.getShield() > 0) {
 			        p.reduceShield();
-			        System.out.println("Saved!");
                 } else {
                     p.setDeathReason("Eaten by a ghost!");
                     game.getWorld().removeEntity(p.getID());
