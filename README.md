@@ -9,3 +9,11 @@ When inside the directory, you can run all the unit tests using the command:
 `gradlew test` for Windows
 
 NOTE: This command runs ALL tests for ALL services.
+
+## Code coverage
+From inside `java-team-project` run using:
+`./gradlew jacocoTestReport` for Unix
+`gradlew jacocoTestReport` for Windows
+
+Then you can find the generated HTML report inside
+`java-team-project/build/reports/jacoco/test/html`.
