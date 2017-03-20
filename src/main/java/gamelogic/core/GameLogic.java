@@ -24,8 +24,6 @@ public abstract class GameLogic {
 	
 	public abstract void gameStep(int delay);
 
-	public abstract void checkEndingConditions();
-
 	public Event<GameDisplayInvalidatedListener, GameDisplayInvalidatedEventArgs> getOnGameDisplayInvalidated() {
 		return onGameDisplayInvalidated;
 	}

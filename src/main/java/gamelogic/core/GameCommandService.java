@@ -1,6 +1,8 @@
 package main.java.gamelogic.core;
 
 import main.java.ai.AIGhost;
+import main.java.ai.AIPlayer;
+import main.java.ai.DefaultBehaviour;
 import main.java.ai.GhostBehaviour;
 import main.java.constants.GameType;
 import main.java.event.Event;
@@ -56,6 +58,14 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 			
 			world.addEntity(spawner);
 		}
+
+		// AI player being commented out as Lyubomir will add it later
+		/*final AIPlayer aiPlayer = new AIPlayer();
+		aiPlayer.setPosition(new Position(0, 7));
+		final Behaviour aiPlayerBehavior = new DefaultBehaviour(world, aiPlayer, 1000, Behaviour.Type.DEFAULT);
+		aiPlayer.setBehaviour(aiPlayerBehavior);
+		world.addEntity(aiPlayer);*/
+
 	}
 
 	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID,

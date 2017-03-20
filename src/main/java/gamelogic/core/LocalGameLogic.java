@@ -110,8 +110,7 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 		return true;
 	}
 
-	@Override
-	public void checkEndingConditions() {
+	private void checkEndingConditions() {
 		if (ghostsEatenPlayers()) {
 			final GameOutcome outcome = new GameOutcome(GameOutcomeType.GHOSTS_WON);
 			onGameEnded(outcome);
