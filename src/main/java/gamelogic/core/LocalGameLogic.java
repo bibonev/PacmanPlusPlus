@@ -52,6 +52,7 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 			for (final Entity entity : game.getWorld().getEntities()) {
 				entity.gameStep(game);
 				eatenPlayers.addAll(getEatenPlayers());
+				invalidateDisplay();
 			}
 
 			eatenPlayers.addAll(getEatenPlayers());
@@ -71,6 +72,7 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 				}
 				game.getWorld().removeEntity(spawner.getID());
 			}
+            checkEndingConditions();
 			invalidateDisplay();
 		}
 	}

@@ -130,7 +130,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	    primaryStage.setResizable(false);
 	    thisStage.setResizable(false);
-	    
+
 		primaryStage.setScene(uiScene);
 		switchToLogIn();
 		primaryStage.show();

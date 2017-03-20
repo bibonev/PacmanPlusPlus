@@ -4,10 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.RotateTransition;
-import javafx.animation.Timeline;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -80,20 +77,20 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameUI = gameUI;
 		this.game = game;
 		this.gameLogic = gameLogic;
+        this.inGameScreens = new InGameScreens(game);
+
 		this.gameLogic.getOnGameDisplayInvalidated().addListener(this);
 		this.gameLogic.getOnGameEnded().addOneTimeListener(this);
 		this.gameLogic.getOnLocalPlayerSpawn().addListener(this);
 		this.gameLogic.getOnLocalPlayerDespawn().addListener(this);
 		this.game.getWorld().getOnEntityRemovingEvent().addListener(this);
-		this.inGameScreens = new InGameScreens(game);
 
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
 		this.allEntities = new HashMap<>();
+        this.removedEntityIDs = new HashSet<>();
 		
 		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
-		
-		this.removedEntityIDs = new HashSet<>();
 		this.onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
 	}
 
@@ -277,15 +274,22 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         clearWindows();
         timeLine.stop();
 
-        root.getChildren().add(this.inGameScreens.endGameScreen(localPlayerID, gameOutcome));
-        root.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.SPACE) {
-                getOnStartingSingleplayerGame().fire(
-                        new SingleplayerGameStartingEventArgs(new GameSettings(), this.gameUI.getName()));
-            } else if (e.getCode() == KeyCode.ESCAPE) {
-                leaveGame();
-            }
+        Node playerNode = root.getChildren().get(root.getChildren().indexOf(allEntities.get(0).getNode()));
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(3000), playerNode);
+        fadeTransition.setFromValue(1.0);
+        fadeTransition.setToValue(0.0);
+        fadeTransition.setOnFinished(e2 -> {
+            root.getChildren().add(this.inGameScreens.endGameScreen(localPlayerID, gameOutcome));
+            root.setOnKeyPressed(e -> {
+                if (e.getCode() == KeyCode.SPACE) {
+                    getOnStartingSingleplayerGame().fire(
+                            new SingleplayerGameStartingEventArgs(new GameSettings(), this.gameUI.getName()));
+                } else if (e.getCode() == KeyCode.ESCAPE) {
+                    leaveGame();
+                }
+            });
         });
+        fadeTransition.play();
     }
 
     private void playerDied(String message, boolean canRejoin) {
