@@ -533,13 +533,13 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
     private void redrawInventory() {
 	    if (controlledPlayer != null) {
-            if (controlledPlayer.getSkillSet().getW().getCD() < 40) {
+            if ( controlledPlayer.getSkillSet().getW() != null && controlledPlayer.getSkillSet().getW().getCD() < 40) {
                 shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
             } else {
                 shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
             }
 
-            if (controlledPlayer.getSkillSet().getQ().getCD() < 20) {
+            if (controlledPlayer.getSkillSet().getQ() != null && controlledPlayer.getSkillSet().getQ().getCD() < 20) {
                 laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
             } else {
                 laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
