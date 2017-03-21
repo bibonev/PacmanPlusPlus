@@ -122,7 +122,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		pane.getStyleClass().add("paneStyle");
 
 		setUpSettingsButton();
-				
+
 		timerLabel.setText(timeSeconds.toString());
 		timerLabel.getStyleClass().add("countdown");
 		timerLabel.setAlignment(Pos.CENTER);
@@ -223,6 +223,10 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		settings.setDisable(true);
 		centerPane.getChildren().add(settingsScreen.getPane());
 	}
+	
+	public boolean showingSettings(){
+		return centerPane.getChildren().contains(settingsScreen.getPane());
+	}
 
 	public void returnBack() {
 		settings.setDisable(false);
@@ -252,7 +256,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		helpPane.setTop(label);
 		thisStage.setScene(helpScene);
 		adjustScreenPosition();
-		//setScreen(helpScreen);
 	}
 
 	public void close() {
@@ -374,8 +377,6 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				// Draw Map
 				thisStage.setScene(render.setupWorld());
 				thisStage.show();
-//				thisStage.setWidth(615);
-//				thisStage.setHeight(388);
 				adjustScreenPosition();
 
 				// Add CLick Listener
