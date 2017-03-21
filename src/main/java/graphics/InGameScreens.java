@@ -19,7 +19,7 @@ public class InGameScreens {
 
 	public StackPane getPlayerRespawnWindow(final String deathReason, final boolean canRejoin) {
 		final StackPane pane = new StackPane();
-		pane.setStyle("-fx-background-color: rgba(0, 100, 100, 0.6)");
+		pane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7)");
 		pane.setPrefSize(ScreenSize.Width, ScreenSize.Height);
 		
 		final Label deathLabel = new Label("You died!");

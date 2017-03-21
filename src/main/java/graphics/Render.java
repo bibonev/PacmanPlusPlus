@@ -1,22 +1,28 @@
 package main.java.graphics;
 
+import java.awt.*;
+import java.awt.Label;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import main.java.constants.CellSize;
-import main.java.constants.CellState;
-import main.java.constants.GameOutcome;
-import main.java.constants.ScreenSize;
+import main.java.constants.*;
 import main.java.event.Event;
 import main.java.event.arguments.EntityChangedEventArgs;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
@@ -33,8 +39,10 @@ import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.domain.*;
+import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.ui.GameUI;
+import main.java.ui.Screen;
 
 /**
  * Created by Boyan Bonev on 09/02/2017.
@@ -42,7 +50,11 @@ import main.java.ui.GameUI;
 public class Render implements GameDisplayInvalidatedListener, GameEndedListener,
 		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener {
 	private Pane root;
-	private Timeline timeLine;
+	private StackPane inventory;
+	private BorderPane parentRoot;
+    private ImageView shieldImage;
+    private ImageView laserImage;
+    private Timeline timeLine;
 	private ControlledPlayer controlledPlayer;
 	private int localPlayerID;
 	private GameUI gameUI;
@@ -83,6 +95,9 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.allEntities = new HashMap<>();
 		this.shieldsActivated = new HashMap<>();
         this.removedEntityIDs = new HashSet<>();
+
+        this.shieldImage = new ImageView("shield.png");
+        this.laserImage = new ImageView("laser.png");
 		
 		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
 		this.onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
@@ -97,10 +112,18 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		int size = game.getWorld().getMap().getMapSize();
 		worldNodes = new Node[size][size];
 
+		parentRoot = new BorderPane();
+        parentRoot.setStyle("-fx-background-color: black");
+
+        setupInventory();
+
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
 
-		final Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
+        parentRoot.setCenter(root);
+        parentRoot.setBottom(inventory);
+
+		final Scene scene = new Scene(parentRoot, ScreenSize.Width, ScreenSize.Height+30);
 
 		redrawWorld();
 		gameLogic.readyToStart();
@@ -108,13 +131,14 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		return scene;
 	}
 
-	/**
+    /**
 	 * Redraw the map
 	 */
     void redrawWorld() {
 		PositionVisualisation.initScreenDimensions();
 
     	redrawCells();
+    	redrawInventory();
     	
     	synchronized (removedEntityIDs) {
 			for(int id : removedEntityIDs) {
@@ -212,6 +236,9 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
+    /**
+     * Starting the timeline
+     */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(GameLogic.GAME_STEP_DURATION), event -> {
             gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
@@ -260,7 +287,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
-	//Getter on the events
+	//Getters on the events
 	
 	public Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> getOnStartingSingleplayerGame() {
 		return onStartingSingleplayerGame;
@@ -455,5 +482,60 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
         allEntities.remove(id);
         allEntities.put(id, pacmanVisualisation);
+    }
+
+    private void setupInventory() {
+        inventory = new StackPane();
+        inventory.setBackground(new Background(new BackgroundImage(
+                new Image("inventory.jpg",ScreenSize.Width,30,false,true),
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                BackgroundSize.DEFAULT)));
+        inventory.setPrefSize(ScreenSize.Width, 30);
+
+        StackPane shieldPane = new StackPane();
+        StackPane laserPane = new StackPane();
+
+        final javafx.scene.control.Label wLabel = new javafx.scene.control.Label("W - ");
+        wLabel.setStyle(
+                "-fx-text-fill: #565656; -fx-font: bold 20 \"serif\"; -fx-padding: 0 110 0 0; -fx-text-alignment: center");
+
+        final javafx.scene.control.Label qLabel = new javafx.scene.control.Label("Q - ");
+        qLabel.setStyle(
+                "-fx-text-fill: #565656; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 50; -fx-text-alignment: center");
+
+        shieldImage.setFitWidth(ScreenSize.Width / 30);
+        shieldImage.setFitHeight(25);
+        shieldPane.setStyle("-fx-padding: 0 50 0 0");
+        shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0,1,0), 10, 0, 0, 0));
+        shieldPane.getChildren().addAll(shieldImage);
+
+        laserImage.setFitWidth(ScreenSize.Width / 30);
+        laserImage.setFitHeight(25);
+        laserPane.setStyle("-fx-padding: 0 0 0 110");
+        laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0,1,0), 10, 0, 0, 0));
+        laserPane.getChildren().add(laserImage);
+
+        StackPane.setAlignment(shieldPane, Pos.CENTER);
+        StackPane.setAlignment(wLabel, Pos.CENTER);
+        StackPane.setAlignment(laserPane, Pos.CENTER);
+        StackPane.setAlignment(qLabel, Pos.CENTER);
+
+        inventory.getChildren().addAll(wLabel, shieldPane, qLabel, laserPane);
+    }
+
+    private void redrawInventory() {
+	    if (controlledPlayer != null) {
+            if (controlledPlayer.getSkillSet().getW().getCD() < 40) {
+                shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
+            } else {
+                shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+            }
+
+            if (controlledPlayer.getSkillSet().getQ().getCD() < 20) {
+                laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
+            } else {
+                laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+            }
+        }
     }
 }
