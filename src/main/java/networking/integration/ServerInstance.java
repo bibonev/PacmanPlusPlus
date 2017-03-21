@@ -117,6 +117,11 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		return server;
 	}
 
+	/**
+	 * Gets the event which is fired when the game which this server is using is about to
+	 * start.
+	 * @return
+	 */
 	public Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> getMultiplayerGameStartingEvent() {
 		return multiplayerGameStartingEvent;
 	}
@@ -151,6 +156,14 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		lobby.getLobbyStateChangedEvent().addListener(this);
 	}
 
+	/**
+	 * Adds this client instance as a listener to any relevant events in the
+	 * currently-used {@link Game} and {@link GameLogic} objects.
+	 * 
+	 * @param game The game object that this server instance is to attach to.
+	 * @param logic The game logic object controlling the game which this
+	 * server instance is to attach to.
+	 */
 	private void addWorldGameHooks(final World world, final LocalGameLogic logic) {
 		world.getOnEntityAddedEvent().addListener(this);
 		world.getOnEntityAddedEvent().addListener(tracker);
@@ -182,6 +195,15 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 
+	
+	/**
+	 * Removes this {@link ServerInstance} object as a listener from any relevant
+	 * events in the currently-used {@link Game} and {@link GameLogic} objects.
+	 * 
+	 * @param game The game object that this server instance is to detach from.
+	 * @param logic The game logic object controlling the game which this
+	 * server instance is to detach from.
+	 */
 	private void removeWorldGameHooks(final World world, final LocalGameLogic logic) {
 		world.getOnEntityAddedEvent().removeListener(this);
 		world.getOnEntityAddedEvent().removeListener(tracker);
@@ -199,6 +221,14 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		manager.dispatch(clientID, p);
 	}
 
+	/**
+	 * Sends the initial state of the lobby to a newly-joined player, so a 
+	 * player who is joining an existing lobby receives the joining packets
+	 * for all of the existing players.
+	 * 
+	 * @param clientID The player to send the initial lobby state to.
+	 * 
+	 */
 	private void sendInitialLobbyState(final int clientID) {
 		for (final int i : lobby.getPlayerIDs()) {
 			manager.dispatch(clientID, createPlayerJoinedLobbyPacket(lobby.getPlayer(i)));
@@ -206,6 +236,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		manager.dispatch(clientID, createRulesChangedPacket(lobby.getSettingsString()));
 	}
 
+	/**
+	 * Create a packet which indicates that the textual display in the
+	 * game lobby showing the game rules has changed.
+	 * 
+	 * @param rules The rule strings to send.
+	 * @return A packet representing the new rules display.
+	 */
 	private Packet createRulesChangedPacket(final String[] rules) {
 		final Packet p = new Packet("lobby-rule-display-changed");
 
@@ -217,6 +254,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		return p;
 	}
 
+	/**
+	 * Create a packet indicating that the player represented by {@code player}
+	 * has joined the lobby.
+	 * 
+	 * @param player The player info of the player who is joining. 
+	 * @return A packet representing that the given player has joined a lobby.
+	 */
 	private Packet createPlayerJoinedLobbyPacket(final LobbyPlayerInfo player) {
 		final Packet p = new Packet("lobby-player-enter");
 		p.setInteger("player-id", player.getID());
@@ -224,17 +268,16 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		return p;
 	}
 
+	/**
+	 * Create a packet indicating that the player with the given {@code playerID}
+	 * has left the lobby.
+	 * 
+	 * @param playerID The ID of the player who is leaving the lobby.
+	 * @return The sendable packet object representing a player leaving the lobby.
+	 */
 	private Packet createPlayerLeftLobbyPacket(final int playerID) {
 		final Packet p = new Packet("lobby-player-left");
 		p.setInteger("player-id", playerID);
-		return p;
-	}
-
-	private Packet createForceMovePacket(final int row, final int column, final double angle) {
-		final Packet p = new Packet("force-move");
-		p.setInteger("row", row);
-		p.setInteger("col", column);
-		p.setDouble("angle", angle);
 		return p;
 	}
 
@@ -282,6 +325,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 
+	/**
+	 * Handes packets indicating that a client is trying to use one of
+	 * its abilities.
+	 * 
+	 * @param sender
+	 * @param p
+	 */
 	private void triggerPlayerUseAbility(int sender, Packet p) {
 		Player player = (Player)game.getWorld().getEntity(sender);
 		
@@ -305,6 +355,22 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 
+	/**
+	 * Handles packets indicating that the client is ready to start. This packet can
+	 * mean one of two things:
+	 * 
+	 * <ul>
+	 * <li>The player's client has loaded the relevant JavaFX resources and may
+	 * now begin the game (ie. finished loading(</li>
+	 * <li>The player is trying to respawn after having died</li>
+	 * </ul>
+	 * 
+	 * The intended meaning is deduced based on whether the game has already started or
+	 * not, and if so, whether the player is already in game or not.
+	 * 
+	 * @param sender
+	 * @param p
+	 */
 	private void triggerClientReadyToStart(int sender, Packet p) {
 		LobbyPlayerInfo playerInfo = lobby.getPlayer(sender);
 		if(!game.hasStarted()) {
@@ -326,6 +392,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 
+	/**
+	 * Handles packets indicating that a client's player is attempting to move in
+	 * the world (ie. to another position on the map).
+	 * 
+	 * @param sender
+	 * @param p
+	 */
 	private void triggerPlayerMoved(final int sender, final Packet p) {
 		final int row = p.getInteger("row"), col = p.getInteger("col");
 
@@ -342,6 +415,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 
+	/**
+	 * Handles the packet sent by the client to the server specifying attributes of
+	 * the player.
+	 * 
+	 * @param sender
+	 * @param p
+	 */
 	private void triggerHandshake(final int sender, final Packet p) {
 		final String username = p.getString("username");
 
@@ -474,10 +554,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			game.getWorld().removeEntity(clientID);
 		}
 		
-		final Packet p = new Packet("remote-player-left");
-		p.setInteger("player-id", clientID);
 		gameUI.multiPlayerLobbyScreen.list.removePlayer(clientID);
-		manager.dispatchAllExcept(p, clientID);
 		
 		if(lobby.getPlayerCount() == 0 || clientID == 0) {
 			server.die();
