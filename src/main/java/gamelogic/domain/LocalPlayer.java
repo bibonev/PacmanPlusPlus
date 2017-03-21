@@ -11,6 +11,7 @@ public class LocalPlayer extends Player {
 		super(name);
 	}
 
+
 	@Override
 	public boolean setPosition(final Position newPosition) {
 		final World world = getWorld();
