@@ -25,7 +25,7 @@ public class PacLaser extends Ability {
 	 */
 	@Override
 	public void activate() {
-		if(getCD() == 20){
+		if(getCD() == LASER_COOLDOWN){
 		    shoot();
 		    owner.setLaserFired(true);
 		    setCD(0);
