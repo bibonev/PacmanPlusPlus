@@ -11,6 +11,7 @@ import java.util.Collection;
  *
  */
 public class PacLaser extends Ability {
+	public static final int LASER_COOLDOWN = 20;
 
 	/**
 	 * Instantiates a new paclaser.
@@ -86,4 +87,13 @@ public class PacLaser extends Ability {
             return;
         }
     }
+
+	@Override
+	public void incrementCooldown() {
+		int cooldown = getCD();
+		
+		if(cooldown < LASER_COOLDOWN) {
+			setCD(cooldown + 1);
+		}
+	}
 }

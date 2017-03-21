@@ -31,10 +31,12 @@ import main.java.gamelogic.core.LocalGameLogic;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.Ghost;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemotePlayer;
 import main.java.gamelogic.domain.ServerEntityTracker;
+import main.java.gamelogic.domain.SkillSet;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.World;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
@@ -275,6 +277,31 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			triggerPlayerMoved(sender, p);
 		} else if(p.getPacketName().equals("ready-to-start")) {
 			triggerClientReadyToStart(sender, p);
+		} else if(p.getPacketName().equals("use-ability")) {
+			triggerPlayerUseAbility(sender, p);
+		}
+	}
+
+	private void triggerPlayerUseAbility(int sender, Packet p) {
+		Player player = (Player)game.getWorld().getEntity(sender);
+		
+		if(player != null) {		
+			SkillSet skillSet = player.getSkillSet();
+			
+			if(skillSet != null) {
+				char abilityKey = p.getString("ability-key").charAt(0);
+				
+				switch(abilityKey) {
+				case 'q':
+					skillSet.activateQ();
+					break;
+				case 'w':
+					skillSet.activateW();
+					break;
+				default:
+					throw new IllegalStateException("Unknown ability key " + abilityKey);
+				}
+			}
 		}
 	}
 
@@ -291,8 +318,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		} else {
 			if(game.getWorld().getEntity(sender) == null) {
 				if(playerInfo.getRemainingLives() > 0) {
+					Position pos = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
 					playerInfo.setRemainingLives(playerInfo.getRemainingLives() - 1);
-					addHumanPlayerToWorld(sender, 0, 6);
+					addHumanPlayerToWorld(sender, pos.getRow(), pos.getColumn());
 				}
 			}
 		}
@@ -403,6 +431,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 				throw new IllegalStateException("Player " + playerID + " already in-game.");
 			} else {
 				final RemotePlayer player = new RemotePlayer(info.getID(), info.getName());
+				player.setSkillSet(LocalSkillSet.createDefaultSkillSet(player));
 				player.setPosition(new Position(row, col));
 				final Spawner spawner = new Spawner(5, player, SpawnerColor.GREEN);
 				spawner.setPosition(player.getPosition());
@@ -512,7 +541,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 		
 		for (final int i : lobby.getPlayerIDs()) {
-			addHumanPlayerToWorld(i, 0, 7);
+			Position p = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
+			addHumanPlayerToWorld(i, p.getRow(), p.getColumn());
 		}
 
 		gameLogicTimer = new GameLogicTimer(gameLogic);

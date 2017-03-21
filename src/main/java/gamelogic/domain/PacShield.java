@@ -9,6 +9,7 @@ package main.java.gamelogic.domain;
  */
 public class PacShield extends Ability {
     public static final int MAX_SHIELD = 4;
+    public static final int SHIELD_COOLDOWN = 40;
 
 	public PacShield() {
 		super("PacShield");
@@ -24,4 +25,12 @@ public class PacShield extends Ability {
             setCD(0);
         }
     }
+	@Override
+	public void incrementCooldown() {
+		int cooldown = getCD();
+		
+		if(cooldown < SHIELD_COOLDOWN && getOwner().getShield() == 0) {
+			setCD(cooldown + 1);
+		}
+	}
 }

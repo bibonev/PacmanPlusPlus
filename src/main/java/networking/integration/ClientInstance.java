@@ -10,6 +10,7 @@ import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.LocalPlayerDespawnEventArgs;
 import main.java.event.arguments.LocalPlayerSpawnEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
+import main.java.event.arguments.PlayerAbilityUsedEventArgs;
 import main.java.event.arguments.PlayerMovedEventArgs;
 import main.java.event.arguments.ReadyToStartEventArgs;
 import main.java.event.arguments.RemoteGameEndedEventArgs;
@@ -17,6 +18,7 @@ import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
 import main.java.event.listener.LocalPlayerSpawnListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
+import main.java.event.listener.PlayerAbilityUsedListener;
 import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.event.listener.ReadyToStartListener;
 import main.java.event.listener.RemoteGameEndedListener;
@@ -33,6 +35,7 @@ import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemoteGhost;
 import main.java.gamelogic.domain.RemotePlayer;
+import main.java.gamelogic.domain.RemoteSkillSet;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.networking.ClientManager;
@@ -44,7 +47,7 @@ import main.java.networking.socket.Client;
 import main.java.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnectedListener, ServerEntityUpdatedListener,
-		GameCreatedListener, LocalPlayerSpawnListener, LocalPlayerDespawnListener, ReadyToStartListener, PlayerLeavingGameListener {
+		GameCreatedListener, LocalPlayerSpawnListener, LocalPlayerDespawnListener, ReadyToStartListener, PlayerLeavingGameListener, PlayerAbilityUsedListener {
 	private Client client;
 	private String serverAddress;
 	private ClientManager manager;
@@ -286,6 +289,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		final double angle = p.getDouble("angle");
 
 		ControlledPlayer player = new ControlledPlayer(client.getClientID(), username);
+		RemoteSkillSet remoteSkillSet = new RemoteSkillSet(player);
+		remoteSkillSet.getOnPlayerAbilityUsed().addListener(this);
+		player.setSkillSet(remoteSkillSet);
+		
 		player.setPosition(new Position(row, col));
 		player.setAngle(angle);
 		game.getWorld().addEntity(player);
@@ -509,5 +516,12 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	@Override
 	public void onPlayerLeavingGame() {
 		client.die();
+	}
+
+	@Override
+	public void onPlayerAbilityUsed(PlayerAbilityUsedEventArgs args) {
+		Packet p = new Packet("use-ability");
+		p.setString("ability-key", String.valueOf(args.getSlot()));
+		manager.dispatch(p);
 	}
 }

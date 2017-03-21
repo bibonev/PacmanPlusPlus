@@ -2,6 +2,7 @@ package main.java.ai;
 
 import main.java.gamelogic.domain.Behaviour;
 import main.java.gamelogic.domain.Entity;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.SkillSet;
 import main.java.gamelogic.domain.World;
@@ -26,7 +27,7 @@ public class GhostBehaviour extends Behaviour {
 	 *            the inventory
 	 */
 	public GhostBehaviour(final World world, final Entity entity, final int speed, final Type type) {
-		super(world, entity, speed, new SkillSet(), type);
+		super(world, entity, speed, new LocalSkillSet(), type);
 	}
 
 	/**
