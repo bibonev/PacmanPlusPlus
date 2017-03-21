@@ -50,4 +50,24 @@ public class RemoteSkillSet implements SkillSet {
 	public void incrementCooldown() {
 		// nop
 	}
+
+	@Override
+	public void setQ(Ability q) {
+		// nop
+	}
+
+	@Override
+	public void setW(Ability w) {
+		// nop
+	}
+
+	@Override
+	public Ability getQ() {
+		return null;
+	}
+
+	@Override
+	public Ability getW() {
+		return null;
+	}
 }
