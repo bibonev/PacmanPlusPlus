@@ -33,4 +33,6 @@ public class DisabledMusic implements Music, GameCreatedListener, GameEndedListe
 
 	@Override
 	public void onGameCreated(GameCreatedEventArgs args) {}
+	
+	public void pausePlay() {}
 }

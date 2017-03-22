@@ -198,6 +198,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 					controlledPlayer.moveRight();
 					redrawWorld();
 				} else if (event.getCode() == KeyCode.ESCAPE) {
+	                gameUI.pausePlay();
 					timeLine.pause();
 					root.getChildren().add(this.inGameScreens.pauseGameScreen());
 					pauseClickListener();
@@ -404,8 +405,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
                 root.getChildren().remove(root.getChildren().size()-1);
                 timeLine.play();
                 addClickListener();
+                gameUI.pausePlay();
             } else if (event.getCode() == KeyCode.Q) {
                 gameUI.switchToMenu();
+                gameUI.stopMusic();
             }
         });
     }
@@ -451,11 +454,13 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             root.getChildren().remove(shout);
         });
         shoutTransition.play();
+        gameUI.fireLaser();
         player.setLaserFired(false);
     }
 
     private void shieldVisulisation(Player player, PacmanVisualisation pacmanVisualisation, Node nextNode, Node node, int id) {
-        transitions.get(player.getID()).setNode(nextNode);
+    	gameUI.playShield();
+    	transitions.get(player.getID()).setNode(nextNode);
         rotations.get(player.getID()).setNode(nextNode);
 
         root.getChildren().remove(node);

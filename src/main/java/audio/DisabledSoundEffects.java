@@ -23,5 +23,7 @@ public class DisabledSoundEffects implements SoundEffects {
 	public void onGameEnded(GameEndedEventArgs args) {}
 	@Override
 	public void onGameCreated(GameCreatedEventArgs args) {}
+	public void fireLasers() {};
+	public void playShield() {};
 
 }
