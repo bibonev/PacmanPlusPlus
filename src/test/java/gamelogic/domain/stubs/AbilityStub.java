@@ -17,7 +17,6 @@ public class AbilityStub extends Ability {
 
 	@Override
 	public void incrementCooldown() {
-
 	}
 
 }
