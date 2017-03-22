@@ -17,8 +17,6 @@ public class AbilityStub extends Ability {
 
 	@Override
 	public void incrementCooldown() {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

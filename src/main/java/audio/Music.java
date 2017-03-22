@@ -21,4 +21,6 @@ public interface Music extends GameCreatedListener, GameEndedListener {
 	public void playMusic();
 
 	public void stopMusic();
+	
+	public void pausePlay();
 }

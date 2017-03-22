@@ -24,4 +24,32 @@ public interface SkillSet {
 	public void activateW();
 
 	public void incrementCooldown();
+
+	/**
+	 * Set q ability.
+	 *
+	 * @param q
+	 */
+	public void setQ(final Ability q);
+
+
+	/**
+	 * Set w ability.
+	 *
+	 * @param w
+	 */
+	public void setW(final Ability w);
+
+	/**
+	 * Get q ability.
+	 *
+	 */
+	public Ability getQ();
+
+	/**
+	 * Get W ability.
+	 *
+	 */
+	public Ability getW();
+
 }

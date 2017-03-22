@@ -24,8 +24,8 @@ public class DefaultSoundEffects implements SoundEffects {
 	private MediaPlayer lostPlayer;
 	private MediaPlayer startPlayer;
 //	private MediaPlayer expPlayer;
-//	private MediaPlayer shootPlayer;
-//	private MediaPlayer powerPlayer;
+	private MediaPlayer shootPlayer;
+	private MediaPlayer powerPlayer;
 
 	public DefaultSoundEffects(GameUI game) {
 		this.game = game;
@@ -34,13 +34,13 @@ public class DefaultSoundEffects implements SoundEffects {
 //		final Media explosion = new Media(new File(explosionFile).toURI().toString());
 //		expPlayer = new MediaPlayer(explosion);
 
-//		final String shootFile = ""; // TODO
-//		final Media shoot = new Media(new File(shootFile).toURI().toString());
-//		shootPlayer = new MediaPlayer(shoot);
+		final String shootFile = "src/main/java/audio/gun.mp3";
+		final Media shoot = new Media(new File(shootFile).toURI().toString());
+		shootPlayer = new MediaPlayer(shoot);
 
-//		final String powerFile = ""; // TODO
-//		final Media power = new Media(new File(powerFile).toURI().toString());
-//		powerPlayer = new MediaPlayer(power);
+		final String powerFile = "src/main/java/audio/shield.mp3";
+		final Media power = new Media(new File(powerFile).toURI().toString());
+		powerPlayer = new MediaPlayer(power);
 		
 		final String winFile = "src/main/java/audio/win.mp3";
 		final Media win = new Media(new File(winFile).toURI().toString());
@@ -71,17 +71,17 @@ public class DefaultSoundEffects implements SoundEffects {
 //		}
 //	}
 
-//	public void playShoot() {
-//		if (isOn) {
-//			shootPlayer.play();
-//		}
-//	}
+	public void fireLasers() {
+		if (isOn) {
+			shootPlayer.play();
+		}
+	}
 
-//	public void playPowerUp() {
-//		if (isOn) {
-//			powerPlayer.play();
-//		}
-//	}
+	public void playShield() {
+		if (isOn) {
+			powerPlayer.play();
+		}
+	}
 
 	@Override
 	public void onGameEnded(GameEndedEventArgs args) {

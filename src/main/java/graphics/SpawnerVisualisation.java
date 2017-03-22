@@ -29,18 +29,18 @@ public class SpawnerVisualisation implements Visualisation {
 	
 	private Color getColor(SpawnerColor color) {
 		switch (color) {
-		case CYAN: return Color.CYAN;
-		case RED: return Color.RED;
-		case GREEN: return Color.LIMEGREEN;
-		case YELLOW: return Color.YELLOW;
-		default: return Color.WHITE;
+			case CYAN: return Color.CYAN;
+			case RED: return Color.RED;
+			case GREEN: return Color.LIMEGREEN;
+			case YELLOW: return Color.YELLOW;
+			default: return Color.WHITE;
 		}
 	}
 
 	/**
 	 * Initialize new visualization for the spawner countdown
 	 *
-	 * @param position
+	 * @param spawner
 	 */
 	public SpawnerVisualisation(final Spawner spawner) {
 		this.spawner = spawner;
@@ -48,7 +48,11 @@ public class SpawnerVisualisation implements Visualisation {
 		node = new ImageView("num1.png");
 		setNumber(spawner.getTimeRemaining());
 	}
-	
+
+	/**
+	 * Set particular number for getting the right picture depending on the timer
+	 * @param number
+	 */
 	public void setNumber(int number) {
 		node.setImage(new Image(String.format("num%d.png", number)));
 	}

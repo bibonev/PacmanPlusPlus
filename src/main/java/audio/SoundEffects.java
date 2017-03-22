@@ -17,5 +17,7 @@ public interface SoundEffects extends GameEndedListener, GameCreatedListener {
 	 * @param bool
 	 */
 	public void setOn(final boolean bool);
+	public void fireLasers();
+	public void playShield();
 
 }

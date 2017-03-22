@@ -1,22 +1,28 @@
 package main.java.graphics;
 
+import java.awt.*;
+import java.awt.Label;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Circle;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
-import main.java.constants.CellSize;
-import main.java.constants.CellState;
-import main.java.constants.GameOutcome;
-import main.java.constants.ScreenSize;
+import main.java.constants.*;
 import main.java.event.Event;
 import main.java.event.arguments.EntityChangedEventArgs;
 import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
@@ -33,8 +39,10 @@ import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.domain.*;
+import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.ui.GameUI;
+import main.java.ui.Screen;
 
 /**
  * Created by Boyan Bonev on 09/02/2017.
@@ -42,7 +50,11 @@ import main.java.ui.GameUI;
 public class Render implements GameDisplayInvalidatedListener, GameEndedListener,
 		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener {
 	private Pane root;
-	private Timeline timeLine;
+	private StackPane inventory;
+	private BorderPane parentRoot;
+    private ImageView shieldImage;
+    private ImageView laserImage;
+    private Timeline timeLine;
 	private ControlledPlayer controlledPlayer;
 	private int localPlayerID;
 	private GameUI gameUI;
@@ -51,6 +63,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private InGameScreens inGameScreens;
     private Node[][] worldNodes;
 	private HashMap<Integer, Visualisation> allEntities;
+    private HashMap<Integer, Visualisation> playersEntities;
 	private HashMap<Integer, RotateTransition> rotations;
 	private HashMap<Integer, TranslateTransition> transitions;
 	private HashMap<Integer, Node> shieldsActivated;
@@ -61,16 +74,17 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> onStartingSingleplayerGame;
 
 	/**
-	 * Initialise new visualisation of the map
+	 * Initialise a new visualisation of the game
 	 *
-	 * @param gameUI
-	 * @param game
+	 * @param gameUI, the GUI
+	 * @param game, the actual game that has in itself the world and the players
+     * @param gameLogic, the game logic
 	 */
 	public Render(final GameUI gameUI, final Game game, final GameLogic gameLogic) {
 		this.gameUI = gameUI;
 		this.game = game;
 		this.gameLogic = gameLogic;
-        this.inGameScreens = new InGameScreens(game);
+        this.inGameScreens = new InGameScreens();
 
 		this.gameLogic.getOnGameDisplayInvalidated().addListener(this);
 		this.gameLogic.getOnGameEnded().addOneTimeListener(this);
@@ -81,6 +95,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.transitions = new HashMap<>();
 		this.rotations = new HashMap<>();
 		this.allEntities = new HashMap<>();
+		this.playersEntities = new HashMap<>();
 		this.shieldsActivated = new HashMap<>();
         this.removedEntityIDs = new HashSet<>();
 		
@@ -97,10 +112,18 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		int size = game.getWorld().getMap().getMapSize();
 		worldNodes = new Node[size][size];
 
+		parentRoot = new BorderPane();
+        parentRoot.setStyle("-fx-background-color: black");
+
+        setupInventory();
+
 		root = new Pane();
 		root.setStyle("-fx-background-color: black");
 
-		final Scene scene = new Scene(root, ScreenSize.Width, ScreenSize.Height);
+        parentRoot.setCenter(root);
+        parentRoot.setBottom(inventory);
+
+		final Scene scene = new Scene(parentRoot, ScreenSize.Width, ScreenSize.Height+30);
 
 		redrawWorld();
 		gameLogic.readyToStart();
@@ -108,13 +131,14 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		return scene;
 	}
 
-	/**
+    /**
 	 * Redraw the map
 	 */
     void redrawWorld() {
 		PositionVisualisation.initScreenDimensions();
 
     	redrawCells();
+    	redrawInventory();
     	
     	synchronized (removedEntityIDs) {
 			for(int id : removedEntityIDs) {
@@ -198,6 +222,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 					controlledPlayer.moveRight();
 					redrawWorld();
 				} else if (event.getCode() == KeyCode.ESCAPE) {
+	                gameUI.pausePlay();
 					timeLine.pause();
 					root.getChildren().add(this.inGameScreens.pauseGameScreen());
 					pauseClickListener();
@@ -212,6 +237,9 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
+    /**
+     * Starting the timeline
+     */
 	public void startTimeline() {
 		timeLine = new Timeline(new KeyFrame(Duration.millis(GameLogic.GAME_STEP_DURATION), event -> {
             gameLogic.gameStep(GameLogic.GAME_STEP_DURATION);
@@ -222,6 +250,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 	//Override methods
 
+    /**
+     * Invoked when the display needs to be redrawn
+     * @param args, arguments that contain some logic
+     */
 	@Override
 	public void onGameDisplayInvalidated(final GameDisplayInvalidatedEventArgs args) {
 		if (!game.hasEnded()) {
@@ -229,6 +261,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}
 	}
 
+    /**
+     * Invoked when the game ends
+     * @param args, arguments containing the outcome
+     */
 	@Override
 	public void onGameEnded(final GameEndedEventArgs args) {
 		Platform.runLater(() -> {
@@ -236,6 +272,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
+    /**
+     * Invoked when a local player has been despawn
+     * @param args, arguments contaning the reason for despawning and whether it can respawn
+     */
 	@Override
 	public void onLocalPlayerDespawn(LocalPlayerDespawnEventArgs args) {
 		this.controlledPlayer = null;
@@ -244,6 +284,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
+    /**
+     * Invoked when a local player has been spawned
+     * @param args, arguments containing the player
+     */
 	@Override
 	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
 		this.controlledPlayer = args.getPlayer();
@@ -251,6 +295,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		Platform.runLater(this::playerRespawn);
 	}
 
+    /**
+     * Invoked when a player has been removed
+     * @param args, arguments containing the id of the player being removed
+     */
 	@Override
 	public void onEntityRemoving(EntityChangedEventArgs args) {
 		Platform.runLater(() -> {
@@ -260,12 +308,20 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
-	//Getter on the events
-	
+	//Getters on the events
+
+    /**
+     * Get the event for satring new game
+     * @return Event
+     */
 	public Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> getOnStartingSingleplayerGame() {
 		return onStartingSingleplayerGame;
 	}
-	
+
+    /**
+     * Get the event for player leaving a game
+     * @return Event
+     */
 	public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
 		return onPlayerLeavingGame;
 	}
@@ -281,18 +337,18 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         clearWindows();
         timeLine.stop();
 
-        Node playerNode = root.getChildren().get(root.getChildren().indexOf(allEntities.get(0).getNode()));
-        if(playerNode != null) {
-	        FadeTransition fadeTransition = new FadeTransition(Duration.millis(3000), playerNode);
-	        fadeTransition.setFromValue(1.0);
-	        fadeTransition.setToValue(0.0);
-	        fadeTransition.setOnFinished(e2 -> {
-	            displayGameEndedScreen(gameOutcome);
-	        });
-	        fadeTransition.play();
-        } else {
-        	displayGameEndedScreen(gameOutcome);
+        for (Visualisation player: playersEntities.values()) {
+            FadeTransition fadeTransition = new FadeTransition(Duration.millis(3000), player.getNode());
+            fadeTransition.setFromValue(1.0);
+            fadeTransition.setToValue(0.0);
+            fadeTransition.setOnFinished(e2 -> {
+                displayGameEndedScreen(gameOutcome);
+            });
+            fadeTransition.play();
         }
+
+        if (allEntities.isEmpty())
+            displayGameEndedScreen(gameOutcome);
     }
     
     private void displayGameEndedScreen(final GameOutcome gameOutcome) {
@@ -350,6 +406,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         rotations.put(player.getID(), rotatePlayer);
 
         allEntities.put(player.getID(), playerVis);
+        playersEntities.put(player.getID(), playerVis);
         root.getChildren().add(playerNode);
     }
 
@@ -404,8 +461,12 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
                 root.getChildren().remove(root.getChildren().size()-1);
                 timeLine.play();
                 addClickListener();
+                gameUI.pausePlay();
             } else if (event.getCode() == KeyCode.Q) {
                 gameUI.switchToMenu();
+                gameUI.stopMusic();
+            } else if(event.getCode() == KeyCode.SPACE){
+            	gameUI.switchToSettingsGame();
             }
         });
     }
@@ -451,17 +512,79 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             root.getChildren().remove(shout);
         });
         shoutTransition.play();
+        gameUI.fireLaser();
         player.setLaserFired(false);
     }
 
     private void shieldVisulisation(Player player, PacmanVisualisation pacmanVisualisation, Node nextNode, Node node, int id) {
-        transitions.get(player.getID()).setNode(nextNode);
+    	gameUI.playShield();
+    	transitions.get(player.getID()).setNode(nextNode);
         rotations.get(player.getID()).setNode(nextNode);
 
         root.getChildren().remove(node);
         root.getChildren().add(nextNode);
 
         allEntities.remove(id);
+        playersEntities.remove(id);
         allEntities.put(id, pacmanVisualisation);
+        playersEntities.put(id, pacmanVisualisation);
+    }
+
+    private void setupInventory() {
+        this.shieldImage = new ImageView("shield.png");
+        this.laserImage = new ImageView("laser.png");
+
+        inventory = new StackPane();
+        inventory.setBackground(new Background(new BackgroundImage(
+                new Image("inventory.jpg",ScreenSize.Width,30,false,true),
+                BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
+                BackgroundSize.DEFAULT)));
+        inventory.setPrefSize(ScreenSize.Width, 30);
+
+        StackPane shieldPane = new StackPane();
+        StackPane laserPane = new StackPane();
+
+        final javafx.scene.control.Label wLabel = new javafx.scene.control.Label("W - ");
+        wLabel.setStyle(
+                "-fx-text-fill: #565656; -fx-font: bold 20 \"serif\"; -fx-padding: 0 110 0 0; -fx-text-alignment: center");
+
+        final javafx.scene.control.Label qLabel = new javafx.scene.control.Label("Q - ");
+        qLabel.setStyle(
+                "-fx-text-fill: #565656; -fx-font: bold 20 \"serif\"; -fx-padding: 0 0 0 50; -fx-text-alignment: center");
+
+        shieldImage.setFitWidth(ScreenSize.Width / 30);
+        shieldImage.setFitHeight(25);
+        shieldPane.setStyle("-fx-padding: 0 50 0 0");
+        shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0,1,0), 10, 0, 0, 0));
+        shieldPane.getChildren().addAll(shieldImage);
+
+        laserImage.setFitWidth(ScreenSize.Width / 30);
+        laserImage.setFitHeight(25);
+        laserPane.setStyle("-fx-padding: 0 0 0 110");
+        laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0,1,0), 10, 0, 0, 0));
+        laserPane.getChildren().add(laserImage);
+
+        StackPane.setAlignment(shieldPane, Pos.CENTER);
+        StackPane.setAlignment(wLabel, Pos.CENTER);
+        StackPane.setAlignment(laserPane, Pos.CENTER);
+        StackPane.setAlignment(qLabel, Pos.CENTER);
+
+        inventory.getChildren().addAll(wLabel, shieldPane, qLabel, laserPane);
+    }
+
+    private void redrawInventory() {
+	    if (controlledPlayer != null) {
+            if ( controlledPlayer.getSkillSet().getW() != null && controlledPlayer.getSkillSet().getW().getCD() < 40) {
+                shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
+            } else {
+                shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+            }
+
+            if (controlledPlayer.getSkillSet().getQ() != null && controlledPlayer.getSkillSet().getQ().getCD() < 20) {
+                laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
+            } else {
+                laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+            }
+        }
     }
 }

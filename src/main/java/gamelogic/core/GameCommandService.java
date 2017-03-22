@@ -8,16 +8,14 @@ import main.java.constants.GameType;
 import main.java.event.Event;
 import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
-import main.java.event.arguments.ReadyToStartEventArgs;
 import main.java.event.arguments.SingleplayerGameStartingEventArgs;
 import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
-import main.java.event.listener.ReadyToStartListener;
 import main.java.event.listener.SingleplayerGameStartingListener;
 import main.java.gamelogic.domain.Behaviour;
-import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RuleChecker;
@@ -50,7 +48,7 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		for(Position p : ghostPositions) {
 			final AIGhost ghost = new AIGhost();
 			ghost.setPosition(p);
-			final Behaviour b = new GhostBehaviour(world, ghost, 1000, Behaviour.Type.GHOST);
+			final Behaviour b = new GhostBehaviour(world, ghost, Behaviour.Type.GHOST);
 			ghost.setBehaviour(b);
 			
 			Spawner spawner = new Spawner(5, ghost, SpawnerColor.RED);
@@ -60,11 +58,14 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		}
 
 		// AI player being commented out as Lyubomir will add it later
-		/*final AIPlayer aiPlayer = new AIPlayer();
-		aiPlayer.setPosition(new Position(0, 7));
-		final Behaviour aiPlayerBehavior = new DefaultBehaviour(world, aiPlayer, 1000, Behaviour.Type.DEFAULT);
+		final AIPlayer aiPlayer = new AIPlayer();
+		aiPlayer.setPosition(new Position(7, 7));
+		final Behaviour aiPlayerBehavior = new DefaultBehaviour(world, aiPlayer, Behaviour.Type.DEFAULT);
 		aiPlayer.setBehaviour(aiPlayerBehavior);
-		world.addEntity(aiPlayer);*/
+		aiPlayer.setSkillSet(LocalSkillSet.createDefaultSkillSet(aiPlayer));
+		Spawner spawner = new Spawner(5, aiPlayer, SpawnerColor.RED);
+		spawner.setPosition(aiPlayer.getPosition());
+		world.addEntity(spawner);
 
 	}
 

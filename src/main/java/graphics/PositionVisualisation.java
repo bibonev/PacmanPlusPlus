@@ -20,10 +20,8 @@ public class PositionVisualisation extends Position {
 	/**
 	 * Initialize positionVisualisation by providing row and column
 	 *
-	 * @param i
-	 *            - row
-	 * @param j
-	 *            - column
+	 * @param i - row
+	 * @param j - column
 	 */
 	public PositionVisualisation(final int i, final int j) {
 		super(i, j);
