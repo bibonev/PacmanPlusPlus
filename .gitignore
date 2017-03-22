@@ -20,3 +20,4 @@ lib/
 
 # remove all .log files
 *.log
+/out/
