@@ -44,19 +44,20 @@ import main.java.networking.data.Packet;
 import main.java.networking.event.ClientDisconnectedListener;
 import main.java.networking.event.ClientTrigger;
 import main.java.networking.socket.Client;
+import main.java.ui.GameInterface;
 import main.java.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnectedListener, ServerEntityUpdatedListener,
 		GameCreatedListener, LocalPlayerSpawnListener, LocalPlayerDespawnListener, ReadyToStartListener, PlayerLeavingGameListener, PlayerAbilityUsedListener {
 	private Client client;
 	private String serverAddress;
-	private ClientManager manager;
+	protected ClientManager manager;
 	private Game game;
 	private RemoteGameLogic gameLogic;
 	private ControlledPlayer player;
 	private Lobby lobby;
 	private String username;
-	private GameUI gameUI;
+	private GameInterface gameUI;
 	private boolean alreadyDoneHandshake;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	private Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> onRemoteGameEndedEvent;
@@ -76,7 +77,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 * @param serverAddress
 	 *            The IP address of the server to connect to.
 	 */
-	public ClientInstance(final GameUI gameUI, final String username, final String serverAddress) {
+	public ClientInstance(final GameInterface gameUI, final String username, final String serverAddress) {
 		this.username = username;
 		this.serverAddress = serverAddress;
 		this.gameUI = gameUI;
@@ -151,7 +152,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 * See the comment at the top of the method for a (fictitious) example of
 	 * how this would be done for a "local player moved" game event.
 	 */
-	private void addGameHooks() {
+	protected void addGameHooks() {
 		/*
 		 * Example of how a local player moved event would be handled. Assume
 		 * the game world object was passed to the ClientInstance via the
@@ -191,7 +192,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 * This is also necessary so that game events are not passed to a client
 	 * manager for a connection which has since been terminated.
 	 */
-	private void removeGameHooks() {
+	protected void removeGameHooks() {
 		/*
 		 * Corresponding example for the local player moved event (see above).
 		 *

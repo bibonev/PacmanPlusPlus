@@ -53,10 +53,10 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,
 		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener, CountDownStartingListener {
 	private Server server;
-	private ServerManager manager;
+	protected ServerManager manager;
 	private Game game;
 	private ServerEntityTracker tracker;
-	private Lobby lobby;
+	protected Lobby lobby;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	private GameLogic gameLogic;
 	private GameLogicTimer gameLogicTimer;
@@ -81,10 +81,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 
 	}
-	
-	public void setManager(ServerManager manager) {
-		this.manager = manager;
-	}
 
 	@Override
 	public void run() {
@@ -92,9 +88,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		server = createServer();
 
 		// Create
-		ServerManager manager = new StandardServerManager(server);
-		manager.setTrigger(this);
-		setManager(manager);
+		this.manager = new StandardServerManager(server);
+		this.manager.setTrigger(this);
 
 		addGameHooks();
 
@@ -139,7 +134,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	 * See the comment at the top of the method for a (fictitious) example of
 	 * how this would be done for a "local player moved" game event.
 	 */
-	private void addGameHooks() {
+	protected void addGameHooks() {
 		/*
 		 * Example of how a local player moved event would be handled. Assume
 		 * the game world object was passed to the ServerInstance via the
@@ -154,9 +149,12 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		 * packet into bytes and sends it to the server.
 		 */
 		tracker = new ServerEntityTracker(this);
-		server.getClientConnectedEvent().addListener(this);
-		server.getClientDisconnectedEvent().addListener(this);
 		lobby.getLobbyStateChangedEvent().addListener(this);
+		
+		if(server != null) {
+			server.getClientConnectedEvent().addListener(this);
+			server.getClientDisconnectedEvent().addListener(this);
+		}
 	}
 
 	/**
@@ -186,7 +184,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	 * This is also necessary so that game events are not passed to a server
 	 * manager for a connection which has since been terminated.
 	 */
-	private void removeGameHooks() {
+	protected void removeGameHooks() {
 		/*
 		 * Corresponding example for the local player moved event (see above).
 		 *
@@ -295,7 +293,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			}
 			p.setInteger("player-id", args.getEntity().getID());
 
-			if (server.getConnectedClients().contains(args.getEntity().getID())) {
+			if (lobby.containsPlayer(args.getEntity().getID())) {
 				// if the player ID is connected to the server, then
 				// this is an actual player
 				// otherwise it's an AI player

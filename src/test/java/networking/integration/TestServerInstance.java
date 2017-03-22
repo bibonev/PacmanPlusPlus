@@ -29,7 +29,7 @@ import main.java.networking.event.ServerTrigger;
 import main.java.networking.integration.ServerInstance;
 
 public class TestServerInstance {
-	private ServerInstance server;
+	private TestableServerInstance server;
 	private Game game;
 	private LocalGameLogic logic;
 	private Lobby lobby;
@@ -38,7 +38,7 @@ public class TestServerInstance {
 	public void setUp() throws Exception {
 		game = new Game(new World(new RuleChecker(), Map.generateMap(), false), new GameSettings(), GameType.MULTIPLAYER_SERVER);
 		lobby = new Lobby();
-		server = new ServerInstance(lobby);
+		server = new TestableServerInstance(lobby);
 		logic = new LocalGameLogic(game);
 		server.run();
 		server.onGameCreated(new GameCreatedEventArgs(game, logic));
@@ -176,6 +176,31 @@ public class TestServerInstance {
 				assertEquals(lobby.getPlayerCount(), lobbyChangePackets[1]);
 				lobbyChangePackets[1] = 0;
 			}
+		}
+	}
+	
+	public static class TestableServerInstance extends ServerInstance {
+		public TestableServerInstance(Lobby lobby) {
+			super(lobby);
+		}
+		
+		public void setManager(ServerManager manager) {
+			this.manager = manager;
+			this.manager.setTrigger(this);
+		}
+		
+		@Override
+		public void run() {
+			setManager(new MockServerManager(this, this.lobby) {
+				@Override
+				public void dispatch(int clientID, Packet packet) {}
+			});
+			this.addGameHooks();
+		}
+		
+		@Override
+		public void stop() {
+			this.removeGameHooks();
 		}
 	}
 

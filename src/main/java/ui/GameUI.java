@@ -50,7 +50,7 @@ import main.java.networking.integration.ServerInstance;
  * @author Rose Kirtley
  *
  */
-public class GameUI extends Application implements LobbyStateChangedListener, GameCreatedListener, PlayerLeavingGameListener {
+public class GameUI extends Application implements GameInterface, LobbyStateChangedListener, GameCreatedListener, PlayerLeavingGameListener {
 	private Lobby lobby;
 	private Game game;
 	private Music music;
