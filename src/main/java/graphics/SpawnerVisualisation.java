@@ -48,7 +48,11 @@ public class SpawnerVisualisation implements Visualisation {
 		node = new ImageView("num1.png");
 		setNumber(spawner.getTimeRemaining());
 	}
-	
+
+	/**
+	 * Set particular number for getting the right picture depending on the timer
+	 * @param number
+	 */
 	public void setNumber(int number) {
 		node.setImage(new Image(String.format("num%d.png", number)));
 	}

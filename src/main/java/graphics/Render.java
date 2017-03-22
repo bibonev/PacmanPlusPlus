@@ -73,10 +73,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> onStartingSingleplayerGame;
 
 	/**
-	 * Initialise new visualisation of the map
+	 * Initialise a new visualisation of the game
 	 *
-	 * @param gameUI
-	 * @param game
+	 * @param gameUI, the GUI
+	 * @param game, the actual game that has in itself the world and the players
+     * @param gameLogic, the game logic
 	 */
 	public Render(final GameUI gameUI, final Game game, final GameLogic gameLogic) {
 		this.gameUI = gameUI;
@@ -131,7 +132,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
     /**
 	 * Redraw the map
 	 */
-    public void redrawWorld() {
+    void redrawWorld() {
 		PositionVisualisation.initScreenDimensions();
 
     	redrawCells();
@@ -246,6 +247,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 	//Override methods
 
+    /**
+     * Invoked when the display needs to be redrawn
+     * @param args, arguments that contain some logic
+     */
 	@Override
 	public void onGameDisplayInvalidated(final GameDisplayInvalidatedEventArgs args) {
 		if (!game.hasEnded()) {
@@ -253,6 +258,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}
 	}
 
+    /**
+     * Invoked when the game ends
+     * @param args, arguments containing the outcome
+     */
 	@Override
 	public void onGameEnded(final GameEndedEventArgs args) {
 		Platform.runLater(() -> {
@@ -260,6 +269,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
+    /**
+     * Invoked when a local player has been despawn
+     * @param args, arguments contaning the reason for despawning and whether it can respawn
+     */
 	@Override
 	public void onLocalPlayerDespawn(LocalPlayerDespawnEventArgs args) {
 		this.controlledPlayer = null;
@@ -268,6 +281,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		});
 	}
 
+    /**
+     * Invoked when a local player has been spawned
+     * @param args, arguments containing the player
+     */
 	@Override
 	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
 		this.controlledPlayer = args.getPlayer();
@@ -275,6 +292,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		Platform.runLater(this::playerRespawn);
 	}
 
+    /**
+     * Invoked when a player has been removed
+     * @param args, arguments containing the id of the player being removed
+     */
 	@Override
 	public void onEntityRemoving(EntityChangedEventArgs args) {
 		Platform.runLater(() -> {
@@ -285,11 +306,19 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	}
 
 	//Getters on the events
-	
+
+    /**
+     * Get the event for satring new game
+     * @return Event
+     */
 	public Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> getOnStartingSingleplayerGame() {
 		return onStartingSingleplayerGame;
 	}
-	
+
+    /**
+     * Get the event for player leaving a game
+     * @return Event
+     */
 	public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
 		return onPlayerLeavingGame;
 	}
