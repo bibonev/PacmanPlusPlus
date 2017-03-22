@@ -37,11 +37,14 @@ public class SinglePlayerLobbyScreen extends Screen {
 		back.getStyleClass().add("backButtonStyle");
 		back.setOnAction(e -> game.switchToMenu());
 		setUpHover(back);
+		
+		Label pause = new Label("Press esc to pause the game.");
+		pause.getStyleClass().add("textStyle");
 
 		final Separator separator = new Separator();
 		separator.getStyleClass().add("separator");
 
-		pane.getChildren().addAll(label, separator, play, back);
+		pane.getChildren().addAll(label, separator, play, back, pause);
 
 		onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
 	}

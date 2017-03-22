@@ -233,20 +233,31 @@ public class HelpScreen extends Screen{
 				+ "and select the checkboxes as desired\n"
 				+ "-\n";
 		
-		playText = "To move, about use the arrows on the key board. \n" +
+		playText = "To move, about use the arrows on the key board. \n"
+				+ "-\n" +
 				"Once the game is over, you can\n" +
 				"play again by pressing space\n" +
 				"or return to the menu screen\n by pressing esc.\n"
-				+ "-\n";
+				+ "-\n"
+				+ "Press Q to shoot.\n"
+				+ "-\n"
+				+ "Press W to activate your shield.\n"
+				+ "-\n"
+				+ "To pause when playing the game press esc.\n-\n";
 		
 		multiText1 = "To start a multiplayer game, select";
 		multiText2 = "in the main menu, then";
-		multiText3 = "Players will appear as they join. Select";
-		multiText4 = "to edit the game settings. Select";
+		multiText3 = "Players will appear as they join. "
+				+ "\n-\n"
+				+ "Select";
+		multiText4 = "to edit the game settings. "
+				+ "\n-\n"
+				+ "Select";
 		multiText5 = "to start the game and a countdown will begin.\n-\n";
 		multiText5a = "To join a multiplayer game, select";
 		multiText6 = "in the main menu, then";
-		multiText7 = "Input the IP address of the host of the game\n" +
+		multiText7 = "-\n"
+				+ "Input the IP address of the host of the game\n" +
 				"and you will be taken to the game lobby.\n"+
 				"You can leave the game by pressing";
 		multiText8 = "When the host of the game has selected";
