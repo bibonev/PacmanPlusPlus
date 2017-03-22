@@ -58,6 +58,9 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	private Stage thisStage;
 	private Scene uiScene;
+	private Scene settingsSceneGame;
+	private Scene settingsSceneMenu;
+	private Scene gameScene;
 	private BorderPane pane;
 	private BorderPane banner;
 	public Button settings;
@@ -75,12 +78,14 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public Screen currentScreen;
 	public LogInScreen logInScreen;
 	public MenuScreen menuScreen;
-	private SettingsScreen settingsScreen;
+//	private SettingsScreen settingsScreen;
 	private SinglePlayerLobbyScreen singlePlayerLobbyScreen;
 	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
 	private MultiPlayerOptionScreen multiPlayerOptionScreen;
 	private MultiPlayerJoinScreen multiPlayerJoinScreen;
 	private HelpScreen helpScreen;
+	private SettingsScreenGame settingsScreenGame;
+	private SettingsScreenMenu settingsScreenMenu;
 
 	private Event<GameClosingListener, Object> onGameClosing = new Event<>((l, a) -> l.onGameClosing());
 	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
@@ -108,7 +113,10 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		pane.getStyleClass().add("paneStyle");
 		uiScene = new Scene(pane, 500, 500);
 		uiScene.setOnKeyPressed(e -> sendMoveEvent(e.getCode()));
-
+		
+		settingsSceneGame = new Scene(settingsScreenGame.getPane(), 500, 500);
+		settingsSceneMenu = new Scene(settingsScreenMenu.getPane(), 500, 500);
+		
 		helpPane = new BorderPane();
 		helpPane.getStyleClass().add("paneStyle");
 		helpPane.setCenter(helpScreen.getPane());
@@ -119,6 +127,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		final String css = this.getClass().getResource("style.css").toExternalForm();
 		uiScene.getStylesheets().add(css);
 		helpScene.getStylesheets().add(css);
+		settingsSceneGame.getStylesheets().add(css);
+		settingsSceneMenu.getStylesheets().add(css);
 		pane.getStyleClass().add("paneStyle");
 
 		setUpSettingsButton();
@@ -158,7 +168,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		gameCommandService.getRemoteGameCreatedEvent().addListener(sounds);
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
-		settingsScreen = new SettingsScreen(this);
+		settingsScreenGame = new SettingsScreenGame(this);
+		settingsScreenMenu = new SettingsScreenMenu(this);
 		singlePlayerLobbyScreen = new SinglePlayerLobbyScreen(this);
 		singlePlayerLobbyScreen.getOnStartingSingleplayerGame().addListener(gameCommandService);
 		multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(this);
@@ -179,7 +190,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	private void setUpSettingsButton() {
 
 		settings = new Button("Settings");
-		settings.setOnAction(e -> switchToSettings());
+		settings.setOnAction(e -> switchToSettingsMenu());
 		settings.getStyleClass().add("buttonStyle");
 
 		banner = new BorderPane();
@@ -222,18 +233,16 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		setScreen(logInScreen);
 	}
 
-	public void switchToSettings() {
-		settings.setDisable(true);
-		centerPane.getChildren().add(settingsScreen.getPane());
-	}
-	
-	public boolean showingSettings(){
-		return centerPane.getChildren().contains(settingsScreen.getPane());
+	public void switchToSettingsMenu() {
+		thisStage.setScene(settingsSceneMenu);
 	}
 
-	public void returnBack() {
-		settings.setDisable(false);
-		centerPane.getChildren().remove(settingsScreen.getPane());
+	public void returnBackFromGame() {
+		thisStage.setScene(gameScene);
+	}
+	
+	public void returnBackFromMenu(){
+		thisStage.setScene(uiScene);
 	}
 
 	public void switchToSinglePlayerLobby() {
@@ -261,6 +270,10 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		adjustScreenPosition();
 	}
 
+	public void switchToSettingsGame(){
+		thisStage.setScene(settingsSceneGame);
+	}
+	
 	public void close() {
 		thisStage.close();
 	}
@@ -340,10 +353,14 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	}
 
 	public void muteMusic(final boolean bool) {
+		settingsScreenGame.selectMusic(bool);
+		settingsScreenMenu.selectMusic(bool);
 		music.setOn(bool);
 	}
 
 	public void muteSounds(final boolean bool) {
+		settingsScreenGame.selectSounds(bool);
+		settingsScreenMenu.selectSounds(bool);
 		sounds.setOn(bool);
 	}
 
@@ -379,7 +396,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				PositionVisualisation.initScreenDimensions();
 		        
 				// Draw Map
-				thisStage.setScene(render.setupWorld());
+				gameScene = render.setupWorld();
+				thisStage.setScene(gameScene);
 				thisStage.show();
 				adjustScreenPosition();
 
@@ -392,6 +410,22 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 				render.getOnPlayerLeavingGame().addOneTimeListener(this);
 			});
 		}
+	}
+	
+	public void fireLaser(){
+		sounds.fireLasers();
+	}
+	
+	public void playShield(){
+		sounds.playShield();
+	}
+	
+	public void pausePlay(){
+		music.pausePlay();
+	}
+	
+	public void stopMusic(){
+		music.stopMusic();
 	}
 	
 	public void timerEnded(){
