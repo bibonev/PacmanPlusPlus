@@ -43,7 +43,6 @@ public class GameUITest {
 	
 	@Mock private LogInScreen logInScreen = new LogInScreen(game);
 	@Mock private Screen currentScreen = logInScreen;
-	@Mock private SettingsScreen settingsScreen = new SettingsScreen(game);
 	@Spy private MultiPlayerLobbyScreen multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(game);
 	@Mock private StackPane centerPane = new StackPane();
 	@Spy private Button settings = new Button();
@@ -85,9 +84,6 @@ public class GameUITest {
 		MockitoAnnotations.initMocks(this);
 		Mockito.doCallRealMethod().when(game).switchToMultiPlayerLobby();
 		Mockito.doCallRealMethod().when(game).switchToLogIn();
-		Mockito.doCallRealMethod().when(game).switchToSettings();
-		Mockito.doCallRealMethod().when(game).showingSettings();
-		Mockito.doCallRealMethod().when(game).returnBack();
 		Mockito.doCallRealMethod().when(game).onLobbyStateChanged(addArgs);
 		Mockito.doCallRealMethod().when(game).onLobbyStateChanged(removeArgs);		
 		Mockito.when(centerPane.getChildren()).thenReturn(nodeList);
@@ -107,15 +103,6 @@ public class GameUITest {
 		assertFalse(game.currentScreen == null);
 		assertFalse(game.logInScreen == null);
 		assertTrue(game.currentScreen == game.logInScreen);
-	}
-	
-	@Test
-	public void testReturnBack(){
-		assertFalse(game.showingSettings());
-		game.switchToSettings();
-		assertTrue(game.showingSettings());
-		game.returnBack();
-		assertFalse(game.showingSettings());		
 	}
 	
 	@Test

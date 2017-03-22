@@ -462,6 +462,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             } else if (event.getCode() == KeyCode.Q) {
                 gameUI.switchToMenu();
                 gameUI.stopMusic();
+            } else if(event.getCode() == KeyCode.SPACE){
+            	gameUI.switchToSettingsGame();
             }
         });
     }
