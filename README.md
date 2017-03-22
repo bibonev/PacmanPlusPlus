@@ -20,4 +20,4 @@ Then you can find the generated HTML report inside
 `java-team-project/build/reports/jacoco/test/html`.
 
 ## Note
-For any gradle task to work, `gradle` needs to be installed first. See instructions on how to do that [here] (https://docs.gradle.org/current/userguide/installation.html).
+For any gradle task to work, `gradle` needs to be installed first. See instructions on how to do that [here](https://docs.gradle.org/current/userguide/installation.html).
