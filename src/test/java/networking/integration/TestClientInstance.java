@@ -10,7 +10,9 @@ import org.junit.Test;
 
 import main.java.ai.AIGhost;
 import main.java.constants.GameType;
+import main.java.event.Event;
 import main.java.event.arguments.GameCreatedEventArgs;
+import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.core.LocalGameLogic;
@@ -31,6 +33,7 @@ import main.java.networking.event.ClientTrigger;
 import main.java.networking.event.ServerTrigger;
 import main.java.networking.integration.ClientInstance;
 import main.java.networking.integration.ServerInstance;
+import main.java.ui.GameInterface;
 import main.java.ui.GameUI;
 
 public class TestClientInstance {
@@ -43,7 +46,27 @@ public class TestClientInstance {
 	public void setUp() throws Exception {
 		game = new Game(new World(new RuleChecker(), Map.generateMap(), false), new GameSettings(), GameType.MULTIPLAYER_SERVER);
 		lobby = new Lobby();
-		client = new TestableClientInstance(new GameUI(), "hello", "localhost");
+		client = new TestableClientInstance(new GameInterface() {
+			private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame;
+
+			{
+				this.onPlayerLeavingGame = new Event<PlayerLeavingGameListener, Object>((l, a) -> l.onPlayerLeavingGame());
+			}
+			
+			@Override
+			public void timer() {}
+			
+			@Override
+			public void setLobby(Lobby lobby) {}
+			
+			@Override
+			public void onPlayerLeavingGame() {}
+			
+			@Override
+			public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
+				return onPlayerLeavingGame;
+			}
+		}, "hello", "localhost");
 		logic = new RemoteGameLogic(game);
 		client.run();
 		client.onGameCreated(new GameCreatedEventArgs(game, logic));
@@ -60,7 +83,7 @@ public class TestClientInstance {
 	}
 	
 	public static class TestableClientInstance extends ClientInstance {
-		public TestableClientInstance(GameUI gameUI, String username, String serverAddress) {
+		public TestableClientInstance(GameInterface gameUI, String username, String serverAddress) {
 			super(gameUI, username, serverAddress);
 		}
 		
