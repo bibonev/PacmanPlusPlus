@@ -394,6 +394,22 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		}
 	}
 	
+	public void fireLaser(){
+		sounds.fireLasers();
+	}
+	
+	public void playShield(){
+		sounds.playShield();
+	}
+	
+	public void pausePlay(){
+		music.pausePlay();
+	}
+	
+	public void stopMusic(){
+		music.stopMusic();
+	}
+	
 	public void timerEnded(){
 		if(multiPlayerLobbyScreen.thisClient){
 			multiPlayerLobbyScreen.getHostStartingGameListener().fire(null);
