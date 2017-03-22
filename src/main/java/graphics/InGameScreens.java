@@ -1,22 +1,25 @@
 package main.java.graphics;
 
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+
 import main.java.constants.GameOutcome;
 import main.java.constants.ScreenSize;
-import main.java.gamelogic.domain.Game;
-import main.java.gamelogic.domain.Player;
 
 public class InGameScreens {
-	
-	private Game game;
-	
-	public InGameScreens(final Game game){
-		this.game = game;
-	}
 
+	/**
+	 * Initialize new instance of the in game screens
+	 */
+	public InGameScreens(){}
+
+	/**
+	 * Gets the player respawn window
+	 * @param deathReason, the reason for dying
+	 * @param canRejoin, whether the person can rejoin the game or not
+	 * @return StackPane containg the window
+	 */
 	public StackPane getPlayerRespawnWindow(final String deathReason, final boolean canRejoin) {
 		final StackPane pane = new StackPane();
 		pane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7)");
@@ -43,7 +46,11 @@ public class InGameScreens {
 		pane.getChildren().addAll(deathLabel, reasonLabel, retryLabel);
 		return pane;
 	}
-	
+
+	/**
+	 * Gets the pause game screen
+	 * @return StackPane containing the window
+	 */
 	public StackPane pauseGameScreen() {
 		final StackPane pane = new StackPane();
 		pane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7)");
@@ -74,7 +81,13 @@ public class InGameScreens {
 		
 		return pane;
 	}
-	
+
+	/**
+	 * Get the end game screen window
+	 * @param localPlayerID, the local player id so that it can be recognised
+	 * @param gameOutcome, the outcome of the game
+	 * @return StackPane containing the window
+	 */
 	public StackPane endGameScreen(final int localPlayerID, final GameOutcome gameOutcome) {
 		final StackPane pane = new StackPane();
 		pane.setStyle("-fx-background-color: rgba(0, 0, 0, 0.7)");

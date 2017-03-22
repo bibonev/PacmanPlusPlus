@@ -16,6 +16,10 @@ public class CellVisualisation implements Visualisation {
 	private Cell cell;
 	private Node node;
 
+    /**
+     * Initialize new instance of the cell visualisation
+     * @param cell, the cell that is going to be visualised
+     */
 	public CellVisualisation(final Cell cell) {
 		this.cell = cell;
 		this.node = null;
@@ -63,6 +67,10 @@ public class CellVisualisation implements Visualisation {
 		return node;
 	}
 
+    /**
+     * Get the cell
+     * @return cell
+     */
 	public Cell getCell() {
 		return cell;
 	}

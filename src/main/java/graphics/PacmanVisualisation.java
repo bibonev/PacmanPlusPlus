@@ -18,7 +18,7 @@ public class PacmanVisualisation implements Visualisation {
 	/**
 	 * Initialize new visualisation for the PacMan player
 	 *
-	 * @param player
+	 * @param player, the player that need to be visualised
 	 */
 	public PacmanVisualisation(final Player player) {
 		this.player = player;
