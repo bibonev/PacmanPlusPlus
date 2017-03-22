@@ -28,5 +28,19 @@ dependencies {
     testCompile "org.mockito:mockito-core:2.7.5"
 }
 
+// Exclude packages and classes for which unit tests don't make sense e.g. Audio
+ jacocoTestReport {
+     afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+                                         // Packages
+             fileTree(dir: it, exclude: ['main/java/example',
+                                         'main/java/audio',
+                                         'main/java/ui',
+                                         // Individual classes
+                                         '**/*Render**'])
+         })
+     }
+ }
+
 // Define the main class for the application
 mainClassName = 'GameUI'
