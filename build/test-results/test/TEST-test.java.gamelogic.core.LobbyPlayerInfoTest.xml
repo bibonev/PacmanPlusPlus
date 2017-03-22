@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="test.java.gamelogic.core.LobbyPlayerInfoTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2017-03-22T17:30:53" hostname="Andrei-Mariuss-MacBook-Pro.local" time="0.009">
-  <properties/>
-  <testcase name="shouldConstruct" classname="test.java.gamelogic.core.LobbyPlayerInfoTest" time="0.009"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
