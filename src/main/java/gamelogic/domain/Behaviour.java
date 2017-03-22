@@ -1,10 +1,8 @@
 package main.java.gamelogic.domain;
 
+import java.security.acl.Owner;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.PriorityQueue;
 import java.util.Random;
 
 import main.java.ai.AStar;
@@ -69,14 +67,11 @@ public abstract class Behaviour {
 	protected Position lastPos;
 
 	/** The inventory. */
-	private SkillSet stash;
+	private SkillSet skills;
 
 	/** The current path. */
 	private ArrayList<Position> currentPath;
 
-	/** The priority targets. */
-	// to be used in more complex behaviors
-	private PriorityQueue<Ability> priorityTargets;
 
 	private int counter;
 	private World world;
@@ -97,7 +92,7 @@ public abstract class Behaviour {
 	 * @param type
 	 *            the type
 	 */
-	public Behaviour(final World world, final Entity entity, final int speed, final SkillSet stash, final Type type) {
+	public Behaviour(final World world, final Entity entity, final SkillSet skills, final Type type) {
 		this.world = world;
 		mapSize = this.world.getMap().getMapSize();
 		this.entity = entity;
@@ -105,7 +100,7 @@ public abstract class Behaviour {
 		astar = new AStar(world.getMap());
 		rng = new Random();
 		focus = rng.nextInt(4) + 1;
-		this.stash = stash;
+		this.skills = skills;
 		this.type = type;
 		lastPos = entity.getPosition();
 		onEntityMoved = entity.getOnMovedEvent();
@@ -125,28 +120,54 @@ public abstract class Behaviour {
 	 */
 	public Position pickTarget() {
 
-		final ArrayList<Position> enemies = scanEnemies();
-
-		// System.out.println(enemies.size());
-		if (enemies.size() == 0) {
-			return pickRandomTarget();
+		//final ArrayList<Position> enemies = scanEnemies();
+		
+		int minDistance = Integer.MAX_VALUE;
+		tarType=Target.RANDOM;
+		Position target = pickRandomTarget();
+		
+		int row=entity.getPosition().getRow();
+		int col=entity.getPosition().getColumn();
+		
+		int colStart,rowStart,rowEnd,colEnd;
+		
+		if(row+3>world.getMap().getMapSize()){
+			rowEnd = world.getMap().getMapSize();
 		}
-
-		else {
-			final int size = enemies.size();
-			final int[] distances = new int[size];
-			final HashMap<Integer, Position> targets = new HashMap<Integer, Position>();
-
-			for (int i = 0; i < size; i++) {
-				distances[i] = manhattanDistance(entity.getPosition(), enemies.get(i));
-				targets.put(new Integer(distances[i]), enemies.get(i));
-
+		else{
+			rowEnd = row + 3;
+		}
+		
+		if(col+5>world.getMap().getMapSize()){
+			colEnd = world.getMap().getMapSize();
+		}
+		else{
+			colEnd = col + 3;
+		}
+		if(col-3<0){
+			colStart = 0;
+		}
+		else{
+			colStart = col - 3;
+		}
+		if(row-3<0){
+			rowStart = 0;
+		}
+		else{
+			rowStart = row - 3;
+		}
+		
+		for(int i = rowStart;i<rowEnd;i++){
+			for(int j = colStart;j<colEnd;j++){
+				int distance = manhattanDistance(entity.getPosition(),world.getMap().getCells()[i][j].getPosition());
+				if(world.getMap().getCells()[i][j].getState() == CellState.FOOD && minDistance>distance && (i!=row || j!=col)){
+					minDistance = distance;
+					target = world.getMap().getCells()[i][j].getPosition();
+					tarType=Target.STATIONARY;
+				}
 			}
-
-			Arrays.sort(distances);
-			tarType = Target.ENEMY;
-			return targets.get(distances[0]);
 		}
+		return target;
 	}
 
 	/**
@@ -229,7 +250,6 @@ public abstract class Behaviour {
 	 * @param map
 	 *            the map
 	 */
-	// will most likely be substituted with event-based implementation
 	public void updateMap(final Map map) {
 		cells = map.getCells();
 	}
@@ -240,7 +260,6 @@ public abstract class Behaviour {
 	 * @param pos
 	 *            the position
 	 */
-	// will most likely be substituted with event-based implementation
 	public void updatePosition(final Position pos) {
 		entity.setPosition(pos);
 	}
@@ -255,40 +274,6 @@ public abstract class Behaviour {
 	}
 
 	/**
-	 * Attempt to trace target in a 3x3 area.
-	 *
-	 * @param target
-	 *            the target position
-	 * @return true, if successful
-	 */
-	private boolean traceTarget(final Position target) {
-		final int row = target.getRow();
-		final int column = target.getColumn();
-
-		if (world.isGhostAt(target)) {
-			return true;
-		}
-		if (world.isGhostAt(target.add(-1, 0))) {
-			lockedTarget = cells[row - 1][column].getPosition();
-			return true;
-		}
-		if (world.isGhostAt(target.add(+1, 0))) {
-			lockedTarget = cells[row + 1][column].getPosition();
-			return true;
-		}
-		if (world.isGhostAt(target.add(0, -1))) {
-			lockedTarget = cells[row][column - 1].getPosition();
-			return true;
-		}
-
-		if (world.isGhostAt(target.add(0, +1))) {
-			lockedTarget = cells[row][column + 1].getPosition();
-			return true;
-		}
-		return false;
-	}
-
-	/**
 	 * Generate path, reverse it and remove starting position.
 	 *
 	 * @param current
@@ -300,11 +285,10 @@ public abstract class Behaviour {
 	private ArrayList<Position> genPath(final Position current, final Position target) {
 
 		currentPath = astar.AStarAlg(current, target);
-
 		// path is backwards
-		Collections.reverse(currentPath);
-		// path starts with current position so we remove it
-		currentPath.remove(0);
+		
+		//Collections.reverse(currentPath);
+		//currentPath.remove(0);
 
 		return currentPath;
 	}
@@ -314,83 +298,41 @@ public abstract class Behaviour {
 	 */
 	public void run() {
 
+		if(entity instanceof Player){
+			((Player) entity).getSkillSet().activateW();
+		}
+		
 		lockedTarget = pickTarget();
 
 		switch (tarType) {
-
-		// if AI is forced to make a random move, it makes *focus number
-		// of consecutive moves before it scans for new enemies
 		case RANDOM: {
-			if (counter < focus) {
-
+			
 				lastPos = entity.getPosition();
+				entity.setPosition(lockedTarget);
 
-				entity.setPosition(currentPath.get(0));
-
-				lockedTarget = pickRandomTarget();
-
-				counter++;
-			} else {
-				counter = 0;
-				run();
-			}
 		}
 			break;
-
-		// if AI has a stationary target (item,food etc)
-		// generates path and follows it until it reaches the target
-		// if path becomes obstructed or item disappears ai chooses new
-		// target
+			
 		case STATIONARY: {
 
-			if (currentPath.size() > 0 && isTargetThere(lockedTarget) && RuleChecker
-					.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+			
+			currentPath = genPath(entity.getPosition(),lockedTarget);
+			
+			entity.setPosition(currentPath.get(0));
+			
+			currentPath.remove(0);
 
-				entity.setPosition(currentPath.get(0));
-
-				currentPath.remove(0);
-
-			} else {
-				genPath(entity.getPosition(), lockedTarget);
-
-				entity.setPosition(currentPath.get(0));
-
-				currentPath.remove(0);
-			}
 		}
-
-		// if ai chases an enemy player
-		// generates path to current enemy position
-		// does *focus number of moves while attempting to trace the
-		// target as it moves
-		// after *focus number of moves it generates new path if target
-		// is still locked
-		// if target is lost the ai gives up and chooses a new target
+			break;
+			
 		case ENEMY: {
 
-			if (currentPath.size() > 0) {
-				genPath(entity.getPosition(), lockedTarget);
-				final int size = currentPath.size();
-				int i = 0;
-				while (i <= focus) {
-					currentPath.remove(size - i);
-					i++;
-				}
-			}
 
-			if (RuleChecker.checkCellValidity(cells[currentPath.get(0).getRow()][currentPath.get(0).getColumn()])) {
+			currentPath = genPath(entity.getPosition(),lockedTarget);
+			
+			entity.setPosition(currentPath.get(0));
 
-				entity.setPosition(currentPath.get(0));
-
-				currentPath.remove(0);
-
-			} else {
-				genPath(entity.getPosition(), lockedTarget);
-
-				entity.setPosition(currentPath.get(0));
-
-				currentPath.remove(0);
-			}
+			currentPath.remove(0);
 		}
 			break;
 		}

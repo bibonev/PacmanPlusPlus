@@ -77,6 +77,17 @@ public class DefaultMusic implements Music, GameCreatedListener, GameEndedListen
 			mediaPlayer.stop();
 		}
 	}
+	
+	public void pausePlay(){
+		if(mediaPlayer.isMute()){
+			mediaPlayer.setMute(false);
+			if(!isOn){
+				mediaPlayer.stop();
+			}
+		}else{
+			mediaPlayer.setMute(true);
+		}
+	}
 
 	@Override
 	public void onGameCreated(GameCreatedEventArgs args) {

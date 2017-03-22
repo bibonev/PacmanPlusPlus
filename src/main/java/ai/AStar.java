@@ -55,8 +55,8 @@ public class AStar {
 		closed = new boolean[mapSize][mapSize];
 
 		// create the A* grid
-		for (int i = 0; i < mapSize; ++i) {
-			for (int j = 0; j < mapSize; ++j) {
+		for (int i = 0; i < mapSize; i++) {
+			for (int j = 0; j < mapSize; j++) {
 				grid[i][j] = new AStarCell(i, j);
 				if (cells[i][j].getState() == CellState.OBSTACLE) {
 					blocked.add(new Position(i, j));
@@ -112,6 +112,10 @@ public class AStar {
 		@Override
 		public String toString() {
 			return "[" + i + ", " + j + "]";
+		}
+		
+		public boolean equals(AStarCell a){
+			return (a.getPos().getRow()==i && a.getPos().getColumn()==j);
 		}
 	}
 
@@ -218,7 +222,7 @@ public class AStar {
 		AStarCell current = null;
 
 		// the algorithm
-		while (!current.equals(grid[endI][endJ])) {
+		while (current == null || (!current.equals(grid[endI][endJ]))) {
 			current = open.poll();
 			if (current == null) {
 				break;
@@ -253,6 +257,7 @@ public class AStar {
 		// path is reversed; goes from END to START
 		final ArrayList<Position> path = new ArrayList<Position>();
 		AStarCell finalcell = grid[endI][endJ];
+		path.add(finalcell.getPos());
 		while (finalcell.parent != null) {
 			path.add(finalcell.parent.getPos());
 			finalcell = finalcell.parent;

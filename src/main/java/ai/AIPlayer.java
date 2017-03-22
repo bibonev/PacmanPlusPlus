@@ -1,6 +1,7 @@
 package main.java.ai;
 
 import main.java.gamelogic.domain.Behaviour;
+import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.LocalPlayer;
 import main.java.gamelogic.domain.Map;
 
@@ -32,5 +33,9 @@ public class AIPlayer extends LocalPlayer {
 	public void setBehaviour(Behaviour behavior) {
 
 		this.behavior = behavior;
+	}
+	@Override
+	public void gameStep(final Game game) {
+		behavior.run();
 	}
 }
