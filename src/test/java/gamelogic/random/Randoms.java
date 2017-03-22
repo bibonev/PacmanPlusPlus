@@ -77,7 +77,7 @@ public class Randoms {
 
 	public static LocalGhost randomLocalGhost() {
 		final LocalGhost localGhost = new LocalGhost();
-		localGhost.setPosition(randomPosition());
+		localGhost.setPosition(randomPositionInRange(15));
 		return localGhost;
 	}
 
@@ -86,7 +86,7 @@ public class Randoms {
 	}
 
 	public static Map randomMap() {
-		return new MapStub(randomCells(randomInteger()));
+		return new MapStub(randomCells(randomInteger(15)));
 	}
 
 	public static GameSettings randomGameSettings() {
