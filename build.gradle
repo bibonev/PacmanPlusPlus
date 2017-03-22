@@ -25,8 +25,22 @@ repositories {
 dependencies {
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
-    testCompile "org.mockito:mockito-core:2.7.5"
+    testCompile "org.mockito:mockito-all:1.9.5"
 }
 
 // Define the main class for the application
 mainClassName = 'GameUI'
+
+// Exclude packages and classes for which unit tests don't make sense e.g. Audio
+jacocoTestReport {
+    afterEvaluate {
+        classDirectories = files(classDirectories.files.collect {
+                                        // Packages
+            fileTree(dir: it, exclude: ['main/java/example',
+                                        'main/java/audio',
+                                        'main/java/ui',
+                                        // Individual classes
+                                        '**/*Render**'])
+        })
+    }
+}

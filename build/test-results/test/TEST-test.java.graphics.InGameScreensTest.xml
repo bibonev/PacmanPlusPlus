@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="test.java.graphics.InGameScreensTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2017-03-22T17:30:55" hostname="Andrei-Mariuss-MacBook-Pro.local" time="0.064">
+  <properties/>
+  <testcase name="testEndGameScreen" classname="test.java.graphics.InGameScreensTest" time="0.061"/>
+  <testcase name="testPauseGameScreen" classname="test.java.graphics.InGameScreensTest" time="0.001"/>
+  <testcase name="testPlayerRespawnWindow" classname="test.java.graphics.InGameScreensTest" time="0.001"/>
+  <testcase name="testInitialization" classname="test.java.graphics.InGameScreensTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Exception in thread "JavaFX Init Thread" java.lang.IllegalStateException: Application launch must not be called more than once
+	at com.sun.javafx.application.LauncherImpl.launchApplication(LauncherImpl.java:162)
+	at com.sun.javafx.application.LauncherImpl.launchApplication(LauncherImpl.java:143)
+	at javafx.application.Application.launch(Application.java:191)
+	at test.java.graphics.InGameScreensTest$1.run(InGameScreensTest.java:37)
+]]></system-err>
+</testsuite>
