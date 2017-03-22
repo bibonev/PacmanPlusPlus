@@ -78,7 +78,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public Screen currentScreen;
 	public LogInScreen logInScreen;
 	public MenuScreen menuScreen;
-//	private SettingsScreen settingsScreen;
+	private GameSettingsScreen gameSettingsScreen;
 	private SinglePlayerLobbyScreen singlePlayerLobbyScreen;
 	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
 	private MultiPlayerOptionScreen multiPlayerOptionScreen;
@@ -168,6 +168,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		gameCommandService.getRemoteGameCreatedEvent().addListener(sounds);
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
+		gameSettingsScreen = new GameSettingsScreen(this);
 		settingsScreenGame = new SettingsScreenGame(this);
 		settingsScreenMenu = new SettingsScreenMenu(this);
 		singlePlayerLobbyScreen = new SinglePlayerLobbyScreen(this);
@@ -214,6 +215,15 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		Rectangle2D primScreenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
 		thisStage.setX((primScreenBounds.getWidth() - thisStage.getWidth()) / 2);
 		thisStage.setY((primScreenBounds.getHeight() - thisStage.getHeight()) / 2);
+	}
+	
+	public void showGameSettingsScreen(){
+		gameSettingsScreen.update();
+		centerPane.getChildren().add(gameSettingsScreen.getPane());
+	}
+	
+	public void removeGameSettingsScreen(){
+		centerPane.getChildren().remove(gameSettingsScreen.getPane());
 	}
 
 	public void switchToMenu() {
@@ -301,6 +311,8 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 			server.stop();
 			client.stop();
 		});
+		
+		gameSettingsScreen.getGameSettingsChangedEvent().addListener(server);
 
 		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> {
 			client.stop();
@@ -342,7 +354,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		onGameClosing.addOneTimeListener(() -> {
 			client.stop();
 		});
-
+		
 		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> client.stop());
 		multiPlayerLobbyScreen.setStartGameEnabled(false);
 		gameCommandService.getRemoteGameCreatedEvent().addOneTimeListener(client);

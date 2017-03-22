@@ -38,7 +38,7 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		return remoteGameCreatedEvent;
 	}
 
-	private void populateWorld(final World world) {
+	private void populateWorld(final World world, boolean playAgainstAI) {
 		Position[] ghostPositions = new Position[] {
 				new Position(1, 1),
 				new Position(1, 13),
@@ -65,8 +65,9 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		aiPlayer.setSkillSet(LocalSkillSet.createDefaultSkillSet(aiPlayer));
 		Spawner spawner = new Spawner(5, aiPlayer, SpawnerColor.RED);
 		spawner.setPosition(aiPlayer.getPosition());
-		world.addEntity(spawner);
-
+		if(playAgainstAI){
+			world.addEntity(spawner);
+		}
 	}
 
 	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID,
@@ -104,7 +105,7 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		final GameLogic gl = new LocalGameLogic(g);
 		
 		getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
-		populateWorld(g.getWorld());
+		populateWorld(g.getWorld(), g.getGameSettings().getAIPlayer());
 	}
 
 	@Override
@@ -114,7 +115,7 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 			g = generateNewServersideGame(args.getSettings());
 			final GameLogic gl = new LocalGameLogic(g);
 			getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
-			populateWorld(g.getWorld());
+			populateWorld(g.getWorld(), g.getGameSettings().getAIPlayer());
 		} else {
 			g = generateNewClientsideGame(args.getLocalUsername(), args.getLocalPlayerID(), args.getSettings(), true);
 			final GameLogic gl = new RemoteGameLogic(g);

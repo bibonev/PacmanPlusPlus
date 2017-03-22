@@ -7,6 +7,7 @@ import main.java.constants.GameType;
 import main.java.event.Event;
 import main.java.event.arguments.EntityMovedEventArgs;
 import main.java.event.arguments.GameCreatedEventArgs;
+import main.java.event.arguments.GameSettingsChangedEventArgs;
 import main.java.event.arguments.LocalPlayerDespawnEventArgs;
 import main.java.event.arguments.LocalPlayerSpawnEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
@@ -15,6 +16,7 @@ import main.java.event.arguments.PlayerMovedEventArgs;
 import main.java.event.arguments.ReadyToStartEventArgs;
 import main.java.event.arguments.RemoteGameEndedEventArgs;
 import main.java.event.listener.GameCreatedListener;
+import main.java.event.listener.GameSettingsChangedEventListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
 import main.java.event.listener.LocalPlayerSpawnListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
@@ -263,7 +265,17 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerCountDown(p);
 		} else if(p.getPacketName().equals("spawner-added")) {
 			triggerSpawnerAdded(p);
+		} else if(p.getPacketName().equals("game-settings-changed")) {
+			triggerGameSettingsChanged(p);
 		}
+	}
+	
+	private void triggerGameSettingsChanged(Packet p){
+		System.out.println("CHANGING");
+		boolean ai = p.getBoolean("playAgainstAI");
+		int lives = p.getInteger("lives");
+		gameUI.multiPlayerLobbyScreen.getMultiplayerSettings().setAIPlayer(ai);
+		gameUI.multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives);
 	}
 	
 	private void triggerSpawnerAdded(Packet p) {

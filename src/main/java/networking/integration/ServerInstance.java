@@ -8,6 +8,7 @@ import main.java.event.arguments.CellStateChangedEventArgs;
 import main.java.event.arguments.EntityChangedEventArgs;
 import main.java.event.arguments.EntityMovedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
+import main.java.event.arguments.GameSettingsChangedEventArgs;
 import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.HostStartingMultiplayerGameEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
@@ -18,6 +19,7 @@ import main.java.event.listener.CountDownStartingListener;
 import main.java.event.listener.EntityAddedListener;
 import main.java.event.listener.EntityRemovingListener;
 import main.java.event.listener.GameEndedListener;
+import main.java.event.listener.GameSettingsChangedEventListener;
 import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.HostStartingMultiplayerGameListener;
 import main.java.event.listener.LobbyStateChangedListener;
@@ -51,7 +53,8 @@ import main.java.ui.GameUI;
 
 public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,
-		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener, CountDownStartingListener {
+		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener,
+		CountDownStartingListener, GameSettingsChangedEventListener {
 	private Server server;
 	private ServerManager manager;
 	private Game game;
@@ -590,6 +593,14 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	public void onCountDownStarted() {
 		final Packet p = new Packet("count-down-started");
 		manager.dispatchAll(p);
+	}
+
+	@Override
+	public void onGameSettingsChanged(GameSettingsChangedEventArgs args) {
+		final Packet p = new Packet("game-settings-changed");
+		p.setInteger("lives", args.getSettings().getInitialPlayerLives());
+		p.setBoolean("playAgainstAI", args.getSettings().getAIPlayer());
+		manager.dispatchAll(p);		
 	}
 
 	/*
