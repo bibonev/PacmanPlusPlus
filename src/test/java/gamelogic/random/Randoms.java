@@ -98,7 +98,42 @@ public class Randoms {
 	}
 
 	public static SkillSet randomSkillSet() {
-		return new SkillSet();
+		return new SkillSet() {
+			@Override
+			public void activateQ() {
+
+			}
+
+			@Override
+			public void activateW() {
+
+			}
+
+			@Override
+			public void incrementCooldown() {
+
+			}
+
+			@Override
+			public void setQ(Ability q) {
+
+			}
+
+			@Override
+			public void setW(Ability w) {
+
+			}
+
+			@Override
+			public Ability getQ() {
+				return null;
+			}
+
+			@Override
+			public Ability getW() {
+				return null;
+			}
+		};
 	}
 
 	public static CellState randomCellState() {

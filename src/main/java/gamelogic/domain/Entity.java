@@ -73,7 +73,7 @@ public abstract class Entity {
 	 * @param id
 	 *            the new id
 	 */
-	protected void setID(final int id) {
+	public void setID(final int id) {
 		this.id = id;
 	}
 

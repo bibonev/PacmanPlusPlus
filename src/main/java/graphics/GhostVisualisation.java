@@ -14,7 +14,7 @@ public class GhostVisualisation implements Visualisation {
 	/**
 	 * Initialize new visualization for the ghost
 	 *
-	 * @param position
+	 * @param position, the position that the ghost will be visualised on
 	 */
 	public GhostVisualisation(final Position position) {
 		this.position = new PositionVisualisation(position.getRow(), position.getColumn());

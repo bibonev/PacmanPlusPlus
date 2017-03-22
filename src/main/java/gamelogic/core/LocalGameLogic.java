@@ -59,6 +59,9 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 				invalidateDisplay();
                 killedEntities.addAll(getKilledEntitiesByLaser());
 				checkEndingConditions();
+				if(entity instanceof Player){
+					((Player) entity).getSkillSet().incrementCooldown();
+				}
 			}
 
 			eatenPlayers.addAll(getEatenPlayers());
