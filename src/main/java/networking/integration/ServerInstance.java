@@ -4,25 +4,8 @@ import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
 import main.java.constants.GameType;
 import main.java.event.Event;
-import main.java.event.arguments.CellStateChangedEventArgs;
-import main.java.event.arguments.EntityChangedEventArgs;
-import main.java.event.arguments.EntityMovedEventArgs;
-import main.java.event.arguments.GameEndedEventArgs;
-import main.java.event.arguments.GameCreatedEventArgs;
-import main.java.event.arguments.HostStartingMultiplayerGameEventArgs;
-import main.java.event.arguments.LobbyChangedEventArgs;
-import main.java.event.arguments.MultiplayerGameStartingEventArgs;
-import main.java.event.arguments.PlayerMovedEventArgs;
-import main.java.event.listener.CellStateChangedEventListener;
-import main.java.event.listener.CountDownStartingListener;
-import main.java.event.listener.EntityAddedListener;
-import main.java.event.listener.EntityRemovingListener;
-import main.java.event.listener.GameEndedListener;
-import main.java.event.listener.GameCreatedListener;
-import main.java.event.listener.HostStartingMultiplayerGameListener;
-import main.java.event.listener.LobbyStateChangedListener;
-import main.java.event.listener.MultiplayerGameStartingListener;
-import main.java.event.listener.ServerEntityUpdatedListener;
+import main.java.event.arguments.*;
+import main.java.event.listener.*;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.core.GameLogicTimer;
 import main.java.gamelogic.core.Lobby;
@@ -51,7 +34,7 @@ import main.java.ui.GameUI;
 
 public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,
-		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener, CountDownStartingListener {
+		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener, CountDownStartingListener, PlayerCooldownChangedListener {
 	private Server server;
 	private ServerManager manager;
 	private Game game;
@@ -360,6 +343,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			p.setInteger("row", e.getPosition().getRow());
 			p.setInteger("col", e.getPosition().getColumn());
 			manager.dispatchAllExcept(p, e.getID());
+
+			((Player)e).getSkillSet().getOnPlayerCooldownChanged().addListener(this);
 			
 			if(lobby.containsPlayer(e.getID())) {
 				manager.dispatch(e.getID(), createLocalPlayerJoinPacket(e.getPosition().getRow(),
@@ -415,6 +400,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			if(e instanceof RemotePlayer && lobby.containsPlayer(e.getID())) {
 				handleRemovingHumanPlayerFromWorld(e.getID(), ((RemotePlayer) e).getDeathReason());
 			}
+
+			((Player)e).getSkillSet().getOnPlayerCooldownChanged().removeListener(this);
 		}
 		if (e instanceof Ghost) {
 			final Packet p = new Packet("remote-ghost-died");
@@ -590,6 +577,18 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	public void onCountDownStarted() {
 		final Packet p = new Packet("count-down-started");
 		manager.dispatchAll(p);
+	}
+
+	@Override
+	public void onPlayerCooldownChanged(PlayerCooldownChangedEventArgs args) {
+		if(lobby.containsPlayer(args.getPlayer().getID())) {
+			Packet p = new Packet("player-cooldown-changed");
+
+			p.setString("slot", String.valueOf(args.getSlot()));
+			p.setInteger("cooldown-level", args.getCooldownLevel());
+
+			manager.dispatch(args.getPlayer().getID(), p);
+		}
 	}
 
 	/*

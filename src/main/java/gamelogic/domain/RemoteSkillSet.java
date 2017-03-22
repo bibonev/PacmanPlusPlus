@@ -2,7 +2,9 @@ package main.java.gamelogic.domain;
 
 import main.java.event.Event;
 import main.java.event.arguments.PlayerAbilityUsedEventArgs;
+import main.java.event.arguments.PlayerCooldownChangedEventArgs;
 import main.java.event.listener.PlayerAbilityUsedListener;
+import main.java.event.listener.PlayerCooldownChangedListener;
 
 /**
  * Represent a player's inventory
@@ -19,11 +21,19 @@ import main.java.event.listener.PlayerAbilityUsedListener;
 public class RemoteSkillSet implements SkillSet {
 	private Player owner;
 	private Event<PlayerAbilityUsedListener, PlayerAbilityUsedEventArgs> onPlayerAbilityUsed;
-	
-	
+	private Event<PlayerCooldownChangedListener,PlayerCooldownChangedEventArgs> onPlayerCooldownChanged;
+
+
 	public RemoteSkillSet(Player owner) {
 		this.owner = owner;
 		onPlayerAbilityUsed = new Event<>((l, a) -> l.onPlayerAbilityUsed(a));
+		onPlayerCooldownChanged = new Event<>((l, a) -> l.onPlayerCooldownChanged(a));
+	}
+
+
+	@Override
+	public Event<PlayerCooldownChangedListener, PlayerCooldownChangedEventArgs> getOnPlayerCooldownChanged() {
+		return onPlayerCooldownChanged;
 	}
 
 	/**

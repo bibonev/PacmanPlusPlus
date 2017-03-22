@@ -5,15 +5,7 @@ import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
 import main.java.constants.GameType;
 import main.java.event.Event;
-import main.java.event.arguments.EntityMovedEventArgs;
-import main.java.event.arguments.GameCreatedEventArgs;
-import main.java.event.arguments.LocalPlayerDespawnEventArgs;
-import main.java.event.arguments.LocalPlayerSpawnEventArgs;
-import main.java.event.arguments.MultiplayerGameStartingEventArgs;
-import main.java.event.arguments.PlayerAbilityUsedEventArgs;
-import main.java.event.arguments.PlayerMovedEventArgs;
-import main.java.event.arguments.ReadyToStartEventArgs;
-import main.java.event.arguments.RemoteGameEndedEventArgs;
+import main.java.event.arguments.*;
 import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
 import main.java.event.listener.LocalPlayerSpawnListener;
@@ -263,9 +255,24 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerCountDown(p);
 		} else if(p.getPacketName().equals("spawner-added")) {
 			triggerSpawnerAdded(p);
+		} else if(p.getPacketName().equals("player-cooldown-changed")) {
+			triggerPlayerCooldownChanged(p);
 		}
 	}
-	
+
+	private void triggerPlayerCooldownChanged(Packet p) {
+		Entity player = game.getWorld().getEntity(client.getClientID());
+
+		if(player != null) {
+			int cooldown = p.getInteger("cooldown-level");
+			char slot = p.getString("slot").charAt(0);
+
+			((Player)player).getSkillSet().getOnPlayerCooldownChanged().fire(
+					new PlayerCooldownChangedEventArgs((Player)player, cooldown, slot)
+			);
+		}
+	}
+
 	private void triggerSpawnerAdded(Packet p) {
 		Spawner.SpawnerColor color;
 		String spawnerType = p.getString("entity-type");

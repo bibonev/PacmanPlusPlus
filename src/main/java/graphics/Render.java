@@ -24,19 +24,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import main.java.constants.*;
 import main.java.event.Event;
-import main.java.event.arguments.EntityChangedEventArgs;
-import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
-import main.java.event.arguments.GameEndedEventArgs;
-import main.java.event.arguments.LocalPlayerDespawnEventArgs;
-import main.java.event.arguments.LocalPlayerSpawnEventArgs;
-import main.java.event.arguments.SingleplayerGameStartingEventArgs;
-import main.java.event.listener.EntityRemovingListener;
-import main.java.event.listener.GameDisplayInvalidatedListener;
-import main.java.event.listener.GameEndedListener;
-import main.java.event.listener.LocalPlayerDespawnListener;
-import main.java.event.listener.LocalPlayerSpawnListener;
-import main.java.event.listener.PlayerLeavingGameListener;
-import main.java.event.listener.SingleplayerGameStartingListener;
+import main.java.event.arguments.*;
+import main.java.event.listener.*;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.domain.*;
 import main.java.gamelogic.domain.Cell;
@@ -48,7 +37,7 @@ import main.java.ui.Screen;
  * Created by Boyan Bonev on 09/02/2017.
  */
 public class Render implements GameDisplayInvalidatedListener, GameEndedListener,
-		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener {
+		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener, PlayerCooldownChangedListener {
 	private Pane root;
 	private StackPane inventory;
 	private BorderPane parentRoot;
@@ -288,6 +277,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	@Override
 	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
 		this.controlledPlayer = args.getPlayer();
+		this.controlledPlayer.getSkillSet().getOnPlayerCooldownChanged().addListener(this);
 		this.localPlayerID = this.controlledPlayer.getID();
 		Platform.runLater(this::playerRespawn);
 	}
@@ -561,6 +551,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
     }
 
     private void redrawInventory() {
+	    /*
 	    if (controlledPlayer != null) {
             if ( controlledPlayer.getSkillSet().getW() != null && controlledPlayer.getSkillSet().getW().getCD() < 40) {
                 shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
@@ -573,6 +564,25 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             } else {
                 laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
             }
-        }
+        } */
+    }
+
+    @Override
+    public void onPlayerCooldownChanged(PlayerCooldownChangedEventArgs args) {
+        Platform.runLater(() -> {
+            if(args.getSlot() == 'q') { //laser
+                if (args.getCooldownLevel() < 20) {
+                    laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
+                } else {
+                    laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+                }
+            } else if(args.getSlot() == 'w') { //shield
+                if (args.getCooldownLevel() < 40) {
+                    shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
+                } else {
+                    shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+                }
+            }
+        });
     }
 }

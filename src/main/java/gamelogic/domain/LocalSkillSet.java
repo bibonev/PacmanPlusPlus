@@ -3,6 +3,11 @@ package main.java.gamelogic.domain;
  * Represent a player's inventory
  */
 
+import main.java.event.Event;
+import main.java.event.arguments.PlayerCooldownChangedEventArgs;
+import main.java.event.listener.PlayerCooldownChangedListener;
+import org.mockito.cglib.core.Local;
+
 /**
  * The player's skillset. Contains 3 items that will be bound to the Q,W and E
  * keys.
@@ -13,9 +18,21 @@ package main.java.gamelogic.domain;
  */
 public class LocalSkillSet implements SkillSet {
 
+	private final Event<PlayerCooldownChangedListener,PlayerCooldownChangedEventArgs> onPlayerCooldownChanged;
 	private Ability q;
 	private Ability w;
 	// private Ability r;
+
+	public LocalSkillSet()
+	{
+		onPlayerCooldownChanged = new Event<>((l, a) -> l.onPlayerCooldownChanged(a));
+	}
+
+
+	@Override
+	public Event<PlayerCooldownChangedListener, PlayerCooldownChangedEventArgs> getOnPlayerCooldownChanged() {
+		return onPlayerCooldownChanged;
+	}
 
 	/**
 	 * Set q ability.
@@ -88,5 +105,8 @@ public class LocalSkillSet implements SkillSet {
 	public void incrementCooldown() {
 		getQ().incrementCooldown();
 		getW().incrementCooldown();
+
+		getOnPlayerCooldownChanged().fire(new PlayerCooldownChangedEventArgs(getQ().getOwner(), getQ().getCD(), 'q'));
+		getOnPlayerCooldownChanged().fire(new PlayerCooldownChangedEventArgs(getW().getOwner(), getW().getCD(), 'w'));
 	}
 }

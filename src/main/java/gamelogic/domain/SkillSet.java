@@ -3,6 +3,10 @@ package main.java.gamelogic.domain;
  * Represent a player's inventory
  */
 
+import main.java.event.Event;
+import main.java.event.arguments.PlayerCooldownChangedEventArgs;
+import main.java.event.listener.PlayerCooldownChangedListener;
+
 /**
  * The player's skillset. Contains 3 items that will be bound to the Q,W and E
  * keys.
@@ -12,6 +16,7 @@ package main.java.gamelogic.domain;
  *
  */
 public interface SkillSet {
+	public Event<PlayerCooldownChangedListener, PlayerCooldownChangedEventArgs> getOnPlayerCooldownChanged();
 
 	/**
 	 * Use Q skill.

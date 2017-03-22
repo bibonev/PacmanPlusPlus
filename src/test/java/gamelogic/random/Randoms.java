@@ -4,6 +4,9 @@ import java.util.Random;
 
 import main.java.constants.CellState;
 import main.java.constants.GameType;
+import main.java.event.Event;
+import main.java.event.arguments.PlayerCooldownChangedEventArgs;
+import main.java.event.listener.PlayerCooldownChangedListener;
 import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.domain.Ability;
 import main.java.gamelogic.domain.Cell;
@@ -99,6 +102,11 @@ public class Randoms {
 
 	public static SkillSet randomSkillSet() {
 		return new SkillSet() {
+			@Override
+			public Event<PlayerCooldownChangedListener, PlayerCooldownChangedEventArgs> getOnPlayerCooldownChanged() {
+				return null;
+			}
+
 			@Override
 			public void activateQ() {
 
