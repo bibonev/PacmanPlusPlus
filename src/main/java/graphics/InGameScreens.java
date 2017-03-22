@@ -11,11 +11,7 @@ import main.java.gamelogic.domain.Player;
 
 public class InGameScreens {
 	
-	private Game game;
-	
-	public InGameScreens(final Game game){
-		this.game = game;
-	}
+	public InGameScreens(){}
 
 	public StackPane getPlayerRespawnWindow(final String deathReason, final boolean canRejoin) {
 		final StackPane pane = new StackPane();

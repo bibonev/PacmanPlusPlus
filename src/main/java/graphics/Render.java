@@ -82,7 +82,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameUI = gameUI;
 		this.game = game;
 		this.gameLogic = gameLogic;
-        this.inGameScreens = new InGameScreens(game);
+        this.inGameScreens = new InGameScreens();
 
 		this.gameLogic.getOnGameDisplayInvalidated().addListener(this);
 		this.gameLogic.getOnGameEnded().addOneTimeListener(this);
@@ -95,9 +95,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.allEntities = new HashMap<>();
 		this.shieldsActivated = new HashMap<>();
         this.removedEntityIDs = new HashSet<>();
-
-        this.shieldImage = new ImageView("shield.png");
-        this.laserImage = new ImageView("laser.png");
 		
 		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
 		this.onStartingSingleplayerGame = new Event<>((l, s) -> l.onSingleplayerGameStarting(s));
@@ -134,7 +131,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
     /**
 	 * Redraw the map
 	 */
-    void redrawWorld() {
+    public void redrawWorld() {
 		PositionVisualisation.initScreenDimensions();
 
     	redrawCells();
@@ -493,6 +490,9 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
     }
 
     private void setupInventory() {
+        this.shieldImage = new ImageView("shield.png");
+        this.laserImage = new ImageView("laser.png");
+
         inventory = new StackPane();
         inventory.setBackground(new Background(new BackgroundImage(
                 new Image("inventory.jpg",ScreenSize.Width,30,false,true),
