@@ -69,6 +69,10 @@ public class PlayersList {
 			removePlayer(i);
 		}
 	}
+	
+	public boolean contains(final int playerID){
+		return playerLabels.containsKey(playerID);
+	}
 
 	public Pane getPane() {
 		return pane;
