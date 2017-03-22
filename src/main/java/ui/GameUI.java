@@ -278,7 +278,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerLobbyScreen.addNames();
 
 		lobby = new Lobby();
-		final ServerInstance server = new ServerInstance(this, lobby);
+		final ServerInstance server = new ServerInstance(lobby);
 		final ClientInstance client = new ClientInstance(this, name, "localhost");
 
 		onGameClosing.addOneTimeListener(() -> {

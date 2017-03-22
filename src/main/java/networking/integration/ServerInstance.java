@@ -55,7 +55,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	private Server server;
 	private ServerManager manager;
 	private Game game;
-	private GameUI gameUI;
 	private ServerEntityTracker tracker;
 	private Lobby lobby;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
@@ -74,14 +73,17 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	 * instance object as a listener to any local events (eg. player moved)
 	 * which must be transmitted over the network.
 	 */
-	public ServerInstance(final GameUI gameUI, final Lobby lobby) {
+	public ServerInstance(final Lobby lobby) {
 		this.lobby = lobby;
 		game = null;
 		gameLogic = null;
 		gameLogicTimer = null;
-		this.gameUI = gameUI;
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 
+	}
+	
+	public void setManager(ServerManager manager) {
+		this.manager = manager;
 	}
 
 	@Override
@@ -90,8 +92,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		server = createServer();
 
 		// Create
-		manager = new StandardServerManager(server);
+		ServerManager manager = new StandardServerManager(server);
 		manager.setTrigger(this);
+		setManager(manager);
 
 		addGameHooks();
 
@@ -229,7 +232,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	 * @param clientID The player to send the initial lobby state to.
 	 * 
 	 */
-	private void sendInitialLobbyState(final int clientID) {
+	public void sendInitialLobbyState(final int clientID) {
 		for (final int i : lobby.getPlayerIDs()) {
 			manager.dispatch(clientID, createPlayerJoinedLobbyPacket(lobby.getPlayer(i)));
 		}
@@ -473,6 +476,16 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 	
+	/**
+	 * Creates a packet indicating that a spawner countdown has been added to
+	 * the world at a given position with a specified starting number.
+	 * 
+	 * @param position The position that the new countdown will appear at.
+	 * @param time The starting time number of the countdown.
+	 * @param type The entity type which the countdown is going to spawn.
+	 * @return A packet representing the appearance of a countdown number in
+	 * the world.
+	 */
 	private Packet createSpawnCountdownPacket(Position position, int time, String type) {
 		final Packet p = new Packet("spawner-added");
 		p.setInteger("row", position.getRow());
@@ -503,7 +516,15 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 	
-	public void addHumanPlayerToWorld(int playerID, int row, int col) {
+	/**
+	 * Handles adding a (human) player to the world, including adding the appropriate
+	 * skill set info and updating the lobby.
+	 * 
+	 * @param playerID The player ID to add to the world.
+	 * @param row The row of the position at which to add the player.
+	 * @param col the column of the position at which to add the player.
+	 */
+	public Player addHumanPlayerToWorld(int playerID, int row, int col) {
 		if(lobby.containsPlayer(playerID)) {
 			LobbyPlayerInfo info = lobby.getPlayer(playerID);
 			
@@ -517,10 +538,22 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 				spawner.setPosition(player.getPosition());
 				game.getWorld().addEntity(spawner);
 				info.setInGame(true);
+				
+				return player;
 			}
+		} else {
+			throw new IllegalStateException("Human player with ID " + playerID + " does not exist.");
 		}
 	}
 	
+	/**
+	 * Handles removing a human player from the world, including setting the player's
+	 * death reason to an appropriate value.
+	 * 
+	 * @param playerID The ID of the human player to remove.
+	 * @param reason The reason for why the player is being removed (this will be
+	 * displayed on the client's screen).
+	 */
 	public void handleRemovingHumanPlayerFromWorld(int playerID, String reason) {
 		LobbyPlayerInfo playerInfo = lobby.getPlayer(playerID);
 		playerInfo.setInGame(false);
@@ -532,6 +565,15 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		manager.dispatch(playerID, createLocalPlayerDiedPacket(reason, playerInfo.getRemainingLives() > 0));
 	}
 	
+	/**
+	 * Create a packet indicating that a local client's player has
+	 * appeared at a given position in the world.
+	 * 
+	 * @param row The row of the position which the player appears at.
+	 * @param col The column of the position which the player appears at.
+	 * @param angle The angle which the player start off pointing to.
+	 * @return
+	 */
 	public Packet createLocalPlayerJoinPacket(int row, int col, double angle) {
 		Packet packet = new Packet("local-player-joined");
 		packet.setInteger("row", row);
@@ -540,6 +582,15 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		return packet;
 	}
 	
+	/**
+	 * Create a packet indicating that a local client's player is being
+	 * removed from the world, with a given reason.
+	 * 
+	 * @param message The message sent to the client describing why they died
+	 * @param rejoinable Whether the player who died is given the chance to 
+	 * respawn or not.
+	 * @return
+	 */
 	public Packet createLocalPlayerDiedPacket(String message, boolean rejoinable) {
 		Packet packet = new Packet("local-player-died");
 		packet.setString("message", message);
@@ -553,8 +604,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		if (game != null && game.getWorld().getEntity(clientID) != null) {
 			game.getWorld().removeEntity(clientID);
 		}
-		
-		gameUI.multiPlayerLobbyScreen.list.removePlayer(clientID);
 		
 		if(lobby.getPlayerCount() == 0 || clientID == 0) {
 			server.die();
@@ -608,7 +657,11 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 
-
+	/**
+	 * Start the game, adding all of the player in the lobby to the world in the process.
+	 * This also starts a timer to tick the game logic. The server has no render loop, so
+	 * a timer must be used manually to tick the game logic along.
+	 */
 	private void startGame() {
 		game.setStarted();
 		lobby.resetReady();
@@ -638,10 +691,17 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 
 	@Override
 	public void onGameEnded(final GameEndedEventArgs args) {
-		triggerGameEnded(args.getOutcome());
+		sendGameEndedPacket(args.getOutcome());
 	}
 
-	private void triggerGameEnded(final GameOutcome outcome) {
+	/**
+	 * Creates and sends a packet to all connected players indicating that
+	 * the game has ended, along with information on the outcome of the
+	 * game.
+	 * 
+	 * @param outcome The outcome of the game.
+	 */
+	private void sendGameEndedPacket(final GameOutcome outcome) {
 		final Packet p = new Packet("game-ended");
 		final GameOutcomeType o = outcome.getOutcomeType();
 
