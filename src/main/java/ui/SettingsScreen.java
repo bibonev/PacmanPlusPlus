@@ -12,9 +12,9 @@ import javafx.scene.control.Separator;
  * @author Rose Kirtley
  *
  */
-public class SettingsScreen extends Screen {
+public abstract class SettingsScreen extends Screen {
 
-	private Button returnButton;
+	public Button returnButton;
 	private Label label;
 	private CheckBox music;
 	private CheckBox sounds;
@@ -24,7 +24,6 @@ public class SettingsScreen extends Screen {
 
 		returnButton = new Button("Return");
 		returnButton.getStyleClass().add("backButtonStyle");
-		returnButton.setOnAction(e -> game.returnBack());
 
 		music = new CheckBox("Music");
 		music.getStyleClass().add("check-box");
@@ -44,16 +43,18 @@ public class SettingsScreen extends Screen {
 
 		pane.getChildren().addAll(label, separator, music, sounds, returnButton);
 	}
+	
+	public void selectMusic(boolean b){
+		music.setSelected(b);
+	}
+	
+	public void selectSounds(boolean b){
+		sounds.setSelected(b);
+	}
 
 	@Override
 	public void changeSelection(final boolean up) {
 		// Only one button
-	}
-
-	@Override
-	public void makeSelection() {
-		game.returnBack();
-
 	}
 
 	@Override
