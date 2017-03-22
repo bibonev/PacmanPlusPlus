@@ -26,8 +26,8 @@ public class GhostBehaviour extends Behaviour {
 	 * @param stash
 	 *            the inventory
 	 */
-	public GhostBehaviour(final World world, final Entity entity, final int speed, final Type type) {
-		super(world, entity, speed, new LocalSkillSet(), type);
+	public GhostBehaviour(final World world, final Entity entity, final Type type) {
+		super(world, entity, new LocalSkillSet(), type);
 	}
 
 	/**
