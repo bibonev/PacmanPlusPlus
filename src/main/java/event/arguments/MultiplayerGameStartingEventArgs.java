@@ -58,8 +58,7 @@ public class MultiplayerGameStartingEventArgs {
 		if (!serverMode) {
 			return localPlayerID;
 		} else {
-			throw new IllegalStateException(
-					"Can't get local player ID when generating multiplayer " + "game for server.");
+			throw new IllegalStateException("Can't get local player ID when generating multiplayer game for server.");
 		}
 	}
 
@@ -68,7 +67,7 @@ public class MultiplayerGameStartingEventArgs {
 			return localUsername;
 		} else {
 			throw new IllegalStateException(
-					"Can't get local player ID when generating multiplayer " + "game for server.");
+					"Can't get local player username when generating multiplayer game for server.");
 		}
 	}
 }
