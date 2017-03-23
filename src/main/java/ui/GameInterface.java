@@ -14,6 +14,11 @@ import main.java.gamelogic.core.Lobby;
  *
  */
 public interface GameInterface {
+	
+	void setAIPlayer(boolean ai);
+	
+	void setLives(int lives);
+	
 	/**
 	 * Set the currently active multiplayer game lobby.
 	 * @param lobby The {@link Lobby} object representing the lobby to use.

@@ -291,8 +291,8 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		System.out.println("CHANGING");
 		boolean ai = p.getBoolean("playAgainstAI");
 		int lives = p.getInteger("lives");
-		gameUI.multiPlayerLobbyScreen.getMultiplayerSettings().setAIPlayer(ai);
-		gameUI.multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives);
+		gameUI.setAIPlayer(ai);
+		gameUI.setLives(lives);
 	}
 
 	/**
