@@ -68,4 +68,9 @@ public class PacBomb extends Ability {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public void reduceShieldValue() {
+		// no
+	}
 }

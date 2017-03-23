@@ -13,7 +13,11 @@ import main.java.event.arguments.GameSettingsChangedEventArgs;
 import main.java.event.arguments.HostStartingMultiplayerGameEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
+import main.java.event.arguments.PlayerCooldownChangedEventArgs;
+import main.java.event.arguments.PlayerLaserActivatedEventArgs;
 import main.java.event.arguments.PlayerMovedEventArgs;
+import main.java.event.arguments.PlayerShieldActivatedEventArgs;
+import main.java.event.arguments.PlayerShieldRemovedEventArgs;
 import main.java.event.listener.CellStateChangedEventListener;
 import main.java.event.listener.CountDownStartingListener;
 import main.java.event.listener.EntityAddedListener;
@@ -24,6 +28,10 @@ import main.java.event.listener.GameSettingsChangedEventListener;
 import main.java.event.listener.HostStartingMultiplayerGameListener;
 import main.java.event.listener.LobbyStateChangedListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
+import main.java.event.listener.PlayerCooldownChangedListener;
+import main.java.event.listener.PlayerLaserActivatedListener;
+import main.java.event.listener.PlayerShieldActivatedListener;
+import main.java.event.listener.PlayerShieldRemovedListener;
 import main.java.event.listener.ServerEntityUpdatedListener;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.core.GameLogicTimer;
@@ -52,8 +60,7 @@ import main.java.networking.socket.Server;
 
 public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,
-		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener,
-		CountDownStartingListener, GameSettingsChangedEventListener {
+		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameSettingsChangedEventListener, GameEndedListener, CountDownStartingListener, PlayerCooldownChangedListener, PlayerLaserActivatedListener, PlayerShieldActivatedListener, PlayerShieldRemovedListener {
 	private Server server;
 	protected ServerManager manager;
 	private Game game;
@@ -454,6 +461,10 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			manager.dispatchAllExcept(p, e.getID());
 
 			if (lobby.containsPlayer(e.getID())) {
+				((Player)e).getSkillSet().getOnPlayerCooldownChanged().addListener(this);
+	            ((Player)e).getSkillSet().getOnPlayerLaserActivated().addListener(this);
+	            ((Player)e).getSkillSet().getOnPlayerShieldActivated().addListener(this);
+	            ((Player)e).getSkillSet().getOnPlayerShieldRemoved().addListener(this);
 				manager.dispatch(e.getID(), createLocalPlayerJoinPacket(e.getPosition().getRow(),
 						e.getPosition().getColumn(), ((Player) e).getAngle()));
 			}
@@ -519,6 +530,11 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			if (e instanceof RemotePlayer && lobby.containsPlayer(e.getID())) {
 				handleRemovingHumanPlayerFromWorld(e.getID(), ((RemotePlayer) e).getDeathReason());
 			}
+
+			((Player)e).getSkillSet().getOnPlayerCooldownChanged().removeListener(this);
+            ((Player)e).getSkillSet().getOnPlayerLaserActivated().removeListener(this);
+            ((Player)e).getSkillSet().getOnPlayerShieldActivated().removeListener(this);
+            ((Player)e).getSkillSet().getOnPlayerShieldRemoved().removeListener(this);
 		}
 		if (e instanceof Ghost) {
 			final Packet p = new Packet("remote-ghost-died");
@@ -756,6 +772,51 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	public void onGameSettingsChanged(GameSettingsChangedEventArgs args) {
 		lobby.setSettingsString(args.getSettings().toDisplayString());	
 	}
+	
+	public void onPlayerCooldownChanged(PlayerCooldownChangedEventArgs args) {
+		if(lobby.containsPlayer(args.getPlayer().getID())) {
+			Packet p = new Packet("player-cooldown-changed");
+
+			p.setString("slot", String.valueOf(args.getSlot()));
+			p.setInteger("cooldown-level", args.getCooldownLevel());
+
+			manager.dispatch(args.getPlayer().getID(), p);
+		}
+	}
+    @Override
+    public void onPlayerLaserActivated(PlayerLaserActivatedEventArgs args) {
+        if(lobby.containsPlayer(args.getPlayer().getID())) {
+            Packet p = new Packet("player-laser-activated");
+
+            p.setDouble("direction", args.getDirection());
+            p.setInteger("cool-down", args.getCoolDown());
+
+            manager.dispatch(args.getPlayer().getID(), p);
+        }
+    }
+
+    @Override
+    public void onPlayerShieldActivated(PlayerShieldActivatedEventArgs args) {
+
+        if(lobby.containsPlayer(args.getPlayer().getID())) {
+            Packet p = new Packet("player-shield-activated");
+            p.setInteger("shield-value", args.getShieldValue());
+
+
+            manager.dispatch(args.getPlayer().getID(), p);
+        }
+    }
+
+
+    @Override
+    public void onPlayerShieldRemoved(PlayerShieldRemovedEventArgs args) {
+        if(lobby.containsPlayer(args.getPlayer().getID())) {
+            Packet p = new Packet("player-shield-removed");
+            p.setInteger("shield-value", args.getShieldValue());
+
+            manager.dispatch(args.getPlayer().getID(), p);
+        }
+    }
 
 	/*
 	 * For posterity: a corresponding removeTriggers method is not necessary.

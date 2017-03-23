@@ -24,19 +24,8 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import main.java.constants.*;
 import main.java.event.Event;
-import main.java.event.arguments.EntityChangedEventArgs;
-import main.java.event.arguments.GameDisplayInvalidatedEventArgs;
-import main.java.event.arguments.GameEndedEventArgs;
-import main.java.event.arguments.LocalPlayerDespawnEventArgs;
-import main.java.event.arguments.LocalPlayerSpawnEventArgs;
-import main.java.event.arguments.SingleplayerGameStartingEventArgs;
-import main.java.event.listener.EntityRemovingListener;
-import main.java.event.listener.GameDisplayInvalidatedListener;
-import main.java.event.listener.GameEndedListener;
-import main.java.event.listener.LocalPlayerDespawnListener;
-import main.java.event.listener.LocalPlayerSpawnListener;
-import main.java.event.listener.PlayerLeavingGameListener;
-import main.java.event.listener.SingleplayerGameStartingListener;
+import main.java.event.arguments.*;
+import main.java.event.listener.*;
 import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.domain.*;
 import main.java.gamelogic.domain.Cell;
@@ -48,7 +37,7 @@ import main.java.ui.Screen;
  * Created by Boyan Bonev on 09/02/2017.
  */
 public class Render implements GameDisplayInvalidatedListener, GameEndedListener,
-		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener {
+		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener, PlayerCooldownChangedListener, PlayerLaserActivatedListener, PlayerShieldActivatedListener, PlayerShieldRemovedListener {
 	private Pane root;
 	private StackPane inventory;
 	private BorderPane parentRoot;
@@ -138,7 +127,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		PositionVisualisation.initScreenDimensions();
 
     	redrawCells();
-    	redrawInventory();
     	
     	synchronized (removedEntityIDs) {
 			for(int id : removedEntityIDs) {
@@ -150,22 +138,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 		for (final Player player : game.getWorld().getPlayers()) {
     	    PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
-		    Node nextNode = pacmanVisualisation.getNode();
+    	    Node nextNode = pacmanVisualisation.getNode();
+
 		    
 		    if(!allEntities.containsKey(player.getID()))
 		    	setupPlayerAnimation(player);
-
-		    if(player.getShield() > 0  && !shieldsActivated.containsKey(player.getID())){
-		        shieldsActivated.put(player.getID(), nextNode);
-                shieldVisulisation(player, pacmanVisualisation, nextNode, allEntities.get(player.getID()).getNode(), player.getID());
-            } else if (player.getShield() <= 0 && shieldsActivated.containsKey(player.getID())){
-                shieldVisulisation(player, pacmanVisualisation, nextNode, shieldsActivated.get(player.getID()), player.getID());
-                shieldsActivated.remove(player.getID());
-            }
-
-            if(player.getLaserFired()){
-                laserVisualisation(player);
-            }
 
             transitions.get(player.getID()).setToY(nextNode.getTranslateY());
             transitions.get(player.getID()).setToX(nextNode.getTranslateX());
@@ -291,6 +268,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	@Override
 	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
 		this.controlledPlayer = args.getPlayer();
+		this.controlledPlayer.getSkillSet().getOnPlayerCooldownChanged().addListener(this);
+		this.controlledPlayer.getSkillSet().getOnPlayerLaserActivated().addListener(this);
+        this.controlledPlayer.getSkillSet().getOnPlayerShieldActivated().addListener(this);
+        this.controlledPlayer.getSkillSet().getOnPlayerShieldRemoved().addListener(this);
+
 		this.localPlayerID = this.controlledPlayer.getID();
 		Platform.runLater(this::playerRespawn);
 	}
@@ -348,7 +330,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             fadeTransition.play();
         }
 
-        if (allEntities.isEmpty())
+        if (playersEntities.isEmpty())
             displayGameEndedScreen(gameOutcome);
     }
     
@@ -471,51 +453,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
-    private void laserVisualisation(Player player) {
-        Node shout = new CellVisualisation(new Cell(CellState.LASER, player.getPosition())).getNode();
-        shout.toFront();
-
-        Node shoutStopNode;
-        Position shoutStopPosition;
-        switch ((int)player.getAngle()){
-            case 90:
-                shoutStopPosition = new Position(CellSize.Rows, player.getPosition().getColumn());
-                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
-                shout.setRotate(90);
-                break;
-            case 0:
-                shoutStopPosition = new Position(player.getPosition().getRow(), CellSize.Columns);
-                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
-                break;
-            case -90:
-                shoutStopPosition = new Position(0, player.getPosition().getColumn());
-                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
-                shout.setRotate(90);
-                break;
-            case 180:
-                shoutStopPosition = new Position(player.getPosition().getRow(), 0);
-                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
-                break;
-            default:
-                shoutStopPosition = new Position(0,0);
-                shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
-                break;
-
-        }
-        root.getChildren().add(shout);
-        TranslateTransition shoutTransition = new TranslateTransition(Duration.millis(1000), shout);
-
-        shoutTransition.setToX(shoutStopNode.getTranslateX());
-        shoutTransition.setToY(shoutStopNode.getTranslateY());
-
-        shoutTransition.setOnFinished(e -> {
-            root.getChildren().remove(shout);
-        });
-        shoutTransition.play();
-        gameUI.fireLaser();
-        player.setLaserFired(false);
-    }
-
     private void shieldVisulisation(Player player, PacmanVisualisation pacmanVisualisation, Node nextNode, Node node, int id) {
     	gameUI.playShield();
     	transitions.get(player.getID()).setNode(nextNode);
@@ -572,19 +509,110 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         inventory.getChildren().addAll(wLabel, shieldPane, qLabel, laserPane);
     }
 
-    private void redrawInventory() {
-	    if (controlledPlayer != null) {
-            if ( controlledPlayer.getSkillSet().getW() != null && controlledPlayer.getSkillSet().getW().getCD() < 40) {
-                shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
-            } else {
-                shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+    @Override
+    public void onPlayerCooldownChanged(PlayerCooldownChangedEventArgs args) {
+        Platform.runLater(() -> {
+            if(args.getSlot() == 'q') { //laser
+                if (args.getCooldownLevel() < 20) {
+                    laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
+                } else {
+                    laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+                }
+            } else if(args.getSlot() == 'w') { //shield
+                if (args.getCooldownLevel() < 40) {
+                    shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
+                } else {
+                    shieldImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onPlayerLaserActivated(PlayerLaserActivatedEventArgs args) {
+        Platform.runLater(() -> {
+            Player player = args.getPlayer();
+            double direction = args.getDirection();
+            int cooldown = args.getCoolDown();
+
+            if(cooldown == 20) {
+
+                Node shout = new CellVisualisation(new Cell(CellState.LASER, player.getPosition())).getNode();
+                shout.toFront();
+
+                Node shoutStopNode;
+                Position shoutStopPosition;
+                switch ((int) direction) {
+                    case 90:
+                        shoutStopPosition = new Position(CellSize.Rows, player.getPosition().getColumn());
+                        shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                        shout.setRotate(90);
+                        break;
+                    case 0:
+                        shoutStopPosition = new Position(player.getPosition().getRow(), CellSize.Columns);
+                        shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                        break;
+                    case -90:
+                        shoutStopPosition = new Position(0, player.getPosition().getColumn());
+                        shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                        shout.setRotate(90);
+                        break;
+                    case 180:
+                        shoutStopPosition = new Position(player.getPosition().getRow(), 0);
+                        shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                        break;
+                    default:
+                        shoutStopPosition = new Position(0, 0);
+                        shoutStopNode = new CellVisualisation(new Cell(CellState.LASER, shoutStopPosition)).getNode();
+                        break;
+
+                }
+                root.getChildren().add(shout);
+                TranslateTransition shoutTransition = new TranslateTransition(Duration.millis(1000), shout);
+
+                shoutTransition.setToX(shoutStopNode.getTranslateX());
+                shoutTransition.setToY(shoutStopNode.getTranslateY());
+
+                shoutTransition.setOnFinished(e -> {
+                    root.getChildren().remove(shout);
+                });
+                shoutTransition.play();
+                gameUI.fireLaser();
+                player.setLaserFired(false);
+            }
+        });
+    }
+
+    @Override
+    public void onPlayerShieldActivated(PlayerShieldActivatedEventArgs args) {
+        Platform.runLater(() -> {
+            Player player = args.getPlayer();
+            int shieldValue = args.getShieldValue();
+            PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
+            Node nextNode = pacmanVisualisation.getShieldNode();
+
+           if (shieldValue > 0 && !shieldsActivated.containsKey(player.getID())) {
+                shieldsActivated.put(player.getID(), nextNode);
+                shieldVisulisation(player, pacmanVisualisation, nextNode, allEntities.get(player.getID()).getNode(), player.getID());
+            }
+        });
+    }
+
+    @Override
+    public void onPlayerShieldRemoved(PlayerShieldRemovedEventArgs args) {
+	    Platform.runLater(() -> {
+            Player player = args.getPlayer();
+            int shieldValue = args.getShieldValue();
+
+            PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
+            Node nextNode = pacmanVisualisation.getNode();
+
+
+            if (shieldValue <= 0 && shieldsActivated.containsKey(player.getID())) {
+                shieldVisulisation(player, pacmanVisualisation, nextNode, shieldsActivated.get(player.getID()), player.getID());
+                shieldsActivated.remove(player.getID());
             }
 
-            if (controlledPlayer.getSkillSet().getQ() != null && controlledPlayer.getSkillSet().getQ().getCD() < 20) {
-                laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(1, 0, 0), 10, 0, 0, 0));
-            } else {
-                laserImage.setEffect(new DropShadow(BlurType.THREE_PASS_BOX, Color.color(0, 1, 0), 10, 0, 0, 0));
-            }
-        }
+        });
     }
 }

@@ -19,4 +19,9 @@ public class AbilityStub extends Ability {
 	public void incrementCooldown() {
 	}
 
+	@Override
+	public void reduceShieldValue() {
+
+	}
+
 }
