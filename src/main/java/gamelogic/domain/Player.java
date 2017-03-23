@@ -19,6 +19,7 @@ public abstract class Player extends Entity {
     private boolean laserFired;
 
 	public Player(final String name) {
+		super();
 		this.name = name;
 		dotsEaten = 0;
 		this.shield = 0;

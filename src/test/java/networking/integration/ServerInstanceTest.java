@@ -2,6 +2,7 @@ package test.java.networking.integration;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
 import java.util.Random;
 
 import org.junit.After;
@@ -9,26 +10,31 @@ import org.junit.Before;
 import org.junit.Test;
 
 import main.java.ai.AIGhost;
+import main.java.ai.DefaultBehaviour;
 import main.java.constants.GameType;
 import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.core.LocalGameLogic;
+import main.java.gamelogic.domain.Behaviour;
+import main.java.gamelogic.domain.Behaviour.Type;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.LocalGhost;
 import main.java.gamelogic.domain.Map;
-import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemotePlayer;
+import main.java.gamelogic.domain.RemoteSkillSet;
 import main.java.gamelogic.domain.RuleChecker;
+import main.java.gamelogic.domain.Spawner;
+import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.gamelogic.domain.World;
 import main.java.networking.ServerManager;
 import main.java.networking.data.Packet;
 import main.java.networking.event.ServerTrigger;
 import main.java.networking.integration.ServerInstance;
 
-public class TestServerInstance {
+public class ServerInstanceTest {
 	private TestableServerInstance server;
 	private Game game;
 	private LocalGameLogic logic;
@@ -108,75 +114,156 @@ public class TestServerInstance {
 	public void testPlayerPacketsTransmitted() {
 		lobby.addPlayer(0, new LobbyPlayerInfo(0, "alice"));
 		lobby.addPlayer(1, new LobbyPlayerInfo(1, "bob"));
+		lobby.addPlayer(2, new LobbyPlayerInfo(2, "charles"));
 		
-		int[] remotePackets = {0, 0, 0};
-		int[] localPackets = {0, 0};
-		
-		server.setManager(new MockServerManager(server, lobby) {
-			@Override
-			public void dispatch(int clientID, Packet packet) {
-				if(clientID == 1) {
-					switch(packet.getPacketName()) {
-					case "remote-player-joined": remotePackets[0]++; break;
-					case "remote-player-moved": remotePackets[1]++; break;
-					case "remote-player-died": remotePackets[2]++; break;
-					}
-				} else {
-					switch(packet.getPacketName()) {
-					case "local-player-joined": localPackets[0]++; break;
-					case "local-player-died": localPackets[1]++; break;
-					}
-				}
-			}
-		});
+		PacketCounterServerManager manager = new PacketCounterServerManager(server, lobby);
+		server.setManager(manager);
 		RemotePlayer alice = new RemotePlayer(0, lobby.getPlayer(0).getName());
 		alice.setPosition(new Position(0, 0));
 		game.getWorld().addEntity(alice);
 		
-		assertEquals(1, remotePackets[0]);
-		assertEquals(1, localPackets[0]);
+		assertEquals(2, manager.getCount("remote-player-joined"));
+		assertEquals(1, manager.getCount("local-player-joined"));
 		
 		for(int i = 0; i < 10; i++) {
-			assertEquals(i, remotePackets[1]);
+			assertEquals(2 * i, manager.getCount("remote-player-moved"));
 			alice.setPosition(new Position(0, i));
 		}
-		assertEquals(10, remotePackets[1]);
+		assertEquals(20, manager.getCount("remote-player-moved"));
 		
 		alice.setDeathReason("bad");
 		game.getWorld().removeEntity(alice.getID());
 
-		assertEquals(1, remotePackets[2]);
-		assertEquals(1, localPackets[1]);
+		assertEquals(2, manager.getCount("remote-player-died"));
+		assertEquals(1, manager.getCount("local-player-died"));
 	}
 	
 	@Test
 	public void testLobbyStateChangesSent() {
-		int[] lobbyChangePackets = {0, 0};
 		Random r = new Random();
-		
-		server.setManager(new MockServerManager(server, lobby) {
-			@Override
-			public void dispatch(int clientID, Packet packet) {
-				switch(packet.getPacketName()) {
-				case "lobby-player-enter": lobbyChangePackets[0]++; break;
-				case "lobby-player-left": lobbyChangePackets[1]++; break;
-				}
-			}
-		});
+
+		PacketCounterServerManager manager = new PacketCounterServerManager(server, lobby);
+		server.setManager(manager);
 		
 		for(int i = 0; i < 200; i++) {
 			if(lobby.getPlayerCount() == 0 || r.nextFloat() > 0.333f) {//add
 				int idtoAdd = lobby.getPlayerIDs().stream().max(Integer::compare).orElse(0);
 				lobby.addPlayer(idtoAdd, new LobbyPlayerInfo(idtoAdd, "player" + i));
-				assertEquals(lobby.getPlayerCount() - 1, lobbyChangePackets[0]);
-				lobbyChangePackets[0] = 0;
+				assertEquals(lobby.getPlayerCount() - 1, manager.getCount("lobby-player-enter"));
+				manager.reset();
 			} else { //remove
 				int idToRemove = r.nextInt(lobby.getPlayerCount());
 				lobby.removePlayer(idToRemove);
-				assertEquals(lobby.getPlayerCount(), lobbyChangePackets[1]);
-				lobbyChangePackets[1] = 0;
+				assertEquals(lobby.getPlayerCount(), manager.getCount("lobby-player-leave"));
+				manager.reset();
 			}
 		}
+	}
+	
+	@Test
+	public void testSpawnersWork() {
+		PacketCounterServerManager manager = new PacketCounterServerManager(server, lobby);
+		server.setManager(manager);
+		String[] players = {"alice", "bob", "charles"};
+		
+		for(int i = 0; i < players.length; i++) {
+			lobby.addPlayer(i, new LobbyPlayerInfo(i, players[i]));
+			RemotePlayer p = new RemotePlayer(i, players[i]);
+			p.setSkillSet(new RemoteSkillSet(p));
+			p.setPosition(new Position(0, i));
+			game.getWorld().addEntity(p);
+		}
+		game.setStarted();
+		final int spawnDuration = 5;
+		AIGhost ghost = new AIGhost();
+		ghost.setPosition(new Position(0, 0));
+		Behaviour behaviour = new DefaultBehaviour(game.getWorld(), ghost, Type.DEFAULT);
+		ghost.setBehaviour(behaviour);
+		
+		Spawner spawner = new Spawner(spawnDuration, ghost, SpawnerColor.RED);
+		spawner.setPosition(ghost.getPosition());
+		
+		game.getWorld().addEntity(spawner);
+		assertEquals(3, manager.getCount("spawner-added"));
+		
+		for(int i = 0; i < 10; i++) {
+			assertEquals(0, manager.getCount("remote-ghost-joined"));
+			logic.gameStep(250);
+		}
+
+		assertEquals(3, manager.getCount("remote-ghost-joined"));
+	}
+	
+	@Test
+	public void testPlayerJoinAndDeathPacketsFired() {
+		lobby.addPlayer(0, new LobbyPlayerInfo(0, "alice"));
+		lobby.addPlayer(1, new LobbyPlayerInfo(1, "bob"));
+		lobby.addPlayer(2, new LobbyPlayerInfo(2, "charles"));
+		
+		game.setStarted();
+		
+		PacketCounterServerManager manager = new PacketCounterServerManager(server, lobby);
+		server.setManager(manager);
+		
+		RemotePlayer player = new RemotePlayer(0, "alice");
+		player.setPosition(new Position(0, 0));
+		player.setSkillSet(new RemoteSkillSet(player));
+		
+		game.getWorld().addEntity(player);
+
+		assertEquals(2, manager.getCount("remote-player-joined"));
+		assertEquals(1, manager.getCount("local-player-joined"));
+		
+		AIGhost ghost = new AIGhost();
+		ghost.setPosition(new Position(0, 0));
+		ghost.setBehaviour(new DefaultBehaviour(game.getWorld(), ghost, Type.DEFAULT));
+		
+		game.getWorld().addEntity(ghost);
+
+		assertEquals(3, manager.getCount("remote-ghost-joined"));
+
+		logic.gameStep(250);
+		
+		assertNull(game.getWorld().getEntity(player.getID()));
+		assertEquals(1, manager.getCount("local-player-died"));
+		assertEquals(2, manager.getCount("remote-player-died"));
+	}
+	
+	@Test
+	public void testGameEndPacketsFired() {
+		lobby.addPlayer(0, new LobbyPlayerInfo(0, "alice"));
+		lobby.addPlayer(1, new LobbyPlayerInfo(1, "bob"));
+		lobby.addPlayer(2, new LobbyPlayerInfo(2, "charles"));
+		
+		game.setStarted();
+		
+		Packet[] packetArr = {null};
+
+		server.setManager(new MockServerManager(server, lobby) {
+			@Override
+			public void dispatch(int clientID, Packet p) {
+				if(p.getPacketName().equals("game-ended"))
+					packetArr[0] = p;
+			}
+		});
+	
+		RemotePlayer player = new RemotePlayer(0, "alice");
+		player.setPosition(new Position(0, 0));
+		player.setSkillSet(new RemoteSkillSet(player));
+		
+		game.getWorld().addEntity(player);
+		
+		AIGhost ghost = new AIGhost();
+		ghost.setPosition(new Position(0, 0));
+		ghost.setBehaviour(new DefaultBehaviour(game.getWorld(), ghost, Type.DEFAULT));
+		
+		game.getWorld().addEntity(ghost);
+
+		logic.gameStep(250);
+		
+		Packet packet = packetArr[0];
+		assertNotNull(packet);
+		assertEquals("ghosts-won", packet.getString("outcome"));
 	}
 	
 	public static class TestableServerInstance extends ServerInstance {
@@ -201,6 +288,28 @@ public class TestServerInstance {
 		@Override
 		public void stop() {
 			this.removeGameHooks();
+		}
+	}
+	
+	public static class PacketCounterServerManager extends MockServerManager {
+		private HashMap<String, Integer> packets;
+		public PacketCounterServerManager(ServerTrigger trigger, Lobby lobby) {
+			super(trigger, lobby);
+			packets = new HashMap<>();
+		}
+		
+		@Override
+		public void dispatch(int clientID, Packet packet) {
+			String packetName = packet.getPacketName();
+			packets.put(packetName, 1 + packets.getOrDefault(packetName, 0));
+		}
+		
+		public int getCount(String packetName) {
+			return packets.getOrDefault(packetName, 0);
+		}
+		
+		public void reset() {
+			packets.clear();
 		}
 	}
 

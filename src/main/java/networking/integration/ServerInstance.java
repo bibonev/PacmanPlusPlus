@@ -49,7 +49,6 @@ import main.java.networking.event.ClientConnectedListener;
 import main.java.networking.event.ClientDisconnectedListener;
 import main.java.networking.event.ServerTrigger;
 import main.java.networking.socket.Server;
-import main.java.ui.GameUI;
 
 public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,

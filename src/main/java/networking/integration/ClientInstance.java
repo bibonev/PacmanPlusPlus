@@ -47,11 +47,10 @@ import main.java.networking.event.ClientDisconnectedListener;
 import main.java.networking.event.ClientTrigger;
 import main.java.networking.socket.Client;
 import main.java.ui.GameInterface;
-import main.java.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnectedListener, ServerEntityUpdatedListener,
 		GameCreatedListener, LocalPlayerSpawnListener, LocalPlayerDespawnListener, ReadyToStartListener, PlayerLeavingGameListener, PlayerAbilityUsedListener {
-	private Client client;
+	protected Client client;
 	private String serverAddress;
 	protected ClientManager manager;
 	private Game game;
@@ -588,7 +587,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	private void triggerHandshake(final Packet p) {
 		if (!alreadyDoneHandshake) {
 			final int clientID = p.getInteger("client-id");
-			client.setClientID(clientID);
+			
+			if(client != null)
+				client.setClientID(clientID);
+			
 			alreadyDoneHandshake = true;
 
 			final Packet p2 = new Packet("client-handshake");
