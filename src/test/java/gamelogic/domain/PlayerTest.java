@@ -23,11 +23,11 @@ public class PlayerTest {
 
 		// When
 		final LocalPlayer player = new LocalPlayer(name);
+		((Player)player).setID(-1);
+		((Player)player).setPosition(pos);
 		((Player)player).setAngle(angle);
 		((Player)player).setDeathReason("Killed by laser");
-		((Player)player).setID(-1);
 		((Player)player).setLaserFired(true);
-		((Player)player).setPosition(pos);
 		((Player)player).setShield(10);
 		((Player)player).setWorld(world);
 
