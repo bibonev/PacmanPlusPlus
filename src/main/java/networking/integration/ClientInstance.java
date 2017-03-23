@@ -257,6 +257,49 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerSpawnerAdded(p);
 		} else if(p.getPacketName().equals("player-cooldown-changed")) {
 			triggerPlayerCooldownChanged(p);
+		} else if(p.getPacketName().equals("player-laser-activated")) {
+			triggerPlayerLaserActivated(p);
+		} else if(p.getPacketName().equals("player-shield-activated")) {
+            triggerPlayerShieldActivated(p);
+        } else if(p.getPacketName().equals("player-shield-removed")) {
+            triggerPlayerShieldRemoved(p);
+        }
+	}
+
+    private void triggerPlayerShieldRemoved(Packet p) {
+        Entity player = game.getWorld().getEntity(client.getClientID());
+
+        if(player != null) {
+
+            int shieldValue = p.getInteger("shield-value");
+            ((Player)player).getSkillSet().getOnPlayerShieldRemoved().fire(
+                    new PlayerShieldRemovedEventArgs((Player)player, shieldValue)
+            );
+        }
+    }
+
+    private void triggerPlayerShieldActivated(Packet p) {
+        Entity player = game.getWorld().getEntity(client.getClientID());
+
+        if(player != null) {
+
+            int shieldValue = p.getInteger("shield-value");
+            ((Player)player).getSkillSet().getOnPlayerShieldActivated().fire(
+                    new PlayerShieldActivatedEventArgs((Player)player, shieldValue)
+            );
+        }
+    }
+
+	private void triggerPlayerLaserActivated(Packet p) {
+		Entity player = game.getWorld().getEntity(client.getClientID());
+
+		if(player != null) {
+			double direction = p.getDouble("direction");
+			int coolDown = p.getInteger("cool-down");
+
+			((Player)player).getSkillSet().getOnPlayerLaserActivated().fire(
+					new PlayerLaserActivatedEventArgs((Player)player, direction, coolDown)
+			);
 		}
 	}
 

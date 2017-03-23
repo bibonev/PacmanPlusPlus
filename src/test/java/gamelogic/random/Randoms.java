@@ -6,7 +6,13 @@ import main.java.constants.CellState;
 import main.java.constants.GameType;
 import main.java.event.Event;
 import main.java.event.arguments.PlayerCooldownChangedEventArgs;
+import main.java.event.arguments.PlayerLaserActivatedEventArgs;
+import main.java.event.arguments.PlayerShieldActivatedEventArgs;
+import main.java.event.arguments.PlayerShieldRemovedEventArgs;
 import main.java.event.listener.PlayerCooldownChangedListener;
+import main.java.event.listener.PlayerLaserActivatedListener;
+import main.java.event.listener.PlayerShieldActivatedListener;
+import main.java.event.listener.PlayerShieldRemovedListener;
 import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.domain.Ability;
 import main.java.gamelogic.domain.Cell;
@@ -108,6 +114,21 @@ public class Randoms {
 			}
 
 			@Override
+			public Event<PlayerLaserActivatedListener, PlayerLaserActivatedEventArgs> getOnPlayerLaserActivated() {
+				return null;
+			}
+
+			@Override
+			public Event<PlayerShieldActivatedListener, PlayerShieldActivatedEventArgs> getOnPlayerShieldActivated() {
+				return null;
+			}
+
+			@Override
+			public Event<PlayerShieldRemovedListener, PlayerShieldRemovedEventArgs> getOnPlayerShieldRemoved() {
+				return null;
+			}
+
+			@Override
 			public void activateQ() {
 
 			}
@@ -119,6 +140,11 @@ public class Randoms {
 
 			@Override
 			public void incrementCooldown() {
+
+			}
+
+			@Override
+			public void removeShield() {
 
 			}
 

@@ -96,4 +96,9 @@ public class PacLaser extends Ability {
 			setCD(cooldown + 1);
 		}
 	}
+
+    @Override
+    public void reduceShieldValue() {
+        // no
+    }
 }

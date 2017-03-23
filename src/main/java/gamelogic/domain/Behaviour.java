@@ -297,10 +297,6 @@ public abstract class Behaviour {
 	 * Run the behavior.
 	 */
 	public void run() {
-
-		if(entity instanceof Player){
-			((Player) entity).getSkillSet().activateW();
-		}
 		
 		lockedTarget = pickTarget();
 

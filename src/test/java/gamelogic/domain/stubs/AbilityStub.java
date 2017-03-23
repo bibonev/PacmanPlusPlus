@@ -20,4 +20,9 @@ public class AbilityStub extends Ability {
 
 	}
 
+	@Override
+	public void reduceShieldValue() {
+
+	}
+
 }

@@ -34,7 +34,7 @@ import main.java.ui.GameUI;
 
 public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,
-		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener, CountDownStartingListener, PlayerCooldownChangedListener {
+		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener, CountDownStartingListener, PlayerCooldownChangedListener, PlayerLaserActivatedListener, PlayerShieldActivatedListener, PlayerShieldRemovedListener {
 	private Server server;
 	private ServerManager manager;
 	private Game game;
@@ -345,6 +345,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			manager.dispatchAllExcept(p, e.getID());
 
 			((Player)e).getSkillSet().getOnPlayerCooldownChanged().addListener(this);
+            ((Player)e).getSkillSet().getOnPlayerLaserActivated().addListener(this);
+            ((Player)e).getSkillSet().getOnPlayerShieldActivated().addListener(this);
+            ((Player)e).getSkillSet().getOnPlayerShieldRemoved().addListener(this);
 			
 			if(lobby.containsPlayer(e.getID())) {
 				manager.dispatch(e.getID(), createLocalPlayerJoinPacket(e.getPosition().getRow(),
@@ -402,6 +405,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			}
 
 			((Player)e).getSkillSet().getOnPlayerCooldownChanged().removeListener(this);
+            ((Player)e).getSkillSet().getOnPlayerLaserActivated().removeListener(this);
+            ((Player)e).getSkillSet().getOnPlayerShieldActivated().removeListener(this);
+            ((Player)e).getSkillSet().getOnPlayerShieldRemoved().removeListener(this);
 		}
 		if (e instanceof Ghost) {
 			final Packet p = new Packet("remote-ghost-died");
@@ -590,6 +596,40 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			manager.dispatch(args.getPlayer().getID(), p);
 		}
 	}
+    @Override
+    public void onPlayerLaserActivated(PlayerLaserActivatedEventArgs args) {
+        if(lobby.containsPlayer(args.getPlayer().getID())) {
+            Packet p = new Packet("player-laser-activated");
+
+            p.setDouble("direction", args.getDirection());
+            p.setInteger("cool-down", args.getCoolDown());
+
+            manager.dispatch(args.getPlayer().getID(), p);
+        }
+    }
+
+    @Override
+    public void onPlayerShieldActivated(PlayerShieldActivatedEventArgs args) {
+
+        if(lobby.containsPlayer(args.getPlayer().getID())) {
+            Packet p = new Packet("player-shield-activated");
+            p.setInteger("shield-value", args.getShieldValue());
+
+
+            manager.dispatch(args.getPlayer().getID(), p);
+        }
+    }
+
+
+    @Override
+    public void onPlayerShieldRemoved(PlayerShieldRemovedEventArgs args) {
+        if(lobby.containsPlayer(args.getPlayer().getID())) {
+            Packet p = new Packet("player-shield-removed");
+            p.setInteger("shield-value", args.getShieldValue());
+
+            manager.dispatch(args.getPlayer().getID(), p);
+        }
+    }
 
 	/*
 	 * For posterity: a corresponding removeTriggers method is not necessary.

@@ -14,6 +14,7 @@ public class PacmanVisualisation implements Visualisation {
 
 	private ImageView pacMan;
 	private Player player;
+	private PositionVisualisation pv;
 
 	/**
 	 * Initialize new visualisation for the PacMan player
@@ -22,7 +23,8 @@ public class PacmanVisualisation implements Visualisation {
 	 */
 	public PacmanVisualisation(final Player player) {
 		this.player = player;
-		pacMan = new ImageView("pacman-animated.gif");
+		this.pacMan = new ImageView("pacman-animated.gif");
+		this.pv = new PositionVisualisation(player.getPosition().getRow(), player.getPosition().getColumn());
 	}
 
 	/**
@@ -32,36 +34,38 @@ public class PacmanVisualisation implements Visualisation {
 	 */
 	@Override
 	public Node getNode() {
-		final PositionVisualisation pv = new PositionVisualisation(player.getPosition().getRow(),
-				player.getPosition().getColumn());
+		pacMan.setFitWidth(getMin());
+		pacMan.setFitHeight(getMin());
+		pacMan.toFront();
 
+		pacMan.setTranslateX(pv.getPixelX() + pv.getWidth() / 2 - getMin() / 2);
+		pacMan.setTranslateY(pv.getPixelY() + pv.getHeight() / 2 - getMin() / 2);
+		pacMan.setRotate(player.getAngle());
+		return pacMan;
+	}
+
+	public Node getShieldNode(){
+		pacMan.setFitWidth(getMin());
+		pacMan.setFitHeight(getMin());
+
+		Circle shield = new Circle(pv.getPixelX() + pv.getWidth() / 2,
+				pv.getPixelY() + pv.getHeight() / 2,
+				pv.getWidth() / 4);
+		shield.setFill(Colors.ShieldColor);
+
+		StackPane pacManWithShield = new StackPane();
+		pacManWithShield.setTranslateX(pv.getPixelX() + pv.getWidth() / 2 - getMin() / 2);
+		pacManWithShield.setTranslateY(pv.getPixelY() + pv.getHeight() / 2 - getMin() / 2);
+		pacManWithShield.setRotate(player.getAngle());
+		pacManWithShield.getChildren().addAll(pacMan, shield);
+		return pacManWithShield;
+	}
+
+	private double getMin(){
 		double min = pv.getHeight();
 		if (pv.getWidth() < pv.getHeight()) {
 			min = pv.getWidth();
 		}
-
-		pacMan.setFitWidth(min);
-		pacMan.setFitHeight(min);
-		pacMan.toFront();
-
-
-		if(player.getShield() > 0){
-			Circle shield = new Circle(pv.getPixelX() + pv.getWidth() / 2,
-					pv.getPixelY() + pv.getHeight() / 2,
-					pv.getWidth() / 4);
-			shield.setFill(Colors.ShieldColor);
-
-			StackPane pacManWithShield = new StackPane();
-			pacManWithShield.setTranslateX(pv.getPixelX() + pv.getWidth() / 2 - min / 2);
-			pacManWithShield.setTranslateY(pv.getPixelY() + pv.getHeight() / 2 - min / 2);
-			pacManWithShield.setRotate(player.getAngle());
-			pacManWithShield.getChildren().addAll(pacMan, shield);
-			return pacManWithShield;
-		} else {
-			pacMan.setTranslateX(pv.getPixelX() + pv.getWidth() / 2 - min / 2);
-			pacMan.setTranslateY(pv.getPixelY() + pv.getHeight() / 2 - min / 2);
-			pacMan.setRotate(player.getAngle());
-			return pacMan;
-		}
+		return min;
 	}
 }
