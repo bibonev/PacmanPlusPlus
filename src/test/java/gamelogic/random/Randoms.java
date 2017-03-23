@@ -153,6 +153,7 @@ public class Randoms {
 	}
 
 	public static ControlledPlayer randomControlledPlayer() {
+		
 		return new ControlledPlayer(Randoms.randomInteger(), Randoms.randomString());
 	}
 
