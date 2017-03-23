@@ -7,6 +7,7 @@ import org.hamcrest.core.IsNot;
 import org.junit.Test;
 
 import main.java.ai.AIGhost;
+import main.java.ai.AIPlayer;
 import main.java.constants.CellState;
 import main.java.gamelogic.domain.Behaviour;
 import main.java.gamelogic.domain.Entity;
@@ -24,9 +25,9 @@ public class BehaviourTest {
 	public void shouldConstruct() {
 		// Given
 		final Behaviour.Type type = Randoms.randomEnum(Behaviour.Type.class);
-		final World world = new World(new RuleChecker(), Map.generateMap(), false);
-		final Entity ghostEntity = new AIGhost();
-		ghostEntity.setPosition(new Position(0, 0));
+		final World world = new World(new RuleChecker(),Map.generateMap(),false);
+		final AIPlayer ghostEntity = new AIPlayer();
+		ghostEntity.setPosition(new Position(0,0));
 		final SkillSet stash = Randoms.randomLocalSkillSet();
 
 		// When
