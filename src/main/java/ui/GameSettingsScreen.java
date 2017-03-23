@@ -1,6 +1,5 @@
 package main.java.ui;
 
-import javafx.collections.FXCollections;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -16,8 +15,12 @@ public class GameSettingsScreen extends Screen {
 	private Label label;
 	private CheckBox ai;
 	private ChoiceBox<Integer> lives;
-	
-	private Event<GameSettingsChangedEventListener, GameSettingsChangedEventArgs> event = new Event<>((l, a) -> l.onGameSettingsChanged(a));
+	private Event<GameSettingsChangedEventListener, GameSettingsChangedEventArgs> event
+			= new Event<>((l, a) -> l.onGameSettingsChanged(a));
+
+	// private Event<GameSettingsChangedEventListener,
+	// GameSettingsChangedEventArgs> event = new Event<>((l, a) ->
+	// l.onGameSettingsChanged(a));
 
 	public GameSettingsScreen(final GameUI game) {
 		super(game);
@@ -25,16 +28,16 @@ public class GameSettingsScreen extends Screen {
 		returnButton = new Button("Return");
 		returnButton.getStyleClass().add("backButtonStyle");
 		returnButton.setOnAction(e -> closeSettings());
-		
+
 		ai = new CheckBox("Play against AI");
 		ai.getStyleClass().add("check-box");
 		ai.setSelected(true);
 
 		lives = new ChoiceBox<Integer>();
 		lives.getStyleClass().add("check-box");
-	    lives.getItems().addAll(1,2,3,4,5);
-	    lives.getSelectionModel().select(3);
-		
+		lives.getItems().addAll(1, 2, 3, 4, 5);
+		lives.getSelectionModel().select(3);
+
 		label = new Label("Game Settings");
 		label.getStyleClass().add("miniTitleStyle");
 
@@ -72,7 +75,7 @@ public class GameSettingsScreen extends Screen {
 	@Override
 	public void makeSelection() {
 		closeSettings();
-		
+
 	}
 	
 	public void loadSettings() {

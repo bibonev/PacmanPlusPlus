@@ -23,3 +23,5 @@ lib/
 /out/
 
 /build/
+
+\.gradle/3\.3/taskArtifacts/

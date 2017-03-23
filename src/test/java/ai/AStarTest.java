@@ -1,4 +1,4 @@
-package test.java.gamelogic.domain;
+package test.java.ai;
 
 import static org.junit.Assert.assertTrue;
 
@@ -14,7 +14,6 @@ public class AStarTest {
 
 		//Given
 		Map map = Map.generateMap();
-		Integer empty = new Integer(0);
 		
 		//When
 		final AStar astar = new AStar(map);

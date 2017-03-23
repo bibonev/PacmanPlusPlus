@@ -103,7 +103,7 @@ public abstract class Entity {
 	 * @param world
 	 *            the new world
 	 */
-	protected void setWorld(final World world) {
+	public void setWorld(final World world) {
 		this.world = world;
 	}
 

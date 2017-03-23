@@ -29,7 +29,8 @@ dependencies {
                                          'main/java/audio',
                                          'main/java/ui',
                                          // Individual classes
-                                         '**/*Render**'])
+                                         '**/*Render**',
+                                         '**/*PacLaser**'])
          })
      }
  }

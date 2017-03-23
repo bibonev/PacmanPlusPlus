@@ -1,6 +1,7 @@
 package test.java.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import org.hamcrest.core.Is;
 import org.junit.Test;
@@ -45,6 +46,7 @@ public class MapTest {
 
 		// Then
 		assertThat(map.getCell(position.getRow(), position.getColumn()), Is.is(cell));
+		assertTrue(map.getMapSize()==map.getCells().length);
 	}
 
 }

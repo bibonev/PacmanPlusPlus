@@ -7,6 +7,7 @@ import org.hamcrest.core.IsNot;
 import org.junit.Test;
 
 import main.java.ai.AIGhost;
+import main.java.ai.AIPlayer;
 import main.java.constants.CellState;
 import main.java.gamelogic.domain.Behaviour;
 import main.java.gamelogic.domain.Entity;
@@ -25,7 +26,7 @@ public class BehaviourTest {
 		// Given
 		final Behaviour.Type type = Randoms.randomEnum(Behaviour.Type.class);
 		final World world = new World(new RuleChecker(),Map.generateMap(),false);
-		final Entity ghostEntity = new AIGhost();
+		final AIPlayer ghostEntity = new AIPlayer();
 		ghostEntity.setPosition(new Position(0,0));
 		final SkillSet stash = Randoms.randomLocalSkillSet();
 
@@ -34,10 +35,12 @@ public class BehaviourTest {
 
 		// Then
 		assertThat(behaviour.getType(), Is.is(type));
-		assertThat(world.getMap().getCell(behaviour.pickTarget()),IsNot.not(CellState.OBSTACLE));
-		Position oldPos = behaviour.entity.getPosition();
+		assertThat(world.getMap().getCell(behaviour.pickTarget()), IsNot.not(CellState.OBSTACLE));
+		assertThat(behaviour.getOnMovedEvent(), Is.is(ghostEntity.getOnMovedEvent()));
+
+		final Position oldPos = behaviour.entity.getPosition();
 		behaviour.run();
-		Position newPos = behaviour.entity.getPosition();
+		final Position newPos = behaviour.entity.getPosition();
 		assertThat(oldPos, IsNot.not(newPos));
 	}
 

@@ -1,5 +1,14 @@
 package main.java.ai;
 
+
+/**
+ * The Enum Target.
+ * @author Lyubomir Pashev
+ */
 public enum Target {
-	ENEMY,STATIONARY, RANDOM,
+	
+	/** The stationary. */
+	STATIONARY, 
+	/** The random. */
+	RANDOM,
 }

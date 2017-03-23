@@ -38,11 +38,12 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		return remoteGameCreatedEvent;
 	}
 
+	// might want to keep the entity count down so the game runs more smoothly
 	private void populateWorld(final World world, boolean playAgainstAI) {
 		Position[] ghostPositions = new Position[] {
 				new Position(1, 1),
-				new Position(1, 13),
-				new Position(13, 13)
+				//new Position(1, 13),
+				//new Position(13, 13)
 		};
 		
 		for(Position p : ghostPositions) {
@@ -57,7 +58,6 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 			world.addEntity(spawner);
 		}
 
-		// AI player being commented out as Lyubomir will add it later
 		final AIPlayer aiPlayer = new AIPlayer();
 		aiPlayer.setPosition(new Position(7, 7));
 		final Behaviour aiPlayerBehavior = new DefaultBehaviour(world, aiPlayer, Behaviour.Type.DEFAULT);
