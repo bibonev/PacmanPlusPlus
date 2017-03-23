@@ -14,6 +14,13 @@ public class ClientReceiver extends Thread {
 	private DataInputStream in = null;
 	private Consumer<byte[]> onReceive;
 
+	/**
+	 * Instantiate a new ClientReceiver with the given thread to read data
+	 * from and the given action to take upon receiving a packet of data.
+	 * 
+	 * @param in The stream to read data from.
+	 * @param onReceive The action to take upon reading a full packet as a byte.
+	 */
 	public ClientReceiver(final DataInputStream in, final Consumer<byte[]> onReceive) {
 		this.in = in;
 		this.onReceive = onReceive;
@@ -44,6 +51,12 @@ public class ClientReceiver extends Thread {
 		}
 	}
 
+	/**
+	 * Kill the receiver so it won't receive any more data. This will not
+	 * stop the current blocking {@link ClientReceiver#run()} operation, but
+	 * it will mean that the read error (as an {@link IOException} will be
+	 * swallowed when it happens.
+	 */
 	public void die() {
 		if (alive) {
 			alive = false;

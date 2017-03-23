@@ -53,6 +53,9 @@ public class Client implements NetworkSocket, Runnable {
 		serverSide = true;
 	}
 
+	/**
+	 * Private constructor to initialize events
+	 */
 	private Client() {
 		receiveEvent = new Event<>((l, b) -> l.receive(b));
 		disconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
@@ -141,6 +144,14 @@ public class Client implements NetworkSocket, Runnable {
 		}
 	}
 
+	/**
+	 * Gets the currently asigned client ID, either representing the
+	 * client ID assigned to a remote client by the current server, or
+	 * the ID assigned to the local client by the remote server if thi
+	 * is one of many clients of a currently running server instance. 
+	 * 
+	 * @return
+	 */
 	public int getClientID() {
 		if (alive) {
 			if (clientID == -1) {
@@ -163,6 +174,14 @@ public class Client implements NetworkSocket, Runnable {
 		return disconnectedEvent;
 	}
 
+	/**
+	 * Sets the current client ID, as received on the server, if running on
+	 * the client.
+	 * 
+	 * @param clientID The ID assigned to this client by the server.
+	 * @throws RuntimeException Thrown when this method is called when this socket
+	 * is not running in client mode.
+	 */
 	public void setClientID(final int clientID) {
 		if (!serverSide) {
 			this.clientID = clientID;

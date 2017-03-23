@@ -43,12 +43,18 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		clientDisconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
 	}
 
+	/**
+	 * Instantiates a new {@link Thread}, with this {@link server} object
+	 * as the {@link Runnable} target, and starts it.
+	 */
 	public void start() {
 		new Thread(this).start();
 	}
 
 	/**
-	 * Start the thread by oppening a socket and starting each client
+	 * Start the server by opening a server socket and opening sockets for
+	 * different clients as connections arrive. Client sockets are delegated
+	 * to {@link Client} objects.
 	 */
 	@Override
 	public void run() {
@@ -113,6 +119,11 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		}
 	}
 
+	/**
+	 * Create a new {@link ServerSocket} to use to accept
+	 * connections.
+	 * @return
+	 */
 	private ServerSocket openServerSocket() {
 		try {
 			return new ServerSocket(serverPort);
