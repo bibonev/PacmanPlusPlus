@@ -26,7 +26,7 @@ public class LogInScreen extends Screen {
 	public LogInScreen(final GameUI game) {
 		super(game);
 
-		title = new Label("Welcome to PacMan");
+		title = new Label("Welcome to PacMan++");
 		title.getStyleClass().add("titleStyle");
 
 		label = new Label("Enter Username:");

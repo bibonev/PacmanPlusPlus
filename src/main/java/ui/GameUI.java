@@ -104,7 +104,7 @@ public class GameUI extends Application implements GameInterface, LobbyStateChan
 		setup(audioDisabled);
 
 		thisStage = primaryStage;
-		primaryStage.setTitle("PacMac");
+		primaryStage.setTitle("PacMac++");
 
 		pane = new BorderPane();
 
@@ -230,14 +230,14 @@ public class GameUI extends Application implements GameInterface, LobbyStateChan
 		thisStage.setScene(uiScene);
 		adjustScreenPosition();
 		setScreen(menuScreen);
-		final Label label = new Label("PacMan " + getName());
+		final Label label = new Label("PacMan++ " + getName());
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		settings.setDisable(false);
 	}
 
 	public void switchToLogIn() {
-		final Label label = new Label("PacMan");
+		final Label label = new Label("PacMan++");
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		setScreen(logInScreen);
