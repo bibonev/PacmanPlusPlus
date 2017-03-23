@@ -104,7 +104,7 @@ public class GameUI extends Application implements GameInterface, LobbyStateChan
 		setup(audioDisabled);
 
 		thisStage = primaryStage;
-		primaryStage.setTitle("PacMac++");
+		primaryStage.setTitle("PacMan++");
 
 		pane = new BorderPane();
 
@@ -273,7 +273,7 @@ public class GameUI extends Application implements GameInterface, LobbyStateChan
 	}
 	
 	public void switchToHelp(){
-		final Label label = new Label("PacMan " + getName());
+		final Label label = new Label("PacMan++ " + getName());
 		label.getStyleClass().add("labelStyle");
 		helpPane.setTop(label);
 		thisStage.setScene(helpScene);
