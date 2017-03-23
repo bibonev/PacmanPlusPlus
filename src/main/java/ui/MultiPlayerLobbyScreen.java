@@ -94,7 +94,7 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 	}
 
 	public void showSettings() {
-		System.out.println("settings"); // TODO
+		game.showGameSettingsScreen();
 	}
 
 	public void setMultiplayerSettings(final GameSettings newSettings) {
@@ -102,13 +102,6 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 	}
 
 	public GameSettings getMultiplayerSettings() {
-		// TODO Rose: when we get round to adding game settings that we need
-		// to change, add a screen to let you edit game settings for multi
-		// player games from this lobby screen - then make this method look
-		// at the choices the player has made and return a GameSettings
-		// object from it
-
-		// temporary implementation
 		return gameSettings;
 	}
 
