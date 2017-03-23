@@ -7,9 +7,8 @@ import main.java.event.Event;
 import main.java.event.arguments.CellStateChangedEventArgs;
 import main.java.event.arguments.EntityChangedEventArgs;
 import main.java.event.arguments.EntityMovedEventArgs;
-import main.java.event.arguments.GameEndedEventArgs;
-import main.java.event.arguments.GameSettingsChangedEventArgs;
 import main.java.event.arguments.GameCreatedEventArgs;
+import main.java.event.arguments.GameEndedEventArgs;
 import main.java.event.arguments.HostStartingMultiplayerGameEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
@@ -18,9 +17,8 @@ import main.java.event.listener.CellStateChangedEventListener;
 import main.java.event.listener.CountDownStartingListener;
 import main.java.event.listener.EntityAddedListener;
 import main.java.event.listener.EntityRemovingListener;
-import main.java.event.listener.GameEndedListener;
-import main.java.event.listener.GameSettingsChangedEventListener;
 import main.java.event.listener.GameCreatedListener;
+import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.HostStartingMultiplayerGameListener;
 import main.java.event.listener.LobbyStateChangedListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
@@ -40,8 +38,8 @@ import main.java.gamelogic.domain.RemotePlayer;
 import main.java.gamelogic.domain.ServerEntityTracker;
 import main.java.gamelogic.domain.SkillSet;
 import main.java.gamelogic.domain.Spawner;
-import main.java.gamelogic.domain.World;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
+import main.java.gamelogic.domain.World;
 import main.java.networking.ServerManager;
 import main.java.networking.StandardServerManager;
 import main.java.networking.data.Packet;
@@ -53,7 +51,7 @@ import main.java.networking.socket.Server;
 public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,
 		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener,
-		CountDownStartingListener, GameSettingsChangedEventListener {
+		CountDownStartingListener {
 	private Server server;
 	protected ServerManager manager;
 	private Game game;
@@ -90,8 +88,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		server = createServer();
 
 		// Create
-		this.manager = new StandardServerManager(server);
-		this.manager.setTrigger(this);
+		manager = new StandardServerManager(server);
+		manager.setTrigger(this);
 
 		addGameHooks();
 
@@ -118,8 +116,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Gets the event which is fired when the game which this server is using is about to
-	 * start.
+	 * Gets the event which is fired when the game which this server is using is
+	 * about to start.
+	 *
 	 * @return
 	 */
 	public Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> getMultiplayerGameStartingEvent() {
@@ -152,8 +151,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		 */
 		tracker = new ServerEntityTracker(this);
 		lobby.getLobbyStateChangedEvent().addListener(this);
-		
-		if(server != null) {
+
+		if (server != null) {
 			server.getClientConnectedEvent().addListener(this);
 			server.getClientDisconnectedEvent().addListener(this);
 		}
@@ -162,10 +161,12 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	/**
 	 * Adds this client instance as a listener to any relevant events in the
 	 * currently-used {@link Game} and {@link GameLogic} objects.
-	 * 
-	 * @param game The game object that this server instance is to attach to.
-	 * @param logic The game logic object controlling the game which this
-	 * server instance is to attach to.
+	 *
+	 * @param game
+	 *            The game object that this server instance is to attach to.
+	 * @param logic
+	 *            The game logic object controlling the game which this server
+	 *            instance is to attach to.
 	 */
 	private void addWorldGameHooks(final World world, final LocalGameLogic logic) {
 		world.getOnEntityAddedEvent().addListener(this);
@@ -198,14 +199,16 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 	}
 
-	
 	/**
-	 * Removes this {@link ServerInstance} object as a listener from any relevant
-	 * events in the currently-used {@link Game} and {@link GameLogic} objects.
-	 * 
-	 * @param game The game object that this server instance is to detach from.
-	 * @param logic The game logic object controlling the game which this
-	 * server instance is to detach from.
+	 * Removes this {@link ServerInstance} object as a listener from any
+	 * relevant events in the currently-used {@link Game} and {@link GameLogic}
+	 * objects.
+	 *
+	 * @param game
+	 *            The game object that this server instance is to detach from.
+	 * @param logic
+	 *            The game logic object controlling the game which this server
+	 *            instance is to detach from.
 	 */
 	private void removeWorldGameHooks(final World world, final LocalGameLogic logic) {
 		world.getOnEntityAddedEvent().removeListener(this);
@@ -225,12 +228,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Sends the initial state of the lobby to a newly-joined player, so a 
-	 * player who is joining an existing lobby receives the joining packets
-	 * for all of the existing players.
-	 * 
-	 * @param clientID The player to send the initial lobby state to.
-	 * 
+	 * Sends the initial state of the lobby to a newly-joined player, so a
+	 * player who is joining an existing lobby receives the joining packets for
+	 * all of the existing players.
+	 *
+	 * @param clientID
+	 *            The player to send the initial lobby state to.
+	 *
 	 */
 	public void sendInitialLobbyState(final int clientID) {
 		for (final int i : lobby.getPlayerIDs()) {
@@ -240,10 +244,11 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Create a packet which indicates that the textual display in the
-	 * game lobby showing the game rules has changed.
-	 * 
-	 * @param rules The rule strings to send.
+	 * Create a packet which indicates that the textual display in the game
+	 * lobby showing the game rules has changed.
+	 *
+	 * @param rules
+	 *            The rule strings to send.
 	 * @return A packet representing the new rules display.
 	 */
 	private Packet createRulesChangedPacket(final String[] rules) {
@@ -260,8 +265,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	/**
 	 * Create a packet indicating that the player represented by {@code player}
 	 * has joined the lobby.
-	 * 
-	 * @param player The player info of the player who is joining. 
+	 *
+	 * @param player
+	 *            The player info of the player who is joining.
 	 * @return A packet representing that the given player has joined a lobby.
 	 */
 	private Packet createPlayerJoinedLobbyPacket(final LobbyPlayerInfo player) {
@@ -272,11 +278,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Create a packet indicating that the player with the given {@code playerID}
-	 * has left the lobby.
-	 * 
-	 * @param playerID The ID of the player who is leaving the lobby.
-	 * @return The sendable packet object representing a player leaving the lobby.
+	 * Create a packet indicating that the player with the given
+	 * {@code playerID} has left the lobby.
+	 *
+	 * @param playerID
+	 *            The ID of the player who is leaving the lobby.
+	 * @return The sendable packet object representing a player leaving the
+	 *         lobby.
 	 */
 	private Packet createPlayerLeftLobbyPacket(final int playerID) {
 		final Packet p = new Packet("lobby-player-left");
@@ -321,30 +329,30 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			triggerHandshake(sender, p);
 		} else if (p.getPacketName().equals("player-moved")) {
 			triggerPlayerMoved(sender, p);
-		} else if(p.getPacketName().equals("ready-to-start")) {
+		} else if (p.getPacketName().equals("ready-to-start")) {
 			triggerClientReadyToStart(sender, p);
-		} else if(p.getPacketName().equals("use-ability")) {
+		} else if (p.getPacketName().equals("use-ability")) {
 			triggerPlayerUseAbility(sender, p);
 		}
 	}
 
 	/**
-	 * Handes packets indicating that a client is trying to use one of
-	 * its abilities.
-	 * 
+	 * Handes packets indicating that a client is trying to use one of its
+	 * abilities.
+	 *
 	 * @param sender
 	 * @param p
 	 */
-	private void triggerPlayerUseAbility(int sender, Packet p) {
-		Player player = (Player)game.getWorld().getEntity(sender);
-		
-		if(player != null) {		
-			SkillSet skillSet = player.getSkillSet();
-			
-			if(skillSet != null) {
-				char abilityKey = p.getString("ability-key").charAt(0);
-				
-				switch(abilityKey) {
+	private void triggerPlayerUseAbility(final int sender, final Packet p) {
+		final Player player = (Player) game.getWorld().getEntity(sender);
+
+		if (player != null) {
+			final SkillSet skillSet = player.getSkillSet();
+
+			if (skillSet != null) {
+				final char abilityKey = p.getString("ability-key").charAt(0);
+
+				switch (abilityKey) {
 				case 'q':
 					skillSet.activateQ();
 					break;
@@ -359,35 +367,35 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Handles packets indicating that the client is ready to start. This packet can
-	 * mean one of two things:
-	 * 
+	 * Handles packets indicating that the client is ready to start. This packet
+	 * can mean one of two things:
+	 *
 	 * <ul>
 	 * <li>The player's client has loaded the relevant JavaFX resources and may
 	 * now begin the game (ie. finished loading(</li>
 	 * <li>The player is trying to respawn after having died</li>
 	 * </ul>
-	 * 
-	 * The intended meaning is deduced based on whether the game has already started or
-	 * not, and if so, whether the player is already in game or not.
-	 * 
+	 *
+	 * The intended meaning is deduced based on whether the game has already
+	 * started or not, and if so, whether the player is already in game or not.
+	 *
 	 * @param sender
 	 * @param p
 	 */
-	private void triggerClientReadyToStart(int sender, Packet p) {
-		LobbyPlayerInfo playerInfo = lobby.getPlayer(sender);
-		if(!game.hasStarted()) {
-			if(!playerInfo.isReady()) {
+	private void triggerClientReadyToStart(final int sender, final Packet p) {
+		final LobbyPlayerInfo playerInfo = lobby.getPlayer(sender);
+		if (!game.hasStarted()) {
+			if (!playerInfo.isReady()) {
 				playerInfo.setReady(true);
-				
-				if(lobby.allReady()) {
+
+				if (lobby.allReady()) {
 					startGame();
 				}
 			}
 		} else {
-			if(game.getWorld().getEntity(sender) == null) {
-				if(playerInfo.getRemainingLives() > 0) {
-					Position pos = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
+			if (game.getWorld().getEntity(sender) == null) {
+				if (playerInfo.getRemainingLives() > 0) {
+					final Position pos = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
 					playerInfo.setRemainingLives(playerInfo.getRemainingLives() - 1);
 					addHumanPlayerToWorld(sender, pos.getRow(), pos.getColumn());
 				}
@@ -396,9 +404,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Handles packets indicating that a client's player is attempting to move in
-	 * the world (ie. to another position on the map).
-	 * 
+	 * Handles packets indicating that a client's player is attempting to move
+	 * in the world (ie. to another position on the map).
+	 *
 	 * @param sender
 	 * @param p
 	 */
@@ -419,9 +427,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Handles the packet sent by the client to the server specifying attributes of
-	 * the player.
-	 * 
+	 * Handles the packet sent by the client to the server specifying attributes
+	 * of the player.
+	 *
 	 * @param sender
 	 * @param p
 	 */
@@ -443,8 +451,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			p.setInteger("row", e.getPosition().getRow());
 			p.setInteger("col", e.getPosition().getColumn());
 			manager.dispatchAllExcept(p, e.getID());
-			
-			if(lobby.containsPlayer(e.getID())) {
+
+			if (lobby.containsPlayer(e.getID())) {
 				manager.dispatch(e.getID(), createLocalPlayerJoinPacket(e.getPosition().getRow(),
 						e.getPosition().getColumn(), ((Player) e).getAngle()));
 			}
@@ -456,43 +464,45 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			p.setInteger("col", e.getPosition().getColumn());
 			manager.dispatchAll(p);
 		}
-		if(e instanceof Spawner) {
-			Spawner s = (Spawner) e;
-			Entity toSpawn = s.getEntity();
-			
-			if(toSpawn instanceof Ghost) {
+		if (e instanceof Spawner) {
+			final Spawner s = (Spawner) e;
+			final Entity toSpawn = s.getEntity();
+
+			if (toSpawn instanceof Ghost) {
 				manager.dispatchAll(createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "ghost"));
-			} else if(toSpawn instanceof Player) {
+			} else if (toSpawn instanceof Player) {
 				manager.dispatchAllExcept(
 						createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "remote-player"),
 						toSpawn.getID());
-				
-				if(lobby.containsPlayer(toSpawn.getID())) {
-					manager.dispatch(
-							toSpawn.getID(),
+
+				if (lobby.containsPlayer(toSpawn.getID())) {
+					manager.dispatch(toSpawn.getID(),
 							createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "local-player"));
 				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Creates a packet indicating that a spawner countdown has been added to
 	 * the world at a given position with a specified starting number.
-	 * 
-	 * @param position The position that the new countdown will appear at.
-	 * @param time The starting time number of the countdown.
-	 * @param type The entity type which the countdown is going to spawn.
-	 * @return A packet representing the appearance of a countdown number in
-	 * the world.
+	 *
+	 * @param position
+	 *            The position that the new countdown will appear at.
+	 * @param time
+	 *            The starting time number of the countdown.
+	 * @param type
+	 *            The entity type which the countdown is going to spawn.
+	 * @return A packet representing the appearance of a countdown number in the
+	 *         world.
 	 */
-	private Packet createSpawnCountdownPacket(Position position, int time, String type) {
+	private Packet createSpawnCountdownPacket(final Position position, final int time, final String type) {
 		final Packet p = new Packet("spawner-added");
 		p.setInteger("row", position.getRow());
 		p.setInteger("col", position.getColumn());
 		p.setInteger("duration", time);
 		p.setString("entity-type", type);
-		
+
 		return p;
 	}
 
@@ -504,8 +514,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			final Packet p = new Packet("remote-player-died");
 			p.setInteger("player-id", e.getID());
 			manager.dispatchAllExcept(p, e.getID());
-			
-			if(e instanceof RemotePlayer && lobby.containsPlayer(e.getID())) {
+
+			if (e instanceof RemotePlayer && lobby.containsPlayer(e.getID())) {
 				handleRemovingHumanPlayerFromWorld(e.getID(), ((RemotePlayer) e).getDeathReason());
 			}
 		}
@@ -515,20 +525,23 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			manager.dispatchAll(p);
 		}
 	}
-	
+
 	/**
-	 * Handles adding a (human) player to the world, including adding the appropriate
-	 * skill set info and updating the lobby.
-	 * 
-	 * @param playerID The player ID to add to the world.
-	 * @param row The row of the position at which to add the player.
-	 * @param col the column of the position at which to add the player.
+	 * Handles adding a (human) player to the world, including adding the
+	 * appropriate skill set info and updating the lobby.
+	 *
+	 * @param playerID
+	 *            The player ID to add to the world.
+	 * @param row
+	 *            The row of the position at which to add the player.
+	 * @param col
+	 *            the column of the position at which to add the player.
 	 */
-	public Player addHumanPlayerToWorld(int playerID, int row, int col) {
-		if(lobby.containsPlayer(playerID)) {
-			LobbyPlayerInfo info = lobby.getPlayer(playerID);
-			
-			if(info.isInGame()) {
+	public Player addHumanPlayerToWorld(final int playerID, final int row, final int col) {
+		if (lobby.containsPlayer(playerID)) {
+			final LobbyPlayerInfo info = lobby.getPlayer(playerID);
+
+			if (info.isInGame()) {
 				throw new IllegalStateException("Player " + playerID + " already in-game.");
 			} else {
 				final RemotePlayer player = new RemotePlayer(info.getID(), info.getName());
@@ -538,61 +551,68 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 				spawner.setPosition(player.getPosition());
 				game.getWorld().addEntity(spawner);
 				info.setInGame(true);
-				
+
 				return player;
 			}
 		} else {
 			throw new IllegalStateException("Human player with ID " + playerID + " does not exist.");
 		}
 	}
-	
+
 	/**
-	 * Handles removing a human player from the world, including setting the player's
-	 * death reason to an appropriate value.
-	 * 
-	 * @param playerID The ID of the human player to remove.
-	 * @param reason The reason for why the player is being removed (this will be
-	 * displayed on the client's screen).
+	 * Handles removing a human player from the world, including setting the
+	 * player's death reason to an appropriate value.
+	 *
+	 * @param playerID
+	 *            The ID of the human player to remove.
+	 * @param reason
+	 *            The reason for why the player is being removed (this will be
+	 *            displayed on the client's screen).
 	 */
-	public void handleRemovingHumanPlayerFromWorld(int playerID, String reason) {
-		LobbyPlayerInfo playerInfo = lobby.getPlayer(playerID);
+	public void handleRemovingHumanPlayerFromWorld(final int playerID, String reason) {
+		final LobbyPlayerInfo playerInfo = lobby.getPlayer(playerID);
 		playerInfo.setInGame(false);
-		if(playerInfo.getRemainingLives() > 0) {
+		if (playerInfo.getRemainingLives() > 0) {
 			reason = reason + "\nLives remaining: " + playerInfo.getRemainingLives();
 		} else {
 			reason = reason + "\nYou have no more lives!";
 		}
 		manager.dispatch(playerID, createLocalPlayerDiedPacket(reason, playerInfo.getRemainingLives() > 0));
 	}
-	
+
 	/**
-	 * Create a packet indicating that a local client's player has
-	 * appeared at a given position in the world.
-	 * 
-	 * @param row The row of the position which the player appears at.
-	 * @param col The column of the position which the player appears at.
-	 * @param angle The angle which the player start off pointing to.
+	 * Create a packet indicating that a local client's player has appeared at a
+	 * given position in the world.
+	 *
+	 * @param row
+	 *            The row of the position which the player appears at.
+	 * @param col
+	 *            The column of the position which the player appears at.
+	 * @param angle
+	 *            The angle which the player start off pointing to.
 	 * @return
 	 */
-	public Packet createLocalPlayerJoinPacket(int row, int col, double angle) {
-		Packet packet = new Packet("local-player-joined");
+	public Packet createLocalPlayerJoinPacket(final int row, final int col, final double angle) {
+		final Packet packet = new Packet("local-player-joined");
 		packet.setInteger("row", row);
 		packet.setInteger("col", col);
 		packet.setDouble("angle", angle);
 		return packet;
 	}
-	
+
 	/**
-	 * Create a packet indicating that a local client's player is being
-	 * removed from the world, with a given reason.
-	 * 
-	 * @param message The message sent to the client describing why they died
-	 * @param rejoinable Whether the player who died is given the chance to 
-	 * respawn or not.
+	 * Create a packet indicating that a local client's player is being removed
+	 * from the world, with a given reason.
+	 *
+	 * @param message
+	 *            The message sent to the client describing why they died
+	 * @param rejoinable
+	 *            Whether the player who died is given the chance to respawn or
+	 *            not.
 	 * @return
 	 */
-	public Packet createLocalPlayerDiedPacket(String message, boolean rejoinable) {
-		Packet packet = new Packet("local-player-died");
+	public Packet createLocalPlayerDiedPacket(final String message, final boolean rejoinable) {
+		final Packet packet = new Packet("local-player-died");
 		packet.setString("message", message);
 		packet.setBoolean("rejoinable", rejoinable);
 		return packet;
@@ -604,11 +624,12 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		if (game != null && game.getWorld().getEntity(clientID) != null) {
 			game.getWorld().removeEntity(clientID);
 		}
-		
-		if(lobby.getPlayerCount() == 0 || clientID == 0) {
+
+		if (lobby.getPlayerCount() == 0 || clientID == 0) {
 			server.die();
-			if(gameLogicTimer != null)
+			if (gameLogicTimer != null) {
 				gameLogicTimer.stop();
+			}
 		}
 	}
 
@@ -645,9 +666,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			}
 			game = args.getGame();
 			gameLogic = args.getGameLogic();
-			
+
 			final Packet p = new Packet("game-starting");
-			
+
 			p.setInteger("initial-player-lives", game.getGameSettings().getInitialPlayerLives());
 			// add game configuration stuff into this packet
 
@@ -658,20 +679,21 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Start the game, adding all of the player in the lobby to the world in the process.
-	 * This also starts a timer to tick the game logic. The server has no render loop, so
-	 * a timer must be used manually to tick the game logic along.
+	 * Start the game, adding all of the player in the lobby to the world in the
+	 * process. This also starts a timer to tick the game logic. The server has
+	 * no render loop, so a timer must be used manually to tick the game logic
+	 * along.
 	 */
 	private void startGame() {
 		game.setStarted();
 		lobby.resetReady();
-		
-		for(final int i : lobby.getPlayerIDs()) {
+
+		for (final int i : lobby.getPlayerIDs()) {
 			lobby.getPlayer(i).setRemainingLives(game.getGameSettings().getInitialPlayerLives());
 		}
-		
+
 		for (final int i : lobby.getPlayerIDs()) {
-			Position p = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
+			final Position p = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
 			addHumanPlayerToWorld(i, p.getRow(), p.getColumn());
 		}
 
@@ -695,11 +717,11 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
 
 	/**
-	 * Creates and sends a packet to all connected players indicating that
-	 * the game has ended, along with information on the outcome of the
-	 * game.
-	 * 
-	 * @param outcome The outcome of the game.
+	 * Creates and sends a packet to all connected players indicating that the
+	 * game has ended, along with information on the outcome of the game.
+	 *
+	 * @param outcome
+	 *            The outcome of the game.
 	 */
 	private void sendGameEndedPacket(final GameOutcome outcome) {
 		final Packet p = new Packet("game-ended");
@@ -729,13 +751,14 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		manager.dispatchAll(p);
 	}
 
-	@Override
-	public void onGameSettingsChanged(GameSettingsChangedEventArgs args) {
-		final Packet p = new Packet("game-settings-changed");
-		p.setInteger("lives", args.getSettings().getInitialPlayerLives());
-		p.setBoolean("playAgainstAI", args.getSettings().getAIPlayer());
-		manager.dispatchAll(p);		
-	}
+	// @Override
+	// public void onGameSettingsChanged(final GameSettingsChangedEventArgs
+	// args) {
+	// final Packet p = new Packet("game-settings-changed");
+	// p.setInteger("lives", args.getSettings().getInitialPlayerLives());
+	// p.setBoolean("playAgainstAI", args.getSettings().getAIPlayer());
+	// manager.dispatchAll(p);
+	// }
 
 	/*
 	 * For posterity: a corresponding removeTriggers method is not necessary.

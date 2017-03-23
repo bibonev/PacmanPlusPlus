@@ -24,9 +24,9 @@ public class BehaviourTest {
 	public void shouldConstruct() {
 		// Given
 		final Behaviour.Type type = Randoms.randomEnum(Behaviour.Type.class);
-		final World world = new World(new RuleChecker(),Map.generateMap(),false);
+		final World world = new World(new RuleChecker(), Map.generateMap(), false);
 		final Entity ghostEntity = new AIGhost();
-		ghostEntity.setPosition(new Position(0,0));
+		ghostEntity.setPosition(new Position(0, 0));
 		final SkillSet stash = Randoms.randomLocalSkillSet();
 
 		// When
@@ -34,10 +34,12 @@ public class BehaviourTest {
 
 		// Then
 		assertThat(behaviour.getType(), Is.is(type));
-		assertThat(world.getMap().getCell(behaviour.pickTarget()),IsNot.not(CellState.OBSTACLE));
-		Position oldPos = behaviour.entity.getPosition();
+		assertThat(world.getMap().getCell(behaviour.pickTarget()), IsNot.not(CellState.OBSTACLE));
+		assertThat(behaviour.getOnMovedEvent(), Is.is(ghostEntity.getOnMovedEvent()));
+
+		final Position oldPos = behaviour.entity.getPosition();
 		behaviour.run();
-		Position newPos = behaviour.entity.getPosition();
+		final Position newPos = behaviour.entity.getPosition();
 		assertThat(oldPos, IsNot.not(newPos));
 	}
 
