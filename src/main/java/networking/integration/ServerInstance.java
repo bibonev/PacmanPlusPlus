@@ -81,7 +81,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		gameLogic = null;
 		gameLogicTimer = null;
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
-
 	}
 
 	@Override
@@ -731,10 +730,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 
 	@Override
 	public void onGameSettingsChanged(GameSettingsChangedEventArgs args) {
-		final Packet p = new Packet("game-settings-changed");
-		p.setInteger("lives", args.getSettings().getInitialPlayerLives());
-		p.setBoolean("playAgainstAI", args.getSettings().getAIPlayer());
-		manager.dispatchAll(p);		
+		lobby.setSettingsString(args.getSettings().toDisplayString());	
 	}
 
 	/*

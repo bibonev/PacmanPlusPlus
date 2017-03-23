@@ -1,13 +1,17 @@
 package main.java.ui;
 
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import main.java.event.Event;
 import main.java.event.arguments.HostStartingMultiplayerGameEventArgs;
 import main.java.event.listener.CountDownStartingListener;
@@ -28,6 +32,7 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 	private Button leaveGame;
 	private Button settings;
 	private Label label;
+	private ObservableList<Node> rulesList;
 
 	public boolean thisClient;
 	public PlayersList list;
@@ -52,22 +57,30 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 		leaveGame.setOnAction(e -> leaveGame());
 		setUpHover(leaveGame);
 
+
+		
 		settings = new Button("Change Game Settings");
 		settings.getStyleClass().add("buttonStyle");
 		settings.setOnAction(e -> showSettings());
 		setUpHover(settings);
 
-		final FlowPane buttons = new FlowPane();
-		buttons.setPadding(new Insets(5, 5, 5, 5));
-		buttons.setVgap(4);
-		buttons.setHgap(4);
-		buttons.setOrientation(Orientation.VERTICAL);
+		final HBox buttons = new HBox();
+		// buttons.setPadding(new Insets(5, 5, 5, 5));
 		buttons.setAlignment(Pos.TOP_CENTER);
 		buttons.getStyleClass().add("paneStyle");
 		buttons.getChildren().addAll(play, leaveGame, settings);
 
 		label = new Label("Multiplayer");
 		label.getStyleClass().add("miniTitleStyle");
+		
+		final FlowPane rules = new FlowPane();
+		rules.setPadding(new Insets(5, 5, 5, 5));
+		rules.setVgap(4);
+		rules.setHgap(4);
+		rules.setOrientation(Orientation.VERTICAL);
+		rules.setAlignment(Pos.TOP_CENTER);
+		rules.getStyleClass().add("paneStyle");
+		rulesList = rules.getChildren();
 
 		final BorderPane labelPane = new BorderPane();
 		labelPane.setTop(label);
@@ -77,8 +90,11 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 		labelPane.setBottom(separator);
 
 		bPane = new BorderPane();
+		bPane.setPadding(new Insets(-25, 0, 0, 0));
 		bPane.setTop(labelPane);
-		bPane.setLeft(buttons);
+		bPane.setLeft(rules);
+		bPane.setBottom(buttons);
+		BorderPane.setAlignment(rules, Pos.TOP_CENTER);
 		pane.getChildren().add(bPane);
 
 		userLeavingLobbyEvent = new Event<>((l, a) -> l.onUserLeavingLobby());
@@ -91,6 +107,19 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 
 		
 		addNames();
+	}
+	
+	public void setRuleStrings(String[] rules) {
+		Platform.runLater(() -> {
+			rulesList.clear();
+			
+			for(String rule : rules) {
+				Label ruleLabel = new Label(rule);
+				ruleLabel.getStyleClass().addAll("labelStyle");
+				
+				rulesList.add(ruleLabel);
+			}
+		});
 	}
 
 	public void showSettings() {
@@ -114,6 +143,10 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 		play.setDisable(!enabled);
 	}
 
+	public void setGameSettingsEnabled(final boolean enabled) {
+		settings.setDisable(!enabled);
+	}
+
 	private void leaveGame() {
 		// fire event for leaving a multiplayer game
 		game.switchToMenu();
@@ -122,7 +155,7 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 
 	public void addNames() {
 		list = new PlayersList(game);
-		bPane.setCenter(list.getPane());
+		bPane.setRight(list.getPane());
 	}
 
 	public Event<UserLeavingLobbyListener, Object> getUserLeavingLobbyEvent() {

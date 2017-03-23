@@ -24,6 +24,7 @@ import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
+import main.java.gamelogic.domain.RemotePlayer;
 import main.java.gamelogic.domain.RuleChecker;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
@@ -135,11 +136,11 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 	private boolean ghostsEatenPlayers() {
 		for (final Spawner c : game.getWorld().getEntities(Spawner.class)) {
 			final Entity e = c.getEntity();
-			if (e != null && e instanceof Player) {
+			if (e != null && e instanceof RemotePlayer) {
 				return false;
 			}
 		}
-		return game.getWorld().getEntities(Player.class).size() == 0;
+		return game.getWorld().getEntities(RemotePlayer.class).size() == 0;
 	}
 
 	private boolean allFoodEaten() {

@@ -35,8 +35,10 @@ public class GameSettings {
 		this.initialPlayerLives = initialPlayerLives;
 	}
 	
-	@Override
-	public String toString() {
-		return String.format("Settings:\nInitial lives: %d", getInitialPlayerLives());
+	public String[] toDisplayString() {
+		return new String[] {
+				String.format("Player lives: %d", getInitialPlayerLives()),
+				String.format("AI Player %s", getAIPlayer() ? "enabled" : "disabled")
+		};
 	}
 }

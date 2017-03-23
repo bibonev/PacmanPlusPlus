@@ -49,10 +49,14 @@ public class GameSettingsScreen extends Screen {
 	}
 	
 	private void closeSettings(){
-		game.multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives.getValue()-1);
+		saveSettings();
+		game.removeGameSettingsScreen();
+	}
+
+	public void saveSettings() {
+		game.multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives.getValue());
 		game.multiPlayerLobbyScreen.getMultiplayerSettings().setAIPlayer(ai.isSelected());
 		event.fire(new GameSettingsChangedEventArgs(game.multiPlayerLobbyScreen.getMultiplayerSettings()));
-		game.removeGameSettingsScreen();
 	}
 
 	@Override
@@ -71,8 +75,8 @@ public class GameSettingsScreen extends Screen {
 		
 	}
 	
-	public void update() {
+	public void loadSettings() {
 		ai.setSelected(game.multiPlayerLobbyScreen.getMultiplayerSettings().getAIPlayer());
-	    lives.getSelectionModel().select(game.multiPlayerLobbyScreen.getMultiplayerSettings().getInitialPlayerLives());
+	    lives.getSelectionModel().select(game.multiPlayerLobbyScreen.getMultiplayerSettings().getInitialPlayerLives() - 1);
 	}
 }
