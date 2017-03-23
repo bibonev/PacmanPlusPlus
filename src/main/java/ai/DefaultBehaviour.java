@@ -3,7 +3,6 @@ package main.java.ai;
 import main.java.gamelogic.domain.Behaviour;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.LocalSkillSet;
-import main.java.gamelogic.domain.SkillSet;
 import main.java.gamelogic.domain.World;
 
 /**
@@ -12,6 +11,7 @@ import main.java.gamelogic.domain.World;
  * @author Lyubomir Pashev
  */
 public class DefaultBehaviour extends Behaviour {
+	
 	/**
 	 * Instantiates a new default behavior.
 	 *
