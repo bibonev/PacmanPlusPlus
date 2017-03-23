@@ -470,4 +470,14 @@ public class GameUI extends Application implements GameInterface, LobbyStateChan
 	public void onPlayerLeavingGame() {
 		this.getOnPlayerLeavingGame().fire(null);
 	}
+
+	@Override
+	public void setAIPlayer(boolean ai) {
+		multiPlayerLobbyScreen.getMultiplayerSettings().setAIPlayer(ai);
+	}
+
+	@Override
+	public void setLives(int lives) {
+		multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives);		
+	}
 }
