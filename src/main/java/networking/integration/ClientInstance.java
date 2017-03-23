@@ -46,19 +46,20 @@ import main.java.networking.data.Packet;
 import main.java.networking.event.ClientDisconnectedListener;
 import main.java.networking.event.ClientTrigger;
 import main.java.networking.socket.Client;
+import main.java.ui.GameInterface;
 import main.java.ui.GameUI;
 
 public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnectedListener, ServerEntityUpdatedListener,
 		GameCreatedListener, LocalPlayerSpawnListener, LocalPlayerDespawnListener, ReadyToStartListener, PlayerLeavingGameListener, PlayerAbilityUsedListener {
 	private Client client;
 	private String serverAddress;
-	private ClientManager manager;
+	protected ClientManager manager;
 	private Game game;
 	private RemoteGameLogic gameLogic;
 	private ControlledPlayer player;
 	private Lobby lobby;
 	private String username;
-	private GameUI gameUI;
+	private GameInterface gameUI;
 	private boolean alreadyDoneHandshake;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	private Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> onRemoteGameEndedEvent;
@@ -78,7 +79,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 * @param serverAddress
 	 *            The IP address of the server to connect to.
 	 */
-	public ClientInstance(final GameUI gameUI, final String username, final String serverAddress) {
+	public ClientInstance(final GameInterface gameUI, final String username, final String serverAddress) {
 		this.username = username;
 		this.serverAddress = serverAddress;
 		this.gameUI = gameUI;
@@ -153,7 +154,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 * See the comment at the top of the method for a (fictitious) example of
 	 * how this would be done for a "local player moved" game event.
 	 */
-	private void addGameHooks() {
+	protected void addGameHooks() {
 		/*
 		 * Example of how a local player moved event would be handled. Assume
 		 * the game world object was passed to the ClientInstance via the
@@ -169,6 +170,14 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		 */
 	}
 
+	/**
+	 * Adds this client instance as a listener to any relevant events in the
+	 * currently-used {@link Game} and {@link GameLogic} objects.
+	 * 
+	 * @param game The game object that this client instance is to attach to.
+	 * @param logic The game logic object controlling the game which this
+	 * client instance is to attach to.
+	 */
 	private void addWorldGameHooks(final Game game, final RemoteGameLogic logic) {
 		logic.getOnLocalPlayerSpawn().addListener(this);
 		logic.getOnLocalPlayerDespawn().addListener(this);
@@ -185,7 +194,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 * This is also necessary so that game events are not passed to a client
 	 * manager for a connection which has since been terminated.
 	 */
-	private void removeGameHooks() {
+	protected void removeGameHooks() {
 		/*
 		 * Corresponding example for the local player moved event (see above).
 		 *
@@ -197,6 +206,14 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		}
 	}
 
+	/**
+	 * Removes this {@link ClientInstance} object as a listener from any relevant
+	 * events in the currently-used {@link Game} and {@link GameLogic} objects.
+	 * 
+	 * @param game The game object that this client instance is to detach from.
+	 * @param logic The game logic object controlling the game which this
+	 * client instance is to detach from.
+	 */
 	private void removeWorldGameHooks(final Game game, final RemoteGameLogic remoteGameLogic) {
 		getOnRemoteGameEndedEvent().removeListener(remoteGameLogic);
 		remoteGameLogic.getOnLocalPlayerSpawn().removeListener(this);
@@ -204,6 +221,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		remoteGameLogic.getOnReadyToStart().removeListener(this);
 	}
 
+	/**
+	 * Gets the event which this client instance will fire when the remote game on
+	 * the server transitions from the lobby state to an actual game in progress.
+	 */
 	public Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> getMultiplayerGameStartingEvent() {
 		return multiplayerGameStartingEvent;
 	}
@@ -231,15 +252,11 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerRemotePlayerMoved(p);
 		} else if (p.getPacketName().equals("remote-ghost-moved")) {
 			triggerRemoteGhostMoved(p);
-		} else if (p.getPacketName().equals("game-tile-changed")) {
-			triggerGameTileChanged(p);
 		} else if (p.getPacketName().equals("remote-ghost-joined")) {
 			triggerRemoteGhostJoined(p);
 		} else if (p.getPacketName().equals("remote-player-joined")) {
 			triggerRemotePlayerJoined(p);
-		} else if (p.getPacketName().equals("remote-player-left")) {
-			triggerRemotePlayerLeft(p);
-		} else if (p.getPacketName().equals("remote-ghost-died")) {
+		}  else if (p.getPacketName().equals("remote-ghost-died")) {
 			triggerRemoteGhostLeft(p);
 		} else if (p.getPacketName().equals("lobby-player-enter")) {
 			triggerLobbyPlayerEnter(p);
@@ -277,7 +294,14 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		gameUI.multiPlayerLobbyScreen.getMultiplayerSettings().setAIPlayer(ai);
 		gameUI.multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives);
 	}
-	
+
+	/**
+	 * Handles received packets which indicate that a countdown spawner
+	 * has been added to the world.
+	 * 
+	 * @param p
+	 */
+
 	private void triggerSpawnerAdded(Packet p) {
 		Spawner.SpawnerColor color;
 		String spawnerType = p.getString("entity-type");
@@ -292,10 +316,21 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		game.getWorld().addEntity(s);
 	}
 
+	/**
+	 * Handles received packets which indicate that the lobby countdown.
+	 * 
+	 * @param p
+	 */
 	private void triggerCountDown(final Packet p) {
 		gameUI.timer();
 	}
 
+	/**
+	 * Handles received packets which indicate that the player which the
+	 * current client is controlling has been (re-)added to the world.
+	 * 
+	 * @param p
+	 */
 	private void triggerLocalPlayerJoined(Packet p) {
 		final int row = p.getInteger("row"), col = p.getInteger("col");
 		final double angle = p.getDouble("angle");
@@ -310,6 +345,13 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		game.getWorld().addEntity(player);
 	}
 
+	/**
+	 * Handles received packets which indicate that the player which the
+	 * current client is controlling has died and has been removed from the
+	 * world.
+	 * 
+	 * @param p
+	 */
 	private void triggerLocalPlayerDied(final Packet p) {
 		if(game.getWorld().getEntity(client.getClientID()) != null) {
 			Entity e = game.getWorld().getEntity(client.getClientID());
@@ -321,12 +363,24 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		}
 	}
 
+	/**
+	 * Handles received packets which indicate that another player has
+	 * died and is removed from the world.
+	 * 
+	 * @param p
+	 */
 	private void triggerRemotePlayerDied(final Packet p) {
 		final int playerID = p.getInteger("player-id");
 
 		game.getWorld().removeEntity(playerID);
 	}
 
+	/**
+	 * Handles packets which indicate that the game has ended with a specified
+	 * outcome.
+	 * 
+	 * @param p
+	 */
 	private void triggerGameEnded(final Packet p) {
 		final String outcomeString = p.getString("outcome");
 		GameOutcome outcome;
@@ -350,6 +404,11 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		onRemoteGameEndedEvent.fire(new RemoteGameEndedEventArgs(outcome));
 	}
 
+	/**
+	 * Handles packets which indicate that a cell on the map has changed state.
+	 * 
+	 * @param p
+	 */
 	private void triggerCellChanged(final Packet p) {
 		final int row = p.getInteger("row"), col = p.getInteger("col");
 		final String newStateStr = p.getString("new-state");
@@ -359,6 +418,12 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		game.getWorld().getMap().getCell(row, col).setState(newState);
 	}
 
+	/**
+	 * Handles packets which indicate that the player's position is to be
+	 * forcibly moved.
+	 * 
+	 * @param p
+	 */
 	private void triggerForceMove(final Packet p) {
 		if(player != null) {
 			final int row = p.getInteger("row"), col = p.getInteger("col");
@@ -372,6 +437,11 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		}
 	}
 
+	/**
+	 * Handles packets which indicate that the game is starting.
+	 * 
+	 * @param p
+	 */
 	private void triggerGameStarting(final Packet p) {
 		final GameSettings settings = new GameSettings();
 		settings.setInitialPlayerLives(p.getInteger("initial-player-lives"));
@@ -383,12 +453,23 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		getMultiplayerGameStartingEvent().fire(args);
 	}
 
+	/**
+	 * Handles packets which indicate that a remote player is leaving the
+	 * lobby in the game.
+	 * @param p
+	 */
 	private void triggerLobbyPlayerLeave(final Packet p) {
 		final int playerID = p.getInteger("player-id");
 
 		lobby.removePlayer(playerID);
 	}
 
+	/**
+	 * Handles packets which indicate that the rule display in the pre-game lobby
+	 * has changed.
+	 * 
+	 * @param p
+	 */
 	private void triggerLobbyRuleDisplayChanged(final Packet p) {
 		final int size = p.getInteger("rule-strings.length");
 		final String[] s = new String[size];
@@ -400,6 +481,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		lobby.setSettingsString(s);
 	}
 
+	/**
+	 * Handles packets which indicate that a remote player is joining the pre-game lobby.
+	 * @param p
+	 */
 	private void triggerLobbyPlayerEnter(final Packet p) {
 		final int playerID = p.getInteger("player-id");
 		final String playerName = p.getString("player-name");
@@ -409,12 +494,24 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		lobby.addPlayer(playerID, lobbyPlayerInfo);
 	}
 
+	/**
+	 * Handles packets which indicate that a ghost has been removed
+	 * from the world.
+	 * 
+	 * @param p
+	 */
 	private void triggerRemoteGhostLeft(final Packet p) {
 		final int ghostID = p.getInteger("ghost-id");
 
 		game.getWorld().removeEntity(ghostID);
 	}
 
+	/**
+	 * Handles packets which indicate that a ghost has been added to
+	 * the world.
+	 * 
+	 * @param p
+	 */
 	private void triggerRemoteGhostJoined(final Packet p) {
 		final int ghostID = p.getInteger("ghost-id");
 
@@ -423,6 +520,12 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		game.getWorld().addEntity(ghost);
 	}
 
+	/**
+	 * Handles packets which indicate that a remote player has been
+	 * added to the world.
+	 * 
+	 * @param p
+	 */
 	private void triggerRemotePlayerJoined(final Packet p) {
 		final int playerID = p.getInteger("player-id");
 		final String name = p.getString("name");
@@ -433,12 +536,12 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		game.getWorld().addEntity(player);
 	}
 
-	private void triggerRemotePlayerLeft(final Packet p) {
-		final int playerID = p.getInteger("player-id");
-		if(game.getWorld().getEntity(playerID) != null)
-			game.getWorld().removeEntity(playerID);
-	}
-
+	/**
+	 * Handles packets which indicate that a remote player has 
+	 * moved within the world.
+	 * 
+	 * @param p
+	 */
 	private void triggerRemotePlayerMoved(final Packet p) {
 		final int row = p.getInteger("row"), col = p.getInteger("col");
 		final int playerID = p.getInteger("player-id");
@@ -456,13 +559,12 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		}
 	}
 
-	private void triggerGameTileChanged(final Packet p) {
-		final int x = p.getInteger("x"), y = p.getInteger("y");
-		final CellState cellState = CellState.valueOf(p.getString("cell-state"));
-
-		game.getWorld().getMap().getCell(x, y).setState(cellState);
-	}
-
+	/**
+	 * Handles packets which indicate that a ghost has moved
+	 * within the world.
+	 * 
+	 * @param p
+	 */
 	private void triggerRemoteGhostMoved(final Packet p) {
 		final int row = p.getInteger("row"), col = p.getInteger("col");
 		final int ghostID = p.getInteger("ghost-id");
@@ -477,6 +579,12 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		}
 	}
 
+	/**
+	 * Handles the initial handshake packet that is sent from the server to the
+	 * client.
+	 * 
+	 * @param p
+	 */
 	private void triggerHandshake(final Packet p) {
 		if (!alreadyDoneHandshake) {
 			final int clientID = p.getInteger("client-id");
@@ -502,7 +610,12 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			addWorldGameHooks(game, gameLogic);
 		}
 	}
-
+	
+	/**
+	 * Gets the event which is fired when the game ends on the server.
+	 * 
+	 * @return
+	 */
 	public Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> getOnRemoteGameEndedEvent() {
 		return onRemoteGameEndedEvent;
 	}

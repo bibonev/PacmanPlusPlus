@@ -27,7 +27,7 @@ public class BehaviourTest {
 		final World world = new World(new RuleChecker(),Map.generateMap(),false);
 		final Entity ghostEntity = new AIGhost();
 		ghostEntity.setPosition(new Position(0,0));
-		final SkillSet stash = Randoms.randomSkillSet();
+		final SkillSet stash = Randoms.randomLocalSkillSet();
 
 		// When
 		final Behaviour behaviour = new BehaviourStub(world, ghostEntity, stash, type);

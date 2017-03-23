@@ -12,6 +12,7 @@ import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.LocalGhost;
 import main.java.gamelogic.domain.LocalPlayer;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemoteGhost;
@@ -97,43 +98,8 @@ public class Randoms {
 		return new AbilityStub(randomString());
 	}
 
-	public static SkillSet randomSkillSet() {
-		return new SkillSet() {
-			@Override
-			public void activateQ() {
-
-			}
-
-			@Override
-			public void activateW() {
-
-			}
-
-			@Override
-			public void incrementCooldown() {
-
-			}
-
-			@Override
-			public void setQ(Ability q) {
-
-			}
-
-			@Override
-			public void setW(Ability w) {
-
-			}
-
-			@Override
-			public Ability getQ() {
-				return null;
-			}
-
-			@Override
-			public Ability getW() {
-				return null;
-			}
-		};
+	public static LocalSkillSet randomLocalSkillSet() {
+		return new LocalSkillSet();
 	}
 
 	public static CellState randomCellState() {

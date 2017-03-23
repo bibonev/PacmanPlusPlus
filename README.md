@@ -12,8 +12,12 @@ NOTE: This command runs ALL tests for ALL services.
 
 ## Code coverage
 From inside `java-team-project` run using:
+
 `./gradlew jacocoTestReport` for Unix
 `gradlew jacocoTestReport` for Windows
 
 Then you can find the generated HTML report inside
 `java-team-project/build/reports/jacoco/test/html`.
+
+## Note
+For any gradle task to work, `gradle` needs to be installed first. See instructions on how to do that [here](https://docs.gradle.org/current/userguide/installation.html).

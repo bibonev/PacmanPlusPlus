@@ -50,7 +50,7 @@ import main.java.networking.integration.ServerInstance;
  * @author Rose Kirtley
  *
  */
-public class GameUI extends Application implements LobbyStateChangedListener, GameCreatedListener, PlayerLeavingGameListener {
+public class GameUI extends Application implements GameInterface, LobbyStateChangedListener, GameCreatedListener, PlayerLeavingGameListener {
 	private Lobby lobby;
 	private Game game;
 	private Music music;
@@ -304,7 +304,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerLobbyScreen.addNames();
 
 		lobby = new Lobby();
-		final ServerInstance server = new ServerInstance(this, lobby);
+		final ServerInstance server = new ServerInstance(lobby);
 		final ClientInstance client = new ClientInstance(this, name, "localhost");
 
 		onGameClosing.addOneTimeListener(() -> {
