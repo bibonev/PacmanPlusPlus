@@ -1,8 +1,8 @@
 package main.java.gamelogic.domain;
 
 import main.java.event.Event;
-import main.java.event.arguments.PlayerAbilityUsedEventArgs;
-import main.java.event.listener.PlayerAbilityUsedListener;
+import main.java.event.arguments.*;
+import main.java.event.listener.*;
 
 /**
  * Represent a player's inventory
@@ -19,11 +19,26 @@ import main.java.event.listener.PlayerAbilityUsedListener;
 public class RemoteSkillSet implements SkillSet {
 	private Player owner;
 	private Event<PlayerAbilityUsedListener, PlayerAbilityUsedEventArgs> onPlayerAbilityUsed;
-	
-	
+	private Event<PlayerCooldownChangedListener,PlayerCooldownChangedEventArgs> onPlayerCooldownChanged;
+	private Event<PlayerLaserActivatedListener,PlayerLaserActivatedEventArgs> onPlayerLaserActivated;
+    private Event<PlayerShieldActivatedListener,PlayerShieldActivatedEventArgs> onPlayerShieldActivated;
+    private Event<PlayerShieldRemovedListener,PlayerShieldRemovedEventArgs> onPlayerShieldRemoved;
+
+
+
 	public RemoteSkillSet(Player owner) {
 		this.owner = owner;
 		onPlayerAbilityUsed = new Event<>((l, a) -> l.onPlayerAbilityUsed(a));
+		onPlayerCooldownChanged = new Event<>((l, a) -> l.onPlayerCooldownChanged(a));
+		onPlayerLaserActivated = new Event<>((l, a) -> l.onPlayerLaserActivated(a));
+        onPlayerShieldActivated = new Event<>((l, a) -> l.onPlayerShieldActivated(a));
+        onPlayerShieldRemoved = new Event<>((l, a) -> l.onPlayerShieldRemoved(a));
+	}
+
+
+	@Override
+	public Event<PlayerCooldownChangedListener, PlayerCooldownChangedEventArgs> getOnPlayerCooldownChanged() {
+		return onPlayerCooldownChanged;
 	}
 
 	/**
@@ -31,7 +46,7 @@ public class RemoteSkillSet implements SkillSet {
 	 */
 	@Override
 	public void activateQ() {
-		onPlayerAbilityUsed.fire(new PlayerAbilityUsedEventArgs(owner, 'q'));
+	    onPlayerAbilityUsed.fire(new PlayerAbilityUsedEventArgs(owner, 'q'));
 	}
 
 	/**
@@ -39,19 +54,38 @@ public class RemoteSkillSet implements SkillSet {
 	 */
 	@Override
 	public void activateW() {
-		onPlayerAbilityUsed.fire(new PlayerAbilityUsedEventArgs(owner, 'w'));
+        onPlayerAbilityUsed.fire(new PlayerAbilityUsedEventArgs(owner, 'w'));
 	}
 
 	public Event<PlayerAbilityUsedListener, PlayerAbilityUsedEventArgs> getOnPlayerAbilityUsed() {
 		return onPlayerAbilityUsed;
 	}
 
-	@Override
+    public Event<PlayerLaserActivatedListener,PlayerLaserActivatedEventArgs> getOnPlayerLaserActivated() {
+        return onPlayerLaserActivated;
+    }
+
+    @Override
+    public Event<PlayerShieldActivatedListener, PlayerShieldActivatedEventArgs> getOnPlayerShieldActivated() {
+        return onPlayerShieldActivated;
+    }
+
+    @Override
+    public Event<PlayerShieldRemovedListener,PlayerShieldRemovedEventArgs> getOnPlayerShieldRemoved() {
+        return onPlayerShieldRemoved;
+    }
+
+    @Override
 	public void incrementCooldown() {
 		// nop
 	}
 
-	@Override
+    @Override
+    public void removeShield() {
+
+    }
+
+    @Override
 	public void setQ(Ability q) {
 		// nop
 	}

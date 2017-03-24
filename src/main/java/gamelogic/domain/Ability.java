@@ -12,6 +12,7 @@ public abstract class Ability {
 	private String name;
 	protected Player owner;
 	private int cooldown;
+	private int shieldValue = 0;
 
 	public Ability(final String name) {
 		this.name = name;
@@ -59,6 +60,24 @@ public abstract class Ability {
 	}
 
 	/**
+	 * Gets the shield value of the item.
+	 *
+	 * @return the owner
+	 */
+	public int getShieldValue() {
+		return shieldValue;
+	}
+
+	/**
+	 * Sets the shieldValue of the item.
+	 *
+	 * @param shieldValue
+	 */
+	public void setShieldValue(int shieldValue) {
+		this.shieldValue = shieldValue;
+	}
+
+	/**
 	 * Update the name of the item
 	 *
 	 * @param name
@@ -75,5 +94,7 @@ public abstract class Ability {
 	 */
 	public abstract void activate();
 
-	public abstract void incrementCooldown();
+	public abstract boolean incrementCooldown();
+
+	public abstract void reduceShieldValue();
 }

@@ -1,19 +1,14 @@
 package main.java.networking.integration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
 import main.java.constants.GameType;
 import main.java.event.Event;
-import main.java.event.arguments.EntityMovedEventArgs;
-import main.java.event.arguments.GameCreatedEventArgs;
-import main.java.event.arguments.LocalPlayerDespawnEventArgs;
-import main.java.event.arguments.LocalPlayerSpawnEventArgs;
-import main.java.event.arguments.MultiplayerGameStartingEventArgs;
-import main.java.event.arguments.PlayerAbilityUsedEventArgs;
-import main.java.event.arguments.PlayerMovedEventArgs;
-import main.java.event.arguments.ReadyToStartEventArgs;
-import main.java.event.arguments.RemoteGameEndedEventArgs;
+import main.java.event.arguments.*;
 import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
 import main.java.event.listener.LocalPlayerSpawnListener;
@@ -62,6 +57,8 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	private boolean alreadyDoneHandshake;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	private Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> onRemoteGameEndedEvent;
+	private List<Entity> entitiesToAddOncePlayerReady;
+	private boolean playerIsReady = false;
 
 	/**
 	 * Creates a new client instance which, when ran, will connect to the server
@@ -91,6 +88,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 		onRemoteGameEndedEvent = new Event<>((l, a) -> l.onRemoteGameEnded(a));
 		gameUI.getOnPlayerLeavingGame().addOneTimeListener(this);
+		entitiesToAddOncePlayerReady = new ArrayList<>();
 	}
 
 	@Override
@@ -287,6 +285,64 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerCountDown(p);
 		} else if (p.getPacketName().equals("spawner-added")) {
 			triggerSpawnerAdded(p);
+		} else if(p.getPacketName().equals("player-cooldown-changed")) {
+			triggerPlayerCooldownChanged(p);
+		} else if(p.getPacketName().equals("player-laser-activated")) {
+			triggerPlayerLaserActivated(p);
+		} else if(p.getPacketName().equals("player-shield-activated")) {
+            triggerPlayerShieldActivated(p);
+        } else if(p.getPacketName().equals("player-shield-removed")) {
+            triggerPlayerShieldRemoved(p);
+        }
+	}
+
+    private void triggerPlayerShieldRemoved(Packet p) {
+        Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
+
+        if(player != null) {
+
+            int shieldValue = p.getInteger("shield-value");
+            ((Player)player).getSkillSet().getOnPlayerShieldRemoved().fire(
+                    new PlayerShieldRemovedEventArgs((Player)player, shieldValue)
+            );
+        }
+    }
+
+    private void triggerPlayerShieldActivated(Packet p) {
+        Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
+
+        if(player != null) {
+
+            int shieldValue = p.getInteger("shield-value");
+            ((Player)player).getSkillSet().getOnPlayerShieldActivated().fire(
+                    new PlayerShieldActivatedEventArgs((Player)player, shieldValue)
+            );
+        }
+    }
+
+	private void triggerPlayerLaserActivated(Packet p) {
+		Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
+
+		if(player != null) {
+			double direction = p.getDouble("direction");
+			int coolDown = p.getInteger("cool-down");
+
+			((Player)player).getSkillSet().getOnPlayerLaserActivated().fire(
+					new PlayerLaserActivatedEventArgs((Player)player, direction, coolDown)
+			);
+		}
+	}
+
+	private void triggerPlayerCooldownChanged(Packet p) {
+		Entity player = game.getWorld().getEntity(client.getClientID());
+
+		if(player != null) {
+			int cooldown = p.getInteger("cooldown-level");
+			char slot = p.getString("slot").charAt(0);
+
+			((Player)player).getSkillSet().getOnPlayerCooldownChanged().fire(
+					new PlayerCooldownChangedEventArgs((Player)player, cooldown, slot)
+			);
 		}
 	}
 
@@ -296,8 +352,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 *
 	 * @param p
 	 */
-
-	private void triggerSpawnerAdded(final Packet p) {
+	private void triggerSpawnerAdded(Packet p) {
 		Spawner.SpawnerColor color;
 		final String spawnerType = p.getString("entity-type");
 		switch (spawnerType) {
@@ -316,7 +371,15 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		}
 		final Spawner s = new Spawner(p.getInteger("duration"), null, color);
 		s.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
-		game.getWorld().addEntity(s);
+		addEntityToWorld(s);
+	}
+	
+	private void addEntityToWorld(Entity e) {
+		if(playerIsReady) {
+			game.getWorld().addEntity(e);
+		} else {
+			entitiesToAddOncePlayerReady.add(e);
+		}
 	}
 
 	/**
@@ -345,7 +408,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 
 		player.setPosition(new Position(row, col));
 		player.setAngle(angle);
-		game.getWorld().addEntity(player);
+		addEntityToWorld(player);
 	}
 
 	/**
@@ -393,7 +456,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			outcome = new GameOutcome(GameOutcomeType.GHOSTS_WON);
 		} else if (outcomeString.equals("player-won")) {
 			final int winnerID = p.getInteger("winner-id");
-			if (lobby.containsPlayer(winnerID)) {
+			if (game.getWorld().getEntity(winnerID) != null) {
 				final Player winner = (Player) game.getWorld().getEntity(winnerID);
 				outcome = new GameOutcome(GameOutcomeType.PLAYER_WON, winner);
 			} else {
@@ -518,10 +581,9 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 */
 	private void triggerRemoteGhostJoined(final Packet p) {
 		final int ghostID = p.getInteger("ghost-id");
-
 		final RemoteGhost ghost = new RemoteGhost(ghostID);
 		ghost.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
-		game.getWorld().addEntity(ghost);
+		addEntityToWorld(ghost);
 	}
 
 	/**
@@ -535,9 +597,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		final String name = p.getString("name");
 
 		final RemotePlayer player = new RemotePlayer(playerID, name);
+		player.setSkillSet(new RemoteSkillSet(player));
 		player.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
 
-		game.getWorld().addEntity(player);
+		addEntityToWorld(player);
 	}
 
 	/**
@@ -643,6 +706,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	public void onReadyToStart(final ReadyToStartEventArgs args) {
 		final Packet p = new Packet("ready-to-start");
 		manager.dispatch(p);
+		this.playerIsReady = true;
+		for(Entity e : entitiesToAddOncePlayerReady) {
+			game.getWorld().addEntity(e);
+		}
 	}
 
 	@Override

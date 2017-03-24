@@ -21,16 +21,26 @@ public class PacShield extends Ability {
     public void activate() {
         // Set the shield power to 10
         if(getCD() == 40){
-            owner.setShield(MAX_SHIELD);
+            setShieldValue(MAX_SHIELD);
             setCD(0);
         }
     }
 	@Override
-	public void incrementCooldown() {
-		int cooldown = getCD();
-		
-		if(cooldown < SHIELD_COOLDOWN && getOwner().getShield() == 0) {
+	public boolean incrementCooldown() {
+        int cooldown = getCD();
+		if(cooldown < SHIELD_COOLDOWN && getOwner().getSkillSet().getW().getShieldValue() == 0) {
 			setCD(cooldown + 1);
+			return true;
+		} else {
+			return false;
 		}
 	}
+
+    @Override
+    public void reduceShieldValue() {
+        int shieldValue = getShieldValue();
+        if(shieldValue > 0){
+            setShieldValue(shieldValue - 1);
+        }
+    }
 }

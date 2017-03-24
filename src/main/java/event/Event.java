@@ -119,6 +119,7 @@ public class Event<TListener, TEventArgs> {
 	 *            The arguments to pass to the event listeners.
 	 */
 	public void fire(final TEventArgs args) {
+		try {
 		synchronized (fireLock) {
 			for (final TListener listener : listeners) {
 				trigger.accept(listener, args);
@@ -129,6 +130,9 @@ public class Event<TListener, TEventArgs> {
 			}
 
 			oneTimeListeners.clear();
+		}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

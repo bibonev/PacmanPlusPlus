@@ -61,14 +61,18 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 				checkEndingConditions();
 				if(entity instanceof Player){
 					((Player) entity).getSkillSet().incrementCooldown();
+					int shieldValue = ((Player) entity).getSkillSet().getW().getShieldValue();
+                    if(shieldValue == 0){
+                        ((Player) entity).getSkillSet().removeShield();
+                    }
 				}
 			}
 
 			eatenPlayers.addAll(getEatenPlayers());
             killedEntities.addAll(getKilledEntitiesByLaser());
 			for (final Player p : eatenPlayers) {
-			    if(p.getShield() > 0) {
-			        p.reduceShield();
+			    if(p.getSkillSet().getW().getShieldValue() > 0) {
+			        p.getSkillSet().getW().reduceShieldValue();
                 } else {
                     p.setDeathReason("Eaten by a ghost!");
                     game.getWorld().removeEntity(p.getID());
@@ -105,8 +109,8 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
     private void decayPlayerShields() {
         if(gameStepsElapsed % 20 == 0) {
             for(Player p : game.getWorld().getPlayers()) {
-                if(p.getShield() > 0)
-                    p.reduceShield();
+                if(p.getSkillSet().getW().getShieldValue() > 0)
+                    p.getSkillSet().getW().reduceShieldValue();
             }
         }
     }

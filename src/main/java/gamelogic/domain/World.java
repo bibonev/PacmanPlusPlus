@@ -22,10 +22,11 @@ public class World {
 	private RuleChecker ruleEnforcer;
 	private Map map;
 	private HashMap<Integer, Entity> entities;
-	private int latestEntityID = 1000;
+	private volatile int latestEntityID = 1000;
 	private Event<EntityAddedListener, EntityChangedEventArgs> onEntityAdded;
 	private Event<EntityRemovingListener, EntityChangedEventArgs> onEntityRemoving;
 	private boolean remote;
+	private Object addObjectSync = new Object();
 
 	public World(final RuleChecker ruleEnforcer, final Map map, final boolean remote) {
 		entities = new HashMap<>();
@@ -99,17 +100,19 @@ public class World {
 	 * @return the id of the newly added entity
 	 */
 	public int addEntity(final Entity entity) {
-		int id;
-		if (entity instanceof Player && entity.getID() > -1) {
-			id = entity.getID();
-		} else {
-			id = latestEntityID++;
-			entity.setID(id);
+		synchronized (addObjectSync) {
+			int id;
+			if (entity.getID() > -1) {
+				id = entity.getID();
+			} else {
+				id = latestEntityID++;
+				entity.setID(id);
+			}
+			entities.put(id, entity);
+			entity.setWorld(this);
+			getOnEntityAddedEvent().fire(new EntityChangedEventArgs(id, this));
+			return id;	
 		}
-		entities.put(id, entity);
-		entity.setWorld(this);
-		getOnEntityAddedEvent().fire(new EntityChangedEventArgs(id, this));
-		return id;
 	}
 
 	/**
@@ -221,6 +224,7 @@ public class World {
 	 */
 	public void removeEntity(final int entityID) {
 		if (entities.containsKey(entityID)) {
+			Entity e = entities.get(entityID);
 			getOnEntityRemovingEvent().fire(new EntityChangedEventArgs(entityID, this));
 			entities.remove(entityID);
 		} else {
