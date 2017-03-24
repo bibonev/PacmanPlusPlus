@@ -3,7 +3,7 @@
 ## Dev Info
 
 ### Automated run of unit tests
-In a Terminal/CMD `cd` into the `java-team-project` directory.
+In a Terminal/CMD `cd` into the `PacmanPlusPlus` directory.
 
 When inside the directory, you can run all the unit tests using the command:
 
@@ -14,7 +14,7 @@ When inside the directory, you can run all the unit tests using the command:
 NOTE: This command runs ALL tests for ALL services.
 
 ### Code coverage
-From inside `java-team-project` run using:
+From inside `PacmanPlusPlus` run using:
 
 `./gradlew jacocoTestReport` for Unix
 
