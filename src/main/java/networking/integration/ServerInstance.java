@@ -642,11 +642,13 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 
 	@Override
 	public void onClientDisconnected(final int clientID) {
-		lobby.removePlayer(clientID);
-		if (game != null && game.getWorld().getEntity(clientID) != null) {
-			game.getWorld().removeEntity(clientID);
+		if(lobby.containsPlayer(clientID)) {
+			lobby.removePlayer(clientID);
+			if (game != null && game.getWorld().getEntity(clientID) != null) {
+				game.getWorld().removeEntity(clientID);
+			}
 		}
-
+		
 		if (lobby.getPlayerCount() == 0 || clientID == 0) {
 			server.die();
 			if (gameLogicTimer != null) {

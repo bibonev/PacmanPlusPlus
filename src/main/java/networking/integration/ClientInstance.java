@@ -242,6 +242,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	/* HANDLERS to create/deal with outgoing packets */
 	@Override
 	public void onEntityMoved(final EntityMovedEventArgs args) {
+		try{
 		if (args.getEntity() instanceof LocalPlayer) {
 			final Packet p = new Packet("player-moved");
 			p.setInteger("row", args.getRow());
@@ -250,6 +251,9 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 				p.setDouble("angle", ((PlayerMovedEventArgs) args).getAngle());
 			}
 			manager.dispatch(p);
+		}
+		}catch(Exception e) {
+			
 		}
 	}
 
