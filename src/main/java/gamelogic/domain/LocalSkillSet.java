@@ -132,11 +132,11 @@ public class LocalSkillSet implements SkillSet {
 
 	@Override
 	public void incrementCooldown() {
-		getQ().incrementCooldown();
-		getW().incrementCooldown();
-
-		getOnPlayerCooldownChanged().fire(new PlayerCooldownChangedEventArgs(getQ().getOwner(), getQ().getCD(), 'q'));
-		getOnPlayerCooldownChanged().fire(new PlayerCooldownChangedEventArgs(getW().getOwner(), getW().getCD(), 'w'));
+		if(getQ().incrementCooldown())
+			getOnPlayerCooldownChanged().fire(new PlayerCooldownChangedEventArgs(getQ().getOwner(), getQ().getCD(), 'q'));
+		
+		if(getW().incrementCooldown())
+			getOnPlayerCooldownChanged().fire(new PlayerCooldownChangedEventArgs(getW().getOwner(), getW().getCD(), 'w'));
 	}
 
 	@Override

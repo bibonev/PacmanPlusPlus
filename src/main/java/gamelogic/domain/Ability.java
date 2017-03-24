@@ -94,7 +94,7 @@ public abstract class Ability {
 	 */
 	public abstract void activate();
 
-	public abstract void incrementCooldown();
+	public abstract boolean incrementCooldown();
 
 	public abstract void reduceShieldValue();
 }

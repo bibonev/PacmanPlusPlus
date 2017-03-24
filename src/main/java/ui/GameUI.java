@@ -1,5 +1,6 @@
 package main.java.ui;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 
 import javafx.animation.KeyFrame;

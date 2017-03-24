@@ -1,5 +1,8 @@
 package main.java.networking.integration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
@@ -54,6 +57,8 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	private boolean alreadyDoneHandshake;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	private Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> onRemoteGameEndedEvent;
+	private List<Entity> entitiesToAddOncePlayerReady;
+	private boolean playerIsReady = false;
 
 	/**
 	 * Creates a new client instance which, when ran, will connect to the server
@@ -83,6 +88,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 		onRemoteGameEndedEvent = new Event<>((l, a) -> l.onRemoteGameEnded(a));
 		gameUI.getOnPlayerLeavingGame().addOneTimeListener(this);
+		entitiesToAddOncePlayerReady = new ArrayList<>();
 	}
 
 	@Override
@@ -365,7 +371,15 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		}
 		final Spawner s = new Spawner(p.getInteger("duration"), null, color);
 		s.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
-		game.getWorld().addEntity(s);
+		addEntityToWorld(s);
+	}
+	
+	private void addEntityToWorld(Entity e) {
+		if(playerIsReady) {
+			game.getWorld().addEntity(e);
+		} else {
+			entitiesToAddOncePlayerReady.add(e);
+		}
 	}
 
 	/**
@@ -394,7 +408,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 
 		player.setPosition(new Position(row, col));
 		player.setAngle(angle);
-		game.getWorld().addEntity(player);
+		addEntityToWorld(player);
 	}
 
 	/**
@@ -442,7 +456,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			outcome = new GameOutcome(GameOutcomeType.GHOSTS_WON);
 		} else if (outcomeString.equals("player-won")) {
 			final int winnerID = p.getInteger("winner-id");
-			if (lobby.containsPlayer(winnerID)) {
+			if (game.getWorld().getEntity(winnerID) != null) {
 				final Player winner = (Player) game.getWorld().getEntity(winnerID);
 				outcome = new GameOutcome(GameOutcomeType.PLAYER_WON, winner);
 			} else {
@@ -567,10 +581,9 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	 */
 	private void triggerRemoteGhostJoined(final Packet p) {
 		final int ghostID = p.getInteger("ghost-id");
-
 		final RemoteGhost ghost = new RemoteGhost(ghostID);
 		ghost.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
-		game.getWorld().addEntity(ghost);
+		addEntityToWorld(ghost);
 	}
 
 	/**
@@ -586,7 +599,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		final RemotePlayer player = new RemotePlayer(playerID, name);
 		player.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
 
-		game.getWorld().addEntity(player);
+		addEntityToWorld(player);
 	}
 
 	/**
@@ -692,6 +705,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	public void onReadyToStart(final ReadyToStartEventArgs args) {
 		final Packet p = new Packet("ready-to-start");
 		manager.dispatch(p);
+		this.playerIsReady = true;
+		for(Entity e : entitiesToAddOncePlayerReady) {
+			game.getWorld().addEntity(e);
+		}
 	}
 
 	@Override

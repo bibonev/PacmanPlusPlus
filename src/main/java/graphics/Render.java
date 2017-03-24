@@ -36,7 +36,7 @@ import main.java.ui.Screen;
 /**
  * Created by Boyan Bonev on 09/02/2017.
  */
-public class Render implements GameDisplayInvalidatedListener, GameEndedListener,
+public class Render implements GameDisplayInvalidatedListener, GameEndedListener, EntityAddedListener,
 		LocalPlayerSpawnListener, LocalPlayerDespawnListener, EntityRemovingListener, PlayerCooldownChangedListener, PlayerLaserActivatedListener, PlayerShieldActivatedListener, PlayerShieldRemovedListener {
 	private Pane root;
 	private StackPane inventory;
@@ -59,7 +59,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	private Node playerRespawnWindow;
 	private Node gameOverWindow;
 	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame;
-	private Set<Integer> removedEntityIDs;
+	private Set<Integer> addedEntityIDs, removedEntityIDs;
 	private Event<SingleplayerGameStartingListener, SingleplayerGameStartingEventArgs> onStartingSingleplayerGame;
 
 	/**
@@ -79,6 +79,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.gameLogic.getOnGameEnded().addOneTimeListener(this);
 		this.gameLogic.getOnLocalPlayerSpawn().addListener(this);
 		this.gameLogic.getOnLocalPlayerDespawn().addListener(this);
+		this.game.getWorld().getOnEntityAddedEvent().addListener(this);
+		
 		this.game.getWorld().getOnEntityRemovingEvent().addListener(this);
 
 		this.transitions = new HashMap<>();
@@ -86,6 +88,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		this.allEntities = new HashMap<>();
 		this.playersEntities = new HashMap<>();
 		this.shieldsActivated = new HashMap<>();
+		this.addedEntityIDs = new HashSet<>();
         this.removedEntityIDs = new HashSet<>();
 		
 		this.onPlayerLeavingGame = new Event<>((l, a) -> l.onPlayerLeavingGame());
@@ -128,6 +131,21 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
     	redrawCells();
     	
+    	synchronized (addedEntityIDs) {
+			for(int id : addedEntityIDs) {
+				Entity e = game.getWorld().getEntity(id);
+				if(e instanceof Player) {
+					setupPlayerAnimation((Player) e);
+				} else if(e instanceof Ghost) {
+					setupGhostAnimation((Ghost) e);
+				} else if(e instanceof Spawner) {
+					setupSpawnerAnimation((Spawner) e);
+				}
+			}
+			
+			addedEntityIDs.clear();
+		}
+    	
     	synchronized (removedEntityIDs) {
 			for(int id : removedEntityIDs) {
 				removeEntityFromStage(id);
@@ -138,40 +156,37 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
 		for (final Player player : game.getWorld().getPlayers()) {
     	    PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
-    	    Node nextNode = pacmanVisualisation.getNode();
-
-		    
-		    if(!allEntities.containsKey(player.getID()))
-		    	setupPlayerAnimation(player);
-
-            transitions.get(player.getID()).setToY(nextNode.getTranslateY());
-            transitions.get(player.getID()).setToX(nextNode.getTranslateX());
-            rotations.get(player.getID()).setToAngle(nextNode.getRotate());
-
-            rotations.get(player.getID()).play();
-            transitions.get(player.getID()).play();
+    	    
+    	    if(pacmanVisualisation != null) {
+	    	    Node nextNode = pacmanVisualisation.getNode();
+	
+	            transitions.get(player.getID()).setToY(nextNode.getTranslateY());
+	            transitions.get(player.getID()).setToX(nextNode.getTranslateX());
+	            rotations.get(player.getID()).setToAngle(nextNode.getRotate());
+	
+	            rotations.get(player.getID()).play();
+	            transitions.get(player.getID()).play();
+    	    }
         }
 
 		for (final Ghost ghost : game.getWorld().getGhosts()) {
-		    ImageView nextNode = new GhostVisualisation(ghost.getPosition()).getNode();
-		    
-		    if(!allEntities.containsKey(ghost.getID())) {
-		    	setupGhostAnimation(ghost);
+		    GhostVisualisation ghostVis = new GhostVisualisation(ghost.getPosition());
+
+		    if(ghostVis != null) {
+		    	Node nextNode = ghostVis.getNode();
+			    transitions.get(ghost.getID()).setToY(nextNode.getTranslateY());
+	            transitions.get(ghost.getID()).setToX(nextNode.getTranslateX());
+	
+	            transitions.get(ghost.getID()).play();
 		    }
-
-		    transitions.get(ghost.getID()).setToY(nextNode.getTranslateY());
-            transitions.get(ghost.getID()).setToX(nextNode.getTranslateX());
-
-            transitions.get(ghost.getID()).play();
 		}
 
 		for (final Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
-		    if(!allEntities.containsKey(spawner.getID())) {
-		    	setupSpawnerAnimation(spawner);
-		    }
 			SpawnerVisualisation vis = (SpawnerVisualisation) allEntities.get(spawner.getID());
 		    
-		    vis.setNumber(spawner.getTimeRemaining());
+			if(vis != null) {
+				vis.setNumber(spawner.getTimeRemaining());
+			}
 		}
 
 		root.requestFocus();
@@ -615,4 +630,12 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
         });
     }
+
+	@Override
+	public void onEntityAdded(EntityChangedEventArgs args) {
+		synchronized (addedEntityIDs) {
+			
+			addedEntityIDs.add(args.getEntityID());
+		}
+	}
 }
