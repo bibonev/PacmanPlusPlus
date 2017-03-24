@@ -437,7 +437,9 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	private void triggerRemotePlayerDied(final Packet p) {
 		final int playerID = p.getInteger("player-id");
 
-		game.getWorld().removeEntity(playerID);
+		if(game.getWorld().getEntity(playerID) != null) {
+			game.getWorld().removeEntity(playerID);
+		}
 	}
 
 	/**

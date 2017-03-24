@@ -182,10 +182,17 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}
 
 		for (final Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
-			SpawnerVisualisation vis = (SpawnerVisualisation) allEntities.get(spawner.getID());
-		    
-			if(vis != null) {
-				vis.setNumber(spawner.getTimeRemaining());
+			Visualisation vi = allEntities.get(spawner.getID());
+			
+			if(vi instanceof SpawnerVisualisation) {
+				SpawnerVisualisation vis = (SpawnerVisualisation) vi;
+			    
+				if(vis != null) {
+					vis.setNumber(spawner.getTimeRemaining());
+				}
+			} else {
+				removedEntityIDs.add(spawner.getID());
+				addedEntityIDs.add(spawner.getID());
 			}
 		}
 
