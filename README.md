@@ -1,11 +1,5 @@
 # PacmanPlusPlus
 
-## Contributions
-
-We welcome contributions from external developers. To do so please fork the
-repository, work on the game following the guidelines outlined in the `Dev Info`
-section and create pull requests for your changes.
-
 ## Developers
 - Thomas Galvin
 - Rose Kirtley
@@ -13,6 +7,12 @@ section and create pull requests for your changes.
 - Lyubomir Pashev
 - Simeon Kostadinov
 - Andrei-Marius Longhin
+
+## Contributions
+
+We welcome contributions from external developers. To do so please fork the
+repository, work on the game following the guidelines outlined in the `Dev Info`
+section and create pull requests for your changes.
 
 ## Dev Info
 
