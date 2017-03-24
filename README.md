@@ -1,4 +1,4 @@
-# PacManPlusPlus
+# PacmanPlusPlus
 
 ## Dev Info
 
