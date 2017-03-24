@@ -460,11 +460,12 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			p.setInteger("col", e.getPosition().getColumn());
 			manager.dispatchAllExcept(p, e.getID());
 
+            ((Player)e).getSkillSet().getOnPlayerLaserActivated().addListener(this);
+            ((Player)e).getSkillSet().getOnPlayerShieldActivated().addListener(this);
+            ((Player)e).getSkillSet().getOnPlayerShieldRemoved().addListener(this);
+            
 			if (lobby.containsPlayer(e.getID())) {
 				((Player)e).getSkillSet().getOnPlayerCooldownChanged().addListener(this);
-	            ((Player)e).getSkillSet().getOnPlayerLaserActivated().addListener(this);
-	            ((Player)e).getSkillSet().getOnPlayerShieldActivated().addListener(this);
-	            ((Player)e).getSkillSet().getOnPlayerShieldRemoved().addListener(this);
 				manager.dispatch(e.getID(), createLocalPlayerJoinPacket(e.getPosition().getRow(),
 						e.getPosition().getColumn(), ((Player) e).getAngle()));
 			}
@@ -785,37 +786,34 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	}
     @Override
     public void onPlayerLaserActivated(PlayerLaserActivatedEventArgs args) {
-        if(lobby.containsPlayer(args.getPlayer().getID())) {
-            Packet p = new Packet("player-laser-activated");
+        Packet p = new Packet("player-laser-activated");
 
-            p.setDouble("direction", args.getDirection());
-            p.setInteger("cool-down", args.getCoolDown());
+        p.setInteger("player-id", args.getPlayer().getID());
+        p.setDouble("direction", args.getDirection());
+        p.setInteger("cool-down", args.getCoolDown());
 
-            manager.dispatch(args.getPlayer().getID(), p);
-        }
+        manager.dispatchAll(p);
     }
 
     @Override
     public void onPlayerShieldActivated(PlayerShieldActivatedEventArgs args) {
 
-        if(lobby.containsPlayer(args.getPlayer().getID())) {
-            Packet p = new Packet("player-shield-activated");
-            p.setInteger("shield-value", args.getShieldValue());
+        Packet p = new Packet("player-shield-activated");
+        p.setInteger("player-id", args.getPlayer().getID());
+        p.setInteger("shield-value", args.getShieldValue());
 
 
-            manager.dispatch(args.getPlayer().getID(), p);
-        }
+        manager.dispatchAll(p);
     }
 
 
     @Override
     public void onPlayerShieldRemoved(PlayerShieldRemovedEventArgs args) {
-        if(lobby.containsPlayer(args.getPlayer().getID())) {
-            Packet p = new Packet("player-shield-removed");
-            p.setInteger("shield-value", args.getShieldValue());
+        Packet p = new Packet("player-shield-removed");
+        p.setInteger("player-id", args.getPlayer().getID());
+        p.setInteger("shield-value", args.getShieldValue());
 
-            manager.dispatch(args.getPlayer().getID(), p);
-        }
+        manager.dispatchAll(p);
     }
 
 	/*

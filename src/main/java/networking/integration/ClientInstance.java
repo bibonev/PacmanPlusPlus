@@ -297,8 +297,9 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	}
 
     private void triggerPlayerShieldRemoved(Packet p) {
-        Entity player = game.getWorld().getEntity(client.getClientID());
+        Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
 
+        System.out.println(player.getClass().getSimpleName());
         if(player != null) {
 
             int shieldValue = p.getInteger("shield-value");
@@ -309,7 +310,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
     }
 
     private void triggerPlayerShieldActivated(Packet p) {
-        Entity player = game.getWorld().getEntity(client.getClientID());
+        Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
 
         if(player != null) {
 
@@ -321,7 +322,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
     }
 
 	private void triggerPlayerLaserActivated(Packet p) {
-		Entity player = game.getWorld().getEntity(client.getClientID());
+		Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
 
 		if(player != null) {
 			double direction = p.getDouble("direction");
@@ -597,6 +598,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		final String name = p.getString("name");
 
 		final RemotePlayer player = new RemotePlayer(playerID, name);
+		player.setSkillSet(new RemoteSkillSet(player));
 		player.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
 
 		addEntityToWorld(player);

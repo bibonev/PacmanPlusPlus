@@ -283,10 +283,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	@Override
 	public void onLocalPlayerSpawn(LocalPlayerSpawnEventArgs args) {
 		this.controlledPlayer = args.getPlayer();
-		this.controlledPlayer.getSkillSet().getOnPlayerCooldownChanged().addListener(this);
-		this.controlledPlayer.getSkillSet().getOnPlayerLaserActivated().addListener(this);
-        this.controlledPlayer.getSkillSet().getOnPlayerShieldActivated().addListener(this);
-        this.controlledPlayer.getSkillSet().getOnPlayerShieldRemoved().addListener(this);
 
 		this.localPlayerID = this.controlledPlayer.getID();
 		Platform.runLater(this::playerRespawn);
@@ -301,6 +297,16 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		Platform.runLater(() -> {
 			synchronized (removedEntityIDs) {
 				removedEntityIDs.add(args.getEntityID());
+			}
+
+			Entity e = game.getWorld().getEntity(args.getEntityID());
+			
+			if (e instanceof Player) {
+				Player thiscontrolledPlayer = (Player)e;
+				thiscontrolledPlayer.getSkillSet().getOnPlayerCooldownChanged().removeListener(this);
+				thiscontrolledPlayer.getSkillSet().getOnPlayerLaserActivated().removeListener(this);
+		        thiscontrolledPlayer.getSkillSet().getOnPlayerShieldActivated().removeListener(this);
+		        thiscontrolledPlayer.getSkillSet().getOnPlayerShieldRemoved().removeListener(this);
 			}
 		});
 	}
@@ -546,6 +552,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
     @Override
     public void onPlayerLaserActivated(PlayerLaserActivatedEventArgs args) {
         Platform.runLater(() -> {
+			System.out.println("blah2");
             Player player = args.getPlayer();
             double direction = args.getDirection();
             int cooldown = args.getCoolDown();
@@ -634,8 +641,17 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	@Override
 	public void onEntityAdded(EntityChangedEventArgs args) {
 		synchronized (addedEntityIDs) {
-			
 			addedEntityIDs.add(args.getEntityID());
+			
+			Entity e = game.getWorld().getEntity(args.getEntityID());
+			
+			if (e instanceof Player) {
+				Player thiscontrolledPlayer = (Player)e;
+				thiscontrolledPlayer.getSkillSet().getOnPlayerCooldownChanged().addListener(this);
+				thiscontrolledPlayer.getSkillSet().getOnPlayerLaserActivated().addListener(this);
+		        thiscontrolledPlayer.getSkillSet().getOnPlayerShieldActivated().addListener(this);
+		        thiscontrolledPlayer.getSkillSet().getOnPlayerShieldRemoved().addListener(this);
+			}
 		}
 	}
 }

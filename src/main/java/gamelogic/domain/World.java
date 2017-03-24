@@ -102,7 +102,7 @@ public class World {
 	public int addEntity(final Entity entity) {
 		synchronized (addObjectSync) {
 			int id;
-			if (entity instanceof Player || entity.getID() > -1) {
+			if (entity.getID() > -1) {
 				id = entity.getID();
 			} else {
 				id = latestEntityID++;
