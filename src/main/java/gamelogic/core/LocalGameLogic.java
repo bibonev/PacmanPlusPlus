@@ -140,11 +140,11 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 	private boolean ghostsEatenPlayers() {
 		for (final Spawner c : game.getWorld().getEntities(Spawner.class)) {
 			final Entity e = c.getEntity();
-			if (e != null && e instanceof RemotePlayer) {
+			if (e != null && e instanceof Player) {
 				return false;
 			}
 		}
-		return game.getWorld().getEntities(RemotePlayer.class).size() == 0;
+		return game.getWorld().getEntities(Player.class).size() == 0;
 	}
 
 	private boolean allFoodEaten() {

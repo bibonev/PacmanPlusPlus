@@ -317,6 +317,10 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 				// otherwise it's an AI player
 
 				manager.dispatchAllExcept(p, args.getEntity().getID());
+				
+				Packet p2 = new Packet("dots-eaten-changed");
+				p2.setInteger("dots", ((Player)args.getEntity()).getDotsEaten());
+				manager.dispatch(args.getEntity().getID(), p2);
 			} else {
 				manager.dispatchAll(p);
 			}
@@ -751,7 +755,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			break;
 		case PLAYER_WON:
 			p.setString("outcome", "player-won");
-			p.setInteger("winner-id", outcome.getWinner().getID());
+			p.setString("winner-name", outcome.getWinner().getName());
 			break;
 		case TIE:
 			p.setString("outcome", "tie");

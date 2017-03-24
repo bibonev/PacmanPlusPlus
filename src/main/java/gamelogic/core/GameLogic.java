@@ -6,6 +6,7 @@ import main.java.event.arguments.GameEndedEventArgs;
 import main.java.event.arguments.LocalPlayerDespawnEventArgs;
 import main.java.event.arguments.LocalPlayerSpawnEventArgs;
 import main.java.event.arguments.ReadyToStartEventArgs;
+import main.java.event.listener.DotsEatenChangedListener;
 import main.java.event.listener.GameDisplayInvalidatedListener;
 import main.java.event.listener.GameEndedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
@@ -21,6 +22,7 @@ public abstract class GameLogic {
 	private Event<LocalPlayerSpawnListener, LocalPlayerSpawnEventArgs> onLocalPlayerSpawn;
 	private Event<LocalPlayerDespawnListener, LocalPlayerDespawnEventArgs> onLocalPlayerDespawn;
 	private Event<ReadyToStartListener, ReadyToStartEventArgs> onReadyToStart;
+	private Event<DotsEatenChangedListener, Integer> onDotsEatenChanged;
 	
 	public abstract void gameStep(int delay);
 

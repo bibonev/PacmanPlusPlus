@@ -9,6 +9,7 @@ import main.java.constants.GameOutcomeType;
 import main.java.constants.GameType;
 import main.java.event.Event;
 import main.java.event.arguments.*;
+import main.java.event.listener.DotsEatenChangedListener;
 import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.LocalPlayerDespawnListener;
 import main.java.event.listener.LocalPlayerSpawnListener;
@@ -57,6 +58,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	private boolean alreadyDoneHandshake;
 	private Event<MultiplayerGameStartingListener, MultiplayerGameStartingEventArgs> multiplayerGameStartingEvent;
 	private Event<RemoteGameEndedListener, RemoteGameEndedEventArgs> onRemoteGameEndedEvent;
+	private Event<DotsEatenChangedListener, Integer> onDotsEatenChanged;
 	private List<Entity> entitiesToAddOncePlayerReady;
 	private boolean playerIsReady = false;
 
@@ -87,6 +89,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		gameLogic = null;
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
 		onRemoteGameEndedEvent = new Event<>((l, a) -> l.onRemoteGameEnded(a));
+		onDotsEatenChanged = new Event<>((l, a) -> l.onDotsEatenChanged(a));
 		gameUI.getOnPlayerLeavingGame().addOneTimeListener(this);
 		entitiesToAddOncePlayerReady = new ArrayList<>();
 	}
@@ -204,6 +207,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			removeWorldGameHooks(game, gameLogic);
 		}
 	}
+	
+	public Event<DotsEatenChangedListener, Integer> getOnDotsEatenChanged() {
+		return onDotsEatenChanged;
+	}
 
 	/**
 	 * Removes this {@link ClientInstance} object as a listener from any
@@ -293,13 +300,20 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
             triggerPlayerShieldActivated(p);
         } else if(p.getPacketName().equals("player-shield-removed")) {
             triggerPlayerShieldRemoved(p);
+        } else if(p.getPacketName().equals("dots-eaten-changed")) {
+        	triggerDotsEatenChanged(p);
         }
 	}
 
-    private void triggerPlayerShieldRemoved(Packet p) {
+    private void triggerDotsEatenChanged(Packet p) {
+		int dots = p.getInteger("dots");
+		onDotsEatenChanged.fire(dots);
+	}
+
+	private void triggerPlayerShieldRemoved(Packet p) {
         Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
 
-        if(player != null) {
+        if(player != null && player instanceof Player) {
 
             int shieldValue = p.getInteger("shield-value");
             ((Player)player).getSkillSet().getOnPlayerShieldRemoved().fire(
@@ -311,7 +325,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
     private void triggerPlayerShieldActivated(Packet p) {
         Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
 
-        if(player != null) {
+        if(player != null && player instanceof Player) {
 
             int shieldValue = p.getInteger("shield-value");
             ((Player)player).getSkillSet().getOnPlayerShieldActivated().fire(
@@ -323,7 +337,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	private void triggerPlayerLaserActivated(Packet p) {
 		Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
 
-		if(player != null) {
+		if(player != null && player instanceof Player) {
 			double direction = p.getDouble("direction");
 			int coolDown = p.getInteger("cool-down");
 
@@ -457,13 +471,9 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		} else if (outcomeString.equals("ghosts-won")) {
 			outcome = new GameOutcome(GameOutcomeType.GHOSTS_WON);
 		} else if (outcomeString.equals("player-won")) {
-			final int winnerID = p.getInteger("winner-id");
-			if (game.getWorld().getEntity(winnerID) != null) {
-				final Player winner = (Player) game.getWorld().getEntity(winnerID);
-				outcome = new GameOutcome(GameOutcomeType.PLAYER_WON, winner);
-			} else {
-				throw new IllegalStateException("Unknown winner ID: " + winnerID);
-			}
+			final String winnerName = p.getString("winner-name");
+			final Player winner = new RemotePlayer(0, winnerName);
+			outcome = new GameOutcome(GameOutcomeType.PLAYER_WON, winner);
 		} else {
 			throw new IllegalStateException("Unknown game outcome from server: " + outcomeString);
 		}
