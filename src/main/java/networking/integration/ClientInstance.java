@@ -299,7 +299,6 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
     private void triggerPlayerShieldRemoved(Packet p) {
         Entity player = game.getWorld().getEntity(p.getInteger("player-id"));
 
-        System.out.println(player.getClass().getSimpleName());
         if(player != null) {
 
             int shieldValue = p.getInteger("shield-value");

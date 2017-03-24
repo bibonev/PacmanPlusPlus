@@ -552,7 +552,6 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
     @Override
     public void onPlayerLaserActivated(PlayerLaserActivatedEventArgs args) {
         Platform.runLater(() -> {
-			System.out.println("blah2");
             Player player = args.getPlayer();
             double direction = args.getDirection();
             int cooldown = args.getCoolDown();
