@@ -1,6 +1,33 @@
 # PacmanPlusPlus
 
+## Contributions
+
+We welcome contributions from external developers. To do so please fork the
+repository, work on the game following the guidelines outlined in the `Dev Info`
+section and create pull requests for your changes.
+
+## Developers
+Thomas Galvin
+Rose Kirtley
+Boyan Bonev
+Lyubomir Pashev
+Simeon Kostadinov
+Andrei-Marius Longhin
+
 ## Dev Info
+
+### Eclipse setup
+To work on the project in Eclipse please follow the steps below:
+
+1) Create a new project called `PacmanPlusPlus` (the name needs to be exactly that)
+
+2) In Build Path, add the folder `resources` to the sources.
+
+3) In Build Path, add the following libraries:
+- JUnit 4
+- Mockito ALL 1.9.5. (available [here](https://mvnrepository.com/artifact/org.mockito/mockito-all/1.9.5))
+
+The game can now be run from the main class `GameUI`.
 
 ### Automated run of unit tests
 In a Terminal/CMD `cd` into the `PacmanPlusPlus` directory.
