@@ -10,6 +10,8 @@ import main.java.constants.MovementDirection;
  */
 public class ControlledPlayer extends LocalPlayer {
 	private MovementDirection direction;
+	
+	private boolean canRespawn;
 
 	public ControlledPlayer(final int id, final String name) {
 		super(name);
@@ -71,5 +73,13 @@ public class ControlledPlayer extends LocalPlayer {
 	@Override
 	public void gameStep(final Game game) {
 		move();
+	}
+
+	public boolean canRespawn() {
+		return canRespawn;
+	}
+
+	public void setCanRespawn(boolean canRespawn) {
+		this.canRespawn = canRespawn;
 	}
 }

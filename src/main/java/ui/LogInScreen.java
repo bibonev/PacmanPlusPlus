@@ -4,9 +4,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import main.java.event.Event;
-import main.java.event.arguments.UserLoggedInEventArgs;
-import main.java.event.listener.UserLoggedInEventListener;
 
 /**
  * Screen for logging in
@@ -20,13 +17,11 @@ public class LogInScreen extends Screen {
 	private Label label;
 	private Label title;
 	private TextField text;
-	private Event<UserLoggedInEventListener, UserLoggedInEventArgs> userLogIn = new Event<>(
-			(listener, arg) -> listener.onUserLoggedIn(arg));
 
 	public LogInScreen(final GameUI game) {
 		super(game);
 
-		title = new Label("Welcome to PacMan");
+		title = new Label("Welcome to Pacman++");
 		title.getStyleClass().add("titleStyle");
 
 		label = new Label("Enter Username:");
@@ -49,7 +44,6 @@ public class LogInScreen extends Screen {
 		if (!username.isEmpty()) {
 			// if(checkname(username)){
 			game.setName(username);
-			userLogIn.fire(new UserLoggedInEventArgs(username));
 			game.switchToMenu();
 			// }else{
 			// Alert alert = new Alert(AlertType.ERROR);

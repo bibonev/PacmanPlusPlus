@@ -16,7 +16,7 @@ public abstract class Entity {
 	private Position position;
 	private int id = -1;
 	private World world;
-	private boolean shield = false;
+	private boolean isKilledByLaser = false;
 
 	private Event<EntityMovedListener, EntityMovedEventArgs> onMoved;
 
@@ -73,28 +73,28 @@ public abstract class Entity {
 	 * @param id
 	 *            the new id
 	 */
-	protected void setID(final int id) {
+	public void setID(final int id) {
 		this.id = id;
 	}
 
-	/**
-	 * Fetch the entity's shield
-	 *
-	 * @return a boolean
-	 */
-	public boolean getShield() {
-		return this.shield;
-	}
+    /**
+     * Fetch the entity's coolDown
+     *
+     * @return an boolean isKilledByLaser
+     */
+    public boolean getIsKilled() {
+        return isKilledByLaser;
+    }
 
-	/**
-	 * Update the entity's shield
-	 *
-	 * @param shield
-	 *            the new shield value
-	 */
-	public void setShield(final boolean shield) {
-		this.shield = shield;
-	}
+    /**
+     * Update the entity's isKilledByLaser
+     *
+     * @param isKilledByLaser
+     *            the new isKilledByLaser
+     */
+    protected void setIsKilled(final boolean isKilledByLaser) {
+        this.isKilledByLaser = isKilledByLaser;
+    }
 
 
 	/**
@@ -103,7 +103,7 @@ public abstract class Entity {
 	 * @param world
 	 *            the new world
 	 */
-	protected void setWorld(final World world) {
+	public void setWorld(final World world) {
 		this.world = world;
 	}
 

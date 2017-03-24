@@ -5,5 +5,5 @@ package main.java.constants;
  * Rows - the count of the rows Columns - the count of the columns
  */
 public enum CellState {
-	EMPTY, OBSTACLE, FOOD
+	EMPTY, OBSTACLE, FOOD, LASER
 }

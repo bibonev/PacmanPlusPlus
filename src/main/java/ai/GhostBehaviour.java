@@ -2,8 +2,8 @@ package main.java.ai;
 
 import main.java.gamelogic.domain.Behaviour;
 import main.java.gamelogic.domain.Entity;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Position;
-import main.java.gamelogic.domain.SkillSet;
 import main.java.gamelogic.domain.World;
 
 /**
@@ -16,20 +16,18 @@ public class GhostBehaviour extends Behaviour {
 	/**
 	 * Instantiates a new default behavior.
 	 *
-	 * @param map
-	 *            the map
-	 * @param entity
-	 *            the controlled entity
-	 * @param speed
-	 *            the speed
-	 * @param stash
-	 *            the inventory
+	 * @param world the world
+	 * @param entity            the controlled entity
+	 * @param type the type
 	 */
-	public GhostBehaviour(final World world, final Entity entity, final int speed, final Type type) {
-		super(world, entity, speed, new SkillSet(), type);
+	public GhostBehaviour(final World world, final Entity entity, final Type type) {
+		super(world, entity, new LocalSkillSet(), type);
 	}
 
 	/**
+	 * Pick target.
+	 *
+	 * @return the position
 	 * @see java.gamelogic.domain.Behaviour#pickTarget()
 	 */
 	@Override
@@ -37,6 +35,9 @@ public class GhostBehaviour extends Behaviour {
 		return pickRandomTarget();
 	}
 
+	/* (non-Javadoc)
+	 * @see main.java.gamelogic.domain.Behaviour#run()
+	 */
 	@Override
 	public void run() {
 

@@ -1,6 +1,7 @@
-package test.java.gamelogic.domain;
+ package test.java.gamelogic.domain;
 
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import org.hamcrest.core.Is;
 import org.junit.Test;
@@ -19,15 +20,18 @@ public class GameTest {
 		// Given
 		final World world = Randoms.randomWorld();
 		final GameSettings gameSettings = Randoms.randomGameSettings();
-		final ControlledPlayer controlledPlayer = Randoms.randomControlledPlayer();
 
 		// When
-		final Game game = new Game(world, gameSettings, controlledPlayer, GameType.SINGLEPLAYER);
+		final Game game = new Game(world, gameSettings, GameType.SINGLEPLAYER);
+		game.setEnded();
+		game.setStarted();
 
 		// Then
-		assertThat(game.getPlayer(), Is.is(controlledPlayer));
 		assertThat(game.getWorld(), Is.is(world));
 		assertThat(game.getGameSettings(), Is.is(gameSettings));
+		assertTrue(game.hasEnded()==true);
+		assertTrue(game.hasStarted()==true);
+		
 	}
 
 }

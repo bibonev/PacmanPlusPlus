@@ -5,10 +5,13 @@ import java.util.Collection;
 /**
  * The PacLaser skill. Shoots 4 lasers out of the pacman, one in each direction, 
  * killing anyone caught in their path.
- * 
+ *
  * @author Lyubomir Pashev
+ * @author Simeon Kostadinov
+ *
  */
 public class PacLaser extends Ability {
+	public static final int LASER_COOLDOWN = 20;
 
 	/**
 	 * Instantiates a new paclaser.
@@ -22,25 +25,83 @@ public class PacLaser extends Ability {
 	 */
 	@Override
 	public void activate() {
-		final World world = owner.getWorld();
-
-		final Collection<Entity> entities = world.getEntities();
-
-		final int row = owner.getPosition().getRow();
-		final int col = owner.getPosition().getColumn();
-		
-		//for now just removes entities from the world
-		//will probably be replaced with a more elegant solution
-		for(Entity entity:entities){
-			final int enrow = entity.getPosition().getRow();
-			final int encol = entity.getPosition().getColumn();
-			if(enrow==row || encol==col){
-				world.removeEntity(entity.getID());
-			}
-					
-		}
-
+		if(getCD() == LASER_COOLDOWN){
+		    shoot();
+		    owner.setLaserFired(true);
+		    setCD(0);
+        }
 
 	}
 
+	private void shoot(){
+        final World world = owner.getWorld();
+
+        final Collection<Entity> entities = world.getEntities();
+
+        final int row = owner.getPosition().getRow();
+        final int col = owner.getPosition().getColumn();
+        final double angle = owner.getAngle();
+
+        if(angle == 0.0){
+
+            for(Entity entity:entities){
+                final int enrow = entity.getPosition().getRow();
+                final int encol = entity.getPosition().getColumn();
+                if(enrow==row && encol>col){
+                    entity.setIsKilled(true);
+                }
+            }
+            return;
+
+        }
+        if(angle == 90.0){
+
+            for(Entity entity:entities){
+                final int enrow = entity.getPosition().getRow();
+                final int encol = entity.getPosition().getColumn();
+                if(enrow>row && encol==col){
+                    entity.setIsKilled(true);
+                }
+            }
+            return;
+        }
+        if(angle == -90.0){
+
+            for(Entity entity:entities){
+                final int enrow = entity.getPosition().getRow();
+                final int encol = entity.getPosition().getColumn();
+                if(enrow<row && encol==col){
+                    entity.setIsKilled(true);
+                }
+            }
+            return;
+        }
+        if(angle == 180.0){
+            for(Entity entity:entities){
+                final int enrow = entity.getPosition().getRow();
+                final int encol = entity.getPosition().getColumn();
+                if(enrow==row && encol<col){
+                    entity.setIsKilled(true);
+                }
+            }
+            return;
+        }
+    }
+
+	@Override
+	public boolean incrementCooldown() {
+		int cooldown = getCD();
+		
+		if(cooldown < LASER_COOLDOWN) {
+			setCD(cooldown + 1);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+    @Override
+    public void reduceShieldValue() {
+        // no
+    }
 }

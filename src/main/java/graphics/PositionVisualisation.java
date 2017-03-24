@@ -20,10 +20,8 @@ public class PositionVisualisation extends Position {
 	/**
 	 * Initialize positionVisualisation by providing row and column
 	 *
-	 * @param i
-	 *            - row
-	 * @param j
-	 *            - column
+	 * @param i - row
+	 * @param j - column
 	 */
 	public PositionVisualisation(final int i, final int j) {
 		super(i, j);
@@ -46,8 +44,8 @@ public class PositionVisualisation extends Position {
 
 		// Test screen size
 		// TODO: Remove the test screen size, or add it as a default one
-		ScreenSize.Width = 600;
-		ScreenSize.Height = 350;
+		ScreenSize.Width = 800;
+		ScreenSize.Height = 550;
 	}
 
 	/**

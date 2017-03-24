@@ -55,8 +55,8 @@ public class AStar {
 		closed = new boolean[mapSize][mapSize];
 
 		// create the A* grid
-		for (int i = 0; i < mapSize; ++i) {
-			for (int j = 0; j < mapSize; ++j) {
+		for (int i = 0; i < mapSize; i++) {
+			for (int j = 0; j < mapSize; j++) {
 				grid[i][j] = new AStarCell(i, j);
 				if (cells[i][j].getState() == CellState.OBSTACLE) {
 					blocked.add(new Position(i, j));
@@ -112,6 +112,10 @@ public class AStar {
 		@Override
 		public String toString() {
 			return "[" + i + ", " + j + "]";
+		}
+		
+		public boolean equals(AStarCell a){
+			return (a.getPos().getRow()==i && a.getPos().getColumn()==j);
 		}
 	}
 
@@ -194,7 +198,7 @@ public class AStar {
 
 			return c1.finalCost < c2.finalCost ? -1 : c1.finalCost > c2.finalCost ? 1 : 0;
 		});
-
+		
 		// set up the costs
 		for (int i = 0; i < mapSize; ++i) {
 			for (int j = 0; j < mapSize; ++j) {
@@ -203,6 +207,7 @@ public class AStar {
 				}
 			}
 		}
+		closed = new boolean[mapSize][mapSize];
 		// Set start position
 		setStartCell(start);
 
@@ -215,14 +220,17 @@ public class AStar {
 		// add the start location to open list.
 		open.add(grid[startI][startJ]);
 
-		AStarCell current = null;
+		AStarCell current;
 
 		// the algorithm
-		while (!current.equals(grid[endI][endJ])) {
+		while (true) {
 			current = open.poll();
 			if (current == null) {
 				break;
 			}
+			if(current.equals(grid[endI][endJ])){
+	            break;
+	        }
 			closed[current.i][current.j] = true;
 
 			AStarCell t;
@@ -249,13 +257,23 @@ public class AStar {
 			}
 		}
 		open = null;
+		
 		// trace back the path
 		// path is reversed; goes from END to START
 		final ArrayList<Position> path = new ArrayList<Position>();
 		AStarCell finalcell = grid[endI][endJ];
+		path.add(finalcell.getPos());
+		
 		while (finalcell.parent != null) {
 			path.add(finalcell.parent.getPos());
 			finalcell = finalcell.parent;
+		}
+		// resets all parent cells
+		for(int i=0;i<mapSize;i++){
+			for(int j=0;j<mapSize;j++){
+				if(grid[i][j]!=null)
+					grid[i][j].parent=null;
+			}
 		}
 		return path;
 	}

@@ -3,15 +3,25 @@ package main.java.gamelogic.domain;
 import main.java.constants.CellState;
 import main.java.event.arguments.PlayerMovedEventArgs;
 
+/**
+ *
+ * @author Tom Galvin
+ * @author Lyubomir Pashev
+ * @author Simeon Kostadinov
+*/
 public abstract class Player extends Entity {
+	private String deathReason;
 	private String name;
 	private double angle;
 	private int dotsEaten;
 	private SkillSet skillSet;
+    private boolean laserFired;
 
 	public Player(final String name) {
+		super();
 		this.name = name;
 		dotsEaten = 0;
+		this.laserFired = false;
 	}
 
 	/**
@@ -36,6 +46,23 @@ public abstract class Player extends Entity {
 		return dotsEaten;
 	}
 
+	/**
+	 * Get whether a laserFired has been fired
+	 * @return the laserFired
+	 */
+	public boolean getLaserFired(){
+		return this.laserFired;
+	}
+
+	/**
+	 * Set that a laserFired has been fired
+	 * @param laserFired
+	 */
+	public void setLaserFired(boolean laserFired){
+		this.laserFired = laserFired;
+	}
+    
+    
 	/**
 	 * Fetch the player's skillset
 	 *
@@ -75,7 +102,7 @@ public abstract class Player extends Entity {
 	}
 
 	protected void eatDot() {
-		if (getWorld() != null && !getWorld().isRemote()) {
+		if (getWorld() != null/* && !getWorld().isRemote() */) {
 			final Cell currentCell = getWorld().getMap().getCell(getPosition());
 
 			if (currentCell.getState() == CellState.FOOD) {
@@ -83,5 +110,20 @@ public abstract class Player extends Entity {
 				dotsEaten++;
 			}
 		}
+	}
+
+	public String getDeathReason() {
+		return deathReason;
+	}
+
+	public void setDeathReason(String deathReason) {
+		this.deathReason = deathReason;
+	}
+	
+	@Override
+	public void gameStep(Game game) {
+		super.gameStep(game);
+		if(this.getSkillSet() != null)
+			this.getSkillSet().incrementCooldown();
 	}
 }

@@ -11,25 +11,42 @@ import main.java.constants.GameType;
 public class Game {
 	private World world;
 	private GameSettings gameSettings;
-	private ControlledPlayer player;
 	private GameType type;
-	private boolean ended;
+	private boolean started, ended;
 
-	public Game(final World world, final GameSettings gameSettings, final ControlledPlayer player,
-			final GameType type) {
+	public Game(final World world, final GameSettings gameSettings, final GameType type) {
 		this.world = world;
 		this.gameSettings = gameSettings;
-		this.player = player;
 		this.type = type;
 		ended = false;
 	}
 
+	/**
+	 * This will return whether the game/round has ended or not.
+	 * This should never return true if {@link Game#hasStarted()} returns
+	 * false (ie. the game cannot end before it starts).
+	 * 
+	 * @return
+	 */
 	public boolean hasEnded() {
 		return ended;
 	}
 
 	public void setEnded() {
 		ended = true;
+	}
+	
+	/**
+	 * Gets whether the game has started yet or not.
+	 * This will return false if the pre-game countdown is still counting down.
+	 * @return
+	 */
+	public boolean hasStarted() {
+		return started;
+	}
+	
+	public void setStarted() {
+		started = true;
 	}
 
 	/**
@@ -68,15 +85,6 @@ public class Game {
 	 */
 	public void setGameSettings(final GameSettings gameSettings) {
 		this.gameSettings = gameSettings;
-	}
-
-	/**
-	 * Fetch the controlled player
-	 *
-	 * @return the controlled player
-	 */
-	public ControlledPlayer getPlayer() {
-		return player;
 	}
 
 	/**

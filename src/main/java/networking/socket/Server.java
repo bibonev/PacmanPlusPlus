@@ -3,6 +3,7 @@ package main.java.networking.socket;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -42,18 +43,25 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		clientDisconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
 	}
 
+	/**
+	 * Instantiates a new {@link Thread}, with this {@link server} object
+	 * as the {@link Runnable} target, and starts it.
+	 */
 	public void start() {
 		new Thread(this).start();
 	}
 
 	/**
-	 * Start the thread by oppening a socket and starting each client
+	 * Start the server by opening a server socket and opening sockets for
+	 * different clients as connections arrive. Client sockets are delegated
+	 * to {@link Client} objects.
 	 */
 	@Override
 	public void run() {
 		serverSocket = openServerSocket();
 
 		try {
+			serverSocket.setSoTimeout(500);
 			while (alive) {
 				Socket clientSocket = null;
 				try {
@@ -63,7 +71,9 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 					client.start();
 					clients.put(clientID, client);
 					clientConnectedEvent.fire(clientID);
-					client.getDisconnectedEvent().addListener(this);
+					client.getDisconnectedEvent().addOneTimeListener(this);
+				} catch(SocketTimeoutException e) {
+					// do nothing
 				} catch (final IOException e) {
 					if (alive) {
 						throw new RuntimeException("Error accepting client.", e);
@@ -73,6 +83,8 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 					}
 				}
 			}
+		} catch(IOException e) {
+			throw new RuntimeException("Could not set socket acceptance timeout.", e);
 		} finally {
 			die();
 		}
@@ -97,7 +109,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	public void die() {
 		if (alive) {
 			alive = false;
-			if (!serverSocket.isClosed()) {
+			if (serverSocket != null && !serverSocket.isClosed()) {
 				try {
 					serverSocket.close();
 				} catch (final IOException e) {
@@ -107,6 +119,11 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 		}
 	}
 
+	/**
+	 * Create a new {@link ServerSocket} to use to accept
+	 * connections.
+	 * @return
+	 */
 	private ServerSocket openServerSocket() {
 		try {
 			return new ServerSocket(serverPort);
@@ -139,7 +156,6 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	@Override
 	public void onClientDisconnected(final int clientID) {
 		clientDisconnectedEvent.fire(clientID);
-		clients.get(clientID).getDisconnectedEvent().removeListener(this);
 		clients.remove(clientID);
 	}
 }

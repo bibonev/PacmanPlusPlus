@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -19,24 +20,24 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import main.java.audio.DefaultMusic;
+import main.java.audio.DefaultSoundEffects;
 import main.java.audio.DisabledMusic;
+import main.java.audio.DisabledSoundEffects;
 import main.java.audio.Music;
 import main.java.audio.SoundEffects;
 import main.java.constants.GameType;
 import main.java.event.Event;
-import main.java.event.arguments.GameStartedEventArgs;
+import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
-import main.java.event.listener.CountDownStartingListener;
 import main.java.event.listener.GameClosingListener;
-import main.java.event.listener.GameEndedListener;
-import main.java.event.listener.GameStartedListener;
+import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.LobbyStateChangedListener;
+import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.gamelogic.core.GameCommandService;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.domain.Game;
 import main.java.graphics.PositionVisualisation;
 import main.java.graphics.Render;
-import main.java.networking.data.Packet;
 import main.java.networking.integration.ClientInstance;
 import main.java.networking.integration.ServerInstance;
 
@@ -46,7 +47,8 @@ import main.java.networking.integration.ServerInstance;
  * @author Rose Kirtley
  *
  */
-public class GameUI extends Application implements LobbyStateChangedListener, GameStartedListener {
+public class GameUI extends Application
+		implements GameInterface, LobbyStateChangedListener, GameCreatedListener, PlayerLeavingGameListener {
 	private Lobby lobby;
 	private Game game;
 	private Music music;
@@ -54,11 +56,16 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	private Stage thisStage;
 	private Scene uiScene;
+	private Scene settingsSceneGame;
+	private Scene settingsSceneMenu;
+	private Scene gameScene;
 	private BorderPane pane;
 	private BorderPane banner;
 	public Button settings;
 	private StackPane centerPane;
-	
+	private Scene helpScene;
+	private BorderPane helpPane;
+
 	private static final Integer STARTTIME = 3;
 	private Timeline timeline;
 	private Label timerLabel = new Label();
@@ -69,27 +76,36 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public Screen currentScreen;
 	public LogInScreen logInScreen;
 	public MenuScreen menuScreen;
-	private SettingsScreen settingsScreen;
+	private GameSettingsScreen gameSettingsScreen;
 	private SinglePlayerLobbyScreen singlePlayerLobbyScreen;
 	public MultiPlayerLobbyScreen multiPlayerLobbyScreen;
 	private MultiPlayerOptionScreen multiPlayerOptionScreen;
 	private MultiPlayerJoinScreen multiPlayerJoinScreen;
+	private HelpScreen helpScreen;
+	private SettingsScreenGame settingsScreenGame;
+	private SettingsScreenMenu settingsScreenMenu;
 
 	private Event<GameClosingListener, Object> onGameClosing = new Event<>((l, a) -> l.onGameClosing());
+	private Event<PlayerLeavingGameListener, Object> onPlayerLeavingGame = new Event<>(
+			(l, a) -> l.onPlayerLeavingGame());
+
 	private GameCommandService gameCommandService;
 
 	@Override
 	public void start(final Stage primaryStage) throws Exception {
 		boolean audioDisabled = false;
-		List<String> params = getParameters().getUnnamed();
-		if(params.contains("--noaudio")) audioDisabled = true;
-		
+		final List<String> params = getParameters().getUnnamed();
+		if (params.contains("--noaudio")) {
+			audioDisabled = true;
+		}
+
 		gameCommandService = new GameCommandService();
-		gameCommandService.getGameStartedEvent().addListener(this);
+		gameCommandService.getLocalGameCreatedEvent().addListener(this);
+		gameCommandService.getRemoteGameCreatedEvent().addListener(this);
 		setup(audioDisabled);
 
 		thisStage = primaryStage;
-		primaryStage.setTitle("PacMac");
+		primaryStage.setTitle("Pacman++");
 
 		pane = new BorderPane();
 
@@ -99,16 +115,32 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		uiScene = new Scene(pane, 500, 500);
 		uiScene.setOnKeyPressed(e -> sendMoveEvent(e.getCode()));
 
+		settingsSceneGame = new Scene(settingsScreenGame.getPane(), 500, 500);
+		settingsSceneMenu = new Scene(settingsScreenMenu.getPane(), 500, 500);
+
+		helpPane = new BorderPane();
+		helpPane.getStyleClass().add("paneStyle");
+		helpPane.setCenter(helpScreen.getPane());
+
+		helpScene = new Scene(helpPane, 1150, 600);
+		helpScene.setOnKeyPressed(e -> sendMoveEvent(e.getCode()));
+
 		final String css = this.getClass().getResource("style.css").toExternalForm();
 		uiScene.getStylesheets().add(css);
+		helpScene.getStylesheets().add(css);
+		settingsSceneGame.getStylesheets().add(css);
+		settingsSceneMenu.getStylesheets().add(css);
 		pane.getStyleClass().add("paneStyle");
 
 		setUpSettingsButton();
-		
+
 		timerLabel.setText(timeSeconds.toString());
 		timerLabel.getStyleClass().add("countdown");
 		timerLabel.setAlignment(Pos.CENTER);
-	    timerLabel.textProperty().bind(timeSeconds.asString());
+		timerLabel.textProperty().bind(timeSeconds.asString());
+
+		primaryStage.setResizable(false);
+		thisStage.setResizable(false);
 
 		primaryStage.setScene(uiScene);
 		switchToLogIn();
@@ -124,20 +156,30 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		return onGameClosing;
 	}
 
-	private void setup(boolean audioDisabled) {
+	@Override
+	public Event<PlayerLeavingGameListener, Object> getOnPlayerLeavingGame() {
+		return onPlayerLeavingGame;
+	}
+
+	private void setup(final boolean audioDisabled) {
 		music = audioDisabled ? new DisabledMusic() : new DefaultMusic();
-		gameCommandService.getGameStartedEvent().addListener((GameStartedListener) music);
-		sounds = new SoundEffects(this);
-		gameCommandService.getGameStartedEvent().addListener((GameStartedListener) sounds);
+		gameCommandService.getLocalGameCreatedEvent().addListener(music);
+		gameCommandService.getRemoteGameCreatedEvent().addListener(music);
+		sounds = audioDisabled ? new DisabledSoundEffects() : new DefaultSoundEffects(this);
+		gameCommandService.getLocalGameCreatedEvent().addListener(sounds);
+		gameCommandService.getRemoteGameCreatedEvent().addListener(sounds);
 		logInScreen = new LogInScreen(this);
 		menuScreen = new MenuScreen(this);
-		settingsScreen = new SettingsScreen(this);
+		gameSettingsScreen = new GameSettingsScreen(this);
+		settingsScreenGame = new SettingsScreenGame(this);
+		settingsScreenMenu = new SettingsScreenMenu(this);
 		singlePlayerLobbyScreen = new SinglePlayerLobbyScreen(this);
 		singlePlayerLobbyScreen.getOnStartingSingleplayerGame().addListener(gameCommandService);
 		multiPlayerLobbyScreen = new MultiPlayerLobbyScreen(this);
 		multiPlayerOptionScreen = new MultiPlayerOptionScreen(this);
 		multiPlayerJoinScreen = new MultiPlayerJoinScreen(this);
-		
+		helpScreen = new HelpScreen(this);
+
 	}
 
 	private void sendMoveEvent(final KeyCode key) {
@@ -151,7 +193,7 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	private void setUpSettingsButton() {
 
 		settings = new Button("Settings");
-		settings.setOnAction(e -> switchToSettings());
+		settings.setOnAction(e -> switchToSettingsMenu());
 		settings.getStyleClass().add("buttonStyle");
 
 		banner = new BorderPane();
@@ -171,30 +213,48 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		centerPane.getChildren().add(screen.getPane());
 	}
 
+	private void adjustScreenPosition() {
+		final Rectangle2D primScreenBounds = javafx.stage.Screen.getPrimary().getVisualBounds();
+		thisStage.setX((primScreenBounds.getWidth() - thisStage.getWidth()) / 2);
+		thisStage.setY((primScreenBounds.getHeight() - thisStage.getHeight()) / 2);
+	}
+
+	public void showGameSettingsScreen() {
+		gameSettingsScreen.loadSettings();
+		centerPane.getChildren().add(gameSettingsScreen.getPane());
+	}
+
+	public void removeGameSettingsScreen() {
+		centerPane.getChildren().remove(gameSettingsScreen.getPane());
+	}
+
 	public void switchToMenu() {
 		thisStage.setScene(uiScene);
+		adjustScreenPosition();
 		setScreen(menuScreen);
-		final Label label = new Label("PacMan " + getName());
+		final Label label = new Label("Pacman++ " + getName());
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		settings.setDisable(false);
 	}
 
 	public void switchToLogIn() {
-		final Label label = new Label("PacMan");
+		final Label label = new Label("Pacman++");
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		setScreen(logInScreen);
 	}
 
-	public void switchToSettings() {
-		settings.setDisable(true);
-		centerPane.getChildren().add(settingsScreen.getPane());
+	public void switchToSettingsMenu() {
+		thisStage.setScene(settingsSceneMenu);
 	}
 
-	public void returnBack() {
-		settings.setDisable(false);
-		centerPane.getChildren().remove(settingsScreen.getPane());
+	public void returnBackFromGame() {
+		thisStage.setScene(gameScene);
+	}
+
+	public void returnBackFromMenu() {
+		thisStage.setScene(uiScene);
 	}
 
 	public void switchToSinglePlayerLobby() {
@@ -212,6 +272,18 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 
 	public void switchToMultiPlayerJoin() {
 		setScreen(multiPlayerJoinScreen);
+	}
+
+	public void switchToHelp() {
+		final Label label = new Label("PacMan++ " + getName());
+		label.getStyleClass().add("labelStyle");
+		helpPane.setTop(label);
+		thisStage.setScene(helpScene);
+		adjustScreenPosition();
+	}
+
+	public void switchToSettingsGame() {
+		thisStage.setScene(settingsSceneGame);
 	}
 
 	public void close() {
@@ -234,28 +306,48 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 		multiPlayerLobbyScreen.addNames();
 
 		lobby = new Lobby();
-		final ServerInstance server = new ServerInstance(this, lobby);
+		final ServerInstance server = new ServerInstance(lobby);
 		final ClientInstance client = new ClientInstance(this, name, "localhost");
 
-		onGameClosing.addListener(() -> {
+		onGameClosing.addOneTimeListener(() -> {
 			server.stop();
 			client.stop();
 		});
 
-		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(() -> {
+		// gameSettingsScreen.getGameSettingsChangedEvent().addListener(server);
+
+		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> {
 			client.stop();
 			server.stop();
+			multiPlayerLobbyScreen.getHostStartingGameListener().removeListener(server);
+			multiPlayerLobbyScreen.getCountDownStartingListener().removeListener(server);
+			gameCommandService.getRemoteGameCreatedEvent().removeListener(client);
+			gameCommandService.getLocalGameCreatedEvent().removeListener(server);
+			gameSettingsScreen.getGameSettingsChangedEvent().removeListener(server);
+
+			client.getMultiplayerGameStartingEvent().removeListener(gameCommandService);
+			server.getMultiplayerGameStartingEvent().removeListener(gameCommandService);
 		});
-		multiPlayerLobbyScreen.getHostStartingGameListener().addListener(server);
-		multiPlayerLobbyScreen.getCountDownStartingListener().addListener(server);
+
+		multiPlayerLobbyScreen.getHostStartingGameListener().addOneTimeListener(server);
+		multiPlayerLobbyScreen.getCountDownStartingListener().addOneTimeListener(server);
+		multiPlayerLobbyScreen.setGameSettingsEnabled(true);
 		multiPlayerLobbyScreen.setStartGameEnabled(true);
-		gameCommandService.getGameStartedEvent().addListener(client);
-		gameCommandService.getGameStartedEvent().addListener(server);
+		gameSettingsScreen.getGameSettingsChangedEvent().addListener(server);
+		gameCommandService.getRemoteGameCreatedEvent().addOneTimeListener(client);
+		gameCommandService.getLocalGameCreatedEvent().addOneTimeListener(server);
 
-		server.getMultiplayerGameStartingEvent().addListener(gameCommandService);
-		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
+		client.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
+		server.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
 
 		server.run();
+		gameSettingsScreen.saveSettings();
+		try {
+			// really nasty cheap workaround to get around JavaFX being weird
+			Thread.sleep(100);
+		} catch (final InterruptedException e) {
+			e.printStackTrace();
+		}
 		client.run();
 		// create new lobby for a multiplayer game
 	}
@@ -265,24 +357,29 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 	public void joinGame(final String gameIp) {
 		final ClientInstance client = new ClientInstance(this, name, gameIp);
 
-		onGameClosing.addListener(() -> {
+		onGameClosing.addOneTimeListener(() -> {
 			client.stop();
 		});
 
-		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addListener(() -> client.stop());
+		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> client.stop());
 		multiPlayerLobbyScreen.setStartGameEnabled(false);
-		gameCommandService.getGameStartedEvent().addListener(client);
-		client.getMultiplayerGameStartingEvent().addListener(gameCommandService);
+		multiPlayerLobbyScreen.setGameSettingsEnabled(false);
+		gameCommandService.getRemoteGameCreatedEvent().addOneTimeListener(client);
+		client.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
 
 		client.run();
 		// join game with ip
 	}
 
 	public void muteMusic(final boolean bool) {
+		settingsScreenGame.selectMusic(bool);
+		settingsScreenMenu.selectMusic(bool);
 		music.setOn(bool);
 	}
 
 	public void muteSounds(final boolean bool) {
+		settingsScreenGame.selectSounds(bool);
+		settingsScreenMenu.selectSounds(bool);
 		sounds.setOn(bool);
 	}
 
@@ -295,63 +392,103 @@ public class GameUI extends Application implements LobbyStateChangedListener, Ga
 			multiPlayerLobbyScreen.list
 					.addPlayer(((LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) args).getPlayerInfo());
 		} else {
-			// TODO: update rules display
+			multiPlayerLobbyScreen
+					.setRuleStrings(((LobbyChangedEventArgs.LobbyRulesChangedEventArgs) args).getNewRules());
 		}
 	}
 
+	@Override
 	public void setLobby(final Lobby lobby) {
 		this.lobby = lobby;
 		lobby.getLobbyStateChangedEvent().addListener(this);
 	}
 
 	@Override
-	public void onGameStarted(final GameStartedEventArgs args) {
+	public void onGameCreated(final GameCreatedEventArgs args) {
 		if (args.getGame().getGameType() != GameType.MULTIPLAYER_SERVER) {
 			Platform.runLater(() -> {
-				final Render mapV = new Render(this, args.getGame(), args.getGameLogic());
+				final Render render = new Render(this, args.getGame(), args.getGameLogic());
 
-				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) music);
-				args.getGameLogic().getOnGameEnded().addListener((GameEndedListener) sounds);
-				
+				args.getGameLogic().getOnGameEnded().addOneTimeListener(music);
+				args.getGameLogic().getOnGameEnded().addOneTimeListener(sounds);
+				render.getOnStartingSingleplayerGame().addOneTimeListener(gameCommandService);
+
 				// Initialize Screen dimensions
 				PositionVisualisation.initScreenDimensions();
 
 				// Draw Map
-				thisStage.setScene(mapV.setupWorld());
+				gameScene = render.setupWorld();
+				thisStage.setScene(gameScene);
 				thisStage.show();
+				adjustScreenPosition();
 
 				// Add CLick Listener
-				mapV.addClickListener();
+				render.addClickListener();
 
 				// Start Timeline
-				mapV.startTimeline();
+				render.startTimeline();
+
+				render.getOnPlayerLeavingGame().addOneTimeListener(this);
 			});
 		}
 	}
-	
-	public void timerEnded(){
-		if(multiPlayerLobbyScreen.thisClient){
+
+	public void fireLaser() {
+		sounds.fireLasers();
+	}
+
+	public void playShield() {
+		sounds.playShield();
+	}
+
+	public void pausePlay() {
+		music.pausePlay();
+	}
+
+	public void stopMusic() {
+		music.stopMusic();
+	}
+
+	public void timerEnded() {
+		if (multiPlayerLobbyScreen.thisClient) {
 			multiPlayerLobbyScreen.getHostStartingGameListener().fire(null);
 			multiPlayerLobbyScreen.thisClient = false;
 		}
 	}
 
-	public void timer(){
+	@Override
+	public void timer() {
 		Platform.runLater(() -> {
-		centerPane.getChildren().add(timerLabel);
-		 if(timeline != null)
-             timeline.stop();
+			centerPane.getChildren().add(timerLabel);
+			if (timeline != null) {
+				timeline.stop();
+			}
 
-         timeSeconds.set(STARTTIME);
-         timeline = new Timeline();
+			timeSeconds.set(STARTTIME);
+			timeline = new Timeline();
 
-         KeyValue keyValue = new KeyValue(timeSeconds, 1);
-         KeyFrame keyFrame = new KeyFrame(Duration.seconds(STARTTIME + 1), keyValue);
+			final KeyValue keyValue = new KeyValue(timeSeconds, 1);
+			final KeyFrame keyFrame = new KeyFrame(Duration.seconds(STARTTIME + 1), keyValue);
 
-         timeline.getKeyFrames().add(keyFrame);
-         timeline.playFromStart();
-         
-         timeline.setOnFinished(e -> timerEnded());
+			timeline.getKeyFrames().add(keyFrame);
+			timeline.playFromStart();
+
+			timeline.setOnFinished(e -> timerEnded());
 		});
+	}
+
+	@Override
+	public void onPlayerLeavingGame() {
+		getOnPlayerLeavingGame().fire(null);
+	}
+
+	@Override
+	public void setAIPlayer(final boolean ai) {
+		multiPlayerLobbyScreen.getMultiplayerSettings().setAIPlayer(ai);
+	}
+
+	@Override
+	public void setLives(final int lives) {
+		multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives);
 	}
 }

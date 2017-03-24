@@ -1,12 +1,12 @@
 package main.java.ai;
 
 import main.java.gamelogic.domain.Behaviour;
+import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.LocalPlayer;
-import main.java.gamelogic.domain.Map;
 
 /**
- * The AI player. Each AI player has a unique behavior that tells it which items
- * to collect or when to attack other players
+ * The AI player. Each AI player has a behavior that tells it where to move
+ * and when to use skills.
  *
  * @author Lyubomir Pashev
  */
@@ -17,20 +17,26 @@ public class AIPlayer extends LocalPlayer {
 
 	/**
 	 * Instantiates a new AI player.
-	 *
-	 * @param name
-	 *            the name
-	 * @param behavior
-	 *            the behavior
-	 * @param map
-	 *            the map
 	 */
-	public AIPlayer(final String name, final Behaviour behavior, final Map map) {
-		super(name);
-		this.behavior = behavior;
+	public AIPlayer() {
+		super("AI");
 	}
 
-	public Behaviour getBehaviour() {
-		return behavior;
+	/**
+	 * Sets the behaviour.
+	 *
+	 * @param behavior the new behaviour
+	 */
+	public void setBehaviour(Behaviour behavior) {
+
+		this.behavior = behavior;
+	}
+	
+	/* (non-Javadoc)
+	 * @see main.java.gamelogic.domain.Player#gameStep(main.java.gamelogic.domain.Game)
+	 */
+	@Override
+	public void gameStep(final Game game) {
+		behavior.run();
 	}
 }

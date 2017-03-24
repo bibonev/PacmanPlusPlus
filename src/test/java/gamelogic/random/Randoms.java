@@ -4,6 +4,16 @@ import java.util.Random;
 
 import main.java.constants.CellState;
 import main.java.constants.GameType;
+import main.java.event.Event;
+import main.java.event.arguments.PlayerCooldownChangedEventArgs;
+import main.java.event.arguments.PlayerLaserActivatedEventArgs;
+import main.java.event.arguments.PlayerShieldActivatedEventArgs;
+import main.java.event.arguments.PlayerShieldRemovedEventArgs;
+import main.java.event.listener.PlayerCooldownChangedListener;
+import main.java.event.listener.PlayerLaserActivatedListener;
+import main.java.event.listener.PlayerShieldActivatedListener;
+import main.java.event.listener.PlayerShieldRemovedListener;
+import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.domain.Ability;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.ControlledPlayer;
@@ -11,6 +21,7 @@ import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.LocalGhost;
 import main.java.gamelogic.domain.LocalPlayer;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemoteGhost;
@@ -76,7 +87,7 @@ public class Randoms {
 
 	public static LocalGhost randomLocalGhost() {
 		final LocalGhost localGhost = new LocalGhost();
-		localGhost.setPosition(randomPosition());
+		localGhost.setPosition(randomPositionInRange(15));
 		return localGhost;
 	}
 
@@ -85,7 +96,7 @@ public class Randoms {
 	}
 
 	public static Map randomMap() {
-		return new MapStub(randomCells(randomInteger()));
+		return new MapStub(randomCells(randomInteger(15)));
 	}
 
 	public static GameSettings randomGameSettings() {
@@ -96,10 +107,10 @@ public class Randoms {
 		return new AbilityStub(randomString());
 	}
 
-	public static SkillSet randomSkillSet() {
-		return new SkillSet();
+	public static LocalSkillSet randomLocalSkillSet() {
+		return new LocalSkillSet();
 	}
-
+	
 	public static CellState randomCellState() {
 		return randomEnum(CellState.class);
 	}
@@ -151,11 +162,16 @@ public class Randoms {
 	}
 
 	public static ControlledPlayer randomControlledPlayer() {
+		
 		return new ControlledPlayer(Randoms.randomInteger(), Randoms.randomString());
 	}
 
 	public static Game randomGame() {
-		return new Game(randomWorld(), randomGameSettings(), randomControlledPlayer(), GameType.SINGLEPLAYER);
+		return new Game(randomWorld(), randomGameSettings(), GameType.SINGLEPLAYER);
+	}
+
+	public static LobbyPlayerInfo randomLobbyPlayerInfo() {
+		return new LobbyPlayerInfo(Randoms.randomInteger(), Randoms.randomString());
 	}
 
 }

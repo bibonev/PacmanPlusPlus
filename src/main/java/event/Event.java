@@ -15,7 +15,9 @@ import java.util.function.BiConsumer;
  */
 public class Event<TListener, TEventArgs> {
 	private HashSet<TListener> listeners;
+	private HashSet<TListener> oneTimeListeners;
 	private BiConsumer<TListener, TEventArgs> trigger;
+	private Object fireLock;
 
 	/**
 	 * Creates a new event with the given trigger function.
@@ -25,24 +27,49 @@ public class Event<TListener, TEventArgs> {
 	 *            on a listener, passing the event arguments to it.
 	 */
 	public Event(final BiConsumer<TListener, TEventArgs> trigger) {
+		this.fireLock = new Object();
 		this.listeners = new HashSet<>();
+		this.oneTimeListeners = new HashSet<>();
 		this.trigger = trigger;
 	}
 
 	/**
-	 * Adds a listener to this event.
+	 * Adds a listener to this event. If this listener is already added as a
+	 * one-time listener, it will be moved to a normal listener.
 	 *
 	 * @param listener
 	 *            The listener to add to the event.
 	 * @throws IllegalArgumentException
 	 *             Thrown when the given listener object is already listening to
-	 *             this event.
+	 *             this event as a normal listener.
 	 */
 	public void addListener(final TListener listener) {
 		if (!isListenedToBy(listener)) {
+			if (oneTimeListeners.contains(listener)) {
+				oneTimeListeners.remove(listener);
+			}
 			listeners.add(listener);
 		} else {
 			throw new IllegalArgumentException("Listener already added to event.");
+		}
+	}
+
+	/**
+	 * Adds a listener to an event. This listener will only be fired once -
+	 * after that, you will need to re-add the listener to the event in order
+	 * for the listener to receive the message again.
+	 * 
+	 * @param listener
+	 *            The listener to add to the event.
+	 * @throws IllegalArgumentException
+	 *             Thrown when the given listener object is already listening to
+	 *             this event, either as a normal or a one-time listener.
+	 */
+	public void addOneTimeListener(final TListener listener) {
+		if (isListenedToBy(listener) || oneTimeListeners.contains(listener)) {
+			throw new IllegalArgumentException("One-time listener already added to event.");
+		} else {
+			oneTimeListeners.add(listener);
 		}
 	}
 
@@ -58,8 +85,8 @@ public class Event<TListener, TEventArgs> {
 	public void removeListener(final TListener listener) {
 		if (isListenedToBy(listener)) {
 			listeners.remove(listener);
-		} else {
-			throw new IllegalArgumentException("Listener cannot be removed because it isn't listening.");
+		} else if (oneTimeListeners.contains(listener)) {
+			oneTimeListeners.remove(listener);
 		}
 	}
 
@@ -92,8 +119,20 @@ public class Event<TListener, TEventArgs> {
 	 *            The arguments to pass to the event listeners.
 	 */
 	public void fire(final TEventArgs args) {
-		for (final TListener listener : listeners) {
-			trigger.accept(listener, args);
+		try {
+		synchronized (fireLock) {
+			for (final TListener listener : listeners) {
+				trigger.accept(listener, args);
+			}
+
+			for (final TListener listener : oneTimeListeners) {
+				trigger.accept(listener, args);
+			}
+
+			oneTimeListeners.clear();
+		}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 }

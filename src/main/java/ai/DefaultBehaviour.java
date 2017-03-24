@@ -2,7 +2,7 @@ package main.java.ai;
 
 import main.java.gamelogic.domain.Behaviour;
 import main.java.gamelogic.domain.Entity;
-import main.java.gamelogic.domain.SkillSet;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.World;
 
 /**
@@ -11,6 +11,7 @@ import main.java.gamelogic.domain.World;
  * @author Lyubomir Pashev
  */
 public class DefaultBehaviour extends Behaviour {
+	
 	/**
 	 * Instantiates a new default behavior.
 	 *
@@ -23,8 +24,7 @@ public class DefaultBehaviour extends Behaviour {
 	 * @param stash
 	 *            the inventory
 	 */
-	public DefaultBehaviour(final World world, final Entity entity, final int speed, final SkillSet stash,
-			final Type type) {
-		super(world, entity, speed, stash, type);
+	public DefaultBehaviour(final World world, final Entity entity, final Type type) {
+		super(world, entity, new LocalSkillSet(), type);
 	}
 }

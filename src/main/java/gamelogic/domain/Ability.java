@@ -4,13 +4,15 @@ package main.java.gamelogic.domain;
  * Represent an item from the inventory
  *
  * @author Lyubomir Pashev
+ * @author Simeon Kostadinov
  *
  */
 public abstract class Ability {
 
 	private String name;
-	protected Entity owner;
+	protected Player owner;
 	private int cooldown;
+	private int shieldValue = 0;
 
 	public Ability(final String name) {
 		this.name = name;
@@ -44,7 +46,7 @@ public abstract class Ability {
 	 *
 	 * @return the owner
 	 */
-	public Entity getOwner() {
+	public Player getOwner() {
 		return owner;
 	}
 
@@ -53,8 +55,26 @@ public abstract class Ability {
 	 *
 	 * @param owner
 	 */
-	public void setOwner(final Entity owner) {
+	public void setOwner(final Player owner) {
 		this.owner = owner;
+	}
+
+	/**
+	 * Gets the shield value of the item.
+	 *
+	 * @return the owner
+	 */
+	public int getShieldValue() {
+		return shieldValue;
+	}
+
+	/**
+	 * Sets the shieldValue of the item.
+	 *
+	 * @param shieldValue
+	 */
+	public void setShieldValue(int shieldValue) {
+		this.shieldValue = shieldValue;
 	}
 
 	/**
@@ -74,4 +94,7 @@ public abstract class Ability {
 	 */
 	public abstract void activate();
 
+	public abstract boolean incrementCooldown();
+
+	public abstract void reduceShieldValue();
 }
