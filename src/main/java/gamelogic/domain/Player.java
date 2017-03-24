@@ -15,13 +15,12 @@ public abstract class Player extends Entity {
 	private double angle;
 	private int dotsEaten;
 	private SkillSet skillSet;
-    private int shield;
     private boolean laserFired;
 
 	public Player(final String name) {
+		super();
 		this.name = name;
 		dotsEaten = 0;
-		this.shield = 0;
 		this.laserFired = false;
 	}
 
@@ -62,33 +61,6 @@ public abstract class Player extends Entity {
 	public void setLaserFired(boolean laserFired){
 		this.laserFired = laserFired;
 	}
-
-    /**
-     * Fetch the entity's shield
-     *
-     * @return a boolean
-     */
-    public int getShield() {
-        return this.shield;
-    }
-
-    /**
-     * Reduce the entity's shield
-     *
-     */
-    public void reduceShield() {
-        this.shield = shield - 1;
-    }
-
-    /**
-     * Update the entity's shield
-     *
-     * @param shield
-     *            the new shield value
-     */
-    public void setShield(final int shield) {
-        this.shield = shield;
-    }
     
     
 	/**

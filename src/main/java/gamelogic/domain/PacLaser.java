@@ -89,11 +89,19 @@ public class PacLaser extends Ability {
     }
 
 	@Override
-	public void incrementCooldown() {
+	public boolean incrementCooldown() {
 		int cooldown = getCD();
 		
 		if(cooldown < LASER_COOLDOWN) {
 			setCD(cooldown + 1);
+			return true;
+		} else {
+			return false;
 		}
 	}
+
+    @Override
+    public void reduceShieldValue() {
+        // no
+    }
 }

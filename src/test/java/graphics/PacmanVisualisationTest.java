@@ -82,7 +82,7 @@ public class PacmanVisualisationTest {
 	public void testShieldNode() {
 		PositionVisualisation.initScreenDimensions();
 
-		testPlayer.setShield(10);
+		//testPlayer.getSkillSet()(10);
 		testPlayer.setAngle(90);
 		test = new PacmanVisualisation(testPlayer);
 

@@ -1,8 +1,6 @@
 package main.java.gamelogic.domain;
 
-import java.security.acl.Owner;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 
 import main.java.ai.AStar;
@@ -13,12 +11,10 @@ import main.java.event.arguments.EntityMovedEventArgs;
 import main.java.event.listener.EntityMovedListener;
 
 /**
- * The default behavior, which picks the closes enemy or moves at random if
- * there are no enemies on the map. There will be several behaviors that extend
- * this class. Each behavior will be able to dynamically prioritize targets on
- * the map (items, players etc.) based on the nature of the behavior. It is
- * responsible for sending move events. Constantly gets an updated version of
- * the game map.
+ * The default AI behaviour, prioritizes food while it tries to constantly protect itself.
+ * If there are nearby food nodes the AI moves towards then, if not them it moves at random
+ * If there is a nearby ghost it activates its shield
+ * If there is a ghost a few nodes in front of it it activates its laser.
  *
  * @author Lyubomir Pashev
  */
@@ -35,19 +31,11 @@ public abstract class Behaviour {
 	/** The type of the behavior. */
 	private Type type;
 
-	/** The astar. */
+	/** The astar algorithm. */
 	private AStar astar;
 
 	/** The current position of the ai. */
 	public Entity entity;
-
-	/**
-	 * The focus variable determines how long it takes before the AI gets bored
-	 * of chasing something or how many consecutive random moves it makes before
-	 * it decides to do something else. Provides some efficiency, since the A*
-	 * algorithm has to be run far less often.
-	 */
-	private int focus;
 
 	/** A random number generator. */
 	private Random rng = new Random();
@@ -66,14 +54,9 @@ public abstract class Behaviour {
 
 	protected Position lastPos;
 
-	/** The inventory. */
-	private SkillSet skills;
-
 	/** The current path. */
 	private ArrayList<Position> currentPath;
 
-
-	private int counter;
 	private World world;
 
 	protected Event<EntityMovedListener, EntityMovedEventArgs> onEntityMoved;
@@ -99,12 +82,9 @@ public abstract class Behaviour {
 		cells = this.world.getMap().getCells();
 		astar = new AStar(world.getMap());
 		rng = new Random();
-		focus = rng.nextInt(4) + 1;
-		this.skills = skills;
 		this.type = type;
 		lastPos = entity.getPosition();
 		onEntityMoved = entity.getOnMovedEvent();
-		counter = 0;
 		currentPath = new ArrayList<Position>();
 	}
 
@@ -120,50 +100,47 @@ public abstract class Behaviour {
 	 */
 	public Position pickTarget() {
 
-		//final ArrayList<Position> enemies = scanEnemies();
-		
+		// final ArrayList<Position> enemies = scanEnemies();
+
 		int minDistance = Integer.MAX_VALUE;
-		tarType=Target.RANDOM;
+		tarType = Target.RANDOM;
 		Position target = pickRandomTarget();
-		
-		int row=entity.getPosition().getRow();
-		int col=entity.getPosition().getColumn();
-		
-		int colStart,rowStart,rowEnd,colEnd;
-		
-		if(row+3>world.getMap().getMapSize()){
+
+		int row = entity.getPosition().getRow();
+		int col = entity.getPosition().getColumn();
+
+		int colStart, rowStart, rowEnd, colEnd;
+
+		if (row + 3 > world.getMap().getMapSize()) {
 			rowEnd = world.getMap().getMapSize();
-		}
-		else{
+		} else {
 			rowEnd = row + 3;
 		}
-		
-		if(col+5>world.getMap().getMapSize()){
+
+		if (col + 5 > world.getMap().getMapSize()) {
 			colEnd = world.getMap().getMapSize();
-		}
-		else{
+		} else {
 			colEnd = col + 3;
 		}
-		if(col-3<0){
+		if (col - 3 < 0) {
 			colStart = 0;
-		}
-		else{
+		} else {
 			colStart = col - 3;
 		}
-		if(row-3<0){
+		if (row - 3 < 0) {
 			rowStart = 0;
-		}
-		else{
+		} else {
 			rowStart = row - 3;
 		}
-		
-		for(int i = rowStart;i<rowEnd;i++){
-			for(int j = colStart;j<colEnd;j++){
-				int distance = manhattanDistance(entity.getPosition(),world.getMap().getCells()[i][j].getPosition());
-				if(world.getMap().getCells()[i][j].getState() == CellState.FOOD && minDistance>distance && (i!=row || j!=col)){
+
+		for (int i = rowStart; i < rowEnd; i++) {
+			for (int j = colStart; j < colEnd; j++) {
+				int distance = manhattanDistance(entity.getPosition(), world.getMap().getCells()[i][j].getPosition());
+				if (world.getMap().getCells()[i][j].getState() == CellState.FOOD && minDistance > distance
+						&& (i != row || j != col)) {
 					minDistance = distance;
 					target = world.getMap().getCells()[i][j].getPosition();
-					tarType=Target.STATIONARY;
+					tarType = Target.STATIONARY;
 				}
 			}
 		}
@@ -225,23 +202,88 @@ public abstract class Behaviour {
 	 *
 	 * @return the array list
 	 */
-	private ArrayList<Position> scanEnemies() {
-		final ArrayList<Position> enemies = new ArrayList<Position>();
-		for (final Ghost g : world.getEntities(Ghost.class)) {
-			enemies.add(g.getPosition());
-		}
-		return enemies;
-	}
+	private boolean scanEnemies(int range, boolean scanForShieldActivation) {
 
-	/**
-	 * Checks if target is still present.
-	 *
-	 * @param target
-	 *            the target
-	 * @return true, if target is present
-	 */
-	private boolean isTargetThere(final Position target) {
-		return cells[target.getRow()][target.getColumn()].getState() != CellState.EMPTY;
+		int row = entity.getPosition().getRow();
+		int col = entity.getPosition().getColumn();
+
+		if (scanForShieldActivation) {
+
+			int colStart, rowStart, rowEnd, colEnd;
+
+			if (row + range > world.getMap().getMapSize()) {
+				rowEnd = world.getMap().getMapSize();
+			} else {
+				rowEnd = row + range;
+			}
+
+			if (col + range > world.getMap().getMapSize()) {
+				colEnd = world.getMap().getMapSize();
+			} else {
+				colEnd = col + range;
+			}
+			if (col - range < 0) {
+				colStart = 0;
+			} else {
+				colStart = col - range;
+			}
+			if (row - range < 0) {
+				rowStart = 0;
+			} else {
+				rowStart = row - range;
+			}
+
+			for (final Ghost g : world.getEntities(Ghost.class)) {
+				int grow = g.getPosition().getRow();
+				int gcol = g.getPosition().getColumn();
+				if ((grow <= rowEnd && grow >= rowStart) && (gcol <= colEnd && gcol >= colStart)) {
+					return true;
+				}
+			}
+		} else {
+
+			double angle = ((Player) entity).getAngle();
+			if (angle == 0.0) {
+
+				for (final Ghost g : world.getEntities(Ghost.class)) {
+					final int enrow = g.getPosition().getRow();
+					final int encol = g.getPosition().getColumn();
+					if (enrow == row && encol > col && encol <= (col + range)) {
+						return true;
+					}
+				}
+			}
+			if (angle == 90.0) {
+
+				for (final Ghost g : world.getEntities(Ghost.class)) {
+					final int enrow = g.getPosition().getRow();
+					final int encol = g.getPosition().getColumn();
+					if (enrow <= (row + range) && enrow > row && encol == col) {
+						return true;
+					}
+				}
+			}
+			if (angle == -90.0) {
+
+				for (final Ghost g : world.getEntities(Ghost.class)) {
+					final int enrow = g.getPosition().getRow();
+					final int encol = g.getPosition().getColumn();
+					if (enrow >= (row - range) && enrow < row && encol == col) {
+						return true;
+					}
+				}
+			}
+			if (angle == 180.0) {
+				for (final Ghost g : world.getEntities(Ghost.class)) {
+					final int enrow = g.getPosition().getRow();
+					final int encol = g.getPosition().getColumn();
+					if (enrow == row && encol < col && encol >= (col - range)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -284,13 +326,18 @@ public abstract class Behaviour {
 	 */
 	private ArrayList<Position> genPath(final Position current, final Position target) {
 
-		currentPath = astar.AStarAlg(current, target);
-		// path is backwards
-		
-		//Collections.reverse(currentPath);
-		//currentPath.remove(0);
+		return astar.AStarAlg(current, target);
+	}
 
-		return currentPath;
+	private void selfPreserve() {
+
+		if (scanEnemies(2, true)) {
+			((Player) entity).getSkillSet().activateW();
+		}
+		if (scanEnemies(4, false)) {
+			((Player) entity).getSkillSet().activateQ();
+		}
+
 	}
 
 	/**
@@ -298,43 +345,42 @@ public abstract class Behaviour {
 	 */
 	public void run() {
 
-		if(entity instanceof Player){
-			((Player) entity).getSkillSet().activateW();
-		}
-		
+		selfPreserve();
 		lockedTarget = pickTarget();
 
 		switch (tarType) {
 		case RANDOM: {
-			
+
+			lastPos = entity.getPosition();
+			entity.setPosition(lockedTarget);
+
+		}
+			break;
+
+		case STATIONARY: {
+
+			if (currentPath.size() == 0 && manhattanDistance(entity.getPosition(), lockedTarget) == 1
+					&& RuleChecker.checkCellValidity(world.getMap().getCell(lockedTarget))) {
+
+				lockedTarget = pickTarget();
 				lastPos = entity.getPosition();
 				entity.setPosition(lockedTarget);
 
+			} else if (currentPath.size() == 0) {
+				currentPath = genPath(entity.getPosition(), lockedTarget);
+				currentPath.remove(currentPath.size() - 1);
+				if (currentPath.size() == 0)
+					entity.setPosition(currentPath.get(0));
+				else
+					entity.setPosition(currentPath.get(currentPath.size() - 1));
+				lastPos = entity.getPosition();
+				currentPath.remove(currentPath.size() - 1);
+			} else {
+				entity.setPosition(currentPath.get(currentPath.size() - 1));
+				lastPos = entity.getPosition();
+				currentPath.remove(currentPath.size() - 1);
+			}
 		}
-			break;
-			
-		case STATIONARY: {
-
-			
-			currentPath = genPath(entity.getPosition(),lockedTarget);
-			
-			entity.setPosition(currentPath.get(0));
-			
-			currentPath.remove(0);
-
-		}
-			break;
-			
-		case ENEMY: {
-
-
-			currentPath = genPath(entity.getPosition(),lockedTarget);
-			
-			entity.setPosition(currentPath.get(0));
-
-			currentPath.remove(0);
-		}
-			break;
 		}
 	}
 }

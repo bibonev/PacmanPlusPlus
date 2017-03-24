@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
@@ -25,6 +24,7 @@ import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
+import main.java.gamelogic.domain.RemotePlayer;
 import main.java.gamelogic.domain.RuleChecker;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
@@ -61,14 +61,18 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
 				checkEndingConditions();
 				if(entity instanceof Player){
 					((Player) entity).getSkillSet().incrementCooldown();
+					int shieldValue = ((Player) entity).getSkillSet().getW().getShieldValue();
+                    if(shieldValue == 0){
+                        ((Player) entity).getSkillSet().removeShield();
+                    }
 				}
 			}
 
 			eatenPlayers.addAll(getEatenPlayers());
             killedEntities.addAll(getKilledEntitiesByLaser());
 			for (final Player p : eatenPlayers) {
-			    if(p.getShield() > 0) {
-			        p.reduceShield();
+			    if(p.getSkillSet().getW().getShieldValue() > 0) {
+			        p.getSkillSet().getW().reduceShieldValue();
                 } else {
                     p.setDeathReason("Eaten by a ghost!");
                     game.getWorld().removeEntity(p.getID());
@@ -105,8 +109,8 @@ public class LocalGameLogic extends GameLogic implements EntityAddedListener, En
     private void decayPlayerShields() {
         if(gameStepsElapsed % 20 == 0) {
             for(Player p : game.getWorld().getPlayers()) {
-                if(p.getShield() > 0)
-                    p.reduceShield();
+                if(p.getSkillSet().getW().getShieldValue() > 0)
+                    p.getSkillSet().getW().reduceShieldValue();
             }
         }
     }

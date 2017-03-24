@@ -21,3 +21,7 @@ lib/
 # remove all .log files
 *.log
 /out/
+
+/build/
+
+\.gradle/3\.3/taskArtifacts/

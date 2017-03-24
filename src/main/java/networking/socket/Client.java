@@ -5,13 +5,9 @@ package main.java.networking.socket;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Consumer;
 
 import main.java.event.Event;
 import main.java.networking.NetworkListener;
@@ -57,6 +53,9 @@ public class Client implements NetworkSocket, Runnable {
 		serverSide = true;
 	}
 
+	/**
+	 * Private constructor to initialize events
+	 */
 	private Client() {
 		receiveEvent = new Event<>((l, b) -> l.receive(b));
 		disconnectedEvent = new Event<>((l, i) -> l.onClientDisconnected(i));
@@ -145,6 +144,14 @@ public class Client implements NetworkSocket, Runnable {
 		}
 	}
 
+	/**
+	 * Gets the currently asigned client ID, either representing the
+	 * client ID assigned to a remote client by the current server, or
+	 * the ID assigned to the local client by the remote server if thi
+	 * is one of many clients of a currently running server instance. 
+	 * 
+	 * @return
+	 */
 	public int getClientID() {
 		if (alive) {
 			if (clientID == -1) {
@@ -167,109 +174,19 @@ public class Client implements NetworkSocket, Runnable {
 		return disconnectedEvent;
 	}
 
+	/**
+	 * Sets the current client ID, as received on the server, if running on
+	 * the client.
+	 * 
+	 * @param clientID The ID assigned to this client by the server.
+	 * @throws RuntimeException Thrown when this method is called when this socket
+	 * is not running in client mode.
+	 */
 	public void setClientID(final int clientID) {
 		if (!serverSide) {
 			this.clientID = clientID;
 		} else {
 			throw new RuntimeException("Cannot set client ID of client on server once initialised.");
-		}
-	}
-}
-
-/**
- * ClientSender thread is used to send a packet byte array to the server
- */
-class ClientSender extends Thread {
-	private boolean alive = true;
-	private DataOutputStream out = null;
-	private BlockingQueue<byte[]> packets;
-
-	public ClientSender(final DataOutputStream out) {
-		this.out = out;
-		packets = new LinkedBlockingQueue<byte[]>();
-	}
-
-	@Override
-	public void run() {
-		try {
-			while (alive) {
-				final byte[] packet = packets.take();
-				if (packet.length > 0) {
-					out.writeInt(packet.length);
-					out.write(packet);
-				}
-			}
-		} catch (final EOFException e) {
-			e.printStackTrace();
-			// connection dropped
-			return;
-		} catch (final IOException e) {
-			if (alive) {
-				throw new RuntimeException("Could not send packet.", e);
-			} else {
-				// connection already dropped, just close thread
-			}
-		} catch (final InterruptedException e) {
-			throw new RuntimeException("Client thread interrupted.", e);
-		} finally {
-			alive = false;
-		}
-	}
-
-	public void die() {
-		if (alive) {
-			alive = false;
-			packets.add(new byte[0]);
-		}
-	}
-
-	public void send(final byte[] packet) {
-		if (alive) {
-			packets.add(packet);
-		}
-	}
-}
-
-/**
- * ClientReceiver thread is used to recieve the packet byte array from the
- * server
- */
-class ClientReceiver extends Thread {
-	private boolean alive = true;
-	private DataInputStream in = null;
-	private Consumer<byte[]> onReceive;
-
-	public ClientReceiver(final DataInputStream in, final Consumer<byte[]> onReceive) {
-		this.in = in;
-		this.onReceive = onReceive;
-	}
-
-	@Override
-	public void run() {
-		while (alive) {
-			try {
-				final int length = in.readInt();
-
-				if (length > 0) {
-					final byte[] message = new byte[length];
-					in.read(message);
-					onReceive.accept(message);
-				}
-			} catch (final EOFException e) {
-				return;
-			} catch (final IOException e) {
-				if (alive) {
-					throw new RuntimeException(e);
-				} else {
-					// connection already ended, just close thread
-				}
-			}
-		}
-	}
-
-	public void die() {
-		if (alive) {
-			alive = false;
 		}
 	}
 }

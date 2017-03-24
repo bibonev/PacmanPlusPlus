@@ -64,8 +64,13 @@ public class PacBomb extends Ability {
 	}
 
 	@Override
-	public void incrementCooldown() {
+	public boolean incrementCooldown() {
 		// TODO Auto-generated method stub
-		
+		return false;
+	}
+
+	@Override
+	public void reduceShieldValue() {
+		// no
 	}
 }
