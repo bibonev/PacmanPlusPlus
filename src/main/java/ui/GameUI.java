@@ -218,9 +218,9 @@ public class GameUI extends Application
 		thisStage.setX((primScreenBounds.getWidth() - thisStage.getWidth()) / 2);
 		thisStage.setY((primScreenBounds.getHeight() - thisStage.getHeight()) / 2);
 	}
-
-	public void showGameSettingsScreen() {
-		gameSettingsScreen.update();
+	
+	public void showGameSettingsScreen(){
+		gameSettingsScreen.loadSettings();
 		centerPane.getChildren().add(gameSettingsScreen.getPane());
 	}
 
@@ -323,6 +323,7 @@ public class GameUI extends Application
 			multiPlayerLobbyScreen.getCountDownStartingListener().removeListener(server);
 			gameCommandService.getRemoteGameCreatedEvent().removeListener(client);
 			gameCommandService.getLocalGameCreatedEvent().removeListener(server);
+			gameSettingsScreen.getGameSettingsChangedEvent().removeListener(server);
 
 			client.getMultiplayerGameStartingEvent().removeListener(gameCommandService);
 			server.getMultiplayerGameStartingEvent().removeListener(gameCommandService);
@@ -330,7 +331,9 @@ public class GameUI extends Application
 
 		multiPlayerLobbyScreen.getHostStartingGameListener().addOneTimeListener(server);
 		multiPlayerLobbyScreen.getCountDownStartingListener().addOneTimeListener(server);
+		multiPlayerLobbyScreen.setGameSettingsEnabled(true);
 		multiPlayerLobbyScreen.setStartGameEnabled(true);
+		gameSettingsScreen.getGameSettingsChangedEvent().addListener(server);
 		gameCommandService.getRemoteGameCreatedEvent().addOneTimeListener(client);
 		gameCommandService.getLocalGameCreatedEvent().addOneTimeListener(server);
 
@@ -338,6 +341,7 @@ public class GameUI extends Application
 		server.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
 
 		server.run();
+		gameSettingsScreen.saveSettings();
 		try {
 			// really nasty cheap workaround to get around JavaFX being weird
 			Thread.sleep(100);
@@ -359,6 +363,7 @@ public class GameUI extends Application
 
 		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> client.stop());
 		multiPlayerLobbyScreen.setStartGameEnabled(false);
+		multiPlayerLobbyScreen.setGameSettingsEnabled(false);
 		gameCommandService.getRemoteGameCreatedEvent().addOneTimeListener(client);
 		client.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
 
@@ -387,7 +392,8 @@ public class GameUI extends Application
 			multiPlayerLobbyScreen.list
 					.addPlayer(((LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) args).getPlayerInfo());
 		} else {
-			// TODO: update rules display
+			multiPlayerLobbyScreen.setRuleStrings(
+					((LobbyChangedEventArgs.LobbyRulesChangedEventArgs)args).getNewRules());
 		}
 	}
 

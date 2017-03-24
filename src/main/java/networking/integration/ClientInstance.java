@@ -287,17 +287,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			triggerCountDown(p);
 		} else if (p.getPacketName().equals("spawner-added")) {
 			triggerSpawnerAdded(p);
-		} else if (p.getPacketName().equals("game-settings-changed")) {
-			triggerGameSettingsChanged(p);
 		}
-	}
-
-	private void triggerGameSettingsChanged(final Packet p) {
-		System.out.println("CHANGING");
-		final boolean ai = p.getBoolean("playAgainstAI");
-		final int lives = p.getInteger("lives");
-		gameUI.setAIPlayer(ai);
-		gameUI.setLives(lives);
 	}
 
 	/**

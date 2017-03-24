@@ -31,7 +31,7 @@ public class PlayersList {
 		pane.setHgap(4);
 		pane.setColumnHalignment(HPos.CENTER);
 		pane.setOrientation(Orientation.VERTICAL);
-		pane.getStyleClass().add("paneStyle");
+		pane.getStyleClass().addAll("paneStyle", "playerDisplayStyle");
 		pane.setAlignment(Pos.TOP_CENTER);
 
 		playerLabels = new HashMap<>();
@@ -49,7 +49,7 @@ public class PlayersList {
 	public void addPlayer(final LobbyPlayerInfo player) {
 		Platform.runLater(() -> {
 			final Label label = new Label(player.getName());
-			label.getStyleClass().add("labelStyle");
+			label.getStyleClass().addAll("playerDisplayStyle");
 			pane.getChildren().add(label);
 			playerLabels.put(player.getID(), label);
 		});
@@ -68,10 +68,6 @@ public class PlayersList {
 		for (final int i : playerLabels.keySet()) {
 			removePlayer(i);
 		}
-	}
-	
-	public boolean contains(final int playerID){
-		return playerLabels.containsKey(playerID);
 	}
 
 	public Pane getPane() {

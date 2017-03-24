@@ -5,6 +5,9 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import main.java.event.Event;
+import main.java.event.arguments.GameSettingsChangedEventArgs;
+import main.java.event.listener.GameSettingsChangedEventListener;
 
 public class GameSettingsScreen extends Screen {
 
@@ -12,6 +15,8 @@ public class GameSettingsScreen extends Screen {
 	private Label label;
 	private CheckBox ai;
 	private ChoiceBox<Integer> lives;
+	private Event<GameSettingsChangedEventListener, GameSettingsChangedEventArgs> event
+			= new Event<>((l, a) -> l.onGameSettingsChanged(a));
 
 	// private Event<GameSettingsChangedEventListener,
 	// GameSettingsChangedEventArgs> event = new Event<>((l, a) ->
@@ -41,18 +46,20 @@ public class GameSettingsScreen extends Screen {
 
 		pane.getChildren().addAll(label, separator, lives, ai, returnButton);
 	}
-
-	// public Event<GameSettingsChangedEventListener,
-	// GameSettingsChangedEventArgs> getGameSettingsChangedEvent() {
-	// return event;
-	// }
-
-	private void closeSettings() {
-		game.multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives.getValue() - 1);
-		game.multiPlayerLobbyScreen.getMultiplayerSettings().setAIPlayer(ai.isSelected());
-		// event.fire(new
-		// GameSettingsChangedEventArgs(game.multiPlayerLobbyScreen.getMultiplayerSettings()));
+	
+	public Event<GameSettingsChangedEventListener, GameSettingsChangedEventArgs> getGameSettingsChangedEvent(){
+		return event;
+	}
+	
+	private void closeSettings(){
+		saveSettings();
 		game.removeGameSettingsScreen();
+	}
+
+	public void saveSettings() {
+		game.multiPlayerLobbyScreen.getMultiplayerSettings().setInitialPlayerLives(lives.getValue());
+		game.multiPlayerLobbyScreen.getMultiplayerSettings().setAIPlayer(ai.isSelected());
+		event.fire(new GameSettingsChangedEventArgs(game.multiPlayerLobbyScreen.getMultiplayerSettings()));
 	}
 
 	@Override
@@ -70,9 +77,9 @@ public class GameSettingsScreen extends Screen {
 		closeSettings();
 
 	}
-
-	public void update() {
+	
+	public void loadSettings() {
 		ai.setSelected(game.multiPlayerLobbyScreen.getMultiplayerSettings().getAIPlayer());
-		lives.getSelectionModel().select(game.multiPlayerLobbyScreen.getMultiplayerSettings().getInitialPlayerLives());
+	    lives.getSelectionModel().select(game.multiPlayerLobbyScreen.getMultiplayerSettings().getInitialPlayerLives() - 1);
 	}
 }

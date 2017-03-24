@@ -100,7 +100,7 @@ public class World {
 	 */
 	public int addEntity(final Entity entity) {
 		int id;
-		if (entity instanceof Player) {
+		if (entity instanceof Player && entity.getID() > -1) {
 			id = entity.getID();
 		} else {
 			id = latestEntityID++;

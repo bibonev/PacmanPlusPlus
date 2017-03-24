@@ -9,6 +9,7 @@ import main.java.event.arguments.EntityChangedEventArgs;
 import main.java.event.arguments.EntityMovedEventArgs;
 import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.event.arguments.GameEndedEventArgs;
+import main.java.event.arguments.GameSettingsChangedEventArgs;
 import main.java.event.arguments.HostStartingMultiplayerGameEventArgs;
 import main.java.event.arguments.LobbyChangedEventArgs;
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
@@ -19,6 +20,7 @@ import main.java.event.listener.EntityAddedListener;
 import main.java.event.listener.EntityRemovingListener;
 import main.java.event.listener.GameCreatedListener;
 import main.java.event.listener.GameEndedListener;
+import main.java.event.listener.GameSettingsChangedEventListener;
 import main.java.event.listener.HostStartingMultiplayerGameListener;
 import main.java.event.listener.LobbyStateChangedListener;
 import main.java.event.listener.MultiplayerGameStartingListener;
@@ -51,7 +53,7 @@ import main.java.networking.socket.Server;
 public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedListener, ServerEntityUpdatedListener,
 		EntityAddedListener, EntityRemovingListener, ClientDisconnectedListener, LobbyStateChangedListener,
 		HostStartingMultiplayerGameListener, GameCreatedListener, CellStateChangedEventListener, GameEndedListener,
-		CountDownStartingListener {
+		CountDownStartingListener, GameSettingsChangedEventListener {
 	private Server server;
 	protected ServerManager manager;
 	private Game game;
@@ -79,7 +81,6 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		gameLogic = null;
 		gameLogicTimer = null;
 		multiplayerGameStartingEvent = new Event<>((l, a) -> l.onMultiplayerGameStarting(a));
-
 	}
 
 	@Override
@@ -751,14 +752,10 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		manager.dispatchAll(p);
 	}
 
-	// @Override
-	// public void onGameSettingsChanged(final GameSettingsChangedEventArgs
-	// args) {
-	// final Packet p = new Packet("game-settings-changed");
-	// p.setInteger("lives", args.getSettings().getInitialPlayerLives());
-	// p.setBoolean("playAgainstAI", args.getSettings().getAIPlayer());
-	// manager.dispatchAll(p);
-	// }
+	@Override
+	public void onGameSettingsChanged(GameSettingsChangedEventArgs args) {
+		lobby.setSettingsString(args.getSettings().toDisplayString());	
+	}
 
 	/*
 	 * For posterity: a corresponding removeTriggers method is not necessary.

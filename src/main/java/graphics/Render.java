@@ -192,6 +192,11 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		    if(!allEntities.containsKey(spawner.getID())) {
 		    	setupSpawnerAnimation(spawner);
 		    }
+		    Visualisation vi = allEntities.get(spawner.getID());
+		    if(!(vi instanceof SpawnerVisualisation)) {
+		    	removedEntityIDs.add(spawner.getID());
+		    	continue;
+		    }
 			SpawnerVisualisation vis = (SpawnerVisualisation) allEntities.get(spawner.getID());
 		    
 		    vis.setNumber(spawner.getTimeRemaining());
@@ -330,6 +335,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 
     private void leaveGame() {
         onPlayerLeavingGame.fire(null);
+        gameUI.stopMusic();
         gameUI.switchToMenu();
     }
 
@@ -463,8 +469,7 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
                 addClickListener();
                 gameUI.pausePlay();
             } else if (event.getCode() == KeyCode.Q) {
-                gameUI.switchToMenu();
-                gameUI.stopMusic();
+                leaveGame();
             } else if(event.getCode() == KeyCode.SPACE){
             	gameUI.switchToSettingsGame();
             }
