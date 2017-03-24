@@ -7,12 +7,12 @@ repository, work on the game following the guidelines outlined in the `Dev Info`
 section and create pull requests for your changes.
 
 ## Developers
-Thomas Galvin
-Rose Kirtley
-Boyan Bonev
-Lyubomir Pashev
-Simeon Kostadinov
-Andrei-Marius Longhin
+- Thomas Galvin
+- Rose Kirtley
+- Boyan Bonev
+- Lyubomir Pashev
+- Simeon Kostadinov
+- Andrei-Marius Longhin
 
 ## Dev Info
 
