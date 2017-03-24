@@ -155,9 +155,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 		}
 
 		for (final Player player : game.getWorld().getPlayers()) {
-    	    PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
-    	    
-    	    if(pacmanVisualisation != null) {
+    	    Visualisation vi = allEntities.get(player.getID());
+			
+			if(vi instanceof PacmanVisualisation) {
+				PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
 	    	    Node nextNode = pacmanVisualisation.getNode();
 	
 	            transitions.get(player.getID()).setToY(nextNode.getTranslateY());
@@ -166,19 +167,26 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
 	
 	            rotations.get(player.getID()).play();
 	            transitions.get(player.getID()).play();
-    	    }
+			} else {
+				removedEntityIDs.add(player.getID());
+				addedEntityIDs.add(player.getID());
+			}
         }
 
 		for (final Ghost ghost : game.getWorld().getGhosts()) {
-		    GhostVisualisation ghostVis = new GhostVisualisation(ghost.getPosition());
-
-		    if(ghostVis != null) {
+			Visualisation vi = allEntities.get(ghost.getID());
+			
+			if(vi instanceof GhostVisualisation) {
+				GhostVisualisation ghostVis = new GhostVisualisation(ghost.getPosition());
 		    	Node nextNode = ghostVis.getNode();
 			    transitions.get(ghost.getID()).setToY(nextNode.getTranslateY());
 	            transitions.get(ghost.getID()).setToX(nextNode.getTranslateX());
 	
 	            transitions.get(ghost.getID()).play();
-		    }
+			} else {
+				removedEntityIDs.add(ghost.getID());
+				addedEntityIDs.add(ghost.getID());
+			}
 		}
 
 		for (final Spawner spawner : game.getWorld().getEntities(Spawner.class)) {
@@ -619,7 +627,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             PacmanVisualisation pacmanVisualisation = new PacmanVisualisation(player);
             Node nextNode = pacmanVisualisation.getShieldNode();
 
-           if (shieldValue > 0 && !shieldsActivated.containsKey(player.getID())) {
+           if (shieldValue > 0 && !shieldsActivated.containsKey(player.getID()) &&
+        		   allEntities.containsKey(player.getID())) {
                 shieldsActivated.put(player.getID(), nextNode);
                 shieldVisulisation(player, pacmanVisualisation, nextNode, allEntities.get(player.getID()).getNode(), player.getID());
             }
@@ -636,7 +645,8 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
             Node nextNode = pacmanVisualisation.getNode();
 
 
-            if (shieldValue <= 0 && shieldsActivated.containsKey(player.getID())) {
+            if (shieldValue <= 0 && shieldsActivated.containsKey(player.getID()) &&
+         		   allEntities.containsKey(player.getID())) {
                 shieldVisulisation(player, pacmanVisualisation, nextNode, shieldsActivated.get(player.getID()), player.getID());
                 shieldsActivated.remove(player.getID());
             }
