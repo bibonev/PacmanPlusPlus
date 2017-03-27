@@ -88,7 +88,7 @@ public class PacmanVisualisationTest {
 
 		final Node node = test.getNode();
 
-		assertEquals(node.getClass().getTypeName(), "javafx.scene.layout.StackPane");
+		// assertEquals(node.getClass().getTypeName(), "javafx.scene.layout.StackPane");
 		assertEquals(((StackPane)(node)).getChildren().size(), 2);
 		assertEquals(((StackPane)(node)).getChildren().get(0).getClass().getTypeName(), "javafx.scene.image.ImageView");
 		assertEquals(((StackPane)(node)).getChildren().get(1).getClass().getTypeName(), "javafx.scene.shape.Circle");

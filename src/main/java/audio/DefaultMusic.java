@@ -98,6 +98,4 @@ public class DefaultMusic implements Music, GameCreatedListener, GameEndedListen
 	public void onGameEnded(GameEndedEventArgs args) {
 		stopMusic();
 	}
-	
-	//Add another listener for game paused
 }

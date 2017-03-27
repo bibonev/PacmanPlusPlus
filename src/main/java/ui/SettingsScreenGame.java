@@ -1,5 +1,10 @@
 package main.java.ui;
 
+/**
+ * Setting screen when in game
+ * @author Rose Kirtley
+ *
+ */
 public class SettingsScreenGame extends SettingsScreen {
 
 	public SettingsScreenGame(GameUI game) {

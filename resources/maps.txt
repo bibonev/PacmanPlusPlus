@@ -1,0 +1,1 @@
+Classic:maps/classic.png

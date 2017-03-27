@@ -6,7 +6,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 
 /**
- * Screen 'overlay' for the client settings, always able to go back to the
+ * Abstract screen 'overlay' for the client settings, always able to go back to the
  * previous screen
  *
  * @author Rose Kirtley

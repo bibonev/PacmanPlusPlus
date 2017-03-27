@@ -35,6 +35,7 @@ import main.java.event.listener.LobbyStateChangedListener;
 import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.gamelogic.core.GameCommandService;
 import main.java.gamelogic.core.Lobby;
+import main.java.gamelogic.core.MapService;
 import main.java.gamelogic.domain.Game;
 import main.java.graphics.PositionVisualisation;
 import main.java.graphics.Render;
@@ -90,6 +91,11 @@ public class GameUI extends Application
 			(l, a) -> l.onPlayerLeavingGame());
 
 	private GameCommandService gameCommandService;
+	private MapService mapService;
+	
+	public MapService getMapService() {
+		return mapService;
+	}
 
 	@Override
 	public void start(final Stage primaryStage) throws Exception {
@@ -99,7 +105,8 @@ public class GameUI extends Application
 			audioDisabled = true;
 		}
 
-		gameCommandService = new GameCommandService();
+		mapService = new MapService();
+		gameCommandService = new GameCommandService(mapService);
 		gameCommandService.getLocalGameCreatedEvent().addListener(this);
 		gameCommandService.getRemoteGameCreatedEvent().addListener(this);
 		setup(audioDisabled);
@@ -125,7 +132,7 @@ public class GameUI extends Application
 		helpScene = new Scene(helpPane, 1150, 600);
 		helpScene.setOnKeyPressed(e -> sendMoveEvent(e.getCode()));
 
-		final String css = this.getClass().getResource("style.css").toExternalForm();
+		final String css = this.getClass().getResource("/css/style.css").toExternalForm();
 		uiScene.getStylesheets().add(css);
 		helpScene.getStylesheets().add(css);
 		settingsSceneGame.getStylesheets().add(css);
@@ -161,6 +168,10 @@ public class GameUI extends Application
 		return onPlayerLeavingGame;
 	}
 
+	/**
+	 * Sets up the necessary listeners and screens
+	 * @param audioDisabled
+	 */
 	private void setup(final boolean audioDisabled) {
 		music = audioDisabled ? new DisabledMusic() : new DefaultMusic();
 		gameCommandService.getLocalGameCreatedEvent().addListener(music);
@@ -207,6 +218,10 @@ public class GameUI extends Application
 		launch(args);
 	}
 
+	/**
+	 * Sets the current screen;
+	 * @param screen
+	 */
 	private void setScreen(final Screen screen) {
 		currentScreen = screen;
 		centerPane.getChildren().remove(0, centerPane.getChildren().size());
@@ -314,8 +329,6 @@ public class GameUI extends Application
 			client.stop();
 		});
 
-		// gameSettingsScreen.getGameSettingsChangedEvent().addListener(server);
-
 		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> {
 			client.stop();
 			server.stop();
@@ -341,19 +354,16 @@ public class GameUI extends Application
 		server.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
 
 		server.run();
-		gameSettingsScreen.saveSettings();
+		
+		gameSettingsScreen.onSettingsChanged();
 		try {
-			// really nasty cheap workaround to get around JavaFX being weird
 			Thread.sleep(100);
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
 		client.run();
-		// create new lobby for a multiplayer game
 	}
 
-	// TODO move creation of client instance into GameCommandService at some
-	// point
 	public void joinGame(final String gameIp) {
 		final ClientInstance client = new ClientInstance(this, name, gameIp);
 

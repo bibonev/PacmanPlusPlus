@@ -1,8 +1,4 @@
 package main.java.gamelogic.domain;
-/**
- * Represent a player's inventory
- */
-
 import main.java.event.Event;
 import main.java.event.arguments.PlayerCooldownChangedEventArgs;
 import main.java.event.arguments.PlayerLaserActivatedEventArgs;

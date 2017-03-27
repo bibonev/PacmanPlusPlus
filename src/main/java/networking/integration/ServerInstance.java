@@ -1,5 +1,6 @@
 package main.java.networking.integration;
 
+import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
 import main.java.constants.GameType;
@@ -38,10 +39,12 @@ import main.java.gamelogic.core.GameLogicTimer;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.core.LocalGameLogic;
+import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.LocalSkillSet;
+import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemotePlayer;
@@ -50,6 +53,7 @@ import main.java.gamelogic.domain.SkillSet;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.gamelogic.domain.World;
+import main.java.graphics.PositionVisualisation;
 import main.java.networking.ServerManager;
 import main.java.networking.StandardServerManager;
 import main.java.networking.data.Packet;
@@ -407,7 +411,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		} else {
 			if (game.getWorld().getEntity(sender) == null) {
 				if (playerInfo.getRemainingLives() > 0) {
-					final Position pos = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
+					final Position pos = game.getWorld().getCandidateSpawnPosition();
 					playerInfo.setRemainingLives(playerInfo.getRemainingLives() - 1);
 					addHumanPlayerToWorld(sender, pos.getRow(), pos.getColumn());
 				}
@@ -486,15 +490,15 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			final Entity toSpawn = s.getEntity();
 
 			if (toSpawn instanceof Ghost) {
-				manager.dispatchAll(createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "ghost"));
+				manager.dispatchAll(createSpawnCountdownPacket(e.getPosition(), e.getID(), s.getTimeRemaining(), "ghost"));
 			} else if (toSpawn instanceof Player) {
 				manager.dispatchAllExcept(
-						createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "remote-player"),
+						createSpawnCountdownPacket(e.getPosition(), e.getID(), s.getTimeRemaining(), "remote-player"),
 						toSpawn.getID());
 
 				if (lobby.containsPlayer(toSpawn.getID())) {
 					manager.dispatch(toSpawn.getID(),
-							createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "local-player"));
+							createSpawnCountdownPacket(e.getPosition(), e.getID(), s.getTimeRemaining(), "local-player"));
 				}
 			}
 		}
@@ -506,6 +510,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	 *
 	 * @param position
 	 *            The position that the new countdown will appear at.
+	 * @param id
+	 *            The ID of the spawner.
 	 * @param time
 	 *            The starting time number of the countdown.
 	 * @param type
@@ -513,8 +519,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	 * @return A packet representing the appearance of a countdown number in the
 	 *         world.
 	 */
-	private Packet createSpawnCountdownPacket(final Position position, final int time, final String type) {
+	private Packet createSpawnCountdownPacket(final Position position, final int id, final int time, final String type) {
 		final Packet p = new Packet("spawner-added");
+		p.setInteger("entity-id", id);
 		p.setInteger("row", position.getRow());
 		p.setInteger("col", position.getColumn());
 		p.setInteger("duration", time);
@@ -600,6 +607,17 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			reason = reason + "\nYou have no more lives!";
 		}
 		manager.dispatch(playerID, createLocalPlayerDiedPacket(reason, playerInfo.getRemainingLives() > 0));
+	}
+	
+	private void addMapInfoToPacket(Packet p, Map m) {
+		int size = m.getMapSize();
+		
+		p.setInteger("map.size", size);
+		for(int i = 0; i < size; i++) {
+			for(int j = 0; j < size; j++) {
+				p.setString("map[" + i + "][" + j + "]", m.getCell(i, j).getState().name());
+			}
+		}
 	}
 
 	/**
@@ -694,6 +712,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			final Packet p = new Packet("game-starting");
 
 			p.setInteger("initial-player-lives", game.getGameSettings().getInitialPlayerLives());
+			addMapInfoToPacket(p, game.getWorld().getMap());
 			// add game configuration stuff into this packet
 
 			manager.dispatchAll(p);
@@ -717,7 +736,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 
 		for (final int i : lobby.getPlayerIDs()) {
-			final Position p = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
+			final Position p = game.getWorld().getCandidateSpawnPosition();
 			addHumanPlayerToWorld(i, p.getRow(), p.getColumn());
 		}
 
