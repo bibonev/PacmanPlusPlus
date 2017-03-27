@@ -30,4 +30,15 @@ public class ServerTest {
 		assertNotNull(server.getClientConnectedEvent());
 		assertNotNull(server.getClientDisconnectedEvent());
 	}
+	
+	@Test
+	public void testDieDoesNothingBeforeStarting() {
+		server.die();
+	}
+	
+	@Test(expected=IllegalStateException.class)
+	public void testCannotGetNonexistentClients() {
+		server.getClient(0);
+		server.getClient(1);
+	}
 }
