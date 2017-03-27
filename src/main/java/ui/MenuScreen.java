@@ -14,15 +14,10 @@ import javafx.scene.control.Tooltip;
 public class MenuScreen extends Screen {
 
 	private Button login;
-	private boolean loginSelected;
 	private Button singlePlayer;
-	private boolean singlePlayerelected;
 	private Button multiPlayer;
-	private boolean multiPlayerSelected;
 	private Button close;
-	private boolean closeSelected;
 	private Button help;
-	private boolean helpSelected;
 	private Label title;
 
 	public MenuScreen(final GameUI game) {

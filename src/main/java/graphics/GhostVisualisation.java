@@ -18,7 +18,7 @@ public class GhostVisualisation implements Visualisation {
 	 */
 	public GhostVisualisation(final Position position) {
 		this.position = new PositionVisualisation(position.getRow(), position.getColumn());
-		node = new ImageView("ghost.png");
+		node = new ImageView("images/ghost.png");
 	}
 
 	/**

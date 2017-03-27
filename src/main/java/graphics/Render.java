@@ -1,7 +1,5 @@
 package main.java.graphics;
 
-import java.awt.*;
-import java.awt.Label;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,7 +9,6 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.effect.BlurType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
@@ -19,8 +16,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import main.java.constants.*;
 import main.java.event.Event;
@@ -31,7 +26,6 @@ import main.java.gamelogic.domain.*;
 import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.ui.GameUI;
-import main.java.ui.Screen;
 
 /**
  * Created by Boyan Bonev on 09/02/2017.
@@ -504,12 +498,12 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
     }
 
     private void setupInventory() {
-        this.shieldImage = new ImageView("shield.png");
-        this.laserImage = new ImageView("laser.png");
+        this.shieldImage = new ImageView("images/shield.png");
+        this.laserImage = new ImageView("images/laser.png");
 
         inventory = new StackPane();
         inventory.setBackground(new Background(new BackgroundImage(
-                new Image("inventory.jpg",ScreenSize.Width,30,false,true),
+                new Image("images/inventory.jpg",ScreenSize.Width,30,false,true),
                 BackgroundRepeat.NO_REPEAT, BackgroundRepeat.NO_REPEAT, BackgroundPosition.CENTER,
                 BackgroundSize.DEFAULT)));
         inventory.setPrefSize(ScreenSize.Width, 30);
@@ -564,6 +558,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
+    /**
+     * Event for drawing the laser
+     * @param args
+     */
     @Override
     public void onPlayerLaserActivated(PlayerLaserActivatedEventArgs args) {
         Platform.runLater(() -> {
@@ -619,6 +617,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
+    /**
+     * Event for drawing the shield
+     * @param args
+     */
     @Override
     public void onPlayerShieldActivated(PlayerShieldActivatedEventArgs args) {
         Platform.runLater(() -> {
@@ -635,6 +637,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
+    /**
+     * Event for removing the shield
+     * @param args
+     */
     @Override
     public void onPlayerShieldRemoved(PlayerShieldRemovedEventArgs args) {
 	    Platform.runLater(() -> {
@@ -654,6 +660,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
+    /**
+     * Event for entity being drawn
+     * @param args Information or parameters regarding/describing the event.
+     */
 	@Override
 	public void onEntityAdded(EntityChangedEventArgs args) {
 		synchronized (addedEntityIDs) {

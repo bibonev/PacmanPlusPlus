@@ -18,7 +18,7 @@ public class AbilityStub extends Ability {
 
 	@Override
 	public boolean incrementCooldown() {
-		return Randoms.randomBoolean();
+		return true;
 	}
 
 	@Override

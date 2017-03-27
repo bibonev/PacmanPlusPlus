@@ -116,7 +116,7 @@ public class InGameScreensTest {
         assertEquals("Wohoo, you won!",((javafx.scene.control.Label)(((StackPane)(nodeWin)).getChildren().get(0))).getText());
         assertEquals("Damn, Other player won this time.",((javafx.scene.control.Label)(((StackPane)(nodeWin2)).getChildren().get(0))).getText());
         assertEquals("Damn! The ghosts won this time...",((javafx.scene.control.Label)(((StackPane)(nodeLoose)).getChildren().get(0))).getText());
-        assertEquals("No one won. Stop being bad at the game.",((javafx.scene.control.Label)(((StackPane)(nodeTie)).getChildren().get(0))).getText());
+        assertEquals("It's a tie! Nicely done.",((javafx.scene.control.Label)(((StackPane)(nodeTie)).getChildren().get(0))).getText());
 
         assertEquals("-fx-background-color: rgba(0, 0, 0, 0.7)", (nodeWin).getStyle());
     }

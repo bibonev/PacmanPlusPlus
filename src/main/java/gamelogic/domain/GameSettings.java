@@ -13,10 +13,14 @@ public class GameSettings {
 	
 	private int initialPlayerLives;
 	private boolean aiPlayer;
+	private String mapName;
+	private int ghostCount;
 	
 	public GameSettings() {
 		initialPlayerLives = 3;
 		aiPlayer = true;
+		mapName = "Default Map";
+		ghostCount = 2;
 	}
 		
 	public int getInitialPlayerLives() {
@@ -35,10 +39,28 @@ public class GameSettings {
 		this.initialPlayerLives = initialPlayerLives;
 	}
 	
+	public void setMapName(String mapName) {
+		this.mapName = mapName;
+	}
+	
+	public String getMapName() {
+		return mapName;
+	}
+	
 	public String[] toDisplayString() {
 		return new String[] {
 				String.format("Player lives: %d", getInitialPlayerLives()),
+				String.format("Ghost count: %d", getGhostCount()),
+				String.format("Map: %s", getMapName()),
 				String.format("AI Player %s", getAIPlayer() ? "enabled" : "disabled")
 		};
+	}
+
+	public int getGhostCount() {
+		return ghostCount;
+	}
+	
+	public void setGhostCount(int ghostCount) {
+		this.ghostCount = ghostCount;
 	}
 }

@@ -65,7 +65,6 @@ public class MultiPlayerLobbyScreen extends Screen implements UserLeavingLobbyLi
 		setUpHover(settings);
 
 		final HBox buttons = new HBox();
-		// buttons.setPadding(new Insets(5, 5, 5, 5));
 		buttons.setAlignment(Pos.TOP_CENTER);
 		buttons.getStyleClass().add("paneStyle");
 		buttons.getChildren().addAll(play, leaveGame, settings);

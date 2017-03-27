@@ -2,7 +2,6 @@ package main.java.graphics;
 
 import javafx.scene.Node;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import main.java.constants.CellState;
@@ -41,7 +40,7 @@ public class CellVisualisation implements Visualisation {
 						positionVisualisation.getWidth() / 8);
 				((Circle) node).setFill(Colors.CellFoodColor);
 			} else if (cell.getState() == CellState.OBSTACLE) {
-				node = new ImageView("border.jpg");
+				node = new ImageView("images/border.jpg");
 	
 				((ImageView) node).setFitWidth(positionVisualisation.getWidth());
 				((ImageView) node).setFitHeight(positionVisualisation.getHeight());

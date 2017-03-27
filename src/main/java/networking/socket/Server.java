@@ -24,7 +24,7 @@ import main.java.networking.event.ClientDisconnectedListener;
 
 public class Server implements NetworkServer, ClientDisconnectedListener, Runnable {
 	private ServerSocket serverSocket = null;
-	private boolean alive = true;
+	private boolean alive = false;
 	private int serverPort;
 	private int currentClientNumber = 0;
 	private Map<Integer, Client> clients;
@@ -48,6 +48,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	 * as the {@link Runnable} target, and starts it.
 	 */
 	public void start() {
+		alive = true;
 		new Thread(this).start();
 	}
 
@@ -143,10 +144,14 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 
 	@Override
 	public NetworkSocket getClient(final int clientID) {
-		if (clients.containsKey(clientID)) {
-			return clients.get(clientID);
+		if(alive) {
+			if (clients.containsKey(clientID)) {
+				return clients.get(clientID);
+			} else {
+				throw new IllegalArgumentException("No client with ID " + clientID);
+			}
 		} else {
-			throw new IllegalArgumentException("No client with ID " + clientID);
+			throw new IllegalStateException("Cannot get client before server has started.");
 		}
 	}
 

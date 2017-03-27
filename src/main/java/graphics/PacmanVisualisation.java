@@ -23,7 +23,7 @@ public class PacmanVisualisation implements Visualisation {
 	 */
 	public PacmanVisualisation(final Player player) {
 		this.player = player;
-		this.pacMan = new ImageView("pacman-animated.gif");
+		this.pacMan = new ImageView("images/pacman-animated.gif");
 		this.pv = new PositionVisualisation(player.getPosition().getRow(), player.getPosition().getColumn());
 	}
 
