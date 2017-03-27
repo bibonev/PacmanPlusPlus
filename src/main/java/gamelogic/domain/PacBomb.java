@@ -1,13 +1,7 @@
-/**
- *
- */
 package main.java.gamelogic.domain;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
-
 /**
+ * 					---UNUSED IN GAME---
  * A bomb that kills all players in a given range.
  *
  * @author Lyubomir Pashev
@@ -65,12 +59,10 @@ public class PacBomb extends Ability {
 
 	@Override
 	public boolean incrementCooldown() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void reduceShieldValue() {
-		// no
 	}
 }

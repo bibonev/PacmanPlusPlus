@@ -25,7 +25,7 @@ public abstract class Behaviour {
 	 *
 	 */
 	public enum Type {
-		DEFAULT, AGGRESSIVE, DEFENSIVE, GHOST
+		DEFAULT, GHOST
 	}
 
 	/** The type of the behavior. */
@@ -162,6 +162,7 @@ public abstract class Behaviour {
 
 	/**
 	 * Pick random adjacent cell to move to.
+	 * The entity's last position has the lowest priority.
 	 *
 	 * @return the position
 	 */
@@ -198,7 +199,11 @@ public abstract class Behaviour {
 	}
 
 	/**
-	 * Scan for enemies.
+	 * @param range - how far away the entity scans for enemies
+	 * @param scanForShieldActivation - if true it checks whether or not it is in danger 
+	 * 								    and uses PacShield accordingly
+	 * 									if false it checks whether or not there's a ghost nearby 
+	 * 									in front of it and uses PacLaser accordingly
 	 *
 	 * @return the array list
 	 */
@@ -329,11 +334,18 @@ public abstract class Behaviour {
 		return astar.AStarAlg(current, target);
 	}
 
+	/**
+	 * Determines which abilities the entity should use and when
+	 * see scanEnemies()
+	 * 
+	 */
 	private void selfPreserve() {
 
+		//shield
 		if (scanEnemies(2, true)) {
 			((Player) entity).getSkillSet().activateW();
 		}
+		//laser
 		if (scanEnemies(4, false)) {
 			((Player) entity).getSkillSet().activateQ();
 		}
@@ -345,10 +357,15 @@ public abstract class Behaviour {
 	 */
 	public void run() {
 
+		//ability usage
 		selfPreserve();
+		
+		//picks target
 		lockedTarget = pickTarget();
 
 		switch (tarType) {
+		
+		//make random move
 		case RANDOM: {
 
 			lastPos = entity.getPosition();
@@ -357,6 +374,7 @@ public abstract class Behaviour {
 		}
 			break;
 
+		//follow certain path to food node
 		case STATIONARY: {
 
 			if (currentPath.size() == 0 && manhattanDistance(entity.getPosition(), lockedTarget) == 1
