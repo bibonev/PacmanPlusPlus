@@ -192,6 +192,7 @@ public class AStar {
 	 */
 	public ArrayList<Position> AStarAlg(final Position start, final Position target) {
 
+		//new cell queue
 		open = new PriorityQueue<>((final Object o1, final Object o2) -> {
 			final AStarCell c1 = (AStarCell) o1;
 			final AStarCell c2 = (AStarCell) o2;
@@ -207,7 +208,9 @@ public class AStar {
 				}
 			}
 		}
+		//visited cells
 		closed = new boolean[mapSize][mapSize];
+		
 		// Set start position
 		setStartCell(start);
 
@@ -268,6 +271,7 @@ public class AStar {
 			path.add(finalcell.parent.getPos());
 			finalcell = finalcell.parent;
 		}
+		
 		// resets all parent cells
 		for(int i=0;i<mapSize;i++){
 			for(int j=0;j<mapSize;j++){

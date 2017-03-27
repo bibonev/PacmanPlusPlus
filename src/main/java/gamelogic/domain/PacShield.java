@@ -26,6 +26,10 @@ public class PacShield extends Ability {
         }
     }
 	@Override
+	/**
+	 * Increments cooldown.
+	 * @return if ability is on cooldown or not
+	 */
 	public boolean incrementCooldown() {
         int cooldown = getCD();
 		if(cooldown < SHIELD_COOLDOWN && getOwner().getSkillSet().getW().getShieldValue() == 0) {
@@ -37,6 +41,9 @@ public class PacShield extends Ability {
 	}
 
     @Override
+    /**
+     * Reduces shield cooldown.
+     */
     public void reduceShieldValue() {
         int shieldValue = getShieldValue();
         if(shieldValue > 0){

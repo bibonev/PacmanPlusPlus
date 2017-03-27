@@ -1,7 +1,7 @@
 package main.java.gamelogic.domain;
 
 /**
- * Represent an item from the inventory
+ * Represent an ability.
  *
  * @author Lyubomir Pashev
  * @author Simeon Kostadinov
@@ -88,10 +88,10 @@ public abstract class Ability {
 	}
 
 	/**
-	 * The item effect. Some items may have a delay.
+	 * The item effect.
 	 *
-	 * @throws InterruptedException
 	 */
+	
 	public abstract void activate();
 
 	public abstract boolean incrementCooldown();

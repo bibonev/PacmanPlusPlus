@@ -21,7 +21,7 @@ public class PacLaser extends Ability {
 	}
 
 	/**
-	 * Shoots instant lasers.
+	 * Activates the laser if not on cooldown
 	 */
 	@Override
 	public void activate() {
@@ -33,6 +33,10 @@ public class PacLaser extends Ability {
 
 	}
 
+	/**
+	 * Checks for entities directly in front of the player
+	 * 
+	 */
 	private void shoot(){
         final World world = owner.getWorld();
 
@@ -88,6 +92,11 @@ public class PacLaser extends Ability {
         }
     }
 
+
+	/**
+	 * Increments cooldown.
+	 * @return if ability is on cooldown or not
+	 */
 	@Override
 	public boolean incrementCooldown() {
 		int cooldown = getCD();
@@ -101,7 +110,7 @@ public class PacLaser extends Ability {
 	}
 
     @Override
+    //UNUSED
     public void reduceShieldValue() {
-        // no
     }
 }

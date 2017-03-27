@@ -1,22 +1,31 @@
 package main.java.gamelogic.domain;
 
 /**
- * Represent a position given by a row and a column
+ * Represent a position given by a row and a column.
  *
  * @author aml
- *
  */
 public class Position {
+	
+	/** The row. */
 	private int row;
+	
+	/** The column. */
 	private int column;
 
+	/**
+	 * Instantiates a new position.
+	 *
+	 * @param row the row
+	 * @param column the column
+	 */
 	public Position(final int row, final int column) {
 		this.row = row;
 		this.column = column;
 	}
 
 	/**
-	 * Fetch the row
+	 * Fetch the row.
 	 *
 	 * @return row
 	 */
@@ -25,7 +34,7 @@ public class Position {
 	}
 
 	/**
-	 * Fetch the column
+	 * Fetch the column.
 	 *
 	 * @return column
 	 */
@@ -37,8 +46,8 @@ public class Position {
 	 * Creates aa new Position object with this position and the position
 	 * {@code p} added together like vectors.
 	 *
-	 * @param p
-	 * @return
+	 * @param p the p
+	 * @return the position
 	 */
 	public Position add(final Position p) {
 		return new Position(row + p.row, column + p.column);
@@ -47,15 +56,18 @@ public class Position {
 	/**
 	 * Creates a new Position object with this position and the position
 	 * {@code (row, column)} added like vectors.
-	 * 
-	 * @param row
-	 * @param column
-	 * @return
+	 *
+	 * @param row the row
+	 * @param column the column
+	 * @return the position
 	 */
 	public Position add(final int row, final int column) {
 		return new Position(this.row + row, this.column + column);
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(final Object obj) {
 		if (obj != null && obj instanceof Position) {
@@ -67,6 +79,9 @@ public class Position {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
 	@Override
 	public String toString() {
 		return String.format("(%d, %d)", getRow(), getColumn());

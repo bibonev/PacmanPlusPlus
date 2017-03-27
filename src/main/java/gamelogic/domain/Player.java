@@ -4,19 +4,37 @@ import main.java.constants.CellState;
 import main.java.event.arguments.PlayerMovedEventArgs;
 
 /**
+ * The Class Player.
  *
  * @author Tom Galvin
  * @author Lyubomir Pashev
  * @author Simeon Kostadinov
-*/
+ */
 public abstract class Player extends Entity {
+	
+	/** The death reason. */
 	private String deathReason;
+	
+	/** The name. */
 	private String name;
+	
+	/** The angle. */
 	private double angle;
+	
+	/** The dots eaten. */
 	private int dotsEaten;
+	
+	/** The skill set. */
 	private SkillSet skillSet;
+    
+    /** The laser fired. */
     private boolean laserFired;
 
+	/**
+	 * Instantiates a new player.
+	 *
+	 * @param name the name
+	 */
 	public Player(final String name) {
 		super();
 		this.name = name;
@@ -25,7 +43,7 @@ public abstract class Player extends Entity {
 	}
 
 	/**
-	 * Fetch the player's name
+	 * Fetch the player's name.
 	 *
 	 * @return the name as a string
 	 */
@@ -34,7 +52,7 @@ public abstract class Player extends Entity {
 	}
 
 	/**
-	 * Fetch the player's angle
+	 * Fetch the player's angle.
 	 *
 	 * @return the angle as a double decimal number
 	 */
@@ -42,12 +60,18 @@ public abstract class Player extends Entity {
 		return angle;
 	}
 
+	/**
+	 * Gets the dots eaten.
+	 *
+	 * @return the dots eaten
+	 */
 	public int getDotsEaten() {
 		return dotsEaten;
 	}
 
 	/**
-	 * Get whether a laserFired has been fired
+	 * Get whether a laserFired has been fired.
+	 *
 	 * @return the laserFired
 	 */
 	public boolean getLaserFired(){
@@ -55,8 +79,9 @@ public abstract class Player extends Entity {
 	}
 
 	/**
-	 * Set that a laserFired has been fired
-	 * @param laserFired
+	 * Set that a laserFired has been fired.
+	 *
+	 * @param laserFired the new laser fired
 	 */
 	public void setLaserFired(boolean laserFired){
 		this.laserFired = laserFired;
@@ -64,7 +89,7 @@ public abstract class Player extends Entity {
     
     
 	/**
-	 * Fetch the player's skillset
+	 * Fetch the player's skillset.
 	 *
 	 * @return player skillset
 	 */
@@ -74,8 +99,9 @@ public abstract class Player extends Entity {
 
 
 	/**
-	 * Set the player's skillset
+	 * Set the player's skillset.
 	 *
+	 * @param skillSet the new skill set
 	 * @return player skillset
 	 */
 	public void setSkillSet(SkillSet skillSet) {
@@ -83,10 +109,9 @@ public abstract class Player extends Entity {
 	}
 
 	/**
-	 * Update the player's angle
+	 * Update the player's angle.
 	 *
-	 * @param angle
-	 *            the new angle
+	 * @param angle            the new angle
 	 */
 	public void setAngle(final double angle) {
 		this.angle = angle;
@@ -94,6 +119,9 @@ public abstract class Player extends Entity {
 				.fire(new PlayerMovedEventArgs(getPosition().getRow(), getPosition().getColumn(), angle, this));
 	}
 
+	/* (non-Javadoc)
+	 * @see main.java.gamelogic.domain.Entity#setPosition(main.java.gamelogic.domain.Position)
+	 */
 	@Override
 	public boolean setPosition(final Position position) {
 		eatDot();
@@ -101,6 +129,9 @@ public abstract class Player extends Entity {
 		return returnValue;
 	}
 
+	/**
+	 * Eat dot.
+	 */
 	protected void eatDot() {
 		if (getWorld() != null/* && !getWorld().isRemote() */) {
 			final Cell currentCell = getWorld().getMap().getCell(getPosition());
@@ -112,14 +143,27 @@ public abstract class Player extends Entity {
 		}
 	}
 
+	/**
+	 * Gets the death reason.
+	 *
+	 * @return the death reason
+	 */
 	public String getDeathReason() {
 		return deathReason;
 	}
 
+	/**
+	 * Sets the death reason.
+	 *
+	 * @param deathReason the new death reason
+	 */
 	public void setDeathReason(String deathReason) {
 		this.deathReason = deathReason;
 	}
 	
+	/* (non-Javadoc)
+	 * @see main.java.gamelogic.domain.Entity#gameStep(main.java.gamelogic.domain.Game)
+	 */
 	@Override
 	public void gameStep(Game game) {
 		super.gameStep(game);
