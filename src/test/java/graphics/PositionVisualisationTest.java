@@ -11,7 +11,6 @@ import main.java.graphics.PositionVisualisation;
  */
 public class PositionVisualisationTest {
 
-	@Test(expected = ExceptionInInitializerError.class)
 	public void testInitialInitialization() {
 		PositionVisualisation.initScreenDimensions();
 	}

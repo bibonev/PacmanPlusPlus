@@ -144,10 +144,14 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 
 	@Override
 	public NetworkSocket getClient(final int clientID) {
-		if (clients.containsKey(clientID)) {
-			return clients.get(clientID);
+		if(alive) {
+			if (clients.containsKey(clientID)) {
+				return clients.get(clientID);
+			} else {
+				throw new IllegalArgumentException("No client with ID " + clientID);
+			}
 		} else {
-			throw new IllegalArgumentException("No client with ID " + clientID);
+			throw new IllegalStateException("Cannot get client before server has started.");
 		}
 	}
 
