@@ -9,6 +9,12 @@ import main.java.event.Event;
 import main.java.event.arguments.GameSettingsChangedEventArgs;
 import main.java.event.listener.GameSettingsChangedEventListener;
 
+/**
+ * Class for settings the game settings
+ * 
+ * @author Rose Kirtley
+ *
+ */
 public class GameSettingsScreen extends Screen {
 
 	public Button returnButton;
@@ -17,10 +23,6 @@ public class GameSettingsScreen extends Screen {
 	private ChoiceBox<Integer> lives;
 	private Event<GameSettingsChangedEventListener, GameSettingsChangedEventArgs> event
 			= new Event<>((l, a) -> l.onGameSettingsChanged(a));
-
-	// private Event<GameSettingsChangedEventListener,
-	// GameSettingsChangedEventArgs> event = new Event<>((l, a) ->
-	// l.onGameSettingsChanged(a));
 
 	public GameSettingsScreen(final GameUI game) {
 		super(game);

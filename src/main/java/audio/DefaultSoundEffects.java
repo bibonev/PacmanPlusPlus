@@ -23,16 +23,12 @@ public class DefaultSoundEffects implements SoundEffects {
 	private MediaPlayer winPlayer;
 	private MediaPlayer lostPlayer;
 	private MediaPlayer startPlayer;
-//	private MediaPlayer expPlayer;
 	private MediaPlayer shootPlayer;
 	private MediaPlayer powerPlayer;
 
 	public DefaultSoundEffects(GameUI game) {
 		this.game = game;
 		isOn = true;
-//		final String explosionFile = ""; // TODO
-//		final Media explosion = new Media(new File(explosionFile).toURI().toString());
-//		expPlayer = new MediaPlayer(explosion);
 
 		final String shootFile = "src/main/java/audio/gun.mp3";
 		final Media shoot = new Media(new File(shootFile).toURI().toString());
@@ -64,12 +60,6 @@ public class DefaultSoundEffects implements SoundEffects {
 	public void setOn(final boolean bool) {
 		isOn = bool;
 	}
-
-//	public void playExplosion() {
-//		if (isOn) {
-//			expPlayer.play();
-//		}
-//	}
 
 	public void fireLasers() {
 		if (isOn) {

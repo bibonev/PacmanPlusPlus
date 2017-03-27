@@ -248,7 +248,7 @@ public class HelpScreen extends Screen {
 
 	@Override
 	public void changeSelection(final boolean up) {
-		// TODO Auto-generated method stub
+		// only one selection
 
 	}
 
@@ -259,7 +259,7 @@ public class HelpScreen extends Screen {
 
 	@Override
 	public void unselectAll() {
-		// TODO Auto-generated method stub
+		// only one selection
 
 	}
 

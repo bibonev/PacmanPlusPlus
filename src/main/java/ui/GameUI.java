@@ -161,6 +161,10 @@ public class GameUI extends Application
 		return onPlayerLeavingGame;
 	}
 
+	/**
+	 * Sets up the necessary listeners and screens
+	 * @param audioDisabled
+	 */
 	private void setup(final boolean audioDisabled) {
 		music = audioDisabled ? new DisabledMusic() : new DefaultMusic();
 		gameCommandService.getLocalGameCreatedEvent().addListener(music);
@@ -207,6 +211,10 @@ public class GameUI extends Application
 		launch(args);
 	}
 
+	/**
+	 * Sets the current screen;
+	 * @param screen
+	 */
 	private void setScreen(final Screen screen) {
 		currentScreen = screen;
 		centerPane.getChildren().remove(0, centerPane.getChildren().size());
@@ -314,8 +322,6 @@ public class GameUI extends Application
 			client.stop();
 		});
 
-		// gameSettingsScreen.getGameSettingsChangedEvent().addListener(server);
-
 		multiPlayerLobbyScreen.getUserLeavingLobbyEvent().addOneTimeListener(() -> {
 			client.stop();
 			server.stop();
@@ -343,17 +349,13 @@ public class GameUI extends Application
 		server.run();
 		gameSettingsScreen.saveSettings();
 		try {
-			// really nasty cheap workaround to get around JavaFX being weird
 			Thread.sleep(100);
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
 		client.run();
-		// create new lobby for a multiplayer game
 	}
 
-	// TODO move creation of client instance into GameCommandService at some
-	// point
 	public void joinGame(final String gameIp) {
 		final ClientInstance client = new ClientInstance(this, name, gameIp);
 
