@@ -28,9 +28,9 @@ dependencies {
              fileTree(dir: it, exclude: ['main/java/example',
                                          'main/java/audio',
                                          'main/java/ui',
+                                         'main/java/networking/integration',
                                          // Individual classes
-                                         '**/*Render**',
-                                         '**/*PacLaser**'])
+                                         '**/*Render**'])
          })
      }
  }
