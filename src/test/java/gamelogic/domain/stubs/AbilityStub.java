@@ -1,6 +1,7 @@
 package test.java.gamelogic.domain.stubs;
 
 import main.java.gamelogic.domain.Ability;
+import test.java.gamelogic.random.Randoms;
 
 public class AbilityStub extends Ability {
 

@@ -18,11 +18,12 @@ public class PlayerTest {
 		// Given
 		final String name = Randoms.randomString();
 		final double angle = 1.0;
-		final Position pos = new Position(0,0);
+		final Position pos = new Position(0, 0);
 		final World world = Randoms.randomWorld();
 
 		// When
 		final LocalPlayer player = new LocalPlayer(name);
+
 		((Player)player).setID(-1);
 		((Player)player).setPosition(pos);
 		((Player)player).setAngle(angle);
@@ -38,6 +39,5 @@ public class PlayerTest {
 		assertTrue(((Player)player).getPosition().equals(pos));
 		assertThat(((Player)player).getWorld(), Is.is(world));
 		assertTrue(((Player)player).getDotsEaten()==0);
-		
 	}
 }

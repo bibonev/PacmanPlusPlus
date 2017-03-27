@@ -1,6 +1,5 @@
 package main.java.ui;
 
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.List;
 
 import javafx.animation.KeyFrame;
@@ -106,7 +105,7 @@ public class GameUI extends Application
 		setup(audioDisabled);
 
 		thisStage = primaryStage;
-		primaryStage.setTitle("PacMan++");
+		primaryStage.setTitle("Pacman++");
 
 		pane = new BorderPane();
 
@@ -219,8 +218,8 @@ public class GameUI extends Application
 		thisStage.setX((primScreenBounds.getWidth() - thisStage.getWidth()) / 2);
 		thisStage.setY((primScreenBounds.getHeight() - thisStage.getHeight()) / 2);
 	}
-	
-	public void showGameSettingsScreen(){
+
+	public void showGameSettingsScreen() {
 		gameSettingsScreen.loadSettings();
 		centerPane.getChildren().add(gameSettingsScreen.getPane());
 	}
@@ -233,14 +232,14 @@ public class GameUI extends Application
 		thisStage.setScene(uiScene);
 		adjustScreenPosition();
 		setScreen(menuScreen);
-		final Label label = new Label("PacMan++ " + getName());
+		final Label label = new Label("Pacman++ " + getName());
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		settings.setDisable(false);
 	}
 
 	public void switchToLogIn() {
-		final Label label = new Label("PacMan++");
+		final Label label = new Label("Pacman++");
 		label.getStyleClass().add("labelStyle");
 		banner.setLeft(label);
 		setScreen(logInScreen);
@@ -393,8 +392,8 @@ public class GameUI extends Application
 			multiPlayerLobbyScreen.list
 					.addPlayer(((LobbyChangedEventArgs.LobbyPlayerJoinedEventArgs) args).getPlayerInfo());
 		} else {
-			multiPlayerLobbyScreen.setRuleStrings(
-					((LobbyChangedEventArgs.LobbyRulesChangedEventArgs)args).getNewRules());
+			multiPlayerLobbyScreen
+					.setRuleStrings(((LobbyChangedEventArgs.LobbyRulesChangedEventArgs) args).getNewRules());
 		}
 	}
 
