@@ -237,4 +237,51 @@ public class World {
 				&& map.getCell(position).getState() != CellState.OBSTACLE;
 
 	}
+
+	
+	public double getSpawnPositionRating(Position p) {
+		CellState cellState = getMap().getCell(p).getState();
+		if(cellState == CellState.OBSTACLE || RuleChecker.isOutOfBounds(p.getRow(), p.getColumn())) return 0;
+		
+		double rating = 1;
+		double aggregateDistance = 0;
+		int entityCount = 0;
+		for(Entity e : getEntities()) {
+			double distance = Math.abs(e.getPosition().getRow() - p.getRow()) +
+					Math.abs(e.getPosition().getColumn() - p.getColumn());
+			
+			if(e instanceof Spawner) e = ((Spawner) e).getEntity();
+			if(e instanceof Player) {
+				aggregateDistance += Math.log(distance);
+			}
+			if(e instanceof Ghost) {
+				aggregateDistance += 2 * Math.log(distance);
+			}
+			entityCount += 1;
+		}
+		if(entityCount > 0) rating += aggregateDistance / entityCount;
+		if(cellState == CellState.FOOD) rating *= 0.75;
+		
+		return rating;
+	}
+	
+	public Position getCandidateSpawnPosition() {
+		Position bestPosition = null;
+		double bestRating = 0;
+		int mapSize = getMap().getMapSize();
+		
+		for(int row = 0; row < mapSize; row++) {
+			for(int col = 0; col < mapSize; col++) {
+				Position position = new Position(row, col);
+				double rating = getSpawnPositionRating(position);
+				
+				if(rating > bestRating) {
+					bestRating = rating;
+					bestPosition = position;
+				}
+			}
+		}
+		
+		return bestPosition;
+	}
 }

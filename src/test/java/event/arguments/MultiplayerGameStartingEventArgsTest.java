@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import main.java.event.arguments.MultiplayerGameStartingEventArgs;
 import main.java.gamelogic.domain.GameSettings;
+import main.java.gamelogic.domain.Map;
 import test.java.gamelogic.random.Randoms;
 
 public class MultiplayerGameStartingEventArgsTest {
@@ -34,7 +35,7 @@ public class MultiplayerGameStartingEventArgsTest {
 
 		// When
 		final MultiplayerGameStartingEventArgs event = new MultiplayerGameStartingEventArgs(settings, localPlayerID,
-				localPlayerUsername);
+				localPlayerUsername, Map.generateMap());
 
 		// Then
 		assertThat(event.getSettings(), Is.is(settings));
