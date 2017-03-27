@@ -23,7 +23,7 @@ public class WorldTest {
 		final Map map = Randoms.randomMap();
 		AIPlayer player = new AIPlayer();
 		((Entity) player).setPosition(new Position(0,0));
-		player.setID(-1);
+		player.setID(1);
 		// When
 		final World world = new World(ruleEnforcer, map, true);
 		player.setWorld(world);
@@ -31,7 +31,7 @@ public class WorldTest {
 		// Then
 		assertThat(world.getRuleEnforcer(), Is.is(ruleEnforcer));
 		assertThat(world.getMap(), Is.is(map));
-		assertThat(world.getEntity(-1),Is.is(player));
+		assertThat(world.getEntity(1),Is.is(player));
 		assertTrue(world.getEntitiesAt(new Position(0,0)).size()==1);
 	}
 

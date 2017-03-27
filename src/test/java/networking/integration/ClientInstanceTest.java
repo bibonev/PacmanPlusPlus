@@ -152,6 +152,7 @@ public class ClientInstanceTest {
 		};
 
 		client.setManager(fakeManager);
+		logic.readyToStart();
 		client.trigger(
 				new Packet("local-player-joined").setInteger("row", 0).setInteger("col", 0).setDouble("angle", 0));
 
@@ -176,6 +177,7 @@ public class ClientInstanceTest {
 			}
 		});
 
+		logic.readyToStart();
 		client.trigger(
 				new Packet("local-player-joined").setInteger("row", 0).setInteger("col", 0).setDouble("angle", 0));
 

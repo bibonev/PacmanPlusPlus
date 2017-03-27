@@ -16,7 +16,6 @@ import main.java.graphics.PositionVisualisation;
  *
  */
 public class Map implements CellStateChangedEventListener {
-
 	public static int defaultNumberOfCells = 15;
 	private Cell[][] cells;
 	private ArrayList<PositionVisualisation> obstacles;
