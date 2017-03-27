@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import main.java.ai.AIGhost;
 import main.java.ai.DefaultBehaviour;
+import main.java.ai.GhostBehaviour;
 import main.java.constants.GameType;
 import main.java.event.arguments.GameCreatedEventArgs;
 import main.java.gamelogic.core.Lobby;
@@ -21,6 +22,7 @@ import main.java.gamelogic.domain.Behaviour.Type;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.LocalGhost;
+import main.java.gamelogic.domain.LocalSkillSet;
 import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemotePlayer;
@@ -120,6 +122,7 @@ public class ServerInstanceTest {
 		server.setManager(manager);
 		RemotePlayer alice = new RemotePlayer(0, lobby.getPlayer(0).getName());
 		alice.setPosition(new Position(0, 0));
+		alice.setSkillSet(new RemoteSkillSet(alice));
 		game.getWorld().addEntity(alice);
 		
 		assertEquals(2, manager.getCount("remote-player-joined"));
@@ -169,7 +172,7 @@ public class ServerInstanceTest {
 		for(int i = 0; i < players.length; i++) {
 			lobby.addPlayer(i, new LobbyPlayerInfo(i, players[i]));
 			RemotePlayer p = new RemotePlayer(i, players[i]);
-			p.setSkillSet(new RemoteSkillSet(p));
+			p.setSkillSet(LocalSkillSet.createDefaultSkillSet(p));
 			p.setPosition(new Position(0, i));
 			game.getWorld().addEntity(p);
 		}
@@ -207,7 +210,7 @@ public class ServerInstanceTest {
 		
 		RemotePlayer player = new RemotePlayer(0, "alice");
 		player.setPosition(new Position(0, 0));
-		player.setSkillSet(new RemoteSkillSet(player));
+		player.setSkillSet(LocalSkillSet.createDefaultSkillSet(player));
 		
 		game.getWorld().addEntity(player);
 
@@ -216,7 +219,7 @@ public class ServerInstanceTest {
 		
 		AIGhost ghost = new AIGhost();
 		ghost.setPosition(new Position(0, 0));
-		ghost.setBehaviour(new DefaultBehaviour(game.getWorld(), ghost, Type.DEFAULT));
+		ghost.setBehaviour(new GhostBehaviour(game.getWorld(), ghost, Type.GHOST));
 		
 		game.getWorld().addEntity(ghost);
 
@@ -249,13 +252,13 @@ public class ServerInstanceTest {
 	
 		RemotePlayer player = new RemotePlayer(0, "alice");
 		player.setPosition(new Position(0, 0));
-		player.setSkillSet(new RemoteSkillSet(player));
+		player.setSkillSet(LocalSkillSet.createDefaultSkillSet(player));
 		
 		game.getWorld().addEntity(player);
 		
 		AIGhost ghost = new AIGhost();
 		ghost.setPosition(new Position(0, 0));
-		ghost.setBehaviour(new DefaultBehaviour(game.getWorld(), ghost, Type.DEFAULT));
+		ghost.setBehaviour(new GhostBehaviour(game.getWorld(), ghost, Type.GHOST));
 		
 		game.getWorld().addEntity(ghost);
 
