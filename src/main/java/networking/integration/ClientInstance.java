@@ -376,6 +376,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	private void triggerSpawnerAdded(Packet p) {
 		Spawner.SpawnerColor color;
 		final String spawnerType = p.getString("entity-type");
+		int entityID = p.getInteger("entity-id");
 		switch (spawnerType) {
 		case "local-player":
 			color = SpawnerColor.GREEN;
@@ -391,6 +392,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 			break;
 		}
 		final Spawner s = new Spawner(p.getInteger("duration"), null, color);
+		s.setID(entityID);
 		s.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
 		addEntityToWorld(s);
 	}
@@ -603,6 +605,7 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 	private void triggerRemoteGhostJoined(final Packet p) {
 		final int ghostID = p.getInteger("ghost-id");
 		final RemoteGhost ghost = new RemoteGhost(ghostID);
+		ghost.setID(ghostID);
 		ghost.setPosition(new Position(p.getInteger("row"), p.getInteger("col")));
 		addEntityToWorld(ghost);
 	}

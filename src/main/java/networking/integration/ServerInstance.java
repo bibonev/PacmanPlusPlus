@@ -490,15 +490,15 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			final Entity toSpawn = s.getEntity();
 
 			if (toSpawn instanceof Ghost) {
-				manager.dispatchAll(createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "ghost"));
+				manager.dispatchAll(createSpawnCountdownPacket(e.getPosition(), e.getID(), s.getTimeRemaining(), "ghost"));
 			} else if (toSpawn instanceof Player) {
 				manager.dispatchAllExcept(
-						createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "remote-player"),
+						createSpawnCountdownPacket(e.getPosition(), e.getID(), s.getTimeRemaining(), "remote-player"),
 						toSpawn.getID());
 
 				if (lobby.containsPlayer(toSpawn.getID())) {
 					manager.dispatch(toSpawn.getID(),
-							createSpawnCountdownPacket(e.getPosition(), s.getTimeRemaining(), "local-player"));
+							createSpawnCountdownPacket(e.getPosition(), e.getID(), s.getTimeRemaining(), "local-player"));
 				}
 			}
 		}
@@ -510,6 +510,8 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	 *
 	 * @param position
 	 *            The position that the new countdown will appear at.
+	 * @param id
+	 *            The ID of the spawner.
 	 * @param time
 	 *            The starting time number of the countdown.
 	 * @param type
@@ -517,8 +519,9 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 	 * @return A packet representing the appearance of a countdown number in the
 	 *         world.
 	 */
-	private Packet createSpawnCountdownPacket(final Position position, final int time, final String type) {
+	private Packet createSpawnCountdownPacket(final Position position, final int id, final int time, final String type) {
 		final Packet p = new Packet("spawner-added");
+		p.setInteger("entity-id", id);
 		p.setInteger("row", position.getRow());
 		p.setInteger("col", position.getColumn());
 		p.setInteger("duration", time);
