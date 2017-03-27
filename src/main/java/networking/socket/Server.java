@@ -24,7 +24,7 @@ import main.java.networking.event.ClientDisconnectedListener;
 
 public class Server implements NetworkServer, ClientDisconnectedListener, Runnable {
 	private ServerSocket serverSocket = null;
-	private boolean alive = true;
+	private boolean alive = false;
 	private int serverPort;
 	private int currentClientNumber = 0;
 	private Map<Integer, Client> clients;
@@ -48,6 +48,7 @@ public class Server implements NetworkServer, ClientDisconnectedListener, Runnab
 	 * as the {@link Runnable} target, and starts it.
 	 */
 	public void start() {
+		alive = true;
 		new Thread(this).start();
 	}
 

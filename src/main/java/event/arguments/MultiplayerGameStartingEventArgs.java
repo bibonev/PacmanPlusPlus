@@ -1,12 +1,14 @@
 package main.java.event.arguments;
 
 import main.java.gamelogic.domain.GameSettings;
+import main.java.gamelogic.domain.Map;
 
 public class MultiplayerGameStartingEventArgs {
 	private boolean serverMode;
 	private GameSettings settings;
 	private int localPlayerID;
 	private String localUsername;
+	private Map map;
 
 	/**
 	 * Create event args for when a multiplayer game is being created on the
@@ -30,15 +32,29 @@ public class MultiplayerGameStartingEventArgs {
 	 *            The ID of the local player.
 	 * @param localUsername
 	 *            The username of the local player;
+	 * @param map The map being played on the server.
 	 */
 	public MultiplayerGameStartingEventArgs(final GameSettings settings, final int localPlayerID,
-			final String localUsername) {
+			final String localUsername, Map map) {
 		this.settings = settings;
 		serverMode = false;
 		this.localPlayerID = localPlayerID;
 		this.localUsername = localUsername;
+		this.map = map;
+	}
+	
+	/**
+	 * Gets the map which this game is being played on.
+	 * @return
+	 */
+	public Map getMap() {
+		return map;
 	}
 
+	/**
+	 * Gets the settings/ruleset that this game is being played by.
+	 * @return
+	 */
 	public GameSettings getSettings() {
 		return settings;
 	}
@@ -54,6 +70,10 @@ public class MultiplayerGameStartingEventArgs {
 		return serverMode;
 	}
 
+	/**
+	 * Gets the ID of the local player.
+	 * @return
+	 */
 	public int getLocalPlayerID() {
 		if (!serverMode) {
 			return localPlayerID;
@@ -62,6 +82,10 @@ public class MultiplayerGameStartingEventArgs {
 		}
 	}
 
+	/**
+	 * Gets the username of the local player.
+	 * @return
+	 */
 	public String getLocalUsername() {
 		if (!serverMode) {
 			return localUsername;

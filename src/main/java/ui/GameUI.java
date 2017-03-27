@@ -35,6 +35,7 @@ import main.java.event.listener.LobbyStateChangedListener;
 import main.java.event.listener.PlayerLeavingGameListener;
 import main.java.gamelogic.core.GameCommandService;
 import main.java.gamelogic.core.Lobby;
+import main.java.gamelogic.core.MapService;
 import main.java.gamelogic.domain.Game;
 import main.java.graphics.PositionVisualisation;
 import main.java.graphics.Render;
@@ -90,6 +91,11 @@ public class GameUI extends Application
 			(l, a) -> l.onPlayerLeavingGame());
 
 	private GameCommandService gameCommandService;
+	private MapService mapService;
+	
+	public MapService getMapService() {
+		return mapService;
+	}
 
 	@Override
 	public void start(final Stage primaryStage) throws Exception {
@@ -99,7 +105,8 @@ public class GameUI extends Application
 			audioDisabled = true;
 		}
 
-		gameCommandService = new GameCommandService();
+		mapService = new MapService();
+		gameCommandService = new GameCommandService(mapService);
 		gameCommandService.getLocalGameCreatedEvent().addListener(this);
 		gameCommandService.getRemoteGameCreatedEvent().addListener(this);
 		setup(audioDisabled);
@@ -347,7 +354,8 @@ public class GameUI extends Application
 		server.getMultiplayerGameStartingEvent().addOneTimeListener(gameCommandService);
 
 		server.run();
-		gameSettingsScreen.saveSettings();
+		
+		gameSettingsScreen.onSettingsChanged();
 		try {
 			Thread.sleep(100);
 		} catch (final InterruptedException e) {

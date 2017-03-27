@@ -29,6 +29,11 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 			(l, g) -> l.onGameCreated(g));
 	private Event<GameCreatedListener, GameCreatedEventArgs> localGameCreatedEvent = new Event<>(
 			(l, g) -> l.onGameCreated(g));
+	private MapService mapService;
+
+	public GameCommandService(MapService mapService) {
+		this.mapService = mapService;
+	}
 
 	public Event<GameCreatedListener, GameCreatedEventArgs> getLocalGameCreatedEvent() {
 		return localGameCreatedEvent;
@@ -39,16 +44,10 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 	}
 
 	// might want to keep the entity count down so the game runs more smoothly
-	private void populateWorld(final World world, boolean playAgainstAI) {
-		Position[] ghostPositions = new Position[] {
-				new Position(1, 1),
-				//new Position(1, 13),
-				//new Position(13, 13)
-		};
-		
-		for(Position p : ghostPositions) {
+	private void populateWorld(final World world, int ghostCount, boolean playAgainstAI) {
+		for(int i = 0; i < ghostCount; i++) {
 			final AIGhost ghost = new AIGhost();
-			ghost.setPosition(p);
+			ghost.setPosition(world.getCandidateSpawnPosition());
 			final Behaviour b = new GhostBehaviour(world, ghost, Behaviour.Type.GHOST);
 			ghost.setBehaviour(b);
 			
@@ -59,7 +58,7 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 		}
 
 		final AIPlayer aiPlayer = new AIPlayer();
-		aiPlayer.setPosition(new Position(7, 7));
+		aiPlayer.setPosition(world.getCandidateSpawnPosition());
 		final Behaviour aiPlayerBehavior = new DefaultBehaviour(world, aiPlayer, Behaviour.Type.DEFAULT);
 		aiPlayer.setBehaviour(aiPlayerBehavior);
 		aiPlayer.setSkillSet(LocalSkillSet.createDefaultSkillSet(aiPlayer));
@@ -71,10 +70,9 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 	}
 
 	private Game generateNewClientsideGame(final String localUsername, final int localPlayerID,
-			final GameSettings settings, final boolean multiplayer) {
+			final GameSettings settings, Map map, final boolean multiplayer) {
 		// Generate a map
 		// Simplest one for now
-		final Map map = Map.generateMap();
 
 		// Create new game and store it
 		final World world = new World(new RuleChecker(), map, multiplayer);
@@ -89,9 +87,9 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 	private Game generateNewServersideGame(final GameSettings settings) {
 		// Generate a map
 		// Simplest one for now
-		final Map map = Map.generateMap();
 
 		// Create new game and store it
+		Map map = mapService.getMap(settings.getMapName());
 		final World world = new World(new RuleChecker(), map, false);
 
 		final Game game = new Game(world, settings, GameType.MULTIPLAYER_SERVER);
@@ -101,11 +99,11 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 
 	@Override
 	public void onSingleplayerGameStarting(final SingleplayerGameStartingEventArgs args) {
-		final Game g = generateNewClientsideGame(args.getUsername(), 0, args.getSettings(), false);
+		final Game g = generateNewClientsideGame(args.getUsername(), 0, args.getSettings(), Map.generateMap(), false);
 		final GameLogic gl = new LocalGameLogic(g);
 		
 		getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
-		populateWorld(g.getWorld(), g.getGameSettings().getAIPlayer());
+		populateWorld(g.getWorld(), args.getSettings().getGhostCount(), g.getGameSettings().getAIPlayer());
 	}
 
 	@Override
@@ -115,9 +113,9 @@ public class GameCommandService implements SingleplayerGameStartingListener, Mul
 			g = generateNewServersideGame(args.getSettings());
 			final GameLogic gl = new LocalGameLogic(g);
 			getLocalGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
-			populateWorld(g.getWorld(), g.getGameSettings().getAIPlayer());
+			populateWorld(g.getWorld(), args.getSettings().getGhostCount(), g.getGameSettings().getAIPlayer());
 		} else {
-			g = generateNewClientsideGame(args.getLocalUsername(), args.getLocalPlayerID(), args.getSettings(), true);
+			g = generateNewClientsideGame(args.getLocalUsername(), args.getLocalPlayerID(), args.getSettings(), args.getMap(), true);
 			final GameLogic gl = new RemoteGameLogic(g);
 			getRemoteGameCreatedEvent().fire(new GameCreatedEventArgs(g, gl));
 		}

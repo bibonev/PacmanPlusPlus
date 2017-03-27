@@ -23,11 +23,13 @@ import main.java.gamelogic.core.GameLogic;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.core.RemoteGameLogic;
+import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.ControlledPlayer;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.GameSettings;
 import main.java.gamelogic.domain.LocalPlayer;
+import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemoteGhost;
@@ -35,6 +37,7 @@ import main.java.gamelogic.domain.RemotePlayer;
 import main.java.gamelogic.domain.RemoteSkillSet;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
+import main.java.graphics.PositionVisualisation;
 import main.java.networking.ClientManager;
 import main.java.networking.StandardClientManager;
 import main.java.networking.data.Packet;
@@ -528,8 +531,10 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		settings.setInitialPlayerLives(p.getInteger("initial-player-lives"));
 		// reconstruct game settings as needed
 
+		Map m = createMapFromPacket(p);
+
 		final MultiplayerGameStartingEventArgs args = new MultiplayerGameStartingEventArgs(settings,
-				client.getClientID(), username);
+				client.getClientID(), username, m);
 
 		getMultiplayerGameStartingEvent().fire(args);
 	}
@@ -683,6 +688,21 @@ public class ClientInstance implements Runnable, ClientTrigger, ClientDisconnect
 		} else {
 			throw new RuntimeException("Already received handshake packet from server.");
 		}
+	}
+	
+	private Map createMapFromPacket(Packet p) {
+		int size = p.getInteger("map.size");
+		Map map = new Map(p.getInteger("map.size"));
+		
+		for(int i = 0; i < size; i++) {
+			for(int j = 0; j < size; j++) {
+				String enumValue = p.getString("map[" + i + "][" + j + "]");
+				CellState state = CellState.valueOf(enumValue);
+				map.addCell(new Cell(state, new PositionVisualisation(i, j)));
+			}
+		}
+		
+		return map;
 	}
 
 	@Override

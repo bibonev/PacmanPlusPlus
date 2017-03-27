@@ -1,5 +1,6 @@
 package main.java.networking.integration;
 
+import main.java.constants.CellState;
 import main.java.constants.GameOutcome;
 import main.java.constants.GameOutcomeType;
 import main.java.constants.GameType;
@@ -38,10 +39,12 @@ import main.java.gamelogic.core.GameLogicTimer;
 import main.java.gamelogic.core.Lobby;
 import main.java.gamelogic.core.LobbyPlayerInfo;
 import main.java.gamelogic.core.LocalGameLogic;
+import main.java.gamelogic.domain.Cell;
 import main.java.gamelogic.domain.Entity;
 import main.java.gamelogic.domain.Game;
 import main.java.gamelogic.domain.Ghost;
 import main.java.gamelogic.domain.LocalSkillSet;
+import main.java.gamelogic.domain.Map;
 import main.java.gamelogic.domain.Player;
 import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.RemotePlayer;
@@ -50,6 +53,7 @@ import main.java.gamelogic.domain.SkillSet;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 import main.java.gamelogic.domain.World;
+import main.java.graphics.PositionVisualisation;
 import main.java.networking.ServerManager;
 import main.java.networking.StandardServerManager;
 import main.java.networking.data.Packet;
@@ -407,7 +411,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		} else {
 			if (game.getWorld().getEntity(sender) == null) {
 				if (playerInfo.getRemainingLives() > 0) {
-					final Position pos = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
+					final Position pos = game.getWorld().getCandidateSpawnPosition();
 					playerInfo.setRemainingLives(playerInfo.getRemainingLives() - 1);
 					addHumanPlayerToWorld(sender, pos.getRow(), pos.getColumn());
 				}
@@ -601,6 +605,17 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 		manager.dispatch(playerID, createLocalPlayerDiedPacket(reason, playerInfo.getRemainingLives() > 0));
 	}
+	
+	private void addMapInfoToPacket(Packet p, Map m) {
+		int size = m.getMapSize();
+		
+		p.setInteger("map.size", size);
+		for(int i = 0; i < size; i++) {
+			for(int j = 0; j < size; j++) {
+				p.setString("map[" + i + "][" + j + "]", m.getCell(i, j).getState().name());
+			}
+		}
+	}
 
 	/**
 	 * Create a packet indicating that a local client's player has appeared at a
@@ -694,6 +709,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 			final Packet p = new Packet("game-starting");
 
 			p.setInteger("initial-player-lives", game.getGameSettings().getInitialPlayerLives());
+			addMapInfoToPacket(p, game.getWorld().getMap());
 			// add game configuration stuff into this packet
 
 			manager.dispatchAll(p);
@@ -717,7 +733,7 @@ public class ServerInstance implements Runnable, ServerTrigger, ClientConnectedL
 		}
 
 		for (final int i : lobby.getPlayerIDs()) {
-			final Position p = ((LocalGameLogic) gameLogic).getCandidateSpawnPosition();
+			final Position p = game.getWorld().getCandidateSpawnPosition();
 			addHumanPlayerToWorld(i, p.getRow(), p.getColumn());
 		}
 
