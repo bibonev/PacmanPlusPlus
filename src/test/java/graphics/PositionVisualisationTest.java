@@ -22,9 +22,9 @@ public class PositionVisualisationTest {
 
 		assertEquals(test.getRow(), 5);
 		assertEquals(test.getColumn(), 5);
-		assertEquals(test.getWidth(), 0, 000.1);
-		assertEquals(test.getHeight(), 0, 000.1);
-		assertEquals(test.getPixelX(), 0, 000.1);
-		assertEquals(test.getPixelY(), 0, 000.1);
+		assertEquals(test.getWidth(), 0, 1);
+		assertEquals(test.getHeight(), 0, 1);
+		assertEquals(test.getPixelX(), 0, 1);
+		assertEquals(test.getPixelY(), 0, 1);
 	}
 }

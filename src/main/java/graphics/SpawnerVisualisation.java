@@ -8,7 +8,6 @@ import javafx.scene.effect.Effect;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
-import main.java.gamelogic.domain.Position;
 import main.java.gamelogic.domain.Spawner;
 import main.java.gamelogic.domain.Spawner.SpawnerColor;
 
@@ -45,7 +44,7 @@ public class SpawnerVisualisation implements Visualisation {
 	public SpawnerVisualisation(final Spawner spawner) {
 		this.spawner = spawner;
 		this.position = new PositionVisualisation(spawner.getPosition().getRow(), spawner.getPosition().getColumn());
-		node = new ImageView("num1.png");
+		node = new ImageView("/images/num1.png");
 		setNumber(spawner.getTimeRemaining());
 	}
 
@@ -54,7 +53,7 @@ public class SpawnerVisualisation implements Visualisation {
 	 * @param number
 	 */
 	public void setNumber(int number) {
-		node.setImage(new Image(String.format("num%d.png", number)));
+		node.setImage(new Image(String.format("/images/num%d.png", number)));
 	}
 
 	/**

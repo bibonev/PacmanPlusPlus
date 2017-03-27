@@ -132,7 +132,7 @@ public class GameUI extends Application
 		helpScene = new Scene(helpPane, 1150, 600);
 		helpScene.setOnKeyPressed(e -> sendMoveEvent(e.getCode()));
 
-		final String css = this.getClass().getResource("style.css").toExternalForm();
+		final String css = this.getClass().getResource("/css/style.css").toExternalForm();
 		uiScene.getStylesheets().add(css);
 		helpScene.getStylesheets().add(css);
 		settingsSceneGame.getStylesheets().add(css);
