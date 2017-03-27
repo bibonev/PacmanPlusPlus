@@ -558,6 +558,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
+    /**
+     * Event for drawing the laser
+     * @param args
+     */
     @Override
     public void onPlayerLaserActivated(PlayerLaserActivatedEventArgs args) {
         Platform.runLater(() -> {
@@ -613,6 +617,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
+    /**
+     * Event for drawing the shield
+     * @param args
+     */
     @Override
     public void onPlayerShieldActivated(PlayerShieldActivatedEventArgs args) {
         Platform.runLater(() -> {
@@ -629,6 +637,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
+    /**
+     * Event for removing the shield
+     * @param args
+     */
     @Override
     public void onPlayerShieldRemoved(PlayerShieldRemovedEventArgs args) {
 	    Platform.runLater(() -> {
@@ -648,6 +660,10 @@ public class Render implements GameDisplayInvalidatedListener, GameEndedListener
         });
     }
 
+    /**
+     * Event for entity being drawn
+     * @param args Information or parameters regarding/describing the event.
+     */
 	@Override
 	public void onEntityAdded(EntityChangedEventArgs args) {
 		synchronized (addedEntityIDs) {
